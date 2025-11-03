@@ -1,1172 +1,682 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>AI Neurology Consult Tool</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Neurology Consult Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Hide scrollbar for cleaner look */
+        ::-webkit-scrollbar {
+            width: 0px;
+            background: transparent;
+        }
+        /* Simple loading spinner */
+        .loader {
+            border: 4px solid #f3f3f3; /* Light grey */
+            border-top: 4px solid #4f46e5; /* Indigo */
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
 
-  <style>
-    :root {
-      --bg:#0f172a;           /* Deep gray-blue background */
-      --panel:#1a2233;        /* Slightly darker for contrast */
-      --panel-deeper:#0b1220; /* Deepest layer for inputs */
-      --border:#374151;       /* Neutral border */
-      --ink:#f4f4f5;          /* Light text */
-      --ink-weak:#a8b2c1;     /* Muted text */
-      --brand:#3B82F6;        /* Blue-500 */
-      --brand-2:#2563EB;      /* Blue-600 */
-
-      /* spacing and radius */
-      --radius:.75rem;
-      --space-xs:.25rem;
-      --space-sm:.5rem;
-      --space-md:1rem;
-      --space-lg:1.5rem;
-    }
-
-    html { scroll-behavior:smooth; }
-
-    * {
-      transition: background .2s ease, border-color .2s ease, color .2s ease, transform .15s ease;
-    }
-
-    body {
-      font-family:'Inter',sans-serif;
-      background:var(--bg);
-      color:var(--ink);
-      line-height:1.6;
-      margin:0;
-      font-size:15.5px;
-    }
-
-    h1,h2,h3,h4,summary,button {
-      font-family:'Roboto Condensed',sans-serif;
-      letter-spacing:.5px;
-      line-height:1.25;
-    }
-
-    h1 { font-size:2rem; }
-    h2 { font-size:1.5rem; }
-    h3 { font-size:1.25rem; }
-
-    .hidden { display:none }
-
-    /* ===== Panels ===== */
-    .panel {
-      background:linear-gradient(180deg, rgba(31,41,55,0.95) 0%, rgba(17,24,39,0.98) 100%);
-      border:1px solid var(--border);
-      border-radius:var(--radius);
-      box-shadow:0 2px 8px rgba(0,0,0,.25);
-      backdrop-filter:blur(6px);
-    }
-
-    /* ===== Buttons ===== */
-    .btn {
-      font-weight:600;
-      padding:.75rem 1.25rem;
-      border-radius:.5rem;
-      box-shadow:0 1px 2px rgba(0,0,0,.25);
-      transition:.15s transform;
-      outline:0;
-      cursor:pointer;
-    }
-    .btn:hover { transform:translateY(-2px) }
-    .btn:focus { outline:2px solid var(--brand); outline-offset:2px; }
-
-    .btn-primary {
-      background:linear-gradient(to right, var(--brand-2), var(--brand));
-      color:#fff;
-    }
-    .btn-primary:hover,
-    .btn-primary:focus {
-      background:var(--brand);
-    }
-
-    .btn-secondary {
-      background:transparent;
-      color:#BFDBFE;
-      border:1px solid var(--brand);
-    }
-    .btn-secondary:hover,
-    .btn-secondary:focus {
-      background:var(--brand);
-      color:#fff;
-    }
-
-    .btn-back {
-      background:#374151;
-      color:#fff;
-    }
-    .btn-back:hover,
-    .btn-back:focus {
-      background:#4B5563;
-    }
-
-    /* ===== Errors ===== */
-    .error-box {
-      display:none;
-      background:rgba(239,68,68,.15);
-      border:1px solid #DC2626;
-      color:#FCA5A5;
-      padding:1rem;
-      border-radius:.5rem;
-      margin-bottom:1rem;
-    }
-
-    /* ===== Spinner ===== */
-    .spinner {
-      border:4px solid rgba(255,255,255,.1);
-      border-top-color:var(--brand);
-      width:40px;
-      height:40px;
-      border-radius:50%;
-      animation:spin .9s linear infinite;
-    }
-    @keyframes spin { 0%{transform:rotate(0)} 100%{transform:rotate(360deg)} }
-
-    /* ===== Inputs ===== */
-    .input {
-      width:100%;
-      padding:.6rem .75rem;
-      border:1px solid var(--border);
-      border-radius:.6rem;
-      background:var(--panel-deeper);
-      color:#F9FAFB;
-      transition:border-color .2s, box-shadow .2s;
-      box-shadow:inset 0 1px 3px rgba(0,0,0,0.5);
-    }
-    .input:hover { border-color:var(--brand); }
-    .input:focus { outline:none; box-shadow:0 0 0 2px var(--brand); }
-    textarea.input::placeholder, input.input::placeholder { color:var(--ink-weak); }
-
-    /* ===== Option Cards ===== */
-    .card-option {
-      border:2px solid var(--border);
-      border-radius:1rem;
-      padding:1rem;
-      cursor:pointer;
-      transition:.12s;
-      user-select:none;
-      background:var(--panel);
-    }
-    .card-option:hover { border-color:#60A5FA; }
-    .card-option.selected {
-      border-color:#60A5FA;
-      background:#0B1220;
-    }
-
-    /* ===== Consult Visuals ===== */
-    #consult-output h3 {
-      font-size:1.125rem;
-      font-weight:700;
-      color:#93C5FD;
-      margin:.75rem 0 .5rem;
-    }
-    #consult-output strong { color:#F3F4F6; }
-    .rec-checkbox { width:26px; height:26px; transform:translateY(3px); }
-    .rec-row {
-      padding:14px;
-      border-radius:.75rem;
-      border:1px solid var(--border);
-      margin-bottom:.5rem;
-      background:#0f172a;
-    }
-    .rec-row:hover { background:#0c1426; }
-
-    .hloc {
-      padding:.75rem 1rem;
-      border-radius:.75rem;
-      border:1px solid var(--border);
-      margin:.75rem 0;
-    }
-    .hloc.alert {
-      background:rgba(239,68,68,.18);
-      border-color:#DC2626;
-    }
-    .hloc.ok {
-      background:rgba(16,185,129,.12);
-      border-color:#10B981;
-    }
-
-    /* ===== Safe Harbor ===== */
-    details>summary { cursor:pointer; position:relative; }
-    details summary::after {
-      content:"▼";
-      float:right;
-      color:var(--ink-weak);
-    }
-    details[open] summary::after { content:"▲"; }
-
-    .safeharbor {
-      background:rgba(239,68,68,.1);
-      border:1px solid #DC2626;
-      border-radius:var(--radius);
-      padding:var(--space-md);
-    }
-    .safeharbor .hd {
-      color:#FCA5A5;
-      font-weight:600;
-    }
-    .safeharbor ol { margin-left:1.5rem; list-style:decimal; }
-    .safeharbor li { color:#FCA5A5; }
-
-    /* ===== Utilities ===== */
-    .text-muted { color:var(--ink-weak); }
-    section>h2 {
-      border-left:4px solid var(--brand);
-      padding-left:.5rem;
-      margin-bottom:.75rem;
-    }
-
-    footer {
-      text-align:center;
-      color:var(--ink-weak);
-      font-size:.875rem;
-      border-top:1px solid var(--border);
-      padding-top:1rem;
-      margin-top:3rem;
-    }
-  </style>
+        /* Styling for the rendered consult output */
+        #consult-output h2 {
+            font-size: 1.25rem; /* text-xl */
+            font-weight: 600; /* font-semibold */
+            margin-top: 1.5rem; /* mt-6 */
+            margin-bottom: 0.5rem; /* mb-2 */
+            border-bottom: 1px solid #4b5563; /* border-b border-gray-700 */
+            padding-bottom: 0.25rem; /* pb-1 */
+        }
+        #consult-output strong {
+            font-weight: 700; /* font-bold */
+            color: #f3f4f6; /* text-gray-100 */
+        }
+        #consult-output ul {
+            list-style-type: disc;
+            margin-left: 1.5rem; /* ml-6 */
+            margin-bottom: 1rem; /* mb-4 */
+        }
+        #consult-output p {
+            margin-bottom: 1rem; /* mb-4 */
+        }
+        
+        /* Microphone Button Styles */
+        .mic-btn {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            display: none; /* Hidden by default, shown by JS if API is supported */
+            align-items: center;
+            justify-content: center;
+            padding: 4px;
+            border: none;
+            border-radius: 50%;
+            background-color: #4b5563; /* gray-600 */
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .mic-btn:hover {
+            background-color: #374151; /* gray-700 */
+        }
+        .mic-btn.is-listening {
+            background-color: #dc2626; /* red-600 */
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+    </style>
 </head>
+<body class="bg-gray-900 flex items-center justify-center min-h-screen p-4">
 
-<body>
-  <div class="max-w-3xl mx-auto p-4 sm:p-8">
+    <div class="bg-gray-800 w-full max-w-4xl rounded-lg shadow-xl overflow-hidden">
+        
+        <!-- Header -->
+        <header class="bg-indigo-700 text-white p-6">
+            <h1 class="text-3xl font-bold text-center flex items-center justify-center">
+                <span class="text-3xl mr-3">🧠</span>
+                AI Neurology Consult
+            </h1>
+            <p class="text-center text-indigo-100 mt-1">Evidence-Based AI Support for Providers</p>
+        </header>
 
-    <header class="text-center mb-6 border-b border-gray-700 pb-4">
-      <h1 class="text-3xl font-bold text-blue-400 tracking-wide">AI NEUROLOGY CONSULT</h1>
-      <p class="text-lg text-gray-300">Board-Certified AI Support for Providers</p>
-    </header>
+        <!-- Main Content Area -->
+        <main class="p-6 md:p-8">
 
-    <!-- Loading -->
-    <div id="loading-spinner" class="hidden flex justify-center items-center p-6">
-      <div class="spinner"></div>
-      <p id="loading-text" class="ml-4 text-lg font-semibold text-gray-300">Working…</p>
+            <!-- Speech Error Message -->
+            <div id="speech-error" class="hidden bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-md mb-6" role="alert">
+                <p class="font-bold">Microphone Error</p>
+                <p id="speech-error-message">Could not start dictation. Please ensure you have allowed microphone access in your browser.</p>
+            </div>
+
+            <!-- Step 1: De-identified Intake -->
+            <div id="step-1-intake">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-semibold text-gray-100">1) De-identified Intake</h2>
+                    <button id="start-over-1" class="text-sm text-indigo-400 hover:underline">Start Over</button>
+                </div>
+
+                <!-- HIPAA Disclaimer -->
+                <details class="bg-red-900 border-l-4 border-red-500 text-red-200 p-4 rounded-md mb-6">
+                    <summary class="font-bold cursor-pointer hover:text-red-100">De-identified Data Only (HIPAA Safe Harbor)</summary>
+                    <p class="text-sm mt-4 mb-2">Do NOT include any of the following 18 identifiers:</p>
+                    <ol class="list-decimal list-inside text-sm space-y-1">
+                        <li>Names</li>
+                        <li>All geographic subdivisions smaller than a state (street, city, county, ZIP)</li>
+                        <li>All elements of dates (except year) related to an individual; all ages > 89</li>
+                        <li>Telephone numbers</li>
+                        <li>Fax numbers</li>
+                        <li>Email addresses</li>
+                        <li>Social Security numbers</li>
+                        <li>Medical record numbers</li>
+                        <li>Health plan beneficiary numbers</li>
+                        <li>Account numbers</li>
+                        <li>Certificate/license numbers</li>
+                        <li>Vehicle identifiers and serial numbers, including license plates</li>
+                        <li>Device identifiers and serial numbers</li>
+                        <li>Web URLs</li>
+                        <li>IP addresses</li>
+                        <li>Biometric identifiers (e.g., fingerprints, voiceprints)</li>
+                        <li>Full-face photographs and comparable images</li>
+                        <li>Any other unique identifying number, characteristic, or code</li>
+                    </ol>
+                    <p class="text-sm mt-3 font-semibold">**Actual knowledge rule:** Even if the above are removed, do not include any detail that you know could identify the individual.</p>
+                </details>
+                
+                <form id="intake-form-1" class="space-y-4">
+                    <!-- Content is dynamically injected by JavaScript -->
+                </form>
+            </div>
+
+            <!-- Step 2: AI-Guided Intake (Data/Exam) -->
+            <div id="step-2-questions" class="hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-semibold text-gray-100">2) AI-Guided Intake (Data & Exam)</h2>
+                    <button id="start-over-2" class="text-sm text-indigo-400 hover:underline">Start Over</button>
+                </div>
+                
+                <details class="bg-red-900 border-l-4 border-red-500 text-red-200 p-4 rounded-md mb-6">
+                    <summary class="font-bold cursor-pointer hover:text-red-100">De-identified Data Only (HIPAA Safe Harbor)</summary>
+                    <p class="text-sm mt-4 mb-2">Do NOT include any of the 18 identifiers (full list in Step 1).</p>
+                    <p class="text-sm mt-3 font-semibold">**Actual knowledge rule:** Even if the above are removed, do not include any detail that you know could identify the individual.</p>
+                </details>
+
+                <form id="intake-form-2" class="space-y-4">
+                    <!-- Content is dynamically injected by JavaScript -->
+                </form>
+            </div>
+
+            <!-- Step 3: AI Neurology Consult -->
+            <div id="step-3-consult" class="hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-semibold text-gray-100">3) AI Neurology Consult</h2>
+                    <button id="start-over-3" class="text-sm text-indigo-400 hover:underline">Start Over</button>
+                </div>
+                
+                <details class="bg-red-900 border-l-4 border-red-500 text-red-200 p-4 rounded-md mb-6">
+                    <summary class="font-bold cursor-pointer hover:text-red-100">De-identified Data Only (HIPAA Safe Harbor)</summary>
+                    <p class="text-sm mt-4 mb-2">Do NOT include any of the 18 identifiers (full list in Step 1).</p>
+                    <p class="text-sm mt-3 font-semibold">**Actual knowledge rule:** Even if the above are removed, do not include any detail that you know could identify the individual.</p>
+                </details>
+
+                <!-- Loading Spinner -->
+                <div id="loading-spinner" class="flex flex-col items-center justify-center min-h-[300px]">
+                    <div class="loader"></div>
+                    <p class="text-gray-400 mt-4">AI Consultant is reviewing the case and searching guidelines...</p>
+                </div>
+                
+                <!-- Consult Output -->
+                <div id="consult-output-container" class="hidden">
+                    <div id="consult-output" class="bg-gray-900 p-4 md:p-6 rounded-lg border border-gray-700 min-h-[300px] prose max-w-none text-gray-300">
+                        <!-- AI content will be injected here -->
+                    </div>
+                </div>
+
+                <div class="pt-6 flex flex-col sm:flex-row justify-between gap-3">
+                    <button type="button" id="back-to-step-2-btn" class="bg-gray-600 hover:bg-gray-500 text-white font-semibold py-2 px-6 rounded-lg shadow transition duration-200">
+                        &larr; Back
+                    </button>
+                    
+                    <div class="flex flex-col sm:flex-row gap-3">
+                         <button type="button" id="copy-clipboard-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-6 rounded-lg shadow transition duration-200">
+                            Copy Consult to Clipboard
+                        </button>
+                        <div id="copy-success" class="text-green-400 text-sm items-center justify-center flex hidden">Copied!</div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
     </div>
 
-<!-- ================= 1) Intake Section ================= -->
-<section id="section-symptoms" class="panel p-6">
-  <!-- Safe Harbor Notice -->
-  <details class="safeharbor mb-6">
-    <summary class="font-semibold text-lg text-red-300 flex items-center gap-2">
-      <span class="inline-block w-3 h-3 bg-red-500 rounded-full animate-pulse"></span>
-      De-identified Data Only (HIPAA Safe Harbor)
-    </summary>
-    <div class="p-4 border-t border-red-900 mt-2">
-      <p class="font-bold text-red-200 mb-2">Do NOT include any of the following 18 identifiers:</p>
-      <ol class="list-decimal list-inside space-y-0.5">
-        <li>Names</li>
-        <li>All geographic subdivisions smaller than a state (street, city, county, ZIP)</li>
-        <li>All elements of dates (except year) related to an individual; all ages &gt; 89</li>
-        <li>Telephone numbers</li>
-        <li>Fax numbers</li>
-        <li>Email addresses</li>
-        <li>Social Security numbers</li>
-        <li>Medical record numbers</li>
-        <li>Health plan beneficiary numbers</li>
-        <li>Account numbers</li>
-        <li>Certificate/license numbers</li>
-        <li>Vehicle identifiers and serial numbers, including license plates</li>
-        <li>Device identifiers and serial numbers</li>
-        <li>Web URLs</li>
-        <li>IP addresses</li>
-        <li>Biometric identifiers (e.g., fingerprints, voiceprints)</li>
-        <li>Full-face photographs and comparable images</li>
-        <li>Any other unique identifying number, characteristic, or code</li>
-      </ol>
-      <p class="mt-3 text-red-200"><strong>Actual knowledge rule:</strong> Even if the above are removed, do not include any detail that you know could identify the individual.</p>
-    </div>
-  </details>
+    <!-- Hidden Textarea for Copy-to-Clipboard -->
+    <textarea id="clipboard-helper" class="absolute -left-full"></textarea>
 
-  <div class="flex justify-between items-center mb-4">
-    <h2 class="text-xl font-semibold border-l-4 border-blue-500 pl-2">1) De-identified Intake</h2>
-    <button type="button" id="start-over-1" class="btn btn-back">Start Over</button>
-  </div>
+    <script type="module">
+        // --- Gemini API Configuration ---
+        const API_KEY = "AIzaSyCeeKqRRtfkh1-e12tP2sUAe_IL2cEsUbE";
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${API_KEY}`;
+        
+        // --- State Management ---
+        const state = {
+            hpi: '',
+            pmh: '',
+            psh: '',
+            allergies: '',
+            medications: '',
+            ros: '',
+            consultSource: '',
+            opqrst: '',
+            exam: '',
+            eeg: '', // Changed from ekg
+            labs: '',
+            imaging: ''
+        };
+        
+        // --- Speech Recognition State ---
+        let recognition;
+        let activeTextarea = null;
+        let lastTranscript = ''; // Holds the most recent transcript
+        let baseTranscript = ''; // Holds the text before dictation started
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-  <div id="error-message-symptoms" class="error-box"></div>
+        const steps = {
+            1: document.getElementById('step-1-intake'),
+            2: document.getElementById('step-2-questions'),
+            3: document.getElementById('step-3-consult')
+        };
+        
+        const loader = document.getElementById('loading-spinner');
+        const consultOutputContainer = document.getElementById('consult-output-container');
+        const consultOutput = document.getElementById('consult-output');
+        const copySuccessMessage = document.getElementById('copy-success');
 
-  <form id="symptom-form" novalidate class="space-y-4">
-    <label for="initial-symptoms" class="block text-sm font-medium text-gray-300">Chief Complaint &amp; HPI:</label>
-    <textarea id="initial-symptoms" rows="5" class="input" placeholder="e.g., Adult with sudden severe headache… CT head negative."></textarea>
-
-    <p class="text-sm text-gray-400 font-medium mt-6 mb-1">Past History &amp; Current Medications</p>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div>
-        <label for="pmh" class="block text-sm font-medium text-gray-300 mb-1">PMH:</label>
-        <textarea id="pmh" rows="2" class="input" placeholder="HTN, HLD, Migraine…"></textarea>
-      </div>
-      <div>
-        <label for="psh" class="block text-sm font-medium text-gray-300 mb-1">PSH:</label>
-        <textarea id="psh" rows="2" class="input" placeholder="Appendectomy…"></textarea>
-      </div>
-      <div>
-        <label for="allergies" class="block text-sm font-medium text-gray-300 mb-1">Allergies:</label>
-        <textarea id="allergies" rows="2" class="input" placeholder="Penicillin (rash)…"></textarea>
-      </div>
-      <div>
-        <label for="medications" class="block text-sm font-medium text-gray-300 mb-1">Medications:</label>
-        <textarea id="medications" rows="2" class="input" placeholder="Lisinopril, Atorvastatin…"></textarea>
-      </div>
-    </div>
-
-    <div>
-      <label for="ros" class="block text-sm font-medium text-gray-300 mb-1">Review of Systems (pertinent):</label>
-      <textarea id="ros" rows="3" class="input" placeholder="Neuro: …; CV: …; Resp: …; ID: …"></textarea>
-    </div>
-
-    <!-- Consult Source -->
-    <div class="mt-6">
-      <p class="block text-sm font-medium text-gray-300 mb-2">Consult Source (who is consulting Neurology):</p>
-      <div id="consult-source-cards" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <button type="button" class="card-option" data-value="Outpatient" aria-pressed="false">
-          <h4 class="text-lg font-semibold text-white">Outpatient</h4>
-          <p class="text-gray-300 text-sm">Clinic / PCM</p>
-        </button>
-        <button type="button" class="card-option" data-value="Inpatient" aria-pressed="false">
-          <h4 class="text-lg font-semibold text-white">Inpatient</h4>
-          <p class="text-gray-300 text-sm">Ward / ICU</p>
-        </button>
-        <button type="button" class="card-option" data-value="ER" aria-pressed="false">
-          <h4 class="text-lg font-semibold text-white">ER</h4>
-          <p class="text-gray-300 text-sm">Emergency Department</p>
-        </button>
-      </div>
-      <input type="hidden" id="consult-source" value="">
-    </div>
-
-    <div class="flex justify-center gap-4 mt-6 pt-3 border-t border-gray-700">
-      <button type="button" id="example-complaint-btn" class="btn btn-secondary">See Example Case</button>
-      <button type="submit" class="btn btn-primary scale-105 shadow-lg ring-2 ring-blue-500 ring-offset-2 ring-offset-gray-900">
-        Start Intake Questions
-      </button>
-      <button type="button" id="start-over-1b" class="btn btn-back">Start Over</button>
-    </div>
-  </form>
-</section>
-
-<!-- ================= 2) Questions ================= -->
-<section id="section-intake-questions" class="panel p-6 mt-6 hidden">
-  <!-- Safe Harbor -->
-  <details class="safeharbor mb-6">
-    <summary class="font-semibold text-lg text-red-300 flex items-center gap-2">
-      <span class="inline-block w-3 h-3 bg-red-500 rounded-full animate-pulse"></span>
-      De-identified Data Only (HIPAA Safe Harbor)
-    </summary>
-    <div class="p-4 border-t border-red-900 mt-2">
-      <p class="font-bold text-red-200 mb-2">Do NOT include any of the following 18 identifiers:</p>
-      <ol class="list-decimal list-inside space-y-0.5">
-        <li>Names</li>
-        <li>All geographic subdivisions smaller than a state (street, city, county, ZIP)</li>
-        <li>All elements of dates (except year) related to an individual; all ages &gt; 89</li>
-        <li>Telephone numbers</li>
-        <li>Fax numbers</li>
-        <li>Email addresses</li>
-        <li>Social Security numbers</li>
-        <li>Medical record numbers</li>
-        <li>Health plan beneficiary numbers</li>
-        <li>Account numbers</li>
-        <li>Certificate/license numbers</li>
-        <li>Vehicle identifiers and serial numbers, including license plates</li>
-        <li>Device identifiers and serial numbers</li>
-        <li>Web URLs</li>
-        <li>IP addresses</li>
-        <li>Biometric identifiers (e.g., fingerprints, voiceprints)</li>
-        <li>Full-face photographs and comparable images</li>
-        <li>Any other unique identifying number, characteristic, or code</li>
-      </ol>
-      <p class="mt-3 text-red-200"><strong>Actual knowledge rule:</strong> Even if the above are removed, do not include any detail that you know could identify the individual.</p>
-    </div>
-  </details>
-
-  <div class="flex justify-between items-center mb-4">
-    <h2 class="text-xl font-semibold border-l-4 border-blue-500 pl-2">2) AI-Guided Intake (Questions Only)</h2>
-    <div class="flex gap-2">
-      <button type="button" id="back-to-hpi-btn" class="btn btn-back">&larr; Back</button>
-      <button type="button" id="start-over-2" class="btn btn-back">Start Over</button>
-    </div>
-  </div>
-
-  <p class="text-gray-300 mb-4">Answer each field below to complete the AI-guided intake. No recommendations on this step.</p>
-  <div id="error-message-intake" class="error-box"></div>
-
-  <div class="mb-4">
-    <label class="block text-sm font-medium text-gray-300 mb-1">Original Intake (Context):</label>
-    <div id="original-context-display" class="w-full p-3 bg-gray-900 border border-gray-700 rounded-md text-gray-200 text-sm space-y-1"></div>
-  </div>
-
-  <form id="intake-form" class="space-y-4">
-    <div>
-      <label id="opqrst-question-label" for="opqrst-answer" class="block text-gray-200 mb-1">OPQRST Details:</label>
-      <textarea id="opqrst-answer" rows="2" class="input" placeholder="Answer…"></textarea>
-    </div>
-
-    <div>
-      <label id="exam-question-label" for="exam-answer" class="block text-gray-200 mb-1">Neurologic Exam &amp; Vital Signs:</label>
-      <textarea id="exam-answer" rows="2" class="input" placeholder="Answer…"></textarea>
-    </div>
-
-    <div>
-      <label id="imaging-question-label" for="imaging-answer" class="block text-gray-200 mb-1">Imaging Findings (if any):</label>
-      <textarea id="imaging-answer" rows="2" class="input" placeholder="Answer…"></textarea>
-    </div>
-
-    <div>
-      <label id="labs-question-label" for="labs-answer" class="block text-gray-200 mb-1">Pertinent Labs (if any):</label>
-      <textarea id="labs-answer" rows="2" class="input" placeholder="Answer…"></textarea>
-    </div>
-
-    <div class="flex justify-center gap-4 mt-6 pt-3 border-t border-gray-700">
-      <button type="submit" class="btn btn-primary scale-105 shadow-lg ring-2 ring-blue-500 ring-offset-2 ring-offset-gray-900">
-        Get Final Consult
-      </button>
-      <button type="button" id="back-to-hpi-btn-2" class="btn btn-back">&larr; Back</button>
-      <button type="button" id="start-over-2b" class="btn btn-back">Start Over</button>
-    </div>
-  </form>
-</section>
-
-<!-- ================= 3) Consult ================= -->
-<section id="section-consult" class="panel p-6 mt-6 hidden">
-  <!-- Safe Harbor -->
-  <details class="safeharbor mb-6">
-    <summary class="font-semibold text-lg text-red-300 flex items-center gap-2">
-      <span class="inline-block w-3 h-3 bg-red-500 rounded-full animate-pulse"></span>
-      De-identified Data Only (HIPAA Safe Harbor)
-    </summary>
-    <div class="p-4 border-t border-red-900 mt-2">
-      <p class="font-bold text-red-200 mb-2">Do NOT include any of the following 18 identifiers:</p>
-      <ol class="list-decimal list-inside space-y-0.5">
-        <li>Names</li>
-        <li>All geographic subdivisions smaller than a state (street, city, county, ZIP)</li>
-        <li>All elements of dates (except year) related to an individual; all ages &gt; 89</li>
-        <li>Telephone numbers</li>
-        <li>Fax numbers</li>
-        <li>Email addresses</li>
-        <li>Social Security numbers</li>
-        <li>Medical record numbers</li>
-        <li>Health plan beneficiary numbers</li>
-        <li>Account numbers</li>
-        <li>Certificate/license numbers</li>
-        <li>Vehicle identifiers and serial numbers, including license plates</li>
-        <li>Device identifiers and serial numbers</li>
-        <li>Web URLs</li>
-        <li>IP addresses</li>
-        <li>Biometric identifiers (e.g., fingerprints, voiceprints)</li>
-        <li>Full-face photographs and comparable images</li>
-        <li>Any other unique identifying number, characteristic, or code</li>
-      </ol>
-      <p class="mt-3 text-red-200">
-        <strong>Actual knowledge rule:</strong> Even if the above are removed, do not include any detail that you know could identify the individual.
-      </p>
-    </div>
-  </details>
-
-  <div class="flex justify-between items-center mb-4">
-    <h2 class="text-xl font-semibold border-l-4 border-blue-500 pl-2">3) AI Neurology Consult</h2>
-    <div class="flex gap-2">
-      <button type="button" id="back-to-intake-btn" class="btn btn-back">&larr; Back</button>
-      <button type="button" id="start-over-3" class="btn btn-back">Start Over</button>
-    </div>
-  </div>
-
-  <div id="consult-output" class="mb-6 min-h-[220px] bg-gray-900 border border-gray-700 rounded-md p-4 text-gray-200 text-sm">
-    <!-- injected AI-generated consult appears here -->
-  </div>
-
-  <div class="flex justify-center gap-4 pt-4 border-t border-gray-700">
-    <button type="button" id="build-note-btn" class="btn btn-primary scale-105 shadow-lg ring-2 ring-blue-500 ring-offset-2 ring-offset-gray-900">
-      Build Final Consult
-    </button>
-    <button type="button" id="copy-consult-btn" class="btn btn-secondary">Copy Consult to Clipboard</button>
-    <button type="button" id="start-over-3b" class="btn btn-back">Start Over</button>
-  </div>
-
-  <p id="copy-success" class="text-sm text-green-400 text-center mt-2 hidden">Copied!</p>
-</section>
-
-  </div>
-
-  <script>
-    /* ================= Config & Schemas ================= */
-    const apiKey = "AIzaSyCeeKqRRtfkh1-e12tP2sUAe_IL2cEsUbE";
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-
-    const SYSTEM_PROMPT_QUESTIONS = `
-Return JSON only with keys {"opqrst","exam","imaging","labs"}.
-Write four short QUESTIONS (no advice):
-- opqrst: Onset, Palliation/Provocation, Quality, Radiation, Severity(1–10), Timing
-- exam: Pertinent neuro exam and current vital signs
-- imaging: Whether any imaging (CT/MRI) was done and findings
-- labs: Whether labs (CBC/CMP/ESR/CRP/coags, etc.) were obtained and results
-No extra text.`;
-
-    function recItemSchema(){
-      return {
-        type:"OBJECT",
-        properties:{
-          id:{type:"STRING"},
-          text:{type:"STRING"},
-          selected:{type:"BOOLEAN"},
-          alternatives:{type:"ARRAY",items:{type:"STRING"}},
-          strength:{type:"STRING"}
-        },
-        required:["id","text","selected"]
-      };
-    }
-
-    const SYSTEM_PROMPT_CONSULT = `
-You are NeuroConsult AI, a board-certified neurologist. Use only current guidelines and high-quality evidence.
-STRICT: Return JSON only per schema.
-
-Requirements:
-- ASSESSMENT: 2–4 sentences summarizing clinical picture.
-- Immediately after ASSESSMENT include HIGHER LEVEL OF CARE (flag true/false). Destination must consider consult_source (Outpatient→ER; ER→Admit/Transfer; Inpatient→ICU/Transfer) if indicated.
-- DDX:
-  • most_likely {dx, probability_pct, confidence, rationale_for, rationale_against}
-  • must_not_miss[1–4] same + consequence_of_miss
-  • other[2–8] {dx, probability_pct, rationale_for, rationale_against}
-  • Probabilities sum ~100% (±10%).
-- PLAN (selectable items; alternatives; strength):
-  • immediate_actions[]
-  • workup as PLAN subsections: labs[], imaging[], diagnostics[]  (each test as its own item; e.g., CBC, CMP, ESR/CRP, CT head, CTA head/neck, MRI brain, MRA, MRV, Spine MRI, EEG, LP, etc.), each tailored to consult_source and presentation.
-    - For labs/imaging/diagnostics include top_recommendation strings naming what you most recommend first (no location statements).
-  • management_initial[] — include ≥5 treatment options with dosing where applicable (no statements about where performed).
-  • consults[]
-  • higher_level_of_care {er:boolean, admit:boolean, rationale:string, destination:string}
-  • follow_up[]
-  • military_profile {recommend_profile:boolean, length_days:number, commander_instructions:string, service_member_instructions:string}
-    - No “category”.
-- REFERENCES: 5–12 APA with url.
-- NOTE_TEXT: Build complete EMR-ready note with sections:
-  HPI, ROS, PMH, Meds, Allergies, Consult Source; ASSESSMENT; HIGHER LEVEL OF CARE; DIFFERENTIAL (with % and confidence); PLAN (subsections: immediate actions; labs; imaging; diagnostics; initial management; consults; follow-up; military profile); REFERENCES with superscripts.
-Do not include any separate “Assessment & Plan” duplicate block.`;
-
-    const QUESTIONS_SCHEMA = {
-      type:"OBJECT",
-      properties:{
-        opqrst:{type:"STRING"},
-        exam:{type:"STRING"},
-        imaging:{type:"STRING"},
-        labs:{type:"STRING"}
-      },
-      required:["opqrst","exam","imaging","labs"]
-    };
-
-    const CONSULT_SCHEMA = {
-      type:"OBJECT",
-      properties:{
-        impression:{type:"STRING"},
-        higher_level_of_care:{type:"OBJECT",properties:{
-          er:{type:"BOOLEAN"},
-          admit:{type:"BOOLEAN"},
-          rationale:{type:"STRING"},
-          destination:{type:"STRING"}
-        },required:["er","admit","rationale","destination"]},
-        ddx:{type:"OBJECT",properties:{
-          most_likely:{type:"OBJECT",properties:{
-            dx:{type:"STRING"},
-            probability_pct:{type:"NUMBER"},
-            confidence:{type:"STRING"},
-            rationale_for:{type:"STRING"},
-            rationale_against:{type:"STRING"}
-          },required:["dx","probability_pct","confidence","rationale_for","rationale_against"]},
-          must_not_miss:{type:"ARRAY",items:{type:"OBJECT",properties:{
-            dx:{type:"STRING"},
-            probability_pct:{type:"NUMBER"},
-            confidence:{type:"STRING"},
-            rationale_for:{type:"STRING"},
-            rationale_against:{type:"STRING"},
-            consequence_of_miss:{type:"STRING"}
-          },required:["dx","probability_pct","confidence","rationale_for","rationale_against","consequence_of_miss"]}},
-          other:{type:"ARRAY",items:{type:"OBJECT",properties:{
-            dx:{type:"STRING"},
-            probability_pct:{type:"NUMBER"},
-            rationale_for:{type:"STRING"},
-            rationale_against:{type:"STRING"}
-          },required:["dx","probability_pct","rationale_for","rationale_against"]}}
-        },required:["most_likely","must_not_miss","other"]},
-        plan:{type:"OBJECT",properties:{
-          immediate_actions:{type:"ARRAY",items:recItemSchema()},
-          workup:{type:"OBJECT",properties:{
-            labs:{type:"ARRAY",items:recItemSchema()},
-            labs_top_recommendation:{type:"STRING"},
-            imaging:{type:"ARRAY",items:recItemSchema()},
-            imaging_top_recommendation:{type:"STRING"},
-            diagnostics:{type:"ARRAY",items:recItemSchema()},
-            diagnostics_top_recommendation:{type:"STRING"}
-          },required:["labs","labs_top_recommendation","imaging","imaging_top_recommendation","diagnostics","diagnostics_top_recommendation"]},
-          management_initial:{type:"ARRAY",items:recItemSchema()},
-          consults:{type:"ARRAY",items:recItemSchema()},
-          higher_level_of_care:{type:"OBJECT",properties:{
-            er:{type:"BOOLEAN"},admit:{type:"BOOLEAN"},
-            rationale:{type:"STRING"},destination:{type:"STRING"}
-          },required:["er","admit","rationale","destination"]},
-          follow_up:{type:"ARRAY",items:recItemSchema()},
-          military_profile:{type:"OBJECT",properties:{
-            recommend_profile:{type:"BOOLEAN"},
-            length_days:{type:"NUMBER"},
-            commander_instructions:{type:"STRING"},
-            service_member_instructions:{type:"STRING"}
-          },required:["recommend_profile","length_days","commander_instructions","service_member_instructions"]}
-        },required:["immediate_actions","workup","management_initial","consults","higher_level_of_care","follow_up","military_profile"]},
-        references:{type:"ARRAY",items:{type:"OBJECT",properties:{
-          citation_apa:{type:"STRING"},url:{type:"STRING"}
-        },required:["citation_apa","url"]}},
-        note_text:{type:"STRING"}
-      },
-      required:["impression","higher_level_of_care","ddx","plan","references","note_text"]
-    };
-
-    /* ================= DOM refs ================= */
-    const sectionSymptoms=document.getElementById('section-symptoms');
-    const sectionIntake=document.getElementById('section-intake-questions');
-    const sectionConsult=document.getElementById('section-consult');
-    const loadingSpinner=document.getElementById('loading-spinner');
-    const loadingText=document.getElementById('loading-text');
-
-    const formSymptoms=document.getElementById('symptom-form');
-    const errorSymptoms=document.getElementById('error-message-symptoms');
-    const exampleBtn=document.getElementById('example-complaint-btn');
-
-    const initialSymptoms=document.getElementById('initial-symptoms');
-    const pmh=document.getElementById('pmh');
-    const psh=document.getElementById('psh');
-    const allergies=document.getElementById('allergies');
-    const medications=document.getElementById('medications');
-    const ros=document.getElementById('ros');
-
-    const consultSourceCards=document.getElementById('consult-source-cards');
-    const consultSourceInput=document.getElementById('consult-source');
-
-    const originalContextDisplay=document.getElementById('original-context-display');
-    const intakeForm=document.getElementById('intake-form');
-    const errorIntake=document.getElementById('error-message-intake');
-
-    const opqrstQuestionLabel=document.getElementById('opqrst-question-label');
-    const examQuestionLabel=document.getElementById('exam-question-label');
-    const imagingQuestionLabel=document.getElementById('imaging-question-label');
-    const labsQuestionLabel=document.getElementById('labs-question-label');
-
-    const opqrstAnswer=document.getElementById('opqrst-answer');
-    const examAnswer=document.getElementById('exam-answer');
-    const imagingAnswer=document.getElementById('imaging-answer');
-    const labsAnswer=document.getElementById('labs-answer');
-
-    const backToHpiBtn=document.getElementById('back-to-hpi-btn');
-    const backToHpiBtn2=document.getElementById('back-to-hpi-btn-2');
-    const startOver1=document.getElementById('start-over-1');
-    const startOver1b=document.getElementById('start-over-1b');
-    const startOver2=document.getElementById('start-over-2');
-    const startOver2b=document.getElementById('start-over-2b');
-    const startOver3=document.getElementById('start-over-3');
-    const startOver3b = document.getElementById('start-over-3b'); // Added this
-    const backToIntakeBtn=document.getElementById('back-to-intake-btn');
-
-    const consultOutput=document.getElementById('consult-output');
-    const copyBtn=document.getElementById('copy-consult-btn');
-    const buildBtn=document.getElementById('build-note-btn');
-    const copySuccess=document.getElementById('copy-success');
-
-    let currentPatient={};
-    let modelConsult=null;
-
-    /* ================= Helpers ================= */
-    function setLoading(on,msg="Working…"){ if(on){loadingText.textContent=msg;loadingSpinner.classList.remove('hidden')}else{loadingSpinner.classList.add('hidden')} }
-    async function fetchWithBackoff(url,opt,retries=3,delay=800){
-      for(let i=0;i<retries;i++){
-        try{
-          const r=await fetch(url,opt); if(r.ok) return r;
-          if(r.status>=400&&r.status<500) throw new Error(`Client ${r.status}`);
-          await new Promise(res=>setTimeout(res,delay)); delay*=2;
-        }catch(e){
-          if(i===retries-1) throw e;
-          await new Promise(res=>setTimeout(res,delay)); delay*=2;
-        }
-      }
-    }
-    async function getAiResponse(user,sys,schema=null){
-      const payload={contents:[{parts:[{text:user}]}],systemInstruction:{parts:[{text:sys}]}}
-      if(schema){payload.generationConfig={responseMimeType:"application/json",responseSchema:schema}}
-      const r=await fetchWithBackoff(apiUrl,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
-      if(!r.ok) throw new Error(`API ${r.status}`);
-      const j=await r.json(); const t=j?.candidates?.[0]?.content?.parts?.[0]?.text;
-      if(!t) throw new Error("No content"); return t;
-    }
-    function escapeHtml(s){return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")}
-
-    /* ================= Consult Source Cards ================= */
-    function clearCards(){
-      consultSourceCards.querySelectorAll(".card-option").forEach(c=>{
-        c.classList.remove("selected");
-        c.setAttribute("aria-pressed","false");
-      });
-    }
-    function selectCard(btn){
-      clearCards();
-      btn.classList.add("selected");
-      btn.setAttribute("aria-pressed","true");
-      consultSourceInput.value = btn.dataset.value || "";
-    }
-    consultSourceCards.addEventListener('click',e=>{
-      const card=e.target.closest('.card-option'); if(!card) return; selectCard(card);
-    });
-    // Keyboard a11y
-    consultSourceCards.querySelectorAll(".card-option").forEach(btn=>{
-      btn.addEventListener("keydown",e=>{
-        if(e.key==="Enter"||e.key===" "){ e.preventDefault(); selectCard(btn); }
-      });
-    });
-
-    /* Example button */
-    exampleBtn.addEventListener('click', ()=>{
-      initialSymptoms.value='30s with 2 weeks of unilateral throbbing headache preceded by visual scintillating scotoma; similar prior episodes; no focal deficits. Question: confirm diagnosis.';
-      pmh.value='Migraine with aura; seasonal allergies';
-      psh.value='None';
-      allergies.value='Sulfa (anaphylaxis)';
-      medications.value='Loratadine PRN';
-      ros.value='Neuro: +photophobia; –weakness, –vision loss. ID: –fever. CV: –chest pain.';
-      const outCard=consultSourceCards.querySelector('[data-value="Outpatient"]');
-      if(outCard) selectCard(outCard);
-      errorSymptoms.style.display="none";
-      errorSymptoms.textContent="";
-    });
-
-  /* ================= STEP 1 → QUESTIONS ================= */
-  formSymptoms.addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    if (!initialSymptoms.value.trim()) {
-      errorSymptoms.textContent = "Enter a chief complaint/HPI.";
-      errorSymptoms.style.display = "block";
-      return;
-    }
-
-    if (!consultSourceInput.value) {
-      errorSymptoms.textContent = "Select a Consult Source.";
-      errorSymptoms.style.display = "block";
-      return;
-    }
-
-    errorSymptoms.style.display = "none";
-    currentPatient = {
-      hpi: initialSymptoms.value.trim(),
-      pmh: pmh.value.trim(),
-      psh: psh.value.trim(),
-      allergies: allergies.value.trim(),
-      medications: medications.value.trim(),
-      ros: ros.value.trim(),
-      consult_source: consultSourceInput.value
-    };
-
-    sectionSymptoms.classList.add("hidden");
-    setLoading(true, "Generating Intake Questions…");
-
-    try {
-      const userPrompt = `
-Chief complaint/HPI: ${currentPatient.hpi}
-PMH: ${currentPatient.pmh || "Not provided"}
-PSH: ${currentPatient.psh || "Not provided"}
-Allergies: ${currentPatient.allergies || "Not provided"}
-Medications: ${currentPatient.medications || "Not provided"}
-ROS: ${currentPatient.ros || "Not provided"}
-Consult source: ${currentPatient.consult_source}`;
-
-      const qJson = await getAiResponse(userPrompt, SYSTEM_PROMPT_QUESTIONS, QUESTIONS_SCHEMA);
-      const q = JSON.parse(qJson);
-
-      originalContextDisplay.innerHTML = `
-        <p><strong>Consult source:</strong> ${escapeHtml(currentPatient.consult_source)}</p>
-        <p><strong>HPI:</strong> ${escapeHtml(currentPatient.hpi)}</p>
-        <p><strong>PMH:</strong> ${escapeHtml(currentPatient.pmh || "N/A")}</p>
-        <p><strong>PSH:</strong> ${escapeHtml(currentPatient.psh || "N/A")}</p>
-        <p><strong>Allergies:</strong> ${escapeHtml(currentPatient.allergies || "N/A")}</p>
-        <p><strong>Medications:</strong> ${escapeHtml(currentPatient.medications || "N/A")}</p>
-        <p><strong>ROS:</strong> ${escapeHtml(currentPatient.ros || "N/A")}</p>
-      `;
-
-      opqrstQuestionLabel.textContent = q.opqrst;
-      examQuestionLabel.textContent = q.exam;
-      imagingQuestionLabel.textContent = q.imaging;
-      labsQuestionLabel.textContent = q.labs;
-      opqrstAnswer.value = examAnswer.value = imagingAnswer.value = labsAnswer.value = "";
-
-      setLoading(false);
-      sectionIntake.classList.remove("hidden");
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    } catch (err) {
-      setLoading(false);
-      sectionSymptoms.classList.remove("hidden");
-      errorSymptoms.textContent = "Failed to generate questions (check API key/network).";
-      errorSymptoms.style.display = "block";
-      console.error(err);
-    }
-  });
-
-  /* ================= QUESTIONS → CONSULT ================= */
-  intakeForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    errorIntake.style.display = "none";
-    sectionIntake.classList.add("hidden");
-    setLoading(true, "Consulting Neurologist…");
-
-    const prompt = `
-Intake summary for Neurology:
-Consult source: ${currentPatient.consult_source}
-HPI: ${currentPatient.hpi}
-PMH: ${currentPatient.pmh || "Not provided"}
-PSH: ${currentPatient.psh || "Not provided"}
-Allergies: ${currentPatient.allergies || "Not provided"}
-Medications: ${currentPatient.medications || "Not provided"}
-ROS: ${currentPatient.ros || "Not provided"}
-
-Follow-up (answers to questions):
-OPQRST: ${opqrstAnswer.value.trim() || "Not provided"}
-Neuro exam & VS: ${examAnswer.value.trim() || "Not provided"}
-Imaging findings: ${imagingAnswer.value.trim() || "Not provided"}
-Labs: ${labsAnswer.value.trim() || "Not provided"}
-
-Return JSON only per schema.`;
-
-    try {
-      const resp = await getAiResponse(prompt, SYSTEM_PROMPT_CONSULT, CONSULT_SCHEMA);
-      modelConsult = JSON.parse(resp);
-      renderConsultInteractive(modelConsult);
-      setLoading(false);
-      sectionConsult.classList.remove("hidden");
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    } catch (err) {
-      console.error(err);
-      setLoading(false);
-      sectionIntake.classList.remove("hidden");
-      errorIntake.textContent = "Failed to get final consult (check API key/network).";
-      errorIntake.style.display = "block";
-    }
-  });
-
-  /* ================= RENDER CONSULT ================= */
-  function listItems(items, groupKey) {
-    if (!Array.isArray(items)) return "";
-    return items
-      .map(
-        (it) => `
-        <label class="rec-row flex items-start gap-3">
-          <input type="checkbox" class="rec-checkbox" data-group="${groupKey}" data-id="${escapeHtml(it.id)}" ${
-          it.selected ? "checked" : ""
-        }>
-          <span class="leading-snug text-gray-100">
-            ${escapeHtml(it.text)}${
-          it.strength ? ` <em class="text-gray-300">(strength: ${escapeHtml(it.strength)})</em>` : ""
-        }
-            ${
-              it.alternatives?.length
-                ? `<br><small class="text-gray-400">Alternatives: ${escapeHtml(
-                    it.alternatives.join(" | ")
-                  )}</small>`
-                : ""
+        // --- Step Navigation ---
+        function showStep(stepNumber) {
+            Object.values(steps).forEach(step => step.classList.add('hidden'));
+            if (steps[stepNumber]) {
+                steps[stepNumber].classList.remove('hidden');
             }
-          </span>
-        </label>`
-      )
-      .join("");
-  }
+            window.scrollTo(0, 0); // Scroll to top on step change
+        }
 
-  function renderConsultInteractive(c) {
-    const el = consultOutput;
-    if (!el) return;
+        // --- Data Collection ---
+        function saveStep1Data() {
+            state.hpi = document.getElementById('hpi').value;
+            state.pmh = document.getElementById('pmh').value;
+            state.psh = document.getElementById('psh').value;
+            state.allergies = document.getElementById('allergies').value;
+            state.medications = document.getElementById('medications').value;
+            state.ros = document.getElementById('ros').value;
+            state.consultSource = document.getElementById('consult-source').value;
+        }
 
-    const hlocTrue = c.higher_level_of_care?.er || c.higher_level_of_care?.admit;
-    const hlocCls = `hloc ${hlocTrue ? "alert" : "ok"}`;
-    const hlocTitle = hlocTrue
-      ? "Higher Level of Care Recommended"
-      : "Higher Level of Care Not Indicated";
-    const dest = c.higher_level_of_care?.destination
-      ? ` — Destination: ${escapeHtml(c.higher_level_of_care.destination)}`
-      : "";
+        function saveStep2Data() {
+            state.opqrst = document.getElementById('opqrst').value;
+            state.exam = document.getElementById('exam').value;
+            state.eeg = document.getElementById('eeg').value; // Changed from ekg
+            state.labs = document.getElementById('labs').value;
+            state.imaging = document.getElementById('imaging').value;
+        }
 
-    const ddxOther = (c.ddx.other || []).slice(0, 5);
-    const otherQuick = ddxOther.length
-      ? `
-        <div class="mt-2">
-          <strong>Other possible diagnoses to consider:</strong>
-          ${ddxOther
-            .map(
-              (o, i) => `
-            <label class="rec-row flex items-start gap-3">
-              <input type="checkbox" class="rec-checkbox" data-group="ddx.other.consider" data-id="other_${i}" checked>
-              <span class="text-gray-100">${escapeHtml(o.dx)} — ${o.probability_pct}%</span>
-            </label>`
-            )
-            .join("")}
-        </div>`
-      : "";
+        // --- AI Consult Logic ---
+        function buildConsultPrompt() {
+            // Helper to only include non-empty fields
+            const addSection = (title, data) => data ? `**${title}:**\n${data}\n\n` : '';
 
-    el.innerHTML = `
-      <h3>ASSESSMENT</h3>
-      <p class="text-gray-100">${escapeHtml(c.impression)}</p>
+            const systemPrompt = `You are a board-certified AI Neurology consultant. A provider is requesting a consult. Your task is to generate a formal neurology consult note based *only* on the de-identified data provided.
 
-      <div class="${hlocCls}">
-        <strong>${hlocTitle}</strong>${dest}
-        <p class="mt-1 text-gray-100"><em>Rationale:</em> ${escapeHtml(
-          c.higher_level_of_care?.rationale || ""
-        )}</p>
-      </div>
+**CRITICAL INSTRUCTIONS:**
+1.  **Evidence-Based Medicine:** You MUST use the provided search tool to find and cite the most current, evidence-based clinical guidelines (e.g., AAN/AHA/ASA guidelines for stroke, seizure, headache, etc.) to support your recommendations.
+2.  **Format:** The note must be concise, professional, and formatted using Markdown for a medical professional.
+3.  **Required Sections:** Your response MUST include the following sections:
 
-      <h3>DIFFERENTIAL DIAGNOSIS</h3>
-      <p class="text-gray-100"><strong>Most likely:</strong> ${escapeHtml(
-        c.ddx.most_likely.dx
-      )} — ${c.ddx.most_likely.probability_pct}% (confidence: ${escapeHtml(
-      c.ddx.most_likely.confidence
-    )})</p>
-      <p class="text-gray-100"><em>Why:</em> ${escapeHtml(c.ddx.most_likely.rationale_for)}</p>
-      <p class="text-gray-100"><em>Why not:</em> ${escapeHtml(c.ddx.most_likely.rationale_against)}</p>
+## 1. Impression & Assessment
+(Your summary of the case and primary concern, e.g., "65 y/o with... concerning for acute ischemic stroke in the L-MCA territory.")
 
-      <p class="mt-2 text-gray-100"><strong>Must not miss:</strong></p>
-      ${c.ddx.must_not_miss
-        .map(
-          (m) => `
-          <div class="ml-2">
-            <p class="text-gray-100">${escapeHtml(m.dx)} — ${m.probability_pct}% (confidence: ${escapeHtml(
-              m.confidence
-            )})</p>
-            <p class="text-gray-100"><em>Why:</em> ${escapeHtml(m.rationale_for)}</p>
-            <p class="text-gray-100"><em>Why not:</em> ${escapeHtml(m.rationale_against)}</p>
-            <p class="text-gray-100"><em>Consequence if missed:</em> ${escapeHtml(
-              m.consequence_of_miss
-            )}</p>
-          </div>`
-        )
-        .join("")}
+## 2. Differential Diagnosis
+(List likely neurologic diagnoses, from most to least probable, citing guidelines where applicable. Include stroke, seizure, migraine, TIA, toxic-metabolic, etc.)
 
-      ${otherQuick}
+## 3. Recommended Workup
+(Specific, actionable recommendations for labs, imaging, EEG, and other tests.)
 
-      <h3>PLAN (select items to include)</h3>
+## 4. Treatment & Management Plan
+(Initial therapeutic recommendations, citing specific guidelines for stroke, seizure, etc.)
+`;
 
-      <strong>Immediate actions</strong>
-      <div>${listItems(c.plan.immediate_actions, "immediate_actions")}</div>
+            const userPrompt = `
+**CONSULT REQUEST**
 
-      <strong class="block mt-2">Plan – Labs</strong>
-      <p class="text-sm italic mb-1 text-gray-300">Top recommendation: ${escapeHtml(
-        c.plan.workup.labs_top_recommendation || ""
-      )}</p>
-      <div>${listItems(c.plan.workup.labs, "workup.labs")}</div>
+${addSection('Consult Source', state.consultSource)}
+${addSection('Chief Complaint & HPI', state.hpi)}
+${addSection('Symptom Details (OPQRST)', state.opqrst)}
+${addSection('Past Medical History', state.pmh)}
+${addSection('Past Surgical History', state.psh)}
+${addSection('Allergies', state.allergies)}
+${addSection('Medications', state.medications)}
+${addSection('Neurology ROS', state.ros)}
+${addSection('Vital Signs & Neurologic Exam', state.exam)}
+${addSection('EEG Findings', state.eeg)}
+${addSection('Pertinent Labs', state.labs)}
+${addSection('Imaging Findings (CT/MRI/CTA)', state.imaging)}
+`;
+            return { systemPrompt, userPrompt };
+        }
 
-      <strong class="block mt-2">Plan – Imaging</strong>
-      <p class="text-sm italic mb-1 text-gray-300">Top recommendation: ${escapeHtml(
-        c.plan.workup.imaging_top_recommendation || ""
-      )}</p>
-      <div>${listItems(c.plan.workup.imaging, "workup.imaging")}</div>
+        async function fetchConsult() {
+            saveStep2Data(); // Save final data
+            showStep(3);
+            loader.classList.remove('hidden');
+            consultOutputContainer.classList.add('hidden');
 
-      <strong class="block mt-2">Plan – Diagnostics</strong>
-      <p class="text-sm italic mb-1 text-gray-300">Top recommendation: ${escapeHtml(
-        c.plan.workup.diagnostics_top_recommendation || ""
-      )}</p>
-      <div>${listItems(c.plan.workup.diagnostics, "workup.diagnostics")}</div>
+            const { systemPrompt, userPrompt } = buildConsultPrompt();
+            
+            const payload = {
+                contents: [{ parts: [{ text: userPrompt }] }],
+                systemInstruction: {
+                    parts: [{ text: systemPrompt }]
+                },
+                // Add the Google Search tool as requested
+                tools: [{ "google_search": {} }],
+                generationConfig: {
+                    temperature: 0.2, // Lower temp for more factual, evidence-based responses
+                    topK: 40,
+                }
+            };
 
-      <strong class="block mt-2">Initial management (≥5 options)</strong>
-      <div>${listItems(c.plan.management_initial, "management_initial")}</div>
+            try {
+                const response = await fetchWithRetry(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`API Error: ${response.statusText}`);
+                }
+                
+                const result = await response.json();
+                const candidate = result.candidates?.[0];
+                
+                if (candidate && candidate.content?.parts?.[0]?.text) {
+                    const rawText = candidate.content.parts[0].text;
+                    let htmlOutput = simpleMarkdownToHtml(rawText);
 
-      <strong class="block mt-2">Consults</strong>
-      <div>${listItems(c.plan.consults, "consults")}</div>
+                    // Handle grounding metadata for sources
+                    const groundingMetadata = candidate.groundingMetadata;
+                    if (groundingMetadata && groundingMetadata.groundingAttributions) {
+                        const sources = groundingMetadata.groundingAttributions
+                            .map(attribution => ({
+                                uri: attribution.web?.uri,
+                                title: attribution.web?.title,
+                            }))
+                            .filter(source => source.uri && source.title); // Ensure sources are valid
 
-      <strong class="block mt-2">Follow-up</strong>
-      <div>${listItems(c.plan.follow_up, "follow_up")}</div>
+                        if (sources.length > 0) {
+                            htmlOutput += `<h2>Evidence-Based Sources</h2><ul>`;
+                            sources.forEach(source => {
+                                htmlOutput += `<li><a href="${source.uri}" target="_blank" rel="noopener noreferrer" class="text-indigo-400 hover:underline">${source.title}</a></li>`;
+                            });
+                            htmlOutput += `</ul>`;
+                        }
+                    }
+                    
+                    consultOutput.innerHTML = htmlOutput;
+                } else {
+                    consultOutput.innerHTML = "<p class='text-red-500'>Error: Could not retrieve a valid response from the AI. Please check the console for details.</p>";
+                    console.error("Invalid API response structure:", result);
+                }
+            } catch (error) {
+                console.error("Fetch Error:", error);
+                consultOutput.innerHTML = `<p class='text-red-500'><strong>Connection Error:</strong><br>${error.message}.<br><br>Please check your internet connection and try again.</p>`;
+            } finally {
+                loader.classList.add('hidden');
+                consultOutputContainer.classList.remove('hidden');
+            }
+        }
+        
+        // --- Exponential Backoff Retry ---
+        async function fetchWithRetry(url, options, retries = 3, delay = 1000) {
+            try {
+                const response = await fetch(url, options);
+                if (response.status === 429 || response.status >= 500) { // Throttling or server error
+                    if (retries > 0) {
+                        // console.warn(`Retrying request... (${retries} retries left)`);
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                        return fetchWithRetry(url, options, retries - 1, delay * 2);
+                    } else {
+                        throw new Error("API request failed after multiple retries.");
+                    }
+                }
+                return response;
+            } catch (error) {
+                 if (retries > 0) {
+                    // console.warn(`Retrying request due to network error... (${retries} retries left)`);
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    return fetchWithRetry(url, options, retries - 1, delay * 2);
+                } else {
+                    throw error;
+                }
+            }
+        }
 
-      <strong class="block mt-2">Military profile</strong>
-      <div class="mb-2 p-3 border border-gray-700 rounded-lg">
-        <label class="flex items-center gap-2 mb-2">
-          <input type="checkbox" id="profile-recommend" ${
-            c.plan.military_profile.recommend_profile ? "checked" : ""
-          }>
-          <span class="text-gray-100">Recommend profile</span>
-        </label>
-        <div class="flex items-center gap-2 mb-2">
-          <span class="text-gray-100">Length (days):</span>
-          <button
-            type="button"
-            id="profile-len-dec"
-            class="btn btn-secondary py-1 px-2"
-            aria-label="Decrease profile length">−</button>
-          <span
-            id="profile-length"
-            data-value="${Number(c.plan.military_profile.length_days) || 7}"
-            class="px-2 text-gray-100">${Number(c.plan.military_profile.length_days) || 7}</span>
-          <button
-            type="button"
-            id="profile-len-inc"
-            class="btn btn-secondary py-1 px-2"
-            aria-label="Increase profile length">+</button>
-        </div>
-        <div class="pl-4">
-          <p class="mb-3 text-gray-100"><em>Commander instructions:</em><br>
-            <span id="profile-commander" data-value="${escapeHtml(
-              c.plan.military_profile.commander_instructions
-            )}">${escapeHtml(c.plan.military_profile.commander_instructions)}</span>
-          </p>
-          <p class="mb-1 text-gray-100"><em>Service member instructions:</em><br>
-            <span id="profile-sm" data-value="${escapeHtml(
-              c.plan.military_profile.service_member_instructions
-            )}">${escapeHtml(c.plan.military_profile.service_member_instructions)}</span>
-          </p>
-        </div>
-      </div>
+        // --- Speech Recognition ---
+        function initializeSpeechRecognition() {
+            if (!SpeechRecognition) {
+                console.warn("Speech Recognition API not supported in this browser.");
+                return;
+            }
 
-      <h3>References</h3>
-      <ol class="list-decimal list-inside">
-        ${c.references
-          .map(
-            (r, i) =>
-              `<li>[${i + 1}] ${escapeHtml(r.citation_apa)} <a href="${r.url}" target="_blank" class="text-blue-400 hover:underline">${r.url}</a></li>`
-          )
-          .join("")}
-      </ol>
-    `;
+            recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = 'en-US';
 
-    // Profile length controls
-    document
-      .getElementById("profile-len-inc")
-      .addEventListener("click", () => {
-        const sp = document.getElementById("profile-length");
-        const v = Number(sp.dataset.value) || 0;
-        sp.dataset.value = String(v + 1);
-        sp.textContent = String(v + 1);
-      });
+            // Handle the result
+            recognition.onresult = (event) => {
+                if (!activeTextarea) return;
 
-    document
-      .getElementById("profile-len-dec")
-      .addEventListener("click", () => {
-        const sp = document.getElementById("profile-length");
-        const v = Number(sp.dataset.value) || 0;
-        const nv = Math.max(0, v - 1);
-        sp.dataset.value = String(nv);
-        sp.textContent = String(nv);
-      });
-  }
-  
-    /* ================= Build + Copy ================= */
-    function itemsByIds(items, ids){ const map=new Map((items||[]).map(i=>[i.id,i])); return ids.map(id=>map.get(id)).filter(Boolean); }
-    function getChecked(group){ return [...document.querySelectorAll(`.rec-checkbox[data-group="${group}"]`)].filter(cb=>cb.checked).map(cb=>cb.dataset.id); }
+                let interimTranscript = '';
+                let finalTranscript = '';
 
-    function buildFinalConsultText(){
-      const c=modelConsult; if(!c) return "";
-      const sel={
-        immediate: itemsByIds(c.plan.immediate_actions, getChecked('immediate_actions')),
-        labs: itemsByIds(c.plan.workup.labs, getChecked('workup.labs')),
-        imaging: itemsByIds(c.plan.workup.imaging, getChecked('workup.imaging')),
-        diagnostics: itemsByIds(c.plan.workup.diagnostics, getChecked('diagnostics')),
-        mgmt: itemsByIds(c.plan.management_initial, getChecked('management_initial')),
-        consults: itemsByIds(c.plan.consults, getChecked('consults')),
-        follow: itemsByIds(c.plan.follow_up, getChecked('follow_up')),
-      };
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        finalTranscript += event.results[i][0].transcript;
+                    } else {
+                        interimTranscript += event.results[i][0].transcript;
+                    }
+                }
 
-      const lines=[];
-      lines.push("HPI:"); lines.push(currentPatient.hpi||""); lines.push("");
-      lines.push("ROS:"); lines.push(currentPatient.ros||""); lines.push("");
-      lines.push("PMH:"); lines.push(currentPatient.pmh||""); lines.push("");
-      lines.push("Medications:"); lines.push(currentPatient.medications||""); lines.push("");
-      lines.push("Allergies:"); lines.push(currentPatient.allergies||""); lines.push("");
-      lines.push(`Consult Source: ${currentPatient.consult_source}`); lines.push("");
+                activeTextarea.value = baseTranscript + finalTranscript + interimTranscript;
+                
+                if (finalTranscript) {
+                    baseTranscript += finalTranscript + ' ';
+                }
+            };
 
-      lines.push("ASSESSMENT:"); lines.push(c.impression); lines.push("");
+            // Handle end of speech
+            recognition.onend = () => {
+                const currentActiveTextareaId = activeTextarea?.id;
+                
+                activeTextarea = null;
+                lastTranscript = '';
+                baseTranscript = ''; 
 
-      lines.push("HIGHER LEVEL OF CARE:");
-      const recHLOC = (c.plan.higher_level_of_care?.er || c.plan.higher_level_of_care?.admit);
-      lines.push(`• Recommended: ${recHLOC ? "Yes" : "No"}`);
-      if(recHLOC){ lines.push(`• Destination: ${c.plan.higher_level_of_care.destination || "—"}`); }
-      lines.push(`• Rationale: ${c.plan.higher_level_of_care.rationale || ""}`); lines.push("");
+                if (currentActiveTextareaId) {
+                     const micBtn = document.querySelector(`.mic-btn[data-target-id="${currentActiveTextareaId}"]`);
+                    if (micBtn) {
+                        micBtn.classList.remove('is-listening');
+                        micBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>`;
+                    }
+                }
+            };
 
-      lines.push("DIFFERENTIAL DIAGNOSIS:");
-      const ml=c.ddx.most_likely;
-      lines.push(`• Most likely: ${ml.dx} — ${ml.probability_pct}% (confidence: ${ml.confidence})`);
-      lines.push(`  Why: ${ml.rationale_for}`);
-      lines.push(`  Why not: ${ml.rationale_against}`);
-      lines.push("• Must not miss:");
-      (c.ddx.must_not_miss||[]).forEach(m=>{
-        lines.push(`  - ${m.dx} — ${m.probability_pct}% (confidence: ${m.confidence}); Consequence: ${m.consequence_of_miss}`);
-        lines.push(`    Why: ${m.rationale_for}`);
-        lines.push(`    Why not: ${m.rationale_against}`);
-      });
-      lines.push("• Other:");
-      (c.ddx.other||[]).forEach(o=>{
-        lines.push(`  - ${o.dx} — ${o.probability_pct}%`);
-        lines.push(`    Why: ${o.rationale_for}`);
-        lines.push(`    Why not: ${o.rationale_against}`);
-      });
-      lines.push("");
+            // Handle errors
+            recognition.onerror = (event) => {
+                console.error("Speech recognition error:", event.error);
+                const errorDiv = document.getElementById('speech-error');
+                const errorMessage = document.getElementById('speech-error-message');
+                
+                if (event.error === 'no-speech') {
+                    errorMessage.innerText = "No speech was detected. Please try speaking again.";
+                } else if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+                    errorMessage.innerText = "Could not start dictation. Please ensure you have allowed microphone access for this site in your browser settings.";
+                } else {
+                    errorMessage.innerText = `An unexpected error occurred: ${event.error}`;
+                }
+                errorDiv.classList.remove('hidden');
+            };
+        }
 
-      lines.push("PLAN:");
-      lines.push("• Immediate actions:"); sel.immediate.forEach(i=>lines.push(`  - ${i.text}${i.strength?` (strength: ${i.strength})`:""}`));
-      lines.push(`• Labs (Top: ${c.plan.workup.labs_top_recommendation||""}):`); sel.labs.forEach(i=>lines.push(`  - ${i.text}${i.strength?` (strength: ${i.strength})`:""}`));
-      lines.push(`• Imaging (Top: ${c.plan.workup.imaging_top_recommendation||""}):`); sel.imaging.forEach(i=>lines.push(`  - ${i.text}${i.strength?` (strength: ${i.strength})`:""}`));
-      lines.push(`• Diagnostics (Top: ${c.plan.workup.diagnostics_top_recommendation||""}):`); sel.diagnostics.forEach(i=>lines.push(`  - ${i.text}${i.strength?` (strength: ${i.strength})`:""}`));
-      lines.push("• Initial management:"); sel.mgmt.forEach(i=>lines.push(`  - ${i.text}${i.strength?` (strength: ${i.strength})`:""}`));
-      lines.push("• Consults:"); sel.consults.forEach(i=>lines.push(`  - ${i.text}${i.strength?` (strength: ${i.strength})`:""}`));
-      lines.push("• Follow-up:"); sel.follow.forEach(i=>lines.push(`  - ${i.text}${i.strength?` (strength: ${i.strength})`:""}`));
-      lines.push("");
+        function handleMicClick(event) {
+            const btn = event.currentTarget;
+            const targetId = btn.dataset.targetId;
+            const targetTextarea = document.getElementById(targetId);
 
-      // Military Profile
-      const recProfile = document.getElementById('profile-recommend')?.checked;
-      if (recProfile) {
-        lines.push("MILITARY PROFILE:");
-        const len = document.getElementById('profile-length')?.dataset.value || '0';
-        lines.push(`• Recommended: Yes`);
-        lines.push(`• Length (days): ${len}`);
-        lines.push(`• Commander instructions: ${document.getElementById('profile-commander')?.dataset.value || ''}`);
-        lines.push(`• Service member instructions: ${document.getElementById('profile-sm')?.dataset.value || ''}`);
-      } else {
-        lines.push("MILITARY PROFILE:");
-        lines.push("• Recommended: No");
-      }
-      lines.push("");
+            if (!recognition || !targetTextarea) return;
 
+            if (activeTextarea) { // If it's already listening, stop it
+                recognition.stop();
+            } else { // Not listening, so start
+                document.getElementById('speech-error').classList.add('hidden');
+                
+                lastTranscript = ''; 
+                baseTranscript = targetTextarea.value;
+                if (baseTranscript.length > 0 && !baseTranscript.endsWith(' ')) {
+                    baseTranscript += ' ';
+                }
+                
+                activeTextarea = targetTextarea;
+                recognition.start();
+                btn.classList.add('is-listening');
+                btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg>`; // Stop icon
+            }
+        }
 
-      lines.push("REFERENCES:");
-      (c.references||[]).forEach((r,i)=>lines.push(`${i+1}. ${r.citation_apa} ${r.url}`));
-      return lines.join("\n");
-    }
+        // --- Utility Functions ---
+        function simpleMarkdownToHtml(md) {
+            let html = md
+                .replace(/^## (.*$)/gim, '<h2>$1</h2>') // H2
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold
+                .replace(/__(.*?)__/g, '<strong>$1</strong>'); // Bold (underscore)
 
-    // Build & Copy
-    buildBtn.addEventListener('click', ()=>{
-      const note=buildFinalConsultText();
-      consultOutput.innerText = note || "No note content.";
-    });
+            html = html.replace(/^\* (.*$)/gim, '<li>$1</li>');
+            html = html.replace(/((<li>.*<\/li\>[\n\r]?)+)/g, '<ul>$1</ul>');
 
-    copyBtn.addEventListener('click', async ()=>{
-      const text=consultOutput.innerText || consultOutput.textContent || "";
-      if(!text) return;
-      try{
-        if(navigator.clipboard?.writeText) await navigator.clipboard.writeText(text);
-        else{ const ta=document.createElement('textarea'); ta.value=text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); }
-        copySuccess.classList.remove('hidden'); setTimeout(()=>copySuccess.classList.add('hidden'),1500);
-      }catch(e){ console.error("Clipboard error", e); }
-    });
+            let lines = html.split('\n');
+            let inList = false;
+            for (let i = 0; i < lines.length; i++) {
+                if (lines[i].startsWith('<ul>')) inList = true;
+                if (lines[i].endsWith('</ul>')) inList = false;
+                
+                if (!lines[i].startsWith('<h') && !lines[i].startsWith('<li') && !lines[i].startsWith('<ul') && !lines[i].endsWith('</ul>') && lines[i].trim() !== '') {
+                    lines[i] = `<p>${lines[i]}</p>`;
+                }
+            }
+            return lines.join('\n').replace(/<p><\/p>/g, '');
+        }
+        
+        function copyToClipboard() {
+            const textToCopy = consultOutput.innerText; // Use innerText for clean text
+            const helper = document.getElementById('clipboard-helper');
+            helper.value = textToCopy;
+            helper.select();
+            helper.setSelectionRange(0, 99999); // For mobile
+            
+            try {
+                document.execCommand('copy');
+                copySuccessMessage.classList.remove('hidden');
+                setTimeout(() => {
+                    copySuccessMessage.classList.add('hidden');
+                }, 2000);
+            } catch (err) {
+                console.error('Failed to copy text: ', err);
+            }
+        }
 
-    // Navigation helpers
-    function resetAll(){
-      initialSymptoms.value=pmh.value=psh.value=allergies.value=medications.value=ros.value="";
-      consultSourceInput.value="";
-      clearCards();
-      opqrstAnswer.value=examAnswer.value=imagingAnswer.value=labsAnswer.value="";
-      modelConsult=null; currentPatient={};
-      errorSymptoms.style.display="none";
-      errorIntake.style.display="none";
-      sectionConsult.classList.add('hidden');
-      sectionIntake.classList.add('hidden');
-      sectionSymptoms.classList.remove('hidden');
-      consultOutput.innerHTML="";
-      window.scrollTo({top:0,behavior:'smooth'});
-    }
-    startOver1.addEventListener('click',resetAll);
-    startOver1b.addEventListener('click',resetAll);
-    startOver2.addEventListener('click',resetAll);
-    startOver2b.addEventListener('click',resetAll);
-    startOver3.addEventListener('click',resetAll);
-    startOver3b.addEventListener('click',resetAll); // Added this
+        function startOver() {
+            if (recognition && activeTextarea) {
+                recognition.stop();
+            }
+            document.getElementById('intake-form-1').reset();
+            document.getElementById('intake-form-2').reset();
+            
+            // Reset pre-filled Neurology ROS
+            const rosTextarea = document.getElementById('ros');
+            if (rosTextarea) {
+                rosTextarea.value = "Headache: \nDizziness/Vertigo: \nSyncope/Presyncope: \nWeakness (focal): \nNumbness/Tingling: \nVision Changes (e.g., diplopia): \nSpeech Changes (e.g., aphasia, dysarthria): \nGait/Balance Issues: \nSeizures: \nCognitive Changes/Memory Loss: ";
+            }
+            consultOutput.innerHTML = '';
+            showStep(1);
+        }
 
-    backToHpiBtn.addEventListener('click',()=>{sectionIntake.classList.add('hidden');sectionSymptoms.classList.remove('hidden');window.scrollTo({top:0,behavior:'smooth'})});
-    backToHpiBtn2.addEventListener('click',()=>{sectionIntake.classList.add('hidden');sectionSymptoms.classList.remove('hidden');window.scrollTo({top:0,behavior:'smooth'})});
-    backToIntakeBtn.addEventListener('click',()=>{sectionConsult.classList.add('hidden');sectionIntakc.classList.remove('hidden');window.scrollTo({top:0,behavior:'smooth'})});
-  </script>
+        // --- Component Template ---
+        function FormSection({ title, id, placeholder = '', rows = '3', value = '' }) {
+            return `
+                <div class="mb-4">
+                    <label for="${id}" class="block text-sm font-medium text-gray-300 mb-1">${title}</label>
+                    <div class="relative">
+                        <textarea 
+                            id="${id}" 
+                            name="${id}" 
+                            rows="${rows}" 
+                            class="block w-full border bg-gray-700 border-gray-600 text-gray-200 placeholder-gray-400 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 p-2 pr-12" 
+                            placeholder="${placeholder}"
+                        >${value}</textarea>
+                        <button type="button" class="mic-btn" data-target-id="${id}" style="display: none;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                                <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                                <line x1="12" y1="19" x2="12" y2="22"></line>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
 
+        // --- Event Listeners ---
+        function registerEventListeners() {
+            // Step 3 Navigation
+            document.getElementById('back-to-step-2-btn').addEventListener('click', () => showStep(2));
+            document.getElementById('copy-clipboard-btn').addEventListener('click', copyToClipboard);
+
+            // Start Over Buttons
+            document.getElementById('start-over-1').addEventListener('click', startOver);
+            document.getElementById('start-over-2').addEventListener('click', startOver);
+            document.getElementById('start-over-3').addEventListener('click', startOver);
+            
+            // Auto-inject form sections
+            const form1 = document.getElementById('intake-form-1');
+            const form2 = document.getElementById('intake-form-2');
+            
+            form1.innerHTML = 
+                FormSection({ title: "Chief Complaint & HPI:", id: "hpi", placeholder: "e.g., 65 y/o with hx of HTN, AFib presents with acute onset right-sided weakness and aphasia, LKW 2 hours ago...", rows: 5 }) +
+                `<div class="grid grid-cols-1 md:grid-cols-2 gap-4">` +
+                FormSection({ title: "Past Medical History (PMH):", id: "pmh", placeholder: "HTN, HLD, Atrial Fibrillation (on apixaban), Prior TIA", rows: 4 }) +
+                FormSection({ title: "Past Surgical History (PSH):", id: "psh", placeholder: "Carotid Endarterectomy (2018), Appendectomy", rows: 4 }) +
+                `</div>` +
+                `<div class="grid grid-cols-1 md:grid-cols-2 gap-4">` +
+                FormSection({ title: "Allergies:", id: "allergies", placeholder: "Contrast dye (anaphylaxis)", rows: 3 }) +
+                FormSection({ title: "Medications:", id: "medications", placeholder: "Apixaban 5mg BID, Levetiracetam 500mg BID, Atorvastatin 40mg", rows: 3 }) +
+                `</div>` +
+                FormSection({ 
+                    title: "Neurology ROS (pertinent):", 
+                    id: "ros", 
+                    placeholder: "Note pertinent positives/negatives", 
+                    rows: 5, 
+                    value: "Headache: \nDizziness/Vertigo: \nSyncope/Presyncope: \nWeakness (focal): \nNumbness/Tingling: \nVision Changes (e.g., diplopia): \nSpeech Changes (e.g., aphasia, dysarthria): \nGait/Balance Issues: \nSeizures: \nCognitive Changes/Memory Loss: " 
+                }) +
+                `<div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Consult Source (who is consulting Neurology):</label>
+                    <select id="consult-source" class="block w-full border-gray-600 bg-gray-700 text-gray-200 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 p-2">
+                        <option>Outpatient / Clinic / PCM</option>
+                        <option>Inpatient / Ward / ICU</option>
+                        <option selected>Emergency Department (ER)</option>
+                    </select>
+                </div>
+                <div class="pt-4 flex justify-end">
+                    <button type="button" id="go-to-step-2-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-6 rounded-lg shadow transition duration-200">
+                        Start AI-Guided Intake &rarr;
+                    </button>
+                </div>`;
+            
+            form2.innerHTML = 
+                FormSection({ title: "Symptom Details (OPQRST):", id: "opqrst", placeholder: "Onset (LKW), Palliating/Provoking, Quality, Radiation, Severity, Timing", rows: 3 }) +
+                FormSection({ title: "Vital Signs & Neurologic Exam:", id: "exam", placeholder: "Vitals: BP, HR, RR, SpO2. Neuro: Mental Status (A&Ox?), Cranial Nerves II-XII, Motor (e.g., RUE/RLE 2/5), Sensory (intact, decr. R side), Reflexes (2+), Coordination (FTN, HTS), Gait. NIH Stroke Scale (if applicable):", rows: 5 }) +
+                FormSection({ title: "EEG Findings (if any):", id: "eeg", placeholder: "e.g., No epileptiform discharges. Generalized slowing. Left temporal slowing...", rows: 3 }) +
+                FormSection({ title: "Pertinent Labs:", id: "labs", placeholder: "e.g., CBC, BMP, Coags (PT/INR), Troponin, Glucose...", rows: 3 }) +
+                FormSection({ title: "Imaging Findings (CT/MRI/CTA):", id: "imaging", placeholder: "e.g., CT Head w/o contrast: No acute bleed. MRI Brain: Acute L-MCA infarct. CTA H/N: L-ICA occlusion...", rows: 3 }) +
+                `<div class="pt-4 flex justify-between">
+                    <button type="button" id="back-to-step-1-btn" class="bg-gray-600 hover:bg-gray-500 text-white font-semibold py-2 px-6 rounded-lg shadow transition duration-200">
+                        &larr; Back
+                    </button>
+                    <button type="button" id="get-consult-btn" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-6 rounded-lg shadow transition duration-200">
+                        Get Final Consult
+                    </button>
+                </div>`;
+                
+            // Re-attach listeners after dynamically creating buttons
+            document.getElementById('go-to-step-2-btn').addEventListener('click', () => {
+                saveStep1Data();
+                showStep(2);
+            });
+            document.getElementById('back-to-step-1-btn').addEventListener('click', () => showStep(1));
+            document.getElementById('get-consult-btn').addEventListener('click', fetchConsult);
+            
+            // Show mic buttons if API is supported
+            if (SpeechRecognition) {
+                document.querySelectorAll('.mic-btn').forEach(btn => {
+                    btn.style.display = 'inline-flex';
+                    btn.addEventListener('click', handleMicClick);
+                });
+            }
+        }
+
+        // --- App Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                if (SpeechRecognition) {
+                    initializeSpeechRecognition();
+                }
+                registerEventListeners();
+                showStep(1); // Show the first step on load
+            } catch (error) {
+                console.error("Initialization Error:", error);
+                // Use a standard browser alert as a last resort if the page is broken.
+                alert("A critical error occurred while loading the application. Please check the console for details.");
+            }
+        });
+    </script>
 </body>
 </html>
