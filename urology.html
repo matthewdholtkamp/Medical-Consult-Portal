@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Urology Consult Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Hide scrollbar for cleaner look */
+        ::-webkit-scrollbar {
+            width: 0px;
+            background: transparent;
+        }
+        /* Simple loading spinner */
+        .loader {
+            /* NEW LOADER */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 70px; /* Width to hold 3 dots */
+            height: 40px;
+        }
+        .loader > div {
+            width: 12px;
+            height: 12px;
+            background-color: #818cf8; /* Indigo-300 */
+            border-radius: 50%;
+            display: inline-block;
+            animation: bounce 1.4s infinite ease-in-out both;
+            margin: 0 4px;
+        }
+        .loader .bounce1 {
+            animation-delay: -0.32s;
+        }
+        .loader .bounce2 {
+            animation-delay: -0.16s;
+        }
+        /* No delay for bounce3 */
+
+
+        /* This is for the smaller follow-up loader */
+        #follow-up-loader .loader {
+            width: 50px; /* Reduced width */
+            height: 24px; /* Same as old height */
+        }
+        /* Scale dots down for the smaller loader */
+        #follow-up-loader .loader > div {
+            width: 8px;
+            height: 8px;
+            margin: 0 2px;
+        }
+
+        /* Styling for the rendered consult output */
+        #consult-output h2 {
+            font-size: 1.25rem; /* text-xl */
+            font-weight: 600; /* font-semibold */
+            margin-top: 1.5rem; /* mt-6 */
+            margin-bottom: 0.5rem; /* mb-2 */
+            border-bottom: 1px solid #4b5563; /* border-b border-gray-700 */
+            padding-bottom: 0.25rem; /* pb-1 */
+        }
+        #consult-output strong {
+            font-weight: 700; /* font-bold */
+            color: #f3f4f6; /* text-gray-100 */
+        }
+        #consult-output ul {
+            list-style-type: disc;
+            margin-left: 1.5rem; /* ml-6 */
+            margin-bottom: 1rem; /* mb-4 */
+        }
+        #consult-output p {
+            margin-bottom: 1rem; /* mb-4 */
+        }
+        
+        /* Microphone Button Styles */
+        .mic-btn {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            display: none; /* Hidden by default, shown by JS if API is supported */
+            align-items: center;
+            justify-content: center;
+            padding: 4px;
+            border: none;
+            border-radius: 50%;
+            background-color: #4b5563; /* gray-600 */
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .mic-btn:hover {
+            background-color: #374151; /* gray-700 */
+        }
+        .mic-btn.is-listening {
+            background-color: #dc2626; /* red-600 */
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+        @keyframes bounce {
+            0%, 80%, 100% { 
+                transform: scale(0);
+            } 40% { 
+                transform: scale(1.0);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 flex items-center justify-center min-h-screen p-4">
+
+    <div class="bg-gray-800 w-full max-w-4xl rounded-lg shadow-xl overflow-hidden">
+        
+        <!-- Header -->
+        <header class="bg-indigo-700 text-white p-6">
+            <h1 class="text-3xl font-bold text-center flex items-center justify-center">
+                <span class="text-3xl mr-3">💧</span>
+                AI Urology Consult
+            </h1>
+            <p class="text-center text-indigo-100 mt-1">Evidence-Based AI Support for Providers</p>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="p-6 md:p-8">
+
+            <!-- Speech Error Message -->
+            <div id="speech-error" class="hidden bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-md mb-6" role="alert">
+                <p class="font-bold">Microphone Error</p>
+                <p id="speech-error-message">Could not start dictation. Please ensure you have allowed microphone access in your browser.</p>
+            </div>
+
+            <!-- Step 1: De-identified Intake -->
+            <div id="step-1-intake">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-semibold text-gray-100">1) De-identified Intake</h2>
+                    <button id="start-over-1" class="text-sm text-indigo-400 hover:underline">Start Over</button>
+                </div>
+
+                <!-- HIPAA Disclaimer -->
+                <details class="bg-red-900 border-l-4 border-red-500 text-red-200 p-4 rounded-md mb-6">
+                    <summary class="font-bold cursor-pointer hover:text-red-100">De-identified Data Only (HIPAA Safe Harbor)</summary>
+                    <p class="text-sm mt-4 mb-2">Do NOT include any of the following 18 identifiers:</p>
+                    <ol class="list-decimal list-inside text-sm space-y-1">
+                        <li>Names</li>
+                        <li>All geographic subdivisions smaller than a state (street, city, county, ZIP)</li>
+                        <li>All elements of dates (except year) related to an individual; all ages > 89</li>
+                        <li>Telephone numbers</li>
+                        <li>Fax numbers</li>
+                        <li>Email addresses</li>
+                        <li>Social Security numbers</li>
+                        <li>Medical record numbers</li>
+                        <li>Health plan beneficiary numbers</li>
+                        <li>Account numbers</li>
+                        <li>Certificate/license numbers</li>
+                        <li>Vehicle identifiers and serial numbers, including license plates</li>
+                        <li>Device identifiers and serial numbers</li>
+                        <li>Web URLs</li>
+                        <li>IP addresses</li>
+                        <li>Biometric identifiers (e.g., fingerprints, voiceprints)</li>
+                        <li>Full-face photographs and comparable images</li>
+                        <li>Any other unique identifying number, characteristic, or code</li>
+                    </ol>
+                    <p class="text-sm mt-3 font-semibold">**Actual knowledge rule:** Even if the above are removed, do not include any detail that you know could identify the individual.</p>
+                </details>
+                
+                <form id="intake-form-1" class="space-y-4">
+                    <!-- Content is dynamically injected by JavaScript -->
+                </form>
+            </div>
+
+            <!-- Step 2: AI-Guided Intake (Data/Exam) -->
+            <div id="step-2-questions" class="hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-semibold text-gray-100">2) AI-Guided Intake (Data & Exam)</h2>
+                    <button id="start-over-2" class="text-sm text-indigo-400 hover:underline">Start Over</button>
+                </div>
+                
+                <details class="bg-red-900 border-l-4 border-red-500 text-red-200 p-4 rounded-md mb-6">
+                    <summary class="font-bold cursor-pointer hover:text-red-100">De-identified Data Only (HIPAA Safe Harbor)</summary>
+                    <p class="text-sm mt-4 mb-2">Do NOT include any of the 18 identifiers (full list in Step 1).</p>
+                    <p class="text-sm mt-3 font-semibold">**Actual knowledge rule:** Even if the above are removed, do not include any detail that you know could identify the individual.</p>
+                </details>
+
+                <form id="intake-form-2" class="space-y-4">
+                    <!-- Content is dynamically injected by JavaScript -->
+                </form>
+            </div>
+
+            <!-- Step 3: AI Urology Consult -->
+            <div id="step-3-consult" class="hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-semibold text-gray-100">3) AI Urology Consult</h2>
+                    <button id="start-over-3" class="text-sm text-indigo-400 hover:underline">Start Over</button>
+                </div>
+                
+                <details class="bg-red-900 border-l-4 border-red-500 text-red-200 p-4 rounded-md mb-6">
+                    <summary class="font-bold cursor-pointer hover:text-red-100">De-identified Data Only (HIPAA Safe Harbor)</summary>
+                    <p class="text-sm mt-4 mb-2">Do NOT include any of the 18 identifiers (full list in Step 1).</p>
+                    <p class="text-sm mt-3 font-semibold">**Actual knowledge rule:** Even if the above are removed, do not include any detail that you know could identify the individual.</p>
+                </details>
+
+                <!-- Loading Spinner -->
+                <div id="loading-spinner" class="flex flex-col items-center justify-center min-h-[300px]">
+                    <div class="loader">
+                        <div class="bounce1"></div>
+                        <div class="bounce2"></div>
+                        <div class="bounce3"></div>
+                    </div>
+                    <p class="text-gray-400 mt-4">AI Consultant is reviewing the case and searching guidelines...</p>
+                </div>
+                
+                <!-- Consult Output -->
+                <div id="consult-output-container" class="hidden">
+                    <div id="consult-output" class="bg-gray-900 p-4 md:p-6 rounded-lg border border-gray-700 min-h-[300px] prose max-w-none text-gray-300">
+                    <!-- AI content will be injected here -->
+                    </div>
+                </div>
+
+                <!-- NEW: Follow-up Addendum Area -->
+                <div id="follow-up-addendum-area" class="hidden mt-6 space-y-4">
+                    <!-- Follow-up Q&A will be injected here -->
+                </div>
+
+                <!-- Military Profile Section -->
+                <div id="military-profile-section" class="hidden mt-6 space-y-4">
+                    <!-- 1. Commander Section -->
+                    <div>
+                        <label for="profile-commander-output" class="block text-sm font-medium text-gray-300 mb-1">Instructions for Commander (Generated by AI):</label>
+                        <div id="profile-commander-output" class="bg-gray-900 p-4 rounded-lg border border-gray-700 min-h-[80px] prose max-w-none text-gray-300">
+                            <!-- AI-generated commander instructions will appear here -->
+                        </div>
+                    </div>
+                    <!-- 2. Soldier Section -->
+                    <div>
+                        <label for="profile-soldier-output" class="block text-sm font-medium text-gray-300 mb-1">Instructions to Soldier (Generated by AI):</label>
+                        <div id="profile-soldier-output" class="bg-gray-900 p-4 rounded-lg border border-gray-700 min-h-[80px] prose max-w-none text-gray-300">
+                            <!-- AI-generated soldier instructions will appear here -->
+                        </div>
+                    </div>
+                    <!-- 3. Profile Days Section -->
+                    <div>
+                        <label for="profile-days" class="block text-sm font-medium text-gray-300 mb-1">Profile Days Given:</label>
+                        <input type="number" id="profile-days" min="0" class="block w-48 border bg-gray-700 border-gray-600 text-gray-200 placeholder-gray-400 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 p-2" placeholder="e.g., 30">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Follow-up Section -->
+            <div id="follow-up-section" class="hidden mt-6">
+                <h3 class="text-xl font-semibold text-gray-100 mb-3">Follow-up Questions</h3>
+                <label for="follow-up-input" class="block text-sm font-medium text-gray-300 mb-1">Ask the AI consultant a follow-up question based on the consult above:</label>
+                <textarea id="follow-up-input" rows="3" class="block w-full border bg-gray-700 border-gray-600 text-gray-200 placeholder-gray-400 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 p-2"></textarea>
+                <div class="flex items-center justify-end mt-3 gap-3">
+                    <div id="follow-up-loader" class="hidden">
+                        <div class="loader"> <!-- Uses the nested CSS for sizing -->
+                            <div class="bounce1"></div>
+                            <div class="bounce2"></div>
+                            <div class="bounce3"></div>
+                        </div>
+                    </div>
+                    <button type="button" id="submit-follow-up-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg shadow transition duration-200">
+                        Submit Follow-up
+                    </button>
+                </div>
+            </div>
+
+            <!-- Bottom Buttons (Copy/Back) -->
+            <div id="bottom-buttons" class="hidden pt-6 flex flex-col sm:flex-row justify-between gap-3">
+                <button type="button" id="back-to-step-2-btn" class="bg-gray-600 hover:bg-gray-500 text-white font-semibold py-2 px-6 rounded-lg shadow transition duration-200">
+                    &larr; Back
+                </button>
+                
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <button type="button" id="copy-clipboard-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-6 rounded-lg shadow transition duration-200">
+                        Copy Consult to Clipboard
+                    </button>
+                    <div id="copy-success" class="text-green-400 text-sm items-center justify-center flex hidden">Copied!</div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Hidden Textarea for Copy-to-Clipboard -->
+    <textarea id="clipboard-helper" class="absolute -left-full"></textarea>
+
+    <script type="module">
+        // --- Gemini API Configuration ---
+        const API_KEY = "AIzaSyAyAQ96QdTF4b2rRn_yMQ8O4poLOtzz72o";
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${API_KEY}`;
+        
+        // --- State Management ---
+        const state = {
+            hpi: '',
+            pmh: '',
+            psh: '',
+            allergies: '',
+            medications: '',
+            ros: '',
+            consultSource: '',
+            opqrst: '',
+            exam: '',
+            labs_ua_culture: '', // Changed from eeg/labs
+            imaging: ''
+        };
+        let chatHistory = []; // Stores the full conversation
+        
+        // --- Speech Recognition State ---
+        let recognition;
+        let activeTextarea = null;
+        let lastTranscript = ''; // Holds the most recent transcript
+        let baseTranscript = ''; // Holds the text before dictation started
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+        // --- UI Element References ---
+        const steps = {
+            1: document.getElementById('step-1-intake'),
+            2: document.getElementById('step-2-questions'),
+            3: document.getElementById('step-3-consult')
+        };
+        
+        const loader = document.getElementById('loading-spinner');
+        const consultOutputContainer = document.getElementById('consult-output-container');
+        const consultOutput = document.getElementById('consult-output');
+        const copySuccessMessage = document.getElementById('copy-success');
+        const bottomButtons = document.getElementById('bottom-buttons');
+
+        // --- Step Navigation ---
+        function showStep(stepNumber) {
+            Object.values(steps).forEach(step => step.classList.add('hidden'));
+            if (steps[stepNumber]) {
+                steps[stepNumber].classList.remove('hidden');
+            }
+            // Hide bottom buttons unless on step 3
+            bottomButtons.classList.toggle('hidden', stepNumber !== 3);
+            window.scrollTo(0, 0); // Scroll to top on step change
+        }
+
+        // --- Data Collection ---
+        function saveStep1Data() {
+            state.hpi = document.getElementById('hpi').value;
+            state.pmh = document.getElementById('pmh').value;
+            state.psh = document.getElementById('psh').value;
+            state.allergies = document.getElementById('allergies').value;
+            state.medications = document.getElementById('medications').value;
+            state.ros = document.getElementById('ros').value;
+            state.consultSource = document.getElementById('consult-source').value;
+        }
+
+        function saveStep2Data() {
+            state.opqrst = document.getElementById('opqrst').value;
+            state.exam = document.getElementById('exam').value;
+            state.labs_ua_culture = document.getElementById('labs_ua_culture').value; // Changed
+            state.imaging = document.getElementById('imaging').value;
+        }
+
+        // --- AI Consult Logic ---
+        function buildConsultPrompt() {
+            // Helper to only include non-empty fields
+            const addSection = (title, data) => data ? `**${title}:**\n${data}\n\n` : '';
+
+            const systemPrompt = `You are a board-certified AI Urology consultant. A provider is requesting a consult. Your task is to generate a formal urology consult note based *only* on the de-identified data provided.
+
+**CRITICAL INSTRUCTIONS:**
+1.  **Evidence-Based Medicine:** You MUST use the provided search tool to find and cite the most current, evidence-based clinical guidelines (e.g., AUA - American Urological Association guidelines) to support your recommendations.
+2.  **Format:** The note must be concise, professional, and formatted using Markdown for a medical professional.
+3.  **No Charts/Tables:** You MUST NOT use charts or tables.
+4.  **Plain English ONLY:** You MUST write in plain English. Do NOT use any mathematical symbols, LaTeX syntax (like \`$\ge$\`, \`$\pm$\`), or other special formatting characters. For example, instead of "$\ge$4", write "greater than or equal to 4". Instead of "$\pm$5", write "plus or minus 5".
+5.  **Required Sections:** Your response MUST include the following sections, in this exact order:
+
+## 1. Impression & Assessment
+(Your summary of the case and primary concern, e.g., "58 y/o male with L flank pain and gross hematuria, concerning for obstructing nephrolithiasis at the L UVJ.")
+
+## 2. Differential Diagnosis
+(List likely urologic diagnoses, from most to least probable, citing guidelines where applicable. Include Nephrolithiasis, Pyelonephritis, UTI, BPH complications, Prostate/Bladder Cancer, Overactive Bladder, etc.)
+
+## 3. Recommended Workup
+(Specific, actionable recommendations for labs, cultures, imaging (CT KUB, US), and procedures (e.g., cystoscopy, urodynamics).)
+
+## 4. Treatment & Management Plan
+(Provide a specific, prescriptive, and rigorous plan.
+* **Pharmacologic:** Specify initial medications, doses, and routes (e.g., "Initiate Tamsulosin 0.4mg daily x 4 weeks for medical expulsive therapy (MET) per AUA guidelines for ureteral stones < 10mm." or "Start Finasteride 5mg daily for BPH.").
+* **Non-Pharmacologic / Procedural:** Detail specific interventions (e.g., "Strain all urine," "Low-oxalate diet counseling," "Recommend ureteral stent placement, ESWL, or Ureteroscopy if no passage or signs of infection.").
+* **Dispo/Next Steps:** Recommend disposition (e.g., "Discharge home with urology follow-up in 1 week," "Admit for pain control and IV abx for pyelonephritis," "Schedule for outpatient cystoscopy.").
+* **Guideline-Driven:** You MUST tie each major recommendation directly to the evidence-based guidelines you cited.)
+
+<!-- This is the consult break string -->
+CONSULT_BREAK_COMMANDER
+## 5. Instructions for Commander (Military Profile)
+(Provide 3-5 SHORT bullet points of functional limitations. e.g.:
+* No running, jumping, or rucking.
+* No lifting over 15 lbs.
+* Must have access to a latrine at all times.
+* No field duty.)
+
+<!-- This is the commander break string -->
+COMMANDER_BREAK_SOLDIER
+
+## 6. Instructions to Soldier (Military Profile)
+(Provide 3-5 SHORT bullet points of simple, clear medical guidance. e.g.:
+* Take medication as prescribed.
+* Strain all of your urine.
+* Drink 2-3 liters of water per day.
+* Call 911 or return to ER for fever, vomiting, or uncontrolled pain.)
+`;
+
+            const userPrompt = `
+**CONSULT REQUEST**
+
+${addSection('Consult Source', state.consultSource)}
+${addSection('Chief Complaint & HPI', state.hpi)}
+${addSection('Symptom Details (OPQRST)', state.opqrst)}
+${addSection('Past Medical History', state.pmh)}
+${addSection('Past Surgical History', state.psh)}
+${addSection('Allergies', state.allergies)}
+${addSection('Medications', state.medications)}
+${addSection('GU ROS (Urology)', state.ros)}
+${addSection('Vital Signs & GU Exam', state.exam)}
+${addSection('Labs (UA/Culture/PSA)', state.labs_ua_culture)}
+${addSection('Imaging Findings (CT KUB/US/Cysto)', state.imaging)}
+`;
+            return { systemPrompt, userPrompt };
+        }
+
+        async function fetchConsult() {
+            saveStep2Data(); // Save final data
+            showStep(3);
+            loader.classList.remove('hidden');
+            consultOutputContainer.classList.add('hidden');
+            document.getElementById('military-profile-section').classList.add('hidden');
+            document.getElementById('follow-up-section').classList.add('hidden');
+            document.getElementById('follow-up-addendum-area').classList.add('hidden');
+
+
+            const { systemPrompt, userPrompt } = buildConsultPrompt();
+            
+            // Initialize chat history for this session
+            chatHistory = [{ role: "user", parts: [{ text: userPrompt }] }];
+
+            const payload = {
+                contents: chatHistory, // Use the new chatHistory array
+                systemInstruction: {
+                    parts: [{ text: systemPrompt }]
+                },
+                // Add the Google Search tool as requested
+                tools: [{ "google_search": {} }],
+                generationConfig: {
+                    temperature: 0.2, // Lower temp for more factual, evidence-based responses
+                    topK: 40,
+                }
+            };
+
+            try {
+                const response = await fetchWithRetry(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`API Error: ${response.statusText}`);
+                }
+                
+                const result = await response.json();
+                const candidate = result.candidates?.[0];
+                
+                if (candidate && candidate.content?.parts?.[0]?.text) {
+                    const rawText = candidate.content.parts[0].text;
+                    
+                    // Add AI response to history
+                    chatHistory.push({ role: "model", parts: [{ text: rawText }] });
+
+                    // Split the raw text based on our delimiters
+                    const parts = rawText.split(/CONSULT_BREAK_COMMANDER|COMMANDER_BREAK_SOLDIER/);
+                    const consultNoteText = parts[0] || "<p class='text-red-500'>Error: Failed to parse consult note.</p>";
+                    const commanderText = parts[1] || "<p class='text-red-500'>Error: Failed to parse commander instructions.</p>";
+                    const soldierText = parts[2] || "<p class='text-red-500'>Error: Failed to parse soldier instructions.</p>";
+
+                    // 1. Render main consult note
+                    let consultHtml = simpleMarkdownToHtml(consultNoteText);
+
+                    // Handle grounding metadata for sources
+                    const groundingMetadata = candidate.groundingMetadata;
+                    if (groundingMetadata && groundingMetadata.groundingAttributions) {
+                        const sources = groundingMetadata.groundingAttributions
+                            .map(attribution => ({
+                                uri: attribution.web?.uri,
+                                title: attribution.web?.title,
+                            }))
+                            .filter(source => source.uri && source.title); // Ensure sources are valid
+
+                        if (sources.length > 0) {
+                            consultHtml += `<h2>Evidence-Based Sources</h2><ul>`;
+                            sources.forEach(source => {
+                                consultHtml += `<li><a href="${source.uri}" target="_blank" rel="noopener noreferrer" class="text-indigo-400 hover:underline">${source.title}</a></li>`;
+                            });
+                            consultHtml += `</ul>`;
+                        }
+                    }
+                    
+                    // Render all parts
+                    consultOutput.innerHTML = consultHtml;
+                    document.getElementById('profile-commander-output').innerHTML = simpleMarkdownToHtml(commanderText);
+                    document.getElementById('profile-soldier-output').innerHTML = simpleMarkdownToHtml(soldierText);
+                } else {
+                    consultOutput.innerHTML = "<p class='text-red-500'>Error: Could not retrieve a valid response from the AI. Please check the console for details.</p>";
+                    console.error("Invalid API response structure:", result);
+                }
+            } catch (error) {
+                console.error("Fetch Error:", error);
+                consultOutput.innerHTML = `<p class='text-red-500'><strong>Connection Error:</strong><br>${error.message}.<br><br>Please check your internet connection and try again.</p>`;
+            } finally {
+                loader.classList.add('hidden');
+                consultOutputContainer.classList.remove('hidden');
+                // Show the military profile and follow-up sections now
+                document.getElementById('military-profile-section').classList.remove('hidden');
+                document.getElementById('follow-up-section').classList.remove('hidden');
+            }
+        }
+        
+        // --- Exponential Backoff Retry ---
+        async function fetchWithRetry(url, options, retries = 3, delay = 1000) {
+            try {
+                const response = await fetch(url, options);
+                if (response.status === 429 || response.status >= 500) { // Throttling or server error
+                    if (retries > 0) {
+                        // console.warn(`Retrying request... (${retries} retries left)`);
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                        return fetchWithRetry(url, options, retries - 1, delay * 2);
+                    } else {
+                        throw new Error("API request failed after multiple retries.");
+                    }
+                }
+                return response;
+            } catch (error) {
+                if (retries > 0) {
+                    // console.warn(`Retrying request due to network error... (${retries} retries left)`);
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    return fetchWithRetry(url, options, retries - 1, delay * 2);
+                } else {
+                    throw error;
+                }
+            }
+        }
+
+        // --- NEW: Handle Follow-up Questions ---
+        async function handleFollowUp() {
+            const input = document.getElementById('follow-up-input');
+            const followUpText = input.value.trim();
+            if (!followUpText) return;
+
+            const loader = document.getElementById('follow-up-loader');
+            const button = document.getElementById('submit-follow-up-btn');
+
+            loader.classList.remove('hidden');
+            button.disabled = true;
+            input.disabled = true;
+
+            // Append user question to history
+            chatHistory.push({ role: "user", parts: [{ text: followUpText }] });
+            
+            // We only need the system prompt, the history is already built
+            // NEW: Use a separate, concise system prompt for follow-ups
+            const followUpSystemPrompt = `You are the same AI Urology Consultant from the previous turn.
+The user is asking a follow-up question based on the consult you already provided.
+Your task is to provide a concise, clear, and precise answer to the user's *most recent* question.
+
+**CRITICAL INSTRUCTIONS:**
+1.  **Be Brief:** Do not rewrite the entire original consult. Directly answer the user's question.
+2.  **Maintain Context:** Your answer should be based on the full conversation history.
+3.  **Plain English ONLY:** Do NOT use any mathematical symbols, LaTeX syntax, or other special formatting characters.
+4.  **No Charts/Tables:** You MUST NOT use charts or tables.
+5.  **Profile Updates:** If the user's question leads to a change in the clinical plan, you MUST provide updated profile instructions. If nothing changes, you MUST state "No change to instructions."
+6.  **Required Format:**
+    (Your direct, brief answer to the user's question goes here.)
+
+    <!-- This is the consult break string -->
+    CONSULT_BREAK_COMMANDER
+
+    ## 5. Updated Instructions for Commander
+    (Provide 3-5 SHORT bullet points ONLY if they are different from the previous turn. If no change, state "No change to commander instructions.")
+
+    <!-- This is the commander break string -->
+    COMMANDER_BREAK_SOLDIER
+
+    ## 6. Updated Instructions to Soldier
+    (Provide 3-5 SHORT bullet points ONLY if they are different from the previous turn. If no change, state "No change to soldier instructions.")
+`;
+            
+            const payload = {
+                contents: chatHistory,
+                systemInstruction: {
+                    parts: [{ text: followUpSystemPrompt }] // Use the new follow-up prompt
+                },
+                tools: [{ "google_search": {} }],
+                generationConfig: {
+                    temperature: 0.2,
+                    topK: 40,
+                }
+            };
+
+            try {
+                const response = await fetchWithRetry(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
+
+                const result = await response.json();
+                const candidate = result.candidates?.[0];
+
+                if (candidate && candidate.content?.parts?.[0]?.text) {
+                    const rawText = candidate.content.parts[0].text;
+                    
+                    // Append model response to history
+                    chatHistory.push({ role: "model", parts: [{ text: rawText }] });
+
+                    // Split the response
+                    const parts = rawText.split(/CONSULT_BREAK_COMMANDER|COMMANDER_BREAK_SOLDIER/);
+                    const consultFollowUpText = parts[0] || "<p class='text-red-500'>Error: Failed to parse follow-up.</p>";
+                    const newCommanderText = parts[1] || "<p class='text-red-500'>Error: Failed to parse commander instructions.</p>";
+                    const newSoldierText = parts[2] || "<p class='text-red-500'>Error: Failed to parse soldier instructions.</p>";
+
+                    // Render the follow-up
+                    let followUpHtml = simpleMarkdownToHtml(consultFollowUpText);
+                    
+                    // Check for sources
+                    const groundingMetadata = candidate.groundingMetadata;
+                    if (groundingMetadata && groundingMetadata.groundingAttributions) {
+                        const sources = groundingMetadata.groundingAttributions
+                            .map(attribution => ({ uri: attribution.web?.uri, title: attribution.web?.title }))
+                            .filter(source => source.uri && source.title);
+                        if (sources.length > 0) {
+                            followUpHtml += `<h2>Evidence-Based Sources</h2><ul>`;
+                            sources.forEach(source => {
+                                followUpHtml += `<li><a href="${source.uri}" target="_blank" rel="noopener noreferrer" class="text-indigo-400 hover:underline">${source.title}</a></li>`;
+                            });
+                            followUpHtml += `</ul>`;
+                        }
+                    }
+                    
+                    // --- START OF MODIFICATION (Option 2) ---
+                    // Create a new, separate div for this Q&A pair
+                    const addendumContainer = document.getElementById('follow-up-addendum-area');
+                    
+                    // Make the addendum area visible if it's the first follow-up
+                    if (addendumContainer.classList.contains('hidden')) {
+                        addendumContainer.classList.remove('hidden');
+                        // Add a title for the addendum section
+                        addendumContainer.innerHTML = `<h3 class="text-xl font-semibold text-gray-100 mb-3 border-b border-gray-600 pb-2">Consult Addendum</h3>`;
+                    }
+
+                    // Format the Q&A for the addendum
+                    const qaBlock = `
+                        <div class="bg-gray-800 p-4 rounded-lg border border-gray-700">
+                            <p class="text-gray-400 text-sm font-semibold">Q: ${escapeHTML(followUpText)}</p>
+                            <div class="mt-2 text-gray-300">${followUpHtml}</div>
+                        </div>
+                    `;
+                    
+                    // Append to the *new* addendum area, not the main consult output
+                    addendumContainer.innerHTML += qaBlock;
+                    // --- END OF MODIFICATION ---
+
+                    // Overwrite profile sections ONLY if there's new text that isn't "No change"
+                    if (!newCommanderText.includes("No change")) {
+                        document.getElementById('profile-commander-output').innerHTML = simpleMarkdownToHtml(newCommanderText);
+                    }
+                    if (!newSoldierText.includes("No change")) {
+                        document.getElementById('profile-soldier-output').innerHTML = simpleMarkdownToHtml(newSoldierText);
+                    }
+                    
+                    // Clear input
+                    input.value = '';
+                    
+                    // Scroll to bottom of output container
+                    consultOutputContainer.scrollTop = consultOutputContainer.scrollHeight;
+
+                } else {
+                    const addendumContainer = document.getElementById('follow-up-addendum-area');
+                    addendumContainer.innerHTML += `<p class='text-red-500'>Error: Could not retrieve a valid follow-up response.</p>`;
+                }
+
+            } catch (error) {
+                console.error("Follow-up Fetch Error:", error);
+                const addendumContainer = document.getElementById('follow-up-addendum-area');
+                addendumContainer.innerHTML += `<p class='text-red-500'><strong>Connection Error:</strong> ${error.message}</p>`;
+            } finally {
+                loader.classList.add('hidden');
+                button.disabled = false;
+                input.disabled = false;
+                input.focus();
+            }
+        }
+
+        // --- Speech Recognition ---
+        function initializeSpeechRecognition() {
+            if (!SpeechRecognition) {
+                console.warn("Speech Recognition API not supported in this browser.");
+                return;
+            }
+
+            recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = 'en-US';
+
+            // Handle the result
+            recognition.onresult = (event) => {
+                if (!activeTextarea) return;
+
+                let interimTranscript = '';
+                let finalTranscript = '';
+
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        finalTranscript += event.results[i][0].transcript;
+                    } else {
+                        interimTranscript += event.results[i][0].transcript;
+                    }
+                }
+
+                activeTextarea.value = baseTranscript + finalTranscript + interimTranscript;
+                
+                if (finalTranscript) {
+                    baseTranscript += finalTranscript + ' ';
+                }
+            };
+
+            // Handle end of speech
+            recognition.onend = () => {
+                const currentActiveTextareaId = activeTextarea?.id;
+                
+                activeTextarea = null;
+                lastTranscript = '';
+                baseTranscript = ''; 
+
+                if (currentActiveTextareaId) {
+                    const micBtn = document.querySelector(`.mic-btn[data-target-id="${currentActiveTextareaId}"]`);
+                    if (micBtn) {
+                        micBtn.classList.remove('is-listening');
+                        micBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>`;
+                    }
+                }
+            };
+
+            // Handle errors
+            recognition.onerror = (event) => {
+                console.error("Speech recognition error:", event.error);
+                const errorDiv = document.getElementById('speech-error');
+                const errorMessage = document.getElementById('speech-error-message');
+                
+                if (event.error === 'no-speech') {
+                    errorMessage.innerText = "No speech was detected. Please try speaking again.";
+                } else if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+                    errorMessage.innerText = "Could not start dictation. Please ensure you have allowed microphone access for this site in your browser settings.";
+                } else {
+                    errorMessage.innerText = `An unexpected error occurred: ${event.error}`;
+                }
+                errorDiv.classList.remove('hidden');
+            };
+        }
+
+        function handleMicClick(event) {
+            const btn = event.currentTarget;
+            const targetId = btn.dataset.targetId;
+            const targetTextarea = document.getElementById(targetId);
+
+            if (!recognition || !targetTextarea) return;
+
+            if (activeTextarea) { // If it's already listening, stop it
+                recognition.stop();
+            } else { // Not listening, so start
+                document.getElementById('speech-error').classList.add('hidden');
+                
+                lastTranscript = ''; 
+                baseTranscript = targetTextarea.value;
+                if (baseTranscript.length > 0 && !baseTranscript.endsWith(' ')) {
+                    baseTranscript += ' ';
+                }
+                
+                activeTextarea = targetTextarea;
+                recognition.start();
+                btn.classList.add('is-listening');
+                btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg>`; // Stop icon
+            }
+        }
+
+        // --- Utility Functions ---
+        function simpleMarkdownToHtml(md) {
+            let html = md
+                .replace(/^## (.*$)/gim, '<h2>$1</h2>') // H2
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold
+                .replace(/__(.*?)__/g, '<strong>$1</strong>'); // Bold (underscore)
+
+            // Process bullet points
+            html = html.replace(/^\* (.*$)/gim, '<li>$1</li>');
+            // Wrap consecutive list items in <ul>
+            html = html.replace(/((<li>.*<\/li\>[\n\r]?)+)/g, '<ul>$1</ul>');
+
+            // Wrap non-tag lines in <p> tags
+            let lines = html.split('\n');
+            let inList = false;
+            for (let i = 0; i < lines.length; i++) {
+                if (lines[i].startsWith('<ul>')) inList = true;
+                if (lines[i].endsWith('</ul>')) inList = false;
+                
+                if (!lines[i].startsWith('<h') && !lines[i].startsWith('<li') && !lines[i].startsWith('<ul') && !lines[i].endsWith('</ul>') && lines[i].trim() !== '') {
+                    lines[i] = `<p>${lines[i]}</p>`;
+                }
+            }
+            return lines.join('\n').replace(/<p><\/p>/g, ''); // Remove empty paragraphs
+        }
+
+        // NEW: Helper to escape HTML for displaying user's question
+        function escapeHTML(str) {
+            return str.replace(/[&<>"']/g, function(match) {
+                return {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#39;'
+                }[match];
+            });
+        }
+        
+        function copyToClipboard() {
+            // Combine all relevant text
+            let textToCopy = `--- AI UROLOGY CONSULT ---\n`; // Changed
+            textToCopy += consultOutput.innerText;
+
+            // Add Addendum if it exists
+            const addendumArea = document.getElementById('follow-up-addendum-area');
+            if (!addendumArea.classList.contains('hidden')) {
+                textToCopy += `\n\n--- CONSULT ADDENDUM ---\n`;
+                // Grab all Q&A pairs
+                const qaBlocks = addendumArea.querySelectorAll('.bg-gray-800');
+                qaBlocks.forEach(block => {
+                    const q = block.querySelector('p')?.innerText || '';
+                    const a = block.querySelector('div.mt-2')?.innerText || '';
+                    textToCopy += `\n${q}\n${a}\n`;
+                });
+            }
+
+            // Add Profile Instructions
+            textToCopy += `\n\n--- MILITARY PROFILE INSTRUCTIONS ---\n`;
+            textToCopy += `\nInstructions for Commander:\n`;
+            textToCopy += document.getElementById('profile-commander-output').innerText;
+            textToCopy += `\n\nInstructions to Soldier:\n`;
+            textToCopy += document.getElementById('profile-soldier-output').innerText;
+            textToCopy += `\n\nProfile Days: ${document.getElementById('profile-days').value || 'N/A'}\n`;
+            textToCopy += `--- END OF REPORT ---`;
+
+            const helper = document.getElementById('clipboard-helper');
+            helper.value = textToCopy;
+            helper.select();
+            helper.setSelectionRange(0, 99999); // For mobile
+            
+            try {
+                document.execCommand('copy');
+                copySuccessMessage.classList.remove('hidden');
+                setTimeout(() => {
+                    copySuccessMessage.classList.add('hidden');
+                }, 2000);
+            } catch (err) {
+                console.error('Failed to copy text: ', err);
+            }
+        }
+
+        function startOver() {
+            if (recognition && activeTextarea) {
+                recognition.stop();
+            }
+            document.getElementById('intake-form-1').reset();
+            document.getElementById('intake-form-2').reset();
+            
+            // Reset pre-filled Urology ROS
+            const rosTextarea = document.getElementById('ros');
+            if (rosTextarea) {
+                rosTextarea.value = "LUTS (Frequency/Urgency/Nocturia): \nVoiding (Hesitancy/Straining/Weak Stream): \nHematuria (Gross/Microscopic): \nDysuria: \nFlank/Suprapubic Pain: \nIncontinence (Stress/Urge/Mixed): \nSexual Fx (ED/Ejaculatory): \nGU Lesions/Discharge: ";
+            }
+            consultOutput.innerHTML = '';
+            
+            // Reset follow-up section
+            chatHistory = [];
+            document.getElementById('follow-up-section').classList.add('hidden');
+            document.getElementById('follow-up-input').value = '';
+            // NEW: Clear the addendum area
+            document.getElementById('follow-up-addendum-area').innerHTML = '';
+            document.getElementById('follow-up-addendum-area').classList.add('hidden');
+
+            // Reset military profile section
+            document.getElementById('military-profile-section').classList.add('hidden');
+            document.getElementById('profile-commander-output').innerHTML = '';
+            document.getElementById('profile-soldier-output').innerHTML = '';
+            document.getElementById('profile-days').value = '';
+
+            showStep(1);
+        }
+
+        // --- Component Template ---
+        function FormSection({ title, id, placeholder = '', rows = '3', value = '' }) {
+            return `
+                <div class="mb-4">
+                    <label for="${id}" class="block text-sm font-medium text-gray-300 mb-1">${title}</label>
+                    <div class="relative">
+                        <textarea 
+                            id="${id}" 
+                            name="${id}" 
+                            rows="${rows}" 
+                            class="block w-full border bg-gray-700 border-gray-600 text-gray-200 placeholder-gray-400 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 p-2 pr-12" 
+                            placeholder="${placeholder}"
+                        >${value}</textarea>
+                        <button type="button" class="mic-btn" data-target-id="${id}" style="display: none;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                                <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                                <line x1="12" y1="19" x2="12" y2="22"></line>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- Event Listeners ---
+        function registerEventListeners() {
+            // Step 3 Navigation
+            document.getElementById('back-to-step-2-btn').addEventListener('click', () => showStep(2));
+            document.getElementById('copy-clipboard-btn').addEventListener('click', copyToClipboard);
+
+            // Start Over Buttons
+            document.getElementById('start-over-1').addEventListener('click', startOver);
+            document.getElementById('start-over-2').addEventListener('click', startOver);
+            document.getElementById('start-over-3').addEventListener('click', startOver);
+            
+            // Add listener for new follow-up button
+            document.getElementById('submit-follow-up-btn').addEventListener('click', handleFollowUp);
+            // Also allow 'Enter' to submit follow-up
+            document.getElementById('follow-up-input').addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault(); // Prevent newline
+                    handleFollowUp();
+                }
+            });
+
+            // Auto-inject form sections
+            const form1 = document.getElementById('intake-form-1');
+            const form2 = document.getElementById('intake-form-2');
+            
+            form1.innerHTML = 
+                FormSection({ title: "Chief Complaint & HPI:", id: "hpi", placeholder: "e.g., 58 y/o male with hx of BPH presents with 3 days of L flank pain radiating to groin, +gross hematuria, +nausea...", rows: 5 }) +
+                `<div class="grid grid-cols-1 md:grid-cols-2 gap-4">` +
+                FormSection({ title: "Past Medical History (PMH):", id: "pmh", placeholder: "e.g., BPH, HTN, HLD, hx of nephrolithiasis (2020)", rows: 4 }) +
+                FormSection({ title: "Past Surgical History (PSH):", id: "psh", placeholder: "e.g., TURP (2019), Cystoscopy (2021)", rows: 4 }) +
+                `</div>` +
+                `<div class="grid grid-cols-1 md:grid-cols-2 gap-4">` +
+                FormSection({ title: "Allergies:", id: "allergies", placeholder: "e.g., IV Contrast (hives)", rows: 3 }) +
+                FormSection({ title: "Medications:", id: "medications", placeholder: "e.g., Tamsulosin 0.4mg daily, Finasteride 5mg daily, HCTZ 25mg daily", rows: 3 }) +
+                `</div>` +
+                FormSection({ 
+                    title: "GU ROS (Urology):", 
+                    id: "ros", 
+                    placeholder: "Note pertinent positives/negatives", 
+                    rows: 5, 
+                    value: "LUTS (Frequency/Urgency/Nocturia): \nVoiding (Hesitancy/Straining/Weak Stream): \nHematuria (Gross/Microscopic): \nDysuria: \nFlank/Suprapubic Pain: \nIncontinence (Stress/Urge/Mixed): \nSexual Fx (ED/Ejaculatory): \nGU Lesions/Discharge: " 
+                }) +
+                `<div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Consult Source (who is consulting Urology):</label>
+                    <select id="consult-source" class="block w-full border-gray-600 bg-gray-700 text-gray-200 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 p-2">
+                        <option>Outpatient / Clinic / PCM</option>
+                        <option>Inpatient / Ward / ICU</option>
+                        <option selected>Emergency Department (ER)</option>
+                    </select>
+                </div>
+                <div class="pt-4 flex justify-end">
+                    <button type="button" id="go-to-step-2-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-6 rounded-lg shadow transition duration-200">
+                        Start AI-Guided Intake &rarr;
+                    </button>
+                </div>`;
+            
+            form2.innerHTML = 
+                FormSection({ title: "Symptom Details (OPQRST):", id: "opqrst", placeholder: "e.g., Onset (sudden, 3 days ago), Palliating/Provoking (worse with movement), Quality (sharp, colicky), Radiation (flank to groin), Severity (9/10), Timing (intermittent waves)", rows: 3 }) +
+                FormSection({ title: "Vital Signs & GU Exam:", id: "exam", placeholder: "Vitals: BP, HR, Tmax. GU Exam: CVA tenderness (e.g., +L CVA-T), Abd (soft, NT/ND, ?suprapubic tenderness), External Genitalia (normal, no lesions), DRE (prostate size, nodules, tenderness)", rows: 5 }) +
+                FormSection({ title: "Pertinent Labs (UA/Culture/PSA):", id: "labs_ua_culture", placeholder: "e.g., UA: +LCE, +Nitrite, >100 RBC, >50 WBC. Culture: Pending. PSA: 4.5. BMP: Cr 1.4. CBC: WBC 12.5", rows: 3 }) +
+                FormSection({ title: "Imaging Findings (CT KUB/US/Cysto):", id: "imaging", placeholder: "e.g., CT KUB (non-con): 5mm stone at L UVJ with mild hydronephrosis. Renal US: No hydro...", rows: 3 }) +
+                `<div class="pt-4 flex justify-between">
+                    <button type="button" id="back-to-step-1-btn" class="bg-gray-600 hover:bg-gray-500 text-white font-semibold py-2 px-6 rounded-lg shadow transition duration-200">
+                        &larr; Back
+                    </button>
+                    <button type="button" id="get-consult-btn" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-6 rounded-lg shadow transition duration-200">
+                        Get Final Consult
+                    </button>
+                </div>`;
+                
+            // Re-attach listeners after dynamically creating buttons
+            document.getElementById('go-to-step-2-btn').addEventListener('click', () => {
+                saveStep1Data();
+                showStep(2);
+            });
+            document.getElementById('back-to-step-1-btn').addEventListener('click', () => showStep(1));
+            document.getElementById('get-consult-btn').addEventListener('click', fetchConsult);
+            
+            // Show mic buttons if API is supported
+            if (SpeechRecognition) {
+                document.querySelectorAll('.mic-btn').forEach(btn => {
+                    btn.style.display = 'inline-flex';
+                    btn.addEventListener('click', handleMicClick);
+                });
+            }
+        }
+
+        // --- App Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                if (SpeechRecognition) {
+                    initializeSpeechRecognition();
+                }
+                registerEventListeners();
+                showStep(1); // Show the first step on load
+            } catch (error) {
+                console.error("Initialization Error:", error);
+                // Error is logged to console.
+            }
+        });
+    </script>
+</body>
+</html>
