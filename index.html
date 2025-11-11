@@ -42,114 +42,223 @@
 
 
 <!-- =================================================================== -->
-<!-- WARNING MODAL (Decision Support + HIPAA Disclaimer) - FULL IDENTIFIERS -->
-<!-- Paste this block inside <body> (preferably near top) -->
+<!-- FRIENDLY, ACCESSIBLE DISCLAIMER MODAL
+     - Focus trap for keyboard users
+     - Autofocus on checkbox
+     - Scrollable content (modal itself scrolls on small screens)
+     - "Don't show again" persistence via localStorage
+     - Simple client-side audit log (timestamp stored in localStorage)
+     - Non-scary styling and short playful opener
+     Paste this block inside <body> where your old modal lived (near top). -->
 <!-- =================================================================== -->
 <div id="disclaimerModal"
      role="dialog"
+     aria-modal="true"
      aria-labelledby="disclaimerTitle"
      aria-describedby="disclaimerDesc"
-     class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-6">
+     class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+  <!-- Dialog container: constrained height so inner content can scroll on small screens -->
+  <div id="disclaimerDialog"
+       class="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl bg-slate-800/95 border border-slate-700 p-6 text-left text-slate-100 shadow-2xl"
+       tabindex="-1">
+    <!-- Header (friendly) -->
+    <div class="flex items-start justify-between gap-4">
+      <div>
+        <h2 id="disclaimerTitle" class="text-2xl font-bold mb-1">Quick challenge — one small step before you start</h2>
+        <p class="text-sm text-slate-300">Use only de-identified examples. You'll be prompted if something looks like PHI.</p>
+      </div>
+      <div class="inline-flex items-center gap-2 text-sm">
+        <span class="inline-block px-2 py-1 rounded-full bg-amber-500 text-black font-semibold">Tip</span>
+      </div>
+    </div>
 
-  <div class="bg-red-900 border border-red-600 rounded-2xl shadow-2xl max-w-2xl w-full p-6 text-left text-red-100">
-      <h2 id="disclaimerTitle" class="text-2xl font-extrabold mb-3">⚠️ Decision-Support Tool — Read Before Use</h2>
+    <hr class="my-4 border-slate-700/60"/>
 
-      <p id="disclaimerDesc" class="text-sm mb-3">
-        This site generates consult drafts and provides clinical decision support. It does <strong>not</strong> replace your clinical judgment,
-        licensure, or medical decision-making. Use only de-identified information here.
-      </p>
+    <!-- Main message -->
+    <p id="disclaimerDesc" class="text-sm text-slate-200 mb-3">
+      This site generates consult drafts and provides clinical decision support. It does <strong>not</strong> replace your clinical judgment,
+      licensure, or medical decision-making. Enter only de-identified information here.
+    </p>
 
-      <p class="text-sm mb-3 font-bold text-red-200">
-        This platform is <u>NOT HIPAA compliant</u>. Do <strong>NOT</strong> enter Protected Health Information (PHI).
-      </p>
+    <p class="text-sm font-semibold text-amber-300 mb-3">
+      This platform is <u>NOT HIPAA compliant</u>. Do <strong>NOT</strong> enter Protected Health Information (PHI).
+    </p>
 
-      <p class="text-sm mb-3">Do not enter any of the following 18 direct identifiers (HIPAA Safe Harbor):</p>
+    <p class="text-sm mb-2">Do not enter any of the following 18 direct identifiers (HIPAA Safe Harbor):</p>
 
-      <ol class="list-decimal list-inside text-sm space-y-1 mb-3">
-        <li>Names (e.g., full name, initials).</li>
-        <li>All geographic subdivisions smaller than a state (street address, city, county, ZIP code).</li>
-        <li>All elements of dates (except year) directly related to an individual (birthdate, admission/discharge dates, death date); and ages >89.</li>
-        <li>Telephone numbers.</li>
-        <li>Fax numbers.</li>
-        <li>Email addresses.</li>
-        <li>Social Security numbers.</li>
-        <li>Medical record numbers.</li>
-        <li>Health plan beneficiary numbers.</li>
-        <li>Account numbers.</li>
-        <li>Certificate or license numbers.</li>
-        <li>Vehicle identifiers and serial numbers, including license plates.</li>
-        <li>Device identifiers and serial numbers.</li>
-        <li>Web URLs.</li>
-        <li>IP addresses.</li>
-        <li>Biometric identifiers (e.g., fingerprints, voiceprints).</li>
-        <li>Full-face photographs and comparable images.</li>
-        <li>Any other unique identifying number, characteristic, or code.</li>
-      </ol>
+    <ol class="list-decimal list-inside text-sm space-y-1 mb-3 text-slate-200">
+      <li>Names (e.g., full name, initials).</li>
+      <li>All geographic subdivisions smaller than a state (street address, city, county, ZIP code).</li>
+      <li>All elements of dates (except year) directly related to an individual (birthdate, admission/discharge dates, death date); and ages &gt;89.</li>
+      <li>Telephone numbers.</li>
+      <li>Fax numbers.</li>
+      <li>Email addresses.</li>
+      <li>Social Security numbers.</li>
+      <li>Medical record numbers.</li>
+      <li>Health plan beneficiary numbers.</li>
+      <li>Account numbers.</li>
+      <li>Certificate or license numbers.</li>
+      <li>Vehicle identifiers and serial numbers, including license plates.</li>
+      <li>Device identifiers and serial numbers.</li>
+      <li>Web URLs.</li>
+      <li>IP addresses.</li>
+      <li>Biometric identifiers (e.g., fingerprints, voiceprints).</li>
+      <li>Full-face photographs and comparable images.</li>
+      <li>Any other unique identifying number, characteristic, or code.</li>
+    </ol>
 
-      <p class="text-sm mb-3 font-semibold">Additional note — other information that may identify a person:</p>
-      <ul class="list-disc list-inside text-sm mb-4 space-y-1">
-        <li>Unique combinations of demographics or clinical details (rare diagnoses, exact time/location of a rare event) that would allow someone with local knowledge to identify the patient.</li>
-        <li>Occupation with identifiable role/location (e.g., "the hospital CEO" at a small facility), specific incident descriptions, or location/time combos that narrow identity.</li>
-        <li>Free-text notes containing household details, small-community ties, or quoted speech that could be linked to an individual.</li>
-      </ul>
+    <p class="text-sm font-semibold text-slate-200 mb-2">Additional — other details that can identify a person:</p>
+    <ul class="list-disc list-inside text-sm mb-3 text-slate-200 space-y-1">
+      <li>Unique combinations of demographics or clinical details (rare diagnosis + exact timestamp/location).</li>
+      <li>Occupation with a unique role/location (e.g., "the hospital CEO" at a small facility).</li>
+      <li>Free-text notes with household details, quoted speech, or local references that link to an individual.</li>
+    </ul>
 
-      <p class="text-sm mb-4 font-semibold text-red-200">
-        <strong>Actual-knowledge rule:</strong> Even if the 18 identifiers above are removed, do not enter any detail you know — from your own knowledge or context — could reasonably identify the individual.
-      </p>
+    <p class="text-sm mb-4 text-amber-300">
+      <strong>Actual-knowledge rule:</strong> Even if the 18 identifiers are removed, do not enter any detail you know could reasonably identify the individual.
+    </p>
 
+    <!-- Acknowledgement controls -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
       <div class="flex items-center gap-3">
-        <label class="inline-flex items-center text-sm">
-          <input id="ackCheckbox" type="checkbox" class="mr-2 rounded-sm" />
-          <span>I confirm I will not enter PHI or identifiable information.</span>
+        <label class="inline-flex items-center text-sm gap-2">
+          <input id="ackCheckbox" type="checkbox" class="h-4 w-4 rounded border-slate-600 bg-slate-700 focus:ring-amber-400" />
+          <span class="text-slate-200">I confirm I will not enter PHI or identifiable information.</span>
+        </label>
+
+        <label class="inline-flex items-center text-sm gap-2 ml-2">
+          <input id="dontShowAgain" type="checkbox" class="h-4 w-4 rounded border-slate-600 bg-slate-700 focus:ring-amber-400" />
+          <span class="text-slate-200">Don't show this again on this device</span>
         </label>
       </div>
 
-      <button id="ackBtn"
-              onclick="dismissModal()"
-              disabled
-              class="mt-4 w-full py-3 rounded-lg bg-red-600 hover:bg-red-500 text-white font-semibold transition opacity-50 disabled:cursor-not-allowed">
-        I Understand — Continue
-      </button>
+      <div class="flex-shrink-0 w-full sm:w-auto">
+        <button id="ackBtn"
+                onclick="acceptDisclaimer()"
+                disabled
+                class="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 rounded-lg bg-amber-600 text-black font-semibold shadow hover:scale-[1.02] transition disabled:opacity-50 disabled:cursor-not-allowed">
+          I Understand — Continue
+        </button>
+      </div>
+    </div>
 
-      <p class="text-xs text-red-300 mt-3">
-        By continuing you acknowledge this tool is for support only and not HIPAA compliant.
-      </p>
+    <p class="text-xs text-slate-400 mt-3">By continuing you acknowledge this tool is for support only and not HIPAA compliant.</p>
   </div>
 </div>
 
 <script>
-  // enable ACK button only after checkbox checked
+/* ====== DISCLAIMER MODAL BEHAVIOR (self-contained) ======
+   - focus trap (keeps keyboard focus inside modal)
+   - autofocus checkbox
+   - persistence: "dontShowAgain" stored in localStorage
+   - audit log: saves an array of timestamped acknowledgements in localStorage
+   - prevents background scroll while modal visible
+   - clicking outside does nothing (modal modal-only)
+   - ESC is disabled to avoid accidental dismissal
+   Paste this block in place of your old modal. */
+(function() {
+  const MODAL_KEY = 'consultDisclaimerAck_v1';        // value = ISO timestamp if ack'd with don't-show checked
+  const AUDIT_KEY = 'consultDisclaimerAudit_v1';      // stores array of timestamps
+  const modal = document.getElementById('disclaimerModal');
+  const dialog = document.getElementById('disclaimerDialog');
   const ackCheckbox = document.getElementById('ackCheckbox');
   const ackBtn = document.getElementById('ackBtn');
+  const dontShowAgain = document.getElementById('dontShowAgain');
+
+  // If user previously acknowledged and opted to not show again, skip showing modal
+  try {
+    const prev = localStorage.getItem(MODAL_KEY);
+    if (prev) {
+      // hide modal immediately and ensure no scroll lock
+      if (modal) modal.style.display = 'none';
+      document.body.style.overflow = '';
+      return;
+    }
+  } catch (e) {
+    // localStorage may be disabled; continue to show modal
+    console.warn('localStorage not available for disclaimer persistence.');
+  }
+
+  // Lock background scroll while modal open
+  document.body.style.overflow = 'hidden';
+
+  // Make dialog focusable and move focus into it
+  dialog.focus();
+
+  // Autofocus checkbox for quick keyboard acceptance
+  ackCheckbox?.focus();
+
+  // enable/disable button depending on checkbox
   ackCheckbox?.addEventListener('change', () => {
     if (ackCheckbox.checked) {
       ackBtn.disabled = false;
-      ackBtn.classList.remove('opacity-50');
+      ackBtn.classList.remove('disabled');
     } else {
       ackBtn.disabled = true;
-      ackBtn.classList.add('opacity-50');
     }
   });
 
-  // Dismiss modal (only via button)
-  function dismissModal() {
-    const modal = document.getElementById('disclaimerModal');
-    if (modal) modal.style.display = 'none';
-  }
+  // Prevent closing via click on backdrop: clicks on backdrop do nothing
+  modal?.addEventListener('click', (e) => {
+    if (e.target === modal) e.stopPropagation();
+  });
 
-  // Prevent closing by click outside / ESC — keep modal blocking unless user acknowledges
+  // Trap focus inside the modal dialog
+  const FOCUSABLE_SELECTORS = 'a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), [tabindex]:not([tabindex="-1"])';
+  function trapFocus(e) {
+    const focusable = Array.from(dialog.querySelectorAll(FOCUSABLE_SELECTORS)).filter(el => el.offsetParent !== null);
+    if (focusable.length === 0) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (e.key === 'Tab') {
+      if (e.shiftKey) { // shift + tab
+        if (document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else { // tab
+        if (document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    }
+  }
+  window.addEventListener('keydown', trapFocus);
+
+  // Prevent Escape from closing
   window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') e.preventDefault();
   });
-  document.getElementById('disclaimerModal').addEventListener('click', (e) => {
-    // stop propagation so clicks outside don't close it; clicks inside allowed
-    if (e.target === document.getElementById('disclaimerModal')) {
-      e.stopPropagation();
+
+  // Accept disclaimer: record audit, persist if asked, close modal, restore scrolling
+  window.acceptDisclaimer = function() {
+    try {
+      // record audit timestamp
+      const now = new Date().toISOString();
+      const auditRaw = localStorage.getItem(AUDIT_KEY);
+      const audits = auditRaw ? JSON.parse(auditRaw) : [];
+      audits.push({ ts: now });
+      localStorage.setItem(AUDIT_KEY, JSON.stringify(audits));
+
+      // persist "don't show again" if checked
+      if (dontShowAgain && dontShowAgain.checked) {
+        localStorage.setItem(MODAL_KEY, now);
+      }
+    } catch (err) {
+      console.warn('localStorage unavailable; audit/persistence may not be recorded.');
     }
-  });
+
+    // hide modal & restore page scroll
+    if (modal) modal.style.display = 'none';
+    document.body.style.overflow = '';
+    // cleanup event listeners
+    window.removeEventListener('keydown', trapFocus);
+  };
+
+  // Safety: if user reloads page mid-modal, the script will run again and show modal
+})();
 </script>
-
-
 
 <!-- =================================================================== -->
 <!-- HERO SECTION -->
