@@ -3,812 +3,777 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Critical Care ICU Note Generator</title>
+    <title>AI ICU Critical Care Consultant</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-        /* Hide scrollbar for cleaner look */
-        ::-webkit-scrollbar {
-            width: 0px;
-            background: transparent;
-        }
-        /* Simple loading spinner */
-        .loader {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 70px; 
-            height: 40px;
-        }
-        .loader > div {
-            width: 12px;
-            height: 12px;
-            background-color: #3b82f6; /* Blue-500 */
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, h4, summary, button, .header-font { font-family: 'Roboto Condensed', sans-serif; letter-spacing: 0.5px; }
+        .hidden { display: none !important; }
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px; height: 36px;
             border-radius: 50%;
-            display: inline-block;
-            animation: bounce 1.4s infinite ease-in-out both;
-            margin: 0 4px;
+            border-left-color: #f43f5e; /* Rose-500 for ICU/Critical */
+            animation: spin 1s ease infinite;
         }
-        .loader .bounce1 {
-            animation-delay: -0.32s;
-        }
-        .loader .bounce2 {
-            animation-delay: -0.16s;
-        }
-
-        /* Follow-up loader specific */
-        #follow-up-loader .loader {
-            width: 50px;
-            height: 24px;
-        }
-        #follow-up-loader .loader > div {
-            width: 8px;
-            height: 8px;
-            margin: 0 2px;
-        }
-
-        /* --- NEW STYLING FOR NOTE READABILITY --- */
-        #consult-output h2 {
-            font-size: 1.25rem; /* text-xl */
-            font-weight: 700; /* font-bold */
-            color: #bfdbfe; /* blue-200 (MAIN HIGHLIGHT) */
-            margin-top: 1.5rem; /* mt-6 */
-            margin-bottom: 0.75rem; /* mb-3 */
-            border-bottom: 1px solid #1e3a8a; /* blue-900 border */
-            padding-bottom: 0.25rem; 
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-        #consult-output h3 {
-            font-size: 1.1rem;
-            font-weight: 700; /* Bolder */
-            color: #e5e7eb; /* gray-200 (Basic, but structured) */
-            margin-top: 1.5rem; /* mt-6 (More space between problems) */
-            margin-bottom: 0.5rem; /* mb-2 */
-        }
-        #consult-output strong {
-            font-weight: 700; 
-            color: #f3f4f6; /* gray-100 (Basic bold) */
-        }
-        #consult-output ul {
-            list-style-type: disc;
-            margin-bottom: 1rem; /* mb-4 */
-            padding-left: 1rem; /* Indent lists */
-        }
-        #consult-output p {
-            margin-bottom: 1rem; /* mb-4 */
-            line-height: 1.6; /* Better readability */
-            font-size: 0.95rem;
-        }
-        /* --- END NEW STYLING --- */
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        details > summary { cursor: pointer; }
         
-        /* Microphone Button Styles */
-        .mic-btn {
-            position: absolute;
-            bottom: 8px;
-            right: 8px;
+        .error-box { 
             display: none; 
-            align-items: center;
-            justify-content: center;
-            padding: 4px;
-            border: none;
-            border-radius: 50%;
-            background-color: #4b5563; 
-            color: white;
-            cursor: pointer;
-            transition: all 0.2s;
+            background-color: rgba(127, 29, 29, 0.5); 
+            border: 1px solid #dc2626; 
+            color: #fca5a5; 
+            padding: 1rem; 
+            border-radius: 0.375rem; 
+            margin-bottom: 1rem; 
         }
-        .mic-btn:hover {
-            background-color: #374151; 
+        .error-box.active { display: block; }
+        
+        .note-preview::-webkit-scrollbar { width: 8px; }
+        .note-preview::-webkit-scrollbar-track { background: #1f2937; }
+        .note-preview::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
+
+        /* ICU Gradient Text */
+        .text-gradient-icu {
+            background: linear-gradient(to right, #fb7185, #e11d48);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
-        .mic-btn.is-listening {
-            background-color: #dc2626; 
-            animation: pulse 1.5s infinite;
+        
+        /* Toggle Switch */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #e11d48;
         }
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
-        }
-        @keyframes bounce {
-            0%, 80%, 100% { transform: scale(0); } 
-            40% { transform: scale(1.0); }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #e11d48;
         }
     </style>
 </head>
-<body class="bg-gray-900 flex items-center justify-center min-h-screen p-4">
+<body class="bg-slate-950 text-slate-200">
 
-    <div class="bg-gray-800 w-full max-w-5xl rounded-lg shadow-xl overflow-hidden border border-gray-700">
+    <div class="max-w-6xl mx-auto p-4 sm:p-8">
         
-        <!-- Header -->
-        <header class="bg-blue-900 text-white p-6 border-b border-blue-800">
-            <div class="flex flex-col items-center">
-                <h1 class="text-3xl font-bold text-center flex items-center justify-center">
-                    <span class="text-4xl mr-3">🫁</span>
-                    Critical Care ICU Note Generator
-                </h1>
-                <p class="text-center text-blue-200 mt-1 text-sm font-medium">Systems-Based Rounding Tool • ABCDE Bundle • Copy-Forward Workflow</p>
+        <header class="text-center mb-8 border-b border-slate-800 pb-6">
+            <div class="flex justify-center items-center mb-2">
+                <i class="fa-solid fa-heart-pulse text-rose-500 text-4xl mr-3"></i>
+                <h1 class="text-4xl font-bold text-white tracking-wider">AI CRITICAL <span class="text-gradient-icu">CARE</span></h1>
             </div>
+            <p class="text-lg text-slate-400">Systems-Based Decision Support & Workflow Automation</p>
         </header>
 
-        <!-- Main Content Area -->
-        <main class="p-6 md:p-8">
+        <!-- HIPAA WARNING -->
+        <details class="bg-slate-900 border border-slate-700 rounded-md mb-8 shadow-lg">
+            <summary class="font-semibold text-slate-300 p-4 cursor-pointer text-lg flex justify-between items-center hover:bg-slate-800 transition">
+                <span class="flex items-center"><i class="fa-solid fa-user-shield mr-2 text-rose-500"></i> SECURITY & COMPLIANCE</span>
+                <span class="text-xs bg-rose-900/80 text-rose-100 px-2 py-1 rounded border border-rose-500">HIPAA Safe Harbor Required</span>
+            </summary>
+            <div class="p-4 border-t border-slate-700 text-sm bg-slate-950/50">
+                <p class="font-bold text-rose-400 mb-3">STRICTLY PROHIBITED: THE 18 HIPAA IDENTIFIERS</p>
+                <p class="text-slate-400 mb-2 italic">Do not enter any of the following data points:</p>
+                <ul class="list-disc ml-5 space-y-1 text-slate-400 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-4 text-xs">
+                    <li>Names</li>
+                    <li>Geographic subdivisions smaller than state</li>
+                    <li>All elements of dates (except year)</li>
+                    <li>Telephone numbers</li>
+                    <li>Fax numbers</li>
+                    <li>Email addresses</li>
+                    <li>Social Security numbers</li>
+                    <li>Medical Record numbers</li>
+                    <li>Health plan beneficiary numbers</li>
+                    <li>Account numbers</li>
+                    <li>Certificate/license numbers</li>
+                    <li>Vehicle identifiers/serial numbers</li>
+                    <li>Device identifiers/serial numbers</li>
+                    <li>Web URLs</li>
+                    <li>IP address numbers</li>
+                    <li>Biometric identifiers (finger/voice)</li>
+                    <li>Full face photographic images</li>
+                    <li>Any other unique identifying number</li>
+                </ul>
+            </div>
+        </details>
 
-            <!-- Speech Error Message -->
-            <div id="speech-error" class="hidden bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-md mb-6" role="alert">
-                <p class="font-bold">Microphone Error</p>
-                <p id="speech-error-message">Could not start dictation.</p>
+        <!-- LOADING SPINNER -->
+        <div id="loading-spinner" class="hidden flex flex-col justify-center items-center p-12">
+            <div class="spinner mb-4"></div>
+            <p class="text-xl font-semibold text-slate-300 animate-pulse" id="loading-text">Processing Clinical Data...</p>
+        </div>
+
+        <!-- SECTION 1: INTAKE -->
+        <div id="section-intake" class="bg-slate-900 p-6 rounded-lg shadow-xl border-t-4 border-rose-600">
+            
+            <div class="flex flex-col md:flex-row justify-between items-center mb-6">
+                <h2 class="text-xl font-semibold text-white flex items-center mb-4 md:mb-0">
+                    <span class="bg-rose-700 text-white w-8 h-8 rounded-full flex items-center justify-center mr-3 text-sm">1</span>
+                    Consult Configuration
+                </h2>
+
+                <!-- TYPE TOGGLE -->
+                <div class="bg-slate-800 p-1 rounded-lg flex border border-slate-700">
+                    <button type="button" id="btn-initial" class="px-6 py-2 rounded-md text-sm font-bold transition-all bg-rose-600 text-white shadow">Initial Consult</button>
+                    <button type="button" id="btn-followup" class="px-6 py-2 rounded-md text-sm font-bold transition-all text-slate-400 hover:text-white">Follow-up Note</button>
+                </div>
             </div>
 
-            <!-- Step 1: Base Context (Copy Forward) -->
-            <div id="step-1-context">
-                <div class="flex justify-between items-center mb-4">
-                    <div>
-                        <h2 class="text-2xl font-semibold text-gray-100">1) Base Clinical Context</h2>
-                        <p class="text-gray-400 text-sm">Paste yesterday's note, the H&P, or the problem list here.</p>
-                    </div>
-                    <button id="clear-step-1" class="text-sm text-blue-400 hover:text-blue-300 hover:underline">Clear Context</button>
-                </div>
-
-                <!-- HIPAA Disclaimer -->
-                <details class="bg-gray-700 border-l-4 border-gray-500 text-gray-300 p-3 rounded-md mb-6">
-                    <summary class="font-bold cursor-pointer hover:text-white text-sm">⚠️ HIPAA Reminder: De-identified Data Only</summary>
-                    <p class="text-xs mt-2">Do not include Names, MRNs, Dates of Birth (use Age), or other PHI.</p>
-                </details>
+            <div id="error-message-intake" class="error-box hidden"></div>
+            
+            <form id="intake-form">
                 
-                <form id="form-context" class="space-y-4">
-                    <div class="mb-4">
-                        <label for="base-context" class="block text-sm font-medium text-gray-300 mb-1">History / Problem List / Prior Note:</label>
-                        <div class="relative">
-                            <textarea 
-                                id="base-context" 
-                                name="base-context" 
-                                rows="12" 
-                                class="block w-full border bg-gray-800 border-gray-600 text-gray-200 placeholder-gray-500 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 p-3 pr-12 font-mono text-sm" 
-                                placeholder="PASTE HERE:
-e.g.
-65M with PMH COPD, CHF (EF 35%), DM2 admitted for Septic Shock 2/2 PNA.
-Problems:
-1. Acute Hypoxic Respiratory Failure - intubated day 2.
-2. Septic Shock - on Levo.
-3. AKI - likely ATN.
-..."
-                            ></textarea>
-                            <button type="button" class="mic-btn" data-target-id="base-context">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="pt-4 flex justify-end">
-                        <button type="button" id="go-to-step-2-btn" class="bg-blue-700 hover:bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg shadow transition duration-200">
-                            Next: Interval Updates &rarr;
-                        </button>
-                    </div>
-                </form>
-            </div>
-
-            <!-- Step 2: Interval Updates -->
-            <div id="step-2-interval" class="hidden">
-                <div class="flex justify-between items-center mb-4">
-                    <div>
-                        <h2 class="text-2xl font-semibold text-gray-100">2) 24-Hour Interval Updates</h2>
-                        <p class="text-gray-400 text-sm">What happened overnight? What are the new numbers?</p>
-                    </div>
-                    <button id="back-to-step-1-top" class="text-sm text-gray-400 hover:text-white hover:underline">Back to Context</button>
+                <!-- Core Demographics -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 bg-slate-950 p-4 rounded-lg border border-slate-800">
+                     <div class="md:col-span-1">
+                        <label class="block text-xs font-bold text-rose-400 mb-2 uppercase tracking-wide">
+                             <i class="fa-solid fa-hashtag mr-1"></i> Age / Sex
+                        </label>
+                        <input type="text" id="age-input" class="w-full p-3 border border-slate-700 rounded bg-slate-900 text-white focus:ring-2 focus:ring-rose-500 outline-none" placeholder="e.g. 65yo M">
+                     </div>
+                     <div class="md:col-span-1">
+                        <label class="block text-xs font-bold text-rose-400 mb-2 uppercase tracking-wide">
+                            <i class="fa-solid fa-hospital-user mr-1"></i> Location
+                         </label>
+                         <select id="location-input" class="w-full p-3 border border-slate-700 rounded bg-slate-900 text-white focus:ring-2 focus:ring-rose-500 outline-none">
+                             <option value="ICU">Inpatient ICU</option>
+                             <option value="Inpatient Ward">Inpatient Ward</option>
+                             <option value="ER">Emergency Room (ER)</option>
+                         </select>
+                     </div>
+                     <div class="md:col-span-1">
+                        <label class="block text-xs font-bold text-rose-400 mb-2 uppercase tracking-wide">
+                             <i class="fa-solid fa-bed-pulse mr-1"></i> Code Status
+                        </label>
+                        <select id="code-status" class="w-full p-3 border border-slate-700 rounded bg-slate-900 text-white focus:ring-2 focus:ring-rose-500 outline-none">
+                            <option value="Full Code">Full Code</option>
+                            <option value="DNR/DNI">DNR / DNI</option>
+                            <option value="DNR/Ok to Intubate">DNR / OK to Intubate</option>
+                        </select>
+                     </div>
                 </div>
 
-                <form id="form-interval" class="space-y-6">
-                    
-                    <!-- Overnight Events -->
+                <!-- DYNAMIC CONTENT AREA -->
+                
+                <!-- SCENARIO A: INITIAL CONSULT -->
+                <div id="initial-fields" class="block space-y-4">
                     <div>
-                        <label for="overnight-events" class="block text-sm font-medium text-blue-200 mb-1">24-Hour Events / Subjective:</label>
-                        <div class="relative">
-                            <textarea id="overnight-events" rows="3" class="block w-full border bg-gray-700 border-gray-600 text-gray-200 placeholder-gray-400 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 p-2 pr-12" 
-                            placeholder="e.g., Febrile to 102 overnight, cultured. Desaturated to 88% req inc PEEP. Central line placed R IJ. Family meeting held."></textarea>
-                            <button type="button" class="mic-btn" data-target-id="overnight-events">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>
-                            </button>
-                        </div>
+                        <label class="block text-sm font-bold text-white mb-1">Reason for Consult / HPI:</label>
+                        <textarea id="hpi-input" rows="3" class="w-full p-3 border border-slate-700 rounded-md focus:ring-2 focus:ring-rose-500 focus:outline-none bg-slate-800 text-white placeholder-slate-500" placeholder="e.g., Acute respiratory failure, septic shock etiology unclear..."></textarea>
                     </div>
+                    <div class="flex justify-end">
+                        <button type="button" id="load-example-btn" class="text-xs text-rose-400 hover:text-rose-300 underline">Load Sepsis Case</button>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-white mb-1">Past Medical History:</label>
+                        <textarea id="pmh-input" rows="2" class="w-full p-3 border border-slate-700 rounded-md focus:ring-2 focus:ring-rose-500 focus:outline-none bg-slate-800 text-white placeholder-slate-500" placeholder="e.g. COPD, CHF (EF 30%), DM2"></textarea>
+                    </div>
+                </div>
 
-                    <!-- Objective Data Grid -->
+                <!-- SCENARIO B: FOLLOW-UP NOTE -->
+                <div id="followup-fields" class="hidden space-y-4">
+                    <div class="bg-indigo-900/20 border border-indigo-700/50 p-4 rounded-md">
+                        <label class="block text-sm font-bold text-indigo-300 mb-2">
+                            <i class="fa-solid fa-paste mr-2"></i>Paste Yesterday's Note / Current Meds
+                        </label>
+                        <textarea id="prior-note-input" rows="6" class="w-full p-3 border border-slate-700 rounded-md focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-slate-900 text-slate-300 text-xs font-mono placeholder-slate-600" placeholder="Paste the full text of the previous progress note or H&P here..."></textarea>
+                    </div>
+                    
+                    <div class="bg-rose-900/20 border border-rose-700/50 p-4 rounded-md">
+                        <label class="block text-sm font-bold text-rose-300 mb-2">
+                            <i class="fa-solid fa-clock-rotate-left mr-2"></i>24-Hour / Overnight Events
+                        </label>
+                        <textarea id="events-input" rows="4" class="w-full p-3 border border-slate-700 rounded-md focus:ring-2 focus:ring-rose-500 focus:outline-none bg-slate-900 text-white placeholder-slate-500" placeholder="e.g. Spiked fever to 39.4 at 0200, started Vanco. Extubated at 0800. Urine output decreased."></textarea>
+                    </div>
+                </div>
+
+                <!-- SHARED CLINICAL DATA -->
+                <div class="mt-6 pt-6 border-t border-slate-800">
+                    <h3 class="text-sm font-bold text-slate-400 mb-3 uppercase">Current Objectve Data</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label for="vitals-io" class="block text-sm font-medium text-gray-300 mb-1">Vitals, I/O & Drips:</label>
-                            <div class="relative">
-                                <textarea id="vitals-io" rows="4" class="block w-full border bg-gray-700 border-gray-600 text-gray-200 placeholder-gray-400 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 p-2 pr-12" 
-                                placeholder="Tmax: 38.2, BP: 90/50 on Levo 0.1, HR: 110 AFib.
-I/O: +2.4L net positive. Urine 300cc/24hr.
-Drips: Levo 0.1, Vaso 0.03, Propofol 20."></textarea>
-                                <button type="button" class="mic-btn" data-target-id="vitals-io">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>
-                                </button>
-                            </div>
+                            <label class="block text-xs text-slate-500 mb-1">Vitals (Current/Range)</label>
+                            <input type="text" id="vitals-input" class="w-full p-2 border border-slate-700 rounded bg-slate-900 text-white text-sm" placeholder="BP 110/60 (on levo), HR 110, RR 24">
                         </div>
                         <div>
-                            <label for="vent-resp" class="block text-sm font-medium text-gray-300 mb-1">Respiratory / Vent Settings:</label>
-                            <div class="relative">
-                                <textarea id="vent-resp" rows="4" class="block w-full border bg-gray-700 border-gray-600 text-gray-200 placeholder-gray-400 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 p-2 pr-12" 
-                                placeholder="Mode: AC/VC
-Rate: 24, Vt: 420 (6cc/kg)
-PEEP: 10, FiO2: 50%
-ABG: 7.32 / 50 / 85 / 24
-Secretions: Thick yellow"></textarea>
-                                <button type="button" class="mic-btn" data-target-id="vent-resp">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>
-                                </button>
-                            </div>
+                            <label class="block text-xs text-slate-500 mb-1">Vent/O2 Settings</label>
+                            <input type="text" id="vent-input" class="w-full p-2 border border-slate-700 rounded bg-slate-900 text-white text-sm" placeholder="AC/VC 450/5/12 40% or 4L NC">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-500 mb-1">Relevant Labs</label>
+                            <input type="text" id="labs-input" class="w-full p-2 border border-slate-700 rounded bg-slate-900 text-white text-sm" placeholder="WBC 18, Cr 2.1, Lactate 4.0">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-500 mb-1">Lines / Drains / Access</label>
+                            <input type="text" id="lines-input" class="w-full p-2 border border-slate-700 rounded bg-slate-900 text-white text-sm" placeholder="R IJ TLC, Foley, Dobhoff">
                         </div>
                     </div>
-
-                    <!-- Labs/Imaging -->
-                    <div>
-                        <label for="labs-imaging" class="block text-sm font-medium text-gray-300 mb-1">New Labs, Imaging & Micro:</label>
-                        <div class="relative">
-                            <textarea id="labs-imaging" rows="3" class="block w-full border bg-gray-700 border-gray-600 text-gray-200 placeholder-gray-400 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 p-2 pr-12" 
-                            placeholder="WBC 18 > 24. Cr 1.2 > 1.8. Lactate 4.2.
-CXR: New RLL consolidation.
-Blood Cx: GPC in chains pending ID."></textarea>
-                            <button type="button" class="mic-btn" data-target-id="labs-imaging">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="pt-4 flex justify-between items-center">
-                        <button type="button" id="back-to-step-1-btn" class="text-gray-400 hover:text-white">
-                            &larr; Back
-                        </button>
-                        <button type="button" id="generate-note-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg shadow-lg transition duration-200 flex items-center">
-                            Generate ICU Note
-                        </button>
-                    </div>
-                </form>
-            </div>
-
-            <!-- Step 3: Output -->
-            <div id="step-3-output" class="hidden">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-2xl font-semibold text-gray-100">Critical Care Progress Note</h2>
-                    <!-- *** MODIFIED: In-line confirmation for reset *** -->
-                    <div id="start-over-controls" class="text-sm">
-                        <button id="start-over-btn" class="text-blue-400 hover:underline">New Patient / Reset</button>
-                        <div id="start-over-confirm" class="hidden space-x-2">
-                            <span class="text-yellow-400">Are you sure?</span>
-                            <button id="start-over-confirm-btn" class="text-red-400 hover:underline font-bold">Yes, Reset</button>
-                            <button id="start-over-cancel-btn" class="text-gray-400 hover:underline">Cancel</button>
-                        </div>
-                    </div>
-                    <!-- *** END MODIFICATION *** -->
                 </div>
 
-                <!-- Loading Spinner -->
-                <div id="loading-spinner" class="flex flex-col items-center justify-center min-h-[300px]">
-                    <div class="loader">
-                        <div class="bounce1"></div>
-                        <div class="bounce2"></div>
-                        <div class="bounce3"></div>
-                    </div>
-                    <p class="text-gray-400 mt-4 font-mono">Synthesizing Systems-Based Plan...</p>
-                    <p class="text-gray-500 text-sm mt-1">Checking ABCDE Bundle & Interactions</p>
+                <button type="submit" class="mt-8 w-full bg-gradient-to-r from-rose-700 to-red-600 text-white font-bold text-lg py-4 px-6 rounded-lg shadow-lg hover:from-rose-600 hover:to-red-500 transition-all transform hover:-translate-y-1 flex items-center justify-center border border-rose-800">
+                    <span class="mr-3">Initiate ICU Systems Analysis</span>
+                    <i class="fa-solid fa-microscope"></i>
+                </button>
+            </form>
+        </div>
+
+        <!-- SECTION 2: FOLLOW-UP QUESTIONS -->
+        <div id="section-questions" class="hidden bg-slate-900 p-6 rounded-lg shadow-xl border border-slate-700">
+            <h2 class="text-xl font-semibold mb-4 text-white border-b border-slate-800 pb-2 flex items-center">
+                <i class="fa-solid fa-user-doctor text-rose-500 mr-2"></i> Intensivist Clarification
+            </h2>
+            <p class="text-sm text-slate-400 mb-6 bg-slate-950 p-3 rounded border-l-4 border-rose-600">
+                To complete the systems-based plan, I need a few specific data points based on the pathology.
+            </p>
+            <div id="error-message-questions" class="error-box hidden"></div>
+            <form id="questions-form">
+                <div id="questions-container" class="space-y-5 mb-8"></div>
+                <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
+                    <button type="button" id="questions-back-btn" class="flex-1 bg-slate-800 text-slate-300 font-bold py-3 rounded-lg hover:bg-slate-700 transition">Back</button>
+                    <button type="submit" class="flex-[2] bg-rose-700 text-white font-bold py-3 rounded-lg hover:bg-rose-600 transition shadow-lg">Generate Systems Note</button>
                 </div>
+            </form>
+        </div>
+
+        <!-- SECTION 3: SYSTEMS REVIEW -->
+        <div id="section-review" class="hidden space-y-6">
+            
+            <div class="bg-slate-900 p-6 rounded-lg border border-slate-800 shadow-xl">
+                 <h2 class="text-2xl font-bold text-white mb-2 flex items-center">
+                    <span class="bg-rose-600 text-white text-xs px-2 py-1 rounded mr-3 uppercase tracking-wider">Plan Review</span>
+                    Systems-Based Assessment
+                </h2>
+                <div id="assessment-summary" class="text-slate-300 italic mb-4 bg-slate-950 p-4 rounded border-l-2 border-rose-500"></div>
                 
-                <!-- Note Output -->
-                <div id="output-container" class="hidden">
-                    <div class="bg-gray-800 p-1 rounded-t-lg border border-gray-700 flex justify-between items-center px-4 py-2 bg-gray-900">
-                        <span class="text-xs font-mono text-gray-400">Markdown Format</span>
-                        <button id="copy-btn" class="text-xs bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded border border-gray-600">Copy to Clipboard</button>
-                    </div>
-                    <div id="consult-output" class="bg-gray-900 p-6 rounded-b-lg border-x border-b border-gray-700 min-h-[400px] prose prose-invert max-w-none text-gray-300 font-sans">
-                        <!-- AI content injected here -->
-                    </div>
-                    <div id="copy-success" class="hidden text-center text-green-400 text-sm mt-2">Copied successfully!</div>
-                </div>
-
-                <!-- Follow-up Section -->
-                <div id="follow-up-section" class="hidden mt-8 border-t border-gray-700 pt-6">
-                    <h3 class="text-lg font-semibold text-gray-200 mb-2">Intensivist Assistant</h3>
-                    <p class="text-sm text-gray-400 mb-3">Ask about drug dosing, guidelines (e.g., "What is the Surviving Sepsis goal for MAP?"), or differential diagnoses.</p>
+                <!-- Systems Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     
-                    <div class="flex gap-2">
-                        <input type="text" id="follow-up-input" class="flex-1 bg-gray-800 border border-gray-600 text-white rounded-md px-4 py-2 focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., Recommended empiric abx for HAP?">
-                        <button id="submit-follow-up" class="bg-blue-700 hover:bg-blue-600 text-white px-4 py-2 rounded-md font-medium">Ask</button>
-                    </div>
-
-                    <div id="follow-up-loader" class="hidden mt-3">
-                        <div class="loader">
-                            <div class="bounce1"></div>
-                            <div class="bounce2"></div>
-                            <div class="bounce3"></div>
+                    <!-- NEURO -->
+                    <div class="bg-slate-800 rounded border border-slate-700 overflow-hidden">
+                        <div class="bg-slate-950 px-4 py-2 border-b border-slate-700 flex justify-between items-center">
+                            <h3 class="font-bold text-rose-400 uppercase text-xs">Neurology / Pain / Sedation</h3>
+                            <i class="fa-solid fa-brain text-slate-600"></i>
+                        </div>
+                        <div class="p-4">
+                            <textarea id="sys-neuro" class="w-full bg-slate-900 text-slate-300 text-sm border border-slate-700 rounded p-2 h-32 font-mono leading-tight"></textarea>
                         </div>
                     </div>
 
-                    <div id="follow-up-response" class="mt-4 hidden">
-                        <!-- Q&A responses go here -->
+                    <!-- CV -->
+                    <div class="bg-slate-800 rounded border border-slate-700 overflow-hidden">
+                        <div class="bg-slate-950 px-4 py-2 border-b border-slate-700 flex justify-between items-center">
+                            <h3 class="font-bold text-rose-400 uppercase text-xs">Cardiovascular</h3>
+                            <i class="fa-solid fa-heart-pulse text-slate-600"></i>
+                        </div>
+                        <div class="p-4">
+                            <textarea id="sys-cv" class="w-full bg-slate-900 text-slate-300 text-sm border border-slate-700 rounded p-2 h-32 font-mono leading-tight"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- RESP -->
+                    <div class="bg-slate-800 rounded border border-slate-700 overflow-hidden">
+                        <div class="bg-slate-950 px-4 py-2 border-b border-slate-700 flex justify-between items-center">
+                            <h3 class="font-bold text-rose-400 uppercase text-xs">Respiratory</h3>
+                            <i class="fa-solid fa-lungs text-slate-600"></i>
+                        </div>
+                        <div class="p-4">
+                            <textarea id="sys-resp" class="w-full bg-slate-900 text-slate-300 text-sm border border-slate-700 rounded p-2 h-32 font-mono leading-tight"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- GI/GU/RENAL -->
+                    <div class="bg-slate-800 rounded border border-slate-700 overflow-hidden">
+                        <div class="bg-slate-950 px-4 py-2 border-b border-slate-700 flex justify-between items-center">
+                            <h3 class="font-bold text-rose-400 uppercase text-xs">Renal / Fluids / GI / Endo</h3>
+                            <i class="fa-solid fa-kidneys text-slate-600"></i>
+                        </div>
+                        <div class="p-4">
+                            <textarea id="sys-renal" class="w-full bg-slate-900 text-slate-300 text-sm border border-slate-700 rounded p-2 h-32 font-mono leading-tight"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- HEME/ID -->
+                    <div class="bg-slate-800 rounded border border-slate-700 overflow-hidden">
+                        <div class="bg-slate-950 px-4 py-2 border-b border-slate-700 flex justify-between items-center">
+                            <h3 class="font-bold text-rose-400 uppercase text-xs">ID / Heme / PPX</h3>
+                            <i class="fa-solid fa-bacterium text-slate-600"></i>
+                        </div>
+                        <div class="p-4">
+                            <textarea id="sys-heme" class="w-full bg-slate-900 text-slate-300 text-sm border border-slate-700 rounded p-2 h-32 font-mono leading-tight"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- ABCDE BUNDLE -->
+                    <div class="bg-slate-800 rounded border border-rose-900/50 overflow-hidden">
+                        <div class="bg-rose-950 px-4 py-2 border-b border-rose-900 flex justify-between items-center">
+                            <h3 class="font-bold text-rose-300 uppercase text-xs">ABCDE Bundle</h3>
+                            <i class="fa-solid fa-list-check text-rose-500"></i>
+                        </div>
+                        <div class="p-4 space-y-2">
+                             <div class="flex items-center">
+                                <input type="checkbox" id="abcde-a" checked class="mr-2 accent-rose-500 h-4 w-4">
+                                <label for="abcde-a" class="text-sm text-slate-300"><b>A:</b> Awakening Trial</label>
+                             </div>
+                             <div class="flex items-center">
+                                <input type="checkbox" id="abcde-b" checked class="mr-2 accent-rose-500 h-4 w-4">
+                                <label for="abcde-b" class="text-sm text-slate-300"><b>B:</b> Breathing Trial</label>
+                             </div>
+                             <div class="flex items-center">
+                                <input type="checkbox" id="abcde-c" checked class="mr-2 accent-rose-500 h-4 w-4">
+                                <label for="abcde-c" class="text-sm text-slate-300"><b>C:</b> Coordination of Care / Sedation Choice</label>
+                             </div>
+                             <div class="flex items-center">
+                                <input type="checkbox" id="abcde-d" checked class="mr-2 accent-rose-500 h-4 w-4">
+                                <label for="abcde-d" class="text-sm text-slate-300"><b>D:</b> Delirium Monitoring (CAM-ICU)</label>
+                             </div>
+                             <div class="flex items-center">
+                                <input type="checkbox" id="abcde-e" checked class="mr-2 accent-rose-500 h-4 w-4">
+                                <label for="abcde-e" class="text-sm text-slate-300"><b>E:</b> Early Mobility</label>
+                             </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-        </main>
+            <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
+                <button type="button" id="review-back-btn" class="flex-1 bg-slate-700 text-slate-300 font-bold py-3 rounded-lg hover:bg-slate-600">Back</button>
+                <button type="button" id="review-finalize-btn" class="flex-1 bg-green-700 text-white font-bold py-3 rounded-lg hover:bg-green-600 shadow-lg">Finalize Note</button>
+            </div>
+        </div>
+
+        <!-- SECTION 4: FINAL NOTE -->
+        <div id="section-final" class="hidden bg-slate-900 p-6 rounded-lg shadow-xl border border-slate-700">
+            <h2 class="text-xl font-semibold mb-4 text-white border-b border-slate-800 pb-2">Final ICU Progress Note</h2>
+            
+             <!-- Refinement Box -->
+            <div class="bg-slate-800 p-4 rounded-md mb-6 border border-slate-700">
+                <label class="block text-xs font-bold text-rose-300 mb-2 uppercase">Consultant Q&A (Refine the plan)</label>
+                <div class="flex space-x-2">
+                    <input type="text" id="refine-input" class="flex-1 p-2 bg-slate-950 border border-slate-700 rounded text-white text-sm focus:border-rose-500 outline-none" placeholder="e.g., 'What is the target MAP?' or 'Sedation holiday protocol?'">
+                    <button type="button" id="refine-btn" class="bg-rose-700 hover:bg-rose-600 text-white px-4 rounded font-medium text-sm">Ask</button>
+                </div>
+                <div id="refine-response" class="hidden mt-3 p-3 bg-slate-900 rounded text-sm text-slate-300 border border-slate-700 italic"></div>
+            </div>
+
+            <div class="bg-white text-black p-6 rounded-md shadow-inner max-h-[600px] overflow-y-auto note-preview font-mono text-xs md:text-sm leading-tight border-2 border-slate-600 mb-4 relative">
+                <div class="absolute top-2 right-2 text-[10px] text-gray-400">GENERATED BY AI ICU CONSULTANT</div>
+                <pre id="final-note-content" class="whitespace-pre-wrap"></pre>
+            </div>
+            
+            <button type="button" id="copy-note-btn" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold text-lg py-4 px-6 rounded-lg shadow-lg border border-slate-600 flex items-center justify-center mb-6">
+                <i class="fa-regular fa-copy mr-2"></i> Copy to EMR
+            </button>
+            <p id="copy-success" class="hidden mt-2 text-center text-green-400 font-semibold text-sm">Copied to clipboard!</p>
+
+            <!-- References -->
+            <div id="references-container" class="bg-slate-800 p-4 rounded border border-slate-700 mb-8 hidden">
+                <h3 class="text-rose-400 font-bold mb-2 text-xs uppercase flex items-center">
+                    <i class="fa-solid fa-book-medical mr-2"></i> Critical Care Guidelines & Evidence
+                </h3>
+                <ul id="references-list" class="list-disc ml-5 text-sm space-y-2 text-slate-400"></ul>
+            </div>
+
+            <div class="mt-6 flex justify-center">
+                <button type="button" id="start-over-btn" class="text-slate-500 hover:text-white underline text-sm">
+                    Start New Patient
+                </button>
+            </div>
+        </div>
+
     </div>
 
-    <!-- Hidden Textarea for Copy-to-Clipboard -->
-    <textarea id="clipboard-helper" class="absolute -left-full"></textarea>
-
-    <script type="module">
-        // --- Configuration ---
-        const API_KEY = "AIzaSyAyAQ96QdTF4b2rRn_yMQ8O4poLOtzz72o";
-        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${API_KEY}`;
+    <script>
+        // --- Global State ---
+        const apiKey = "AIzaSyD5OPC5Ij1SlDyOZfqWuWnkwJ7VSgfnlpg";
         
-        // --- State ---
-        let chatHistory = []; 
-        
-        // --- DOM Elements ---
-        const steps = {
-            1: document.getElementById('step-1-context'),
-            2: document.getElementById('step-2-interval'),
-            3: document.getElementById('step-3-output')
+        let state = {
+            mode: "Initial", // or "Followup"
+            age: "",
+            location: "",
+            codeStatus: "",
+            hpi: "",
+            pmh: "",
+            priorNote: "",
+            events: "",
+            vitals: "",
+            vent: "",
+            labs: "",
+            lines: "",
+            questions: [],
+            answers: [],
+            generatedPlan: null
         };
-        const consultOutput = document.getElementById('consult-output');
-        const loader = document.getElementById('loading-spinner');
-        const outputContainer = document.getElementById('output-container');
+
+        // --- DOM Elements ---
+        const sections = {
+            intake: document.getElementById('section-intake'),
+            questions: document.getElementById('section-questions'),
+            review: document.getElementById('section-review'),
+            final: document.getElementById('section-final')
+        };
+        const loadingSpinner = document.getElementById('loading-spinner');
+        const errorBoxes = {
+            intake: document.getElementById('error-message-intake'),
+            questions: document.getElementById('error-message-questions')
+        };
         
-        // --- Navigation ---
-        function showStep(stepNum) {
-            Object.values(steps).forEach(el => el.classList.add('hidden'));
-            steps[stepNum].classList.remove('hidden');
-            window.scrollTo(0,0);
+        // --- Toggle Logic ---
+        const btnInitial = document.getElementById('btn-initial');
+        const btnFollowup = document.getElementById('btn-followup');
+        const initialFields = document.getElementById('initial-fields');
+        const followupFields = document.getElementById('followup-fields');
+
+        function setMode(mode) {
+            state.mode = mode;
+            if (mode === 'Initial') {
+                btnInitial.className = "px-6 py-2 rounded-md text-sm font-bold transition-all bg-rose-600 text-white shadow";
+                btnFollowup.className = "px-6 py-2 rounded-md text-sm font-bold transition-all text-slate-400 hover:text-white";
+                initialFields.classList.remove('hidden');
+                followupFields.classList.add('hidden');
+            } else {
+                btnInitial.className = "px-6 py-2 rounded-md text-sm font-bold transition-all text-slate-400 hover:text-white";
+                btnFollowup.className = "px-6 py-2 rounded-md text-sm font-bold transition-all bg-rose-600 text-white shadow";
+                initialFields.classList.add('hidden');
+                followupFields.classList.remove('hidden');
+            }
         }
 
-        document.getElementById('go-to-step-2-btn').addEventListener('click', () => showStep(2));
-        document.getElementById('back-to-step-1-btn').addEventListener('click', () => showStep(1));
-        document.getElementById('back-to-step-1-top').addEventListener('click', () => showStep(1));
-        
-        document.getElementById('clear-step-1').addEventListener('click', () => {
-            document.getElementById('base-context').value = '';
-        });
+        btnInitial.addEventListener('click', () => setMode('Initial'));
+        btnFollowup.addEventListener('click', () => setMode('Followup'));
 
-        // --- *** MODIFIED: Replaced confirm() with inline UI *** ---
-        const startOverBtn = document.getElementById('start-over-btn');
-        const startOverConfirmDiv = document.getElementById('start-over-confirm');
-        const startOverConfirmBtn = document.getElementById('start-over-confirm-btn');
-        const startOverCancelBtn = document.getElementById('start-over-cancel-btn');
+        // --- Helpers ---
+        function showLoading(isLoading, text = "Processing...") {
+            document.getElementById('loading-text').textContent = text;
+            loadingSpinner.classList.toggle('hidden', !isLoading);
+            if (isLoading) Object.values(sections).forEach(s => s.classList.add('hidden'));
+        }
 
-        startOverBtn.addEventListener('click', () => {
-            startOverBtn.classList.add('hidden');
-            startOverConfirmDiv.classList.remove('hidden');
-        });
+        function showSection(name) {
+            showLoading(false);
+            Object.keys(sections).forEach(key => sections[key].classList.toggle('hidden', key !== name));
+            window.scrollTo(0, 0);
+        }
 
-        startOverCancelBtn.addEventListener('click', () => {
-            startOverBtn.classList.remove('hidden');
-            startOverConfirmDiv.classList.add('hidden');
-        });
+        function showError(section, msg) {
+            if(errorBoxes[section]) {
+                errorBoxes[section].textContent = msg;
+                errorBoxes[section].classList.remove('hidden');
+                errorBoxes[section].classList.add('active');
+            }
+        }
 
-        startOverConfirmBtn.addEventListener('click', () => {
-            // This is the original logic from the old 'confirm()' block
-            document.getElementById('form-context').reset();
-            document.getElementById('form-interval').reset();
-            consultOutput.innerHTML = '';
-            document.getElementById('follow-up-response').innerHTML = '';
-            chatHistory = [];
-            showStep(1);
-            
-            // Reset the buttons
-            startOverBtn.classList.remove('hidden');
-            startOverConfirmDiv.classList.add('hidden');
-        });
-        // --- *** END MODIFICATION *** ---
+        function clearErrors() {
+            Object.values(errorBoxes).forEach(box => {
+                box.classList.add('hidden');
+                box.classList.remove('active');
+            });
+        }
 
-        // --- AI Generation Logic ---
-        document.getElementById('generate-note-btn').addEventListener('click', generateNote);
-
-        async function generateNote() {
-            showStep(3);
-            loader.classList.remove('hidden');
-            outputContainer.classList.add('hidden');
-            document.getElementById('follow-up-section').classList.add('hidden');
-
-            // Collect Data
-            const context = document.getElementById('base-context').value;
-            const events = document.getElementById('overnight-events').value;
-            const vitals = document.getElementById('vitals-io').value;
-            const resp = document.getElementById('vent-resp').value;
-            const labs = document.getElementById('labs-imaging').value;
-
-            const systemPrompt = `You are a board-certified Critical Care Intensivist. 
-YOUR PERFORMANCE WILL BE GRADED ON THE SUBSTANCE, DETAIL, AND CLINICAL RIGOR OF YOUR PLAN.
-YOUR PRIMARY GOAL IS SUBSTANCE AND DETAIL. BE EXTREMELY THOROUGH AND RIGOROUS. DO NOT WRITE SHORT, LOW-DETAIL PLANS.
-Your task is to write a highly structured, Systems-Based ICU Progress Note. 
-
-**Tone:** Professional, concise, rigorous, medical shorthand allowed (e.g., "cont," "titrate," "ppx").
-**Format:** Markdown.
-**Constraint:** DO NOT USE TABLES. Tables render poorly in this view. Use bullet points, numbered lists, or bold headers instead.
-
-**CRITICAL REQUIREMENT - DETAIL:**
-For all plans and medications, you MUST be specific.
-* **Medications:** Include **Dose, Route, Frequency, and Duration/Day #**. (e.g., "Vancomycin 1.5g IV q12h (Day 3/7)", "Levophed titrated to MAP > 65, current 0.1 mcg/kg/min", "Pantoprazole 40mg IV daily").
-* **Ventilator:** Include full settings (Mode, Rate, Vt, PEEP, FiO2).
-* **Fluids:** Include specific rate or bolus amount (e.g., "LR at 125cc/hr").
-* **VAGUE PLANS (e.g., "Continue meds," "Titrate pressors") ARE UNACCEPTABLE. BE EXPLICIT.**
-
-**CRITICAL REQUIREMENT - A/P STRUCTURE (EXPERT LEVEL):**
-For *each problem* listed under a system, your Assessment & Plan MUST have three parts:
-1.  **Pathophysiology/Etiology:** 1-2 lines explaining *why* this problem is happening (e.g., "Acute Hypoxic Resp Failure: 2/2 PNA and ARDS, causing V/Q mismatch and shunting." or "Septic shock 2/2 PNA, causing vasodilation and capillary leak...").
-2.  **Today's Plan:** The specific, detailed plan for today (e.g., "Cont. Levophed 0.1mcg/kg/min, titrate for MAP > 65. Vanc 1.5g IV q12h (Day 3/7), check 3rd trough 30min prior to 4th dose. Order TTE to assess LV function 2/2 new pressor req. Cont. LR 75cc/hr, monitor CVP/lactate.").
-3.  **Forward-Looking Plan / De-escalation Goals:** State the *criteria* for de-escalation/discontinuation. This is the plan to get the patient out of the ICU. (e.g., "Wean pressors as lactate < 2.0 and UOP > 0.5cc/kg/hr. De-escalate Abx per cultures/sensitivities in 24-48h. Extubation criteria: FiO2 <40%, PEEP <8, passing SBT, RASS 0 to -1, following commands/strong cough.").
-    * **Antibiotics:** "Plan to narrow based on final culture sensitivities." or "Stop after planned 7-day course."
-    * **Pressors:** "Continue titrating to maintain MAP > 65. Wean vasopressin first, then levophed."
-    * **Sedation:** "Perform daily Spontaneous Awakening Trial (SAT). Wean propofol first as tolerated, goal RASS -1 to 0."
-    * **Ventilator:** "Perform daily Spontaneous Breathing Trial (SBT). Criteria for extubation: FiO2 < 40%, PEEP < 8, stable hemodynamics off pressors, passing SBT, following commands/coughing."
-
-**STRUCTURE REQUIREMENTS:**
-
-1. **Summary Statement:** A classic "One-Liner" (e.g., "XX year old [Gender] with PMH of [X] admitted for [Y], now ICU Day [Z]. Course complicated by [A].")
-
-2. **24-HOUR INTERVAL EVENTS:**
-   (You will insert the user-provided "24-Hour Events" here. Briefly summarize the key overnight events, new fevers, desaturations, procedures, or family meetings as provided in the input.)
-
-3. **Systems-Based Assessment & Plan:** You MUST use these specific headers. Under each header, list the Active Problems/Diagnoses followed by the Plan (using the 3-part structure above).
-    * **NEUROLOGIC:** (Include sedation/RASS, pain, delirium/CAM-ICU).
-    * **CARDIOVASCULAR:** (Include Shock state, Rhythm, Pressors/Inotropes, MAP goals, volume status).
-    * **RESPIRATORY:** (Include Vent settings/Weaning plan, SBT status, Secretions, ABG interpretation).
-    * **RENAL / FLUIDS / LYTES:** (Include AKI/CKD status, Urine Output trends, Dialysis/CRRT, Electrolyte repletion).
-    * **GASTROINTESTINAL / NUTRITION:** (Include Diet/Feeds, Bowel Regimen, Liver function).
-    * **HEMATOLOGIC / INFECTIOUS DISEASE:** (Include Antibiotic Days [Day X of Y], Culture results, Transfusion thresholds).
-    * **ENDOCRINE:** (Include Glucose control/Insulin gtt).
-
-4. **Critical Care Checklist (MANDATORY SECTION):**
-   You must include a checklist section at the very bottom called "## ICU BUNDLE & PROPHYLAXIS".
-   * **FAST HUGS MAIDENS / ABCDE:**
-        * **Diet:** [Current Diet]
-        * **Analgesia/Sedation:** [Current Drips with doses] - Target RASS [X].
-        * **Thromboembolic Prophylaxis:** [Drug + Dose + Frequency]
-        * **Head of Bed:** Elevated >30 deg.
-        * **Ulcer Prophylaxis:** [Drug + Dose + Frequency or "Not indicated"]
-        * **Glucose Control:** [Target range]
-        * **Spontaneous Breathing Trial:** [Pass/Fail/Contraindicated]
-        * **Lines/Tubes:** [List lines and mention "Assess need for removal daily"]
-        * **Code Status:** [Full Code / DNR / DNI]
-        * **Dispo:** [ICU / Stepdown / Floor]
-
-**INPUT PROCESSING:**
-* The user will provide "Base Context," "Interval Updates (Vitals, Vent, Labs)," and "24-Hour Events."
-* **Synthesize** the Base Context and Interval Updates to formulate the systems-based plan.
-* **Insert** the "24-Hour Events" data directly into its own section ("## 24-HOUR INTERVAL EVENTS").
-* Synthesize these. If the previous note says "Plan: Start Levo" and the Interval says "Levo off", the new note must say "Cardiovascular: Septic Shock - Resolved off pressors."
-`;
-
-            const userPrompt = `
-**BASE CONTEXT (Prior Note/History):**
-${context}
-
-**INTERVAL UPDATES (Last 24h):**
-*Events:* ${events}
-*Vitals/I&O/Drips:* ${vitals}
-*Respiratory/Vent:* ${resp}
-*New Labs/Imaging:* ${labs}
-
-**TASK:** Generate the ICU Systems-Based Note for today.
-`;
-
-            chatHistory = [
-                { role: "user", parts: [{ text: userPrompt }] }
-            ];
+        // --- API Logic ---
+        async function callGeminiApi(systemPrompt, userQuery) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+            const payload = {
+                contents: [{ parts: [{ text: userQuery }] }],
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+                generationConfig: { responseMimeType: "application/json" }
+            };
 
             try {
-                const response = await fetch(API_URL, {
+                const response = await fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: chatHistory,
-                        systemInstruction: { parts: [{ text: systemPrompt }] },
-                        generationConfig: { temperature: 0.3 } // Low temp for clinical accuracy
-                    })
+                    body: JSON.stringify(payload)
                 });
-
+                if (!response.ok) throw new Error(`API Error: ${response.status}`);
                 const data = await response.json();
-                if (data.candidates && data.candidates[0].content) {
-                    const aiText = data.candidates[0].content.parts[0].text;
-                    chatHistory.push({ role: "model", parts: [{ text: aiText }] });
-                    
-                    // Render Markdown
-                    consultOutput.innerHTML = parseMarkdown(aiText);
-                    
-                    outputContainer.classList.remove('hidden');
-                    document.getElementById('follow-up-section').classList.remove('hidden');
-                } else {
-                    throw new Error("No content generated");
-                }
-            } catch (err) {
-                // Use a non-blocking way to show error
-                consultOutput.innerHTML = `<p class="text-red-400">Error generating note. Please check connection. ${err.message}</p>`;
-                outputContainer.classList.remove('hidden');
-                console.error(err);
-            } finally {
-                loader.classList.add('hidden');
+                return JSON.parse(data.candidates[0].content.parts[0].text);
+            } catch (error) {
+                console.error(error);
+                throw error;
             }
         }
 
-        // --- Follow Up Logic ---
-        document.getElementById('submit-follow-up').addEventListener('click', async () => {
-            const input = document.getElementById('follow-up-input');
-            const val = input.value.trim();
-            if (!val) return;
+        // Added for text-only refine queries
+        async function callGeminiText(systemPrompt, userQuery) {
+             const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+             const payload = {
+                contents: [{ parts: [{ text: userQuery }] }],
+                systemInstruction: { parts: [{ text: systemPrompt }] }
+            };
+            const response = await fetch(url, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload)});
+            const data = await response.json();
+            return data.candidates[0].content.parts[0].text;
+        }
 
-            const followUpContainer = document.getElementById('follow-up-response');
-            const followLoader = document.getElementById('follow-up-loader');
+        // --- Step 1: Intake Logic ---
+        document.getElementById('load-example-btn').addEventListener('click', () => {
+            setMode('Initial');
+            document.getElementById('age-input').value = "68yo F";
+            document.getElementById('location-input').value = "ICU";
+            document.getElementById('code-status').value = "Full Code";
+            document.getElementById('hpi-input').value = "Admitted from ER with hypotension (80/40), fever (39C), and altered mental status. History of UTI.";
+            document.getElementById('pmh-input').value = "DM2, HTN, CKD stage 3";
+            document.getElementById('vitals-input').value = "BP 90/50 (post 2L fluid), HR 115, RR 26, O2 94% on 4L NC";
+            document.getElementById('vent-input').value = "N/A - NC 4L";
+            document.getElementById('labs-input').value = "WBC 22, Lactate 4.2, Cr 1.9 (baseline 1.4), K 3.8";
+            document.getElementById('lines-input').value = "R IJ Central Line, Foley";
+        });
+
+        document.getElementById('intake-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            clearErrors();
             
-            input.disabled = true;
-            followLoader.classList.remove('hidden');
-            followUpContainer.classList.remove('hidden');
+            // Gather state
+            state.age = document.getElementById('age-input').value;
+            state.location = document.getElementById('location-input').value;
+            state.codeStatus = document.getElementById('code-status').value;
+            state.vitals = document.getElementById('vitals-input').value;
+            state.vent = document.getElementById('vent-input').value;
+            state.labs = document.getElementById('labs-input').value;
+            state.lines = document.getElementById('lines-input').value;
+            state.hpi = document.getElementById('hpi-input').value;
+            state.pmh = document.getElementById('pmh-input').value;
+            state.priorNote = document.getElementById('prior-note-input').value;
+            state.events = document.getElementById('events-input').value;
 
-            chatHistory.push({ role: "user", parts: [{ text: val }] });
+            if(!state.age) return showError('intake', 'Age is required.');
+            
+            let clinicalContext = `Patient: ${state.age}. Loc: ${state.location}. Code: ${state.codeStatus}.\n`;
+            clinicalContext += `Vitals: ${state.vitals}. Vent/O2: ${state.vent}. Labs: ${state.labs}. Lines: ${state.lines}.\n`;
+            
+            if (state.mode === 'Initial') {
+                clinicalContext += `Type: Initial Consult. HPI: ${state.hpi}. PMH: ${state.pmh}.`;
+                if(state.hpi.length < 5) return showError('intake', 'Please provide an HPI.');
+            } else {
+                clinicalContext += `Type: Follow-up/Progress Note.\nPrior Note: ${state.priorNote}\n24hr Events: ${state.events}`;
+                if(state.events.length < 5 && state.priorNote.length < 5) return showError('intake', 'Please provide 24hr events or a prior note.');
+            }
 
-            const followUpSystemPrompt = `You are a Critical Care Intensivist assistant. 
-            Answer the user's medical question concisely. 
-            If asking about guidelines (Surviving Sepsis, ARDSnet, PADIS), cite them briefly.
-            If asking for a differential, provide a ranked list.
-            Keep it brief and high-yield for a rounding physician.
-            IMPORTANT: DO NOT use tables in your output. Use lists only.`;
+            showLoading(true, "Consulting Critical Care Guidelines...");
+
+            const systemPrompt = `
+                You are an expert ICU Intensivist. Review the clinical data.
+                Generate 5-7 targeted clarification questions to refine the plan for a SYSTEMS-BASED NOTE.
+                Prioritize missing data for Neuro, CV (pressors/echo), Resp (ABG/Vent), Renal (UOP), and ID (Culture data).
+                Return strictly JSON: { "questions": ["Question 1", "Question 2"...] }
+            `;
 
             try {
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: chatHistory,
-                        systemInstruction: { parts: [{ text: followUpSystemPrompt }] },
-                        generationConfig: { temperature: 0.2 }
-                    })
+                const result = await callGeminiApi(systemPrompt, clinicalContext);
+                const container = document.getElementById('questions-container');
+                container.innerHTML = '';
+                result.questions.forEach((q, i) => {
+                    container.innerHTML += `
+                        <div class="bg-slate-800 p-3 rounded border border-slate-700">
+                            <label class="block text-sm text-rose-300 mb-1 font-medium">${q}</label>
+                            <input type="text" data-q="${q}" class="w-full p-2 border-b border-slate-600 bg-transparent text-white focus:border-rose-500 outline-none transition-colors" placeholder="Answer...">
+                        </div>`;
                 });
-                const data = await response.json();
-                const aiText = data.candidates[0].content.parts[0].text;
-                chatHistory.push({ role: "model", parts: [{ text: aiText }] });
-
-                // Append Q&A
-                const qaDiv = document.createElement('div');
-                qaDiv.className = "mb-4 border-b border-gray-700 pb-4";
-                qaDiv.innerHTML = `
-                    <p class="text-blue-300 font-semibold text-sm mb-1">Q: ${val}</p>
-                    <div class="text-gray-300 text-sm prose prose-invert max-w-none">${parseMarkdown(aiText)}</div>
-                `;
-                followUpContainer.prepend(qaDiv); // Add new Q to top
-                input.value = '';
-
+                showSection('questions');
             } catch (err) {
                 console.error(err);
-            } finally {
-                input.disabled = false;
-                followLoader.classList.add('hidden');
-                input.focus();
+                showError('intake', 'Consultation failed. Ensure all fields are filled.');
+                showSection('intake');
             }
         });
 
-        // --- *** MODIFIED PARSER FUNCTION *** ---
-        // This function correctly handles paragraphs, headers, lists, and bolds.
-        function parseMarkdown(text) {
-            let blocks = text.split(/\n\n+/); // Split by 2 or more newlines (paragraphs)
-            
-            let html = blocks.map(block => {
-                // Trim whitespace
-                block = block.trim();
-                if (block.length === 0) return '';
-                
-                // Header 2
-                if (block.startsWith('## ')) {
-                    return '<h2>' + block.substring(3) + '</h2>';
-                }
-                // Header 3
-                if (block.startsWith('### ')) {
-                    return '<h3>' + block.substring(4) + '</h3>';
-                }
-                // List
-                if (block.startsWith('* ')) {
-                    let items = block.split('\n').map(item => {
-                        item = item.trim();
-                        if (item.startsWith('* ')) {
-                            return '<li>' + item.substring(2).trim() + '</li>';
-                        }
-                        // This handles list items that wrap to a new line but aren't new bullets
-                        // It's a simplification but works for this context.
-                        return item; 
-                    }).join('');
-                    // Re-wrap joined items that weren't the start of a list
-                    // This is imperfect but better than nothing. A real parser is complex.
-                    // A simple <li> wrapper for all lines in a * block is safer.
-                    items = block.split('\n').map(item => {
-                         item = item.trim();
-                         if (item.startsWith('* ')) {
-                            return '<li>' + item.substring(2).trim() + '</li>';
-                         }
-                         return '<li>' + item + '</li>'; // Assume wrapped lines are new items
-                    }).join('');
+        document.getElementById('questions-back-btn').addEventListener('click', () => showSection('intake'));
 
-                    // Let's try a simpler list logic:
-                    items = block.split('\n').map(item => {
-                        let trimmedItem = item.trim();
-                        // Remove the leading '*' or '-'
-                        if (trimmedItem.startsWith('* ')) {
-                            trimmedItem = trimmedItem.substring(2).trim();
-                        } else if (trimmedItem.startsWith('- ')) {
-                             trimmedItem = trimmedItem.substring(2).trim();
-                        }
-                        return '<li>' + trimmedItem + '</li>';
-                    }).join('');
-                    return '<ul>' + items + '</ul>';
-                }
-                // Paragraph
-                // Convert single newlines to <br> *within* a paragraph block
-                // --- *** FIX: Corrected typo '- +' to '+' *** ---
-                return '<p>' + block.replace(/\n/g, '<br>') + '</p>'; 
-            }).join('');
-            
-            // Now, do the bold replacement *after* HTML is structured
-            html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-            
-            return html;
-        }
-        // --- *** END MODIFICATION *** ---
+        // --- Step 2: Generate Plan ---
+        document.getElementById('questions-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            clearErrors();
 
-
-        // --- Clipboard ---
-        document.getElementById('copy-btn').addEventListener('click', () => {
-            // const text = consultOutput.innerText; // Old plain text method
-            
-            // --- NEW "RICH TEXT" COPY LOGIC ---
-            // This copies the formatted HTML (bolds, bullets, etc.) as seen on screen
-            // for pasting into EMRs that support rich text.
-            
-            const consultOutputEl = document.getElementById('consult-output');
-            const success = document.getElementById('copy-success');
-            
-            try {
-                // 1. Create a range and select the content of the output div
-                const range = document.createRange();
-                range.selectNode(consultOutputEl); 
-                
-                // 2. Clear any existing selections
-                const selection = window.getSelection();
-                selection.removeAllRanges(); 
-                
-                // 3. Add the new range to the selection
-                selection.addRange(range); 
-                
-                // 4. Execute the copy command
-                // This copies the selected HTML as rich text
-                document.execCommand('copy'); 
-                
-                // 5. Clean up the selection
-                selection.removeAllRanges(); 
-
-                // Show success message
-                success.classList.remove('hidden');
-                setTimeout(() => success.classList.add('hidden'), 2000);
-            } catch (err) {
-                console.error("Rich text copy failed, falling back to plain text: ", err);
-                
-                // --- FALLBACK TO PLAIN TEXT (innerText) ---
-                // If rich text copy fails, try to copy the clean innerText
-                const text = consultOutputEl.innerText;
-                const helper = document.getElementById('clipboard-helper');
-                helper.value = text;
-                helper.select();
-                helper.setSelectionRange(0, 99999);
-                try {
-                    document.execCommand('copy');
-                    success.classList.remove('hidden');
-                    setTimeout(() => success.classList.add('hidden'), 2000);
-                } catch (err2) {
-                     console.error("Fallback plain text copy also failed: ", err2);
-                }
-            }
-        });
-
-        // --- Speech Recognition (Basic Implementation) ---
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        let recognition; // Keep recognition instance
-        let activeTextarea = null; // Track active textarea
-
-        if (SpeechRecognition) {
-            recognition = new SpeechRecognition();
-            recognition.continuous = true; // Stay on
-            recognition.interimResults = true; // Show interim
-            recognition.lang = 'en-US';
-
-            document.querySelectorAll('.mic-btn').forEach(btn => {
-                btn.style.display = 'flex';
-                btn.addEventListener('click', (e) => {
-                    const targetId = btn.dataset.targetId;
-                    const targetEl = document.getElementById(targetId);
-
-                    if (activeTextarea && activeTextarea === targetEl) {
-                        // Already listening on this one, so stop
-                        recognition.stop();
-                    } else if (activeTextarea) {
-                        // Listening on a *different* one, stop it and start new
-                        recognition.stop(); // This will trigger 'onend'
-                        // We will start the new one in the 'onend' handler
-                        btn.dataset.startPending = "true"; // Mark this to start after old one stops
-                        btn.classList.add('is-listening');
-                    } else {
-                        // Not listening anywhere, so start
-                        document.getElementById('speech-error').classList.add('hidden');
-                        activeTextarea = targetEl;
-                        btn.classList.add('is-listening');
-                        recognition.start();
-                    }
-                });
+            state.answers = [];
+            document.querySelectorAll('#questions-container input').forEach(inp => {
+                state.answers.push({ q: inp.dataset.q, a: inp.value });
             });
 
-            let baseTranscript = ''; // Text before mic was clicked
-            recognition.onstart = () => {
-                if(activeTextarea) {
-                    baseTranscript = activeTextarea.value;
-                    if (baseTranscript.length > 0 && !baseTranscript.endsWith(' ')) {
-                        baseTranscript += ' ';
-                    }
-                }
-            };
+            showLoading(true, "Synthesizing Systems-Based Plan...");
+
+            let contextData = `Mode: ${state.mode}\nPatient: ${state.age}\nCode Status: ${state.codeStatus}\n`;
+            contextData += `Vitals: ${state.vitals}\nVent: ${state.vent}\nLabs: ${state.labs}\nLines: ${state.lines}\n`;
             
-            recognition.onresult = (event) => {
-                if (!activeTextarea) return;
+            if(state.mode === 'Initial') {
+                contextData += `HPI: ${state.hpi}\nPMH: ${state.pmh}\n`;
+            } else {
+                contextData += `Prior Note: ${state.priorNote}\n24hr Events: ${state.events}\n`;
+            }
 
-                let interimTranscript = '';
-                let finalTranscript = '';
+            state.answers.forEach(item => contextData += `Q: ${item.q} A: ${item.a}\n`);
 
-                for (let i = event.resultIndex; i < event.results.length; ++i) {
-                    if (event.results[i].isFinal) {
-                        finalTranscript += event.results[i][0].transcript + ' ';
-                    } else {
-                        interimTranscript += event.results[i][0].transcript;
-                    }
+            const systemPrompt = `
+                You are an expert Intensivist. Generate a comprehensive ICU SYSTEMS-BASED NOTE.
+                
+                STRUCTURE:
+                1. Assessment/Summary: A synthesis paragraph of the current status.
+                2. Systems: Neuro, CV, Resp, Renal/Fluids/GI/Endo, ID/Heme.
+                   - CRITICAL FORMATTING FOR SYSTEMS:
+                   For each system key (neuro, cv, etc.), the returned value MUST be a formatted string starting with:
+                   "Diagnosis: [Diagnosis Name] [ICD-10 Code]
+                   Assessment: [1 sentence pathophysiology/assessment]
+                   Plan:
+                   - [Specific Bullet 1]
+                   - [Specific Bullet 2]"
+                   
+                3. ABCDE Bundle: A strict checklist for Awakening, Breathing, Coordination, Delirium, Early Mobility.
+                
+                OUTPUT JSON SCHEMA:
+                {
+                    "assessment": "Synthesis paragraph...",
+                    "systems": {
+                        "neuro": "string (formatted as above)",
+                        "cv": "string (formatted as above)",
+                        "resp": "string (formatted as above)",
+                        "renal_gi_endo": "string (formatted as above)",
+                        "id_heme": "string (formatted as above)"
+                    },
+                    "abcde": {
+                        "a": "Plan for Awakening",
+                        "b": "Plan for Breathing",
+                        "c": "Coordination plan",
+                        "d": "Delirium status/plan",
+                        "e": "Mobility plan"
+                    },
+                    "references": [ {"title": "string (e.g. SCCM Sepsis Guidelines 2021)", "url": "string"} ]
                 }
+            `;
 
-                activeTextarea.value = baseTranscript + finalTranscript + interimTranscript;
-                if (finalTranscript) {
-                    baseTranscript += finalTranscript; // Add final to base
-                }
-            };
+            try {
+                const result = await callGeminiApi(systemPrompt, contextData);
+                state.generatedPlan = result;
+                
+                // Populate Review
+                document.getElementById('assessment-summary').textContent = result.assessment;
+                document.getElementById('sys-neuro').value = result.systems.neuro;
+                document.getElementById('sys-cv').value = result.systems.cv;
+                document.getElementById('sys-resp').value = result.systems.resp;
+                document.getElementById('sys-renal').value = result.systems.renal_gi_endo;
+                document.getElementById('sys-heme').value = result.systems.id_heme;
+                
+                showSection('review');
+            } catch (err) {
+                console.error(err);
+                showError('questions', 'Failed to generate plan.');
+                showSection('questions');
+            }
+        });
+        
+        document.getElementById('review-back-btn').addEventListener('click', () => showSection('questions'));
 
-            recognition.onerror = (event) => {
-                console.error("Speech recognition error:", event.error);
-                const errorDiv = document.getElementById('speech-error');
-                const errorMessage = document.getElementById('speech-error-message');
-                if (event.error === 'not-allowed') {
-                    errorMessage.innerText = "Microphone access denied. Please allow it in your browser settings.";
-                } else {
-                    errorMessage.innerText = `Speech error: ${event.error}`;
-                }
-                errorDiv.classList.remove('hidden');
-                if (activeTextarea) {
-                    const btn = document.querySelector(`.mic-btn[data-target-id="${activeTextarea.id}"]`);
-                    if(btn) btn.classList.remove('is-listening');
-                }
-                activeTextarea = null;
-            };
+        // --- Step 3: Finalize ---
+        document.getElementById('review-finalize-btn').addEventListener('click', () => {
+            const now = new Date();
+            const timeString = now.toLocaleDateString() + " " + now.toLocaleTimeString();
             
-            recognition.onend = () => {
-                if (activeTextarea) {
-                    const btn = document.querySelector(`.mic-btn[data-target-id="${activeTextarea.id}"]`);
-                    if(btn) btn.classList.remove('is-listening');
-                }
-                activeTextarea = null;
-                baseTranscript = '';
+            let note = `*** CRITICAL CARE ${state.mode.toUpperCase()} NOTE ***\n`;
+            note += `Date: ${timeString}\n`;
+            note += `Pt: ${state.age} | ${state.location} | ${state.codeStatus}\n`;
+            note += `-------------------------------------------\n`;
+            
+            if(state.mode === 'Initial') {
+                note += `\nHPI/REASON FOR CONSULT:\n${state.hpi}\n\nPMH:\n${state.pmh}\n`;
+            } else {
+                note += `\n24 HOUR EVENTS / OVERNIGHT:\n${state.events}\n`;
+            }
+            
+            note += `\nOBJECTIVE:\n`;
+            note += `Vitals: ${state.vitals}\n`;
+            note += `Resp: ${state.vent}\n`;
+            note += `Labs: ${state.labs}\n`;
+            note += `Lines: ${state.lines}\n`;
+            
+            note += `\n-------------------------------------------\n`;
+            note += `ASSESSMENT:\n${document.getElementById('assessment-summary').textContent}\n\n`;
+            
+            note += `SYSTEMS PLAN:\n`;
+            
+            note += `\nNEURO / PAIN / SEDATION:\n`;
+            note += document.getElementById('sys-neuro').value;
+            
+            note += `\n\nCARDIOVASCULAR:\n`;
+            note += document.getElementById('sys-cv').value;
+            
+            note += `\n\nRESPIRATORY:\n`;
+            note += document.getElementById('sys-resp').value;
+            
+            note += `\n\nRENAL / GI / ENDO / FLUIDS:\n`;
+            note += document.getElementById('sys-renal').value;
+            
+            note += `\n\nID / HEME / PROPHYLAXIS:\n`;
+            note += document.getElementById('sys-heme').value;
+            
+            note += `\n\n-------------------------------------------\n`;
+            note += `ABCDE BUNDLE COMPLIANCE:\n`;
+            
+            const p = state.generatedPlan.abcde;
+            const check = (id) => document.getElementById(id).checked ? "[x]" : "[ ]";
+            
+            note += `${check('abcde-a')} A: ${p.a}\n`;
+            note += `${check('abcde-b')} B: ${p.b}\n`;
+            note += `${check('abcde-c')} C: ${p.c}\n`;
+            note += `${check('abcde-d')} D: ${p.d}\n`;
+            note += `${check('abcde-e')} E: ${p.e}\n`;
+            
+            document.getElementById('final-note-content').textContent = note;
 
-                // Check if another mic button is waiting to start
-                const pendingBtn = document.querySelector('.mic-btn[data-start-pending="true"]');
-                if (pendingBtn) {
-                    pendingBtn.removeAttribute('data-start-pending');
-                    const targetId = pendingBtn.dataset.targetId;
-                    activeTextarea = document.getElementById(targetId);
-                    pendingBtn.classList.add('is-listening');
-                    recognition.start();
-                }
-            };
-        }
+            // Render References
+            const refList = document.getElementById('references-list');
+            refList.innerHTML = '';
+            if(state.generatedPlan.references && state.generatedPlan.references.length) {
+                state.generatedPlan.references.forEach(r => {
+                    refList.innerHTML += `<li><a href="${r.url}" target="_blank" class="text-rose-400 hover:underline">${r.title}</a></li>`;
+                });
+                document.getElementById('references-container').classList.remove('hidden');
+            } else {
+                document.getElementById('references-container').classList.add('hidden');
+            }
+
+            showSection('final');
+        });
+
+        // Refine Button Logic
+        document.getElementById('refine-btn').addEventListener('click', async () => {
+            const q = document.getElementById('refine-input').value;
+            const box = document.getElementById('refine-response');
+            if(!q) return;
+            
+            box.classList.remove('hidden');
+            box.textContent = "Consulting SCCM Guidelines...";
+            
+            const sys = "You are a concise ICU Consultant. Answer based on SCCM/ESICM guidelines and the specific patient context.";
+            const ctx = `Patient: ${state.age}. Condition: ${document.getElementById('assessment-summary').textContent}. Question: ${q}`;
+            
+            try {
+                const ans = await callGeminiText(sys, ctx);
+                box.textContent = `Consultant: ${ans}`;
+            } catch(e) {
+                box.textContent = "Connection error.";
+            }
+        });
+
+        document.getElementById('copy-note-btn').addEventListener('click', () => {
+            const text = document.getElementById('final-note-content').textContent;
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed"; 
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                const succ = document.getElementById('copy-success');
+                succ.classList.remove('hidden');
+                setTimeout(() => succ.classList.add('hidden'), 2000);
+            } catch (err) { console.error('Copy failed', err); }
+            document.body.removeChild(textArea);
+        });
+
+        document.getElementById('start-over-btn').addEventListener('click', () => location.reload());
+
+        // Init
+        setMode('Initial');
+        showSection('intake');
     </script>
 </body>
 </html>
