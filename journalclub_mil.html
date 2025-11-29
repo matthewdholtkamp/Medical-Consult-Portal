@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Operational Medical Journal Club - Dr. Holtkamp Edition</title>
+    <!-- Tailwind CSS for rapid, responsive styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- MathJax for rendering medical formulas -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Marked.js for Markdown rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <style>
+        /* Custom Theme Overrides */
+        :root {
+            --bg-primary: #1a1a2e;
+            --bg-secondary: #16213e;
+            --accent: #e94560;
+            --text-main: #e0e0e0;
+            --text-muted: #a0a0a0;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        .glass-panel {
+            background: rgba(22, 33, 62, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Markdown Styles within the content area */
+        .prose-invert h1, .prose-invert h2, .prose-invert h3 {
+            color: #F39C12;
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+            font-weight: 700;
+        }
+        .prose-invert h2 { border-bottom: 1px solid #333; padding-bottom: 5px; }
+        .prose-invert strong { color: var(--accent); }
+        .prose-invert ul { list-style-type: disc; padding-left: 20px; margin: 10px 0; }
+        .prose-invert li { margin-bottom: 5px; }
+        .prose-invert p { margin-bottom: 1em; line-height: 1.7; }
+        .prose-invert a { color: #38bdf8; text-decoration: underline; } /* Link styling */
+        
+        /* Loading Animation */
+        .pulse-ring {
+            display: inline-block;
+            width: 64px;
+            height: 64px;
+        }
+        .pulse-ring:after {
+            content: " ";
+            display: block;
+            width: 46px;
+            height: 46px;
+            margin: 1px;
+            border-radius: 50%;
+            border: 5px solid var(--accent);
+            border-color: var(--accent) transparent var(--accent) transparent;
+            animation: ring 1.2s linear infinite;
+        }
+        @keyframes ring {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Toast Notification */
+        #toast {
+            visibility: hidden;
+            min-width: 250px;
+            margin-left: -125px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 8px;
+            padding: 16px;
+            position: fixed;
+            z-index: 50;
+            left: 50%;
+            bottom: 30px;
+            font-size: 17px;
+            border: 1px solid var(--accent);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        #toast.show {
+            visibility: visible;
+            -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+
+        @-webkit-keyframes fadein {
+            from {bottom: 0; opacity: 0;} 
+            to {bottom: 30px; opacity: 1;}
+        }
+
+        @keyframes fadein {
+            from {bottom: 0; opacity: 0;}
+            to {bottom: 30px; opacity: 1;}
+        }
+
+        @-webkit-keyframes fadeout {
+            from {bottom: 30px; opacity: 1;} 
+            to {bottom: 0; opacity: 0;}
+        }
+
+        @keyframes fadeout {
+            from {bottom: 30px; opacity: 1;}
+            to {bottom: 0; opacity: 0;}
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center p-4 md:p-8">
+
+    <!-- Toast Notification -->
+    <div id="toast">Notification Message</div>
+
+    <!-- Header -->
+    <header class="w-full max-w-4xl text-center mb-10">
+        <h1 class="text-4xl md:text-5xl font-extrabold text-orange-500 tracking-tight mb-3">Operational Medicine Journal Club</h1>
+        <!-- Prominent Subtitle -->
+        <p class="text-blue-50 mt-2 text-2xl font-semibold leading-relaxed">JTS CPGs, Deployed Medicine, and Tactical Evidence</p>
+        <!-- Subdued Sub-subtitle -->
+        <p class="text-gray-500 text-sm mt-3 italic">Deployment Readiness Starts Now - Brought to you by Dr. Matthew Holtkamp</p>
+    </header>
+
+    <main class="w-full max-w-4xl">
+        
+        <!-- Disclaimer -->
+        <div class="bg-blue-900/30 border border-blue-800 rounded-lg p-4 mb-8 text-center text-xs text-blue-200">
+            <strong>Operational Use Only.</strong> Verify with current JTS Clinical Practice Guidelines (CPGs) and Theater Medical Directors.
+        </div>
+
+        <!-- STEP 1: Initial Topic -->
+        <div id="step1" class="glass-panel rounded-xl p-6 shadow-2xl mb-6">
+            <form id="queryForm" class="space-y-4">
+                <div>
+                    <label class="block text-lg font-semibold mb-2">Operational Topic or Clinical Question</label>
+                    <input type="text" id="initialQuestion" 
+                           class="w-full bg-slate-800 border border-slate-600 rounded-lg p-4 text-white focus:ring-2 focus:ring-orange-500 outline-none transition"
+                           placeholder="e.g., Fresh Whole Blood transfusion in Prolonged Field Care" required>
+                </div>
+                <button type="submit" id="btnRefine"
+                        class="w-full bg-indigo-700 hover:bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg transition duration-200 flex justify-center items-center gap-2">
+                    <span>Initialize Refinement</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                </button>
+            </form>
+        </div>
+
+        <!-- STEP 2: Refinement (Dynamic) -->
+        <div id="step2" class="glass-panel rounded-xl p-6 shadow-2xl mb-6 hidden">
+            <!-- UPDATED HEADER -->
+            <h3 class="text-xl font-bold text-orange-400 mb-4 border-b border-gray-700 pb-2">Refining Operational Context</h3>
+            <form id="refinementForm" class="space-y-4">
+                <div id="dynamicInputs" class="space-y-4"></div>
+                
+                <div class="flex gap-4 pt-2">
+                    <button type="button" id="btnBackToStep1" class="w-1/3 bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 px-4 rounded-lg">
+                        Back
+                    </button>
+                    <button type="submit" id="btnGenerate"
+                            class="w-2/3 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform transition hover:scale-[1.01]">
+                        Generate Analysis
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Loader -->
+        <div id="loader" class="hidden text-center py-12">
+            <div class="pulse-ring"></div>
+            <p id="loaderText" class="mt-4 text-orange-400 font-mono text-sm animate-pulse">Analyzing JTS CPGs & Doctrine...</p>
+        </div>
+
+        <!-- STEP 3: Results -->
+        <div id="results" class="hidden">
+            
+            <!-- UPDATED TOOLBAR (GRID LAYOUT) -->
+            <!-- 8 columns total. Listen takes 4 (50%). The other 4 take 1 each. -->
+            <div class="grid grid-cols-2 md:grid-cols-8 gap-2 mb-6 bg-slate-800/50 p-3 rounded-lg border border-slate-700 items-stretch">
+                
+                <!-- Listen Button: Biggest, First, Half Width -->
+                <button id="btnAudio" type="button" class="col-span-2 md:col-span-4 bg-teal-700 hover:bg-teal-600 text-white px-4 py-3 rounded-lg font-bold text-lg flex items-center justify-center gap-2 shadow-lg transition-all h-full">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" /></svg>
+                    Listen to Brief
+                </button>
+
+                <!-- New Topic -->
+                <button id="btnNewTopic" type="button" class="md:col-span-1 bg-red-900/40 hover:bg-red-900/60 text-red-200 px-2 py-3 rounded-lg font-semibold text-xs md:text-sm border border-red-900/50 flex items-center justify-center h-full">
+                    New Topic
+                </button>
+
+                <!-- Back -->
+                <button id="btnBackToRefine" type="button" class="md:col-span-1 bg-slate-700 hover:bg-slate-600 text-gray-200 px-2 py-3 rounded-lg font-medium text-xs md:text-sm flex items-center justify-center h-full">
+                    Back
+                </button>
+                
+                <!-- Copy Text -->
+                <button id="btnCopy" type="button" class="md:col-span-1 bg-slate-700 hover:bg-slate-600 text-gray-200 px-2 py-3 rounded-lg font-medium text-xs md:text-sm flex items-center justify-center h-full">
+                    Copy Text
+                </button>
+
+                <!-- Copy Plan -->
+                <button id="btnPlan" type="button" class="md:col-span-1 bg-slate-700 hover:bg-slate-600 text-gray-200 px-2 py-3 rounded-lg font-medium text-xs md:text-sm flex items-center justify-center h-full">
+                    Copy Plan
+                </button>
+            </div>
+            
+            <!-- Audio Player Container -->
+            <div id="audioContainer" class="hidden mb-6 p-4 bg-teal-900/30 border border-teal-800 rounded-lg transition-all duration-300">
+                <p class="text-teal-200 text-sm mb-2 font-semibold">🎙️ Dr. Holtkamp's Operational Analysis</p>
+                
+                <!-- Progress Bar -->
+                <div id="audioProgressContainer" class="w-full bg-gray-700 rounded-full h-2.5 mb-3 hidden">
+                    <div id="audioProgressBar" class="bg-teal-500 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+                    <p id="audioProgressText" class="text-xs text-teal-400 text-center mt-1">Generating Briefing...</p>
+                </div>
+
+                <audio id="audioPlayer" controls class="w-full hidden"></audio>
+            </div>
+
+            <!-- Follow Up (MOVED TO TOP) -->
+            <div class="mb-8 p-6 bg-slate-800/30 rounded-lg border border-slate-700">
+                <h3 class="text-lg font-bold text-white mb-2">Interactive Discussion</h3>
+                <form id="followUpForm" class="flex gap-2">
+                    <input type="text" id="followUpInput" class="flex-1 bg-slate-800 border border-slate-600 rounded-lg p-3 text-white focus:border-orange-500 outline-none" placeholder="Ask Dr. Holtkamp a follow-up about regulations or protocol...">
+                    <button type="submit" class="bg-orange-600 hover:bg-orange-500 text-white px-6 rounded-lg font-bold">Ask</button>
+                </form>
+                <div id="followUpResult" class="mt-4 p-4 bg-slate-800/50 rounded-lg border-l-4 border-orange-500 hidden prose prose-invert max-w-none"></div>
+            </div>
+
+            <!-- Content Tabs -->
+            <div class="mb-4 border-b border-gray-700 flex gap-6 overflow-x-auto">
+                <button class="tab-btn active text-orange-500 border-b-2 border-orange-500 pb-2 px-1 font-bold" data-target="summary">Guideline Review</button>
+                <button class="tab-btn text-gray-400 hover:text-white pb-2 px-1 font-medium" data-target="plan">Operational Plan</button>
+                <button class="tab-btn text-gray-400 hover:text-white pb-2 px-1 font-medium" data-target="refs">References</button>
+            </div>
+
+            <!-- Content Areas -->
+            <div id="summaryContent" class="tab-content prose prose-invert max-w-none text-gray-300"></div>
+            <div id="planContent" class="tab-content hidden prose prose-invert max-w-none text-gray-300"></div>
+            <div id="refsContent" class="tab-content hidden font-mono text-sm bg-black/30 p-4 rounded text-gray-400 whitespace-pre-wrap"></div>
+
+        </div>
+
+    </main>
+
+    <!-- PCM to WAV Library (Inlined for single file portability) -->
+    <script>
+    !function(e,t){"object"==typeof exports&&"object"==typeof module?module.exports=t():"function"==typeof define&&define.amd?define([],t):"object"==typeof exports?exports.pcmToWav=t():e.pcmToWav=t()}(window,function(){return function(e){var t={};function r(n){if(t[n])return t[n].exports;var o=t[n]={i:n,l:!1,exports:{}};return e[n].call(o.exports,o,o.exports,r),o.l=!0,o.exports}return r.m=e,r.c=t,r.d=function(e,t,n){r.o(e,t)||Object.defineProperty(e,t,{enumerable:!0,get:n})},r.r=function(e){"undefined"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(e,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(e,"__esModule",{value:!0})},r.t=function(e,t){if(1&t&&(e=r(e)),8&t)return e;if(4&t&&"object"==typeof e&&e&&e.__esModule)return e;var n=Object.create(null);if(r.r(n),Object.defineProperty(n,"default",{enumerable:!0,value:e}),2&t&&"string"!=typeof e)for(var o in e)r.d(n,o,function(t){return e[t]}.bind(null,o));return n},r.n=function(e){var t=e&&e.__esModule?function(){return e.default}:function(){return e};return r.d(t,"a",t),t},r.o=function(e,t){return Object.prototype.hasOwnProperty.call(e,t)},r.p="",r(r.s=0)}([function(e,t,r){"use strict";Object.defineProperty(t,"__esModule",{value:!0}),t.default=function(e,t,r){var n,o,a,i,f,c,u,d=new DataView(new ArrayBuffer(44+e.length*t*2));return d.setUint32(0,1380533830,!1),d.setUint32(4,36+e.length*t*2,!0),d.setUint32(8,1463899717,!1),d.setUint32(12,1718449184,!1),d.setUint32(16,16,!0),d.setUint16(20,1,!0),n=t,d.setUint16(22,n,!0),o=r,d.setUint32(24,o,!0),a=r*t*2,d.setUint32(28,a,!0),i=2*t,d.setUint16(32,i,!0),f=16,d.setUint16(34,f,!0),d.setUint32(36,1684108385,!1),c=e.length*t*2,d.setUint32(40,c,!0),u=new Uint8Array(d.buffer,44),e.forEach(function(e,t){var r=44+2*t;d.setInt16(r,e,!0)}),new Blob([d.buffer],{type:"audio/wav"})},e.exports=t.default}])});
+    </script>
+
+    <!-- Main Logic -->
+    <script>
+        // API Configuration
+        const apiKey = "AIzaSyD2CAh8chhZkxqQnwuRa2WOMBF3ESYH6yk";
+        const GENERATE_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+        const TTS_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
+
+        // DOM Elements
+        const el = id => document.getElementById(id);
+        const queryForm = el('queryForm');
+        const refineForm = el('refinementForm');
+        const loader = el('loader');
+        const results = el('results');
+        const dynamicInputs = el('dynamicInputs');
+        const followUpForm = el('followUpForm');
+        const progressBar = el('audioProgressBar');
+        const progressContainer = el('audioProgressContainer');
+        const progressText = el('audioProgressText');
+        const toast = el('toast');
+        
+        let storedSummary = "";
+        let storedContext = "";
+
+        // Toast Notification Function
+        function showToast(message) {
+            toast.innerText = message;
+            toast.className = "show";
+            setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 3000);
+        }
+
+        // Improved Retry Logic with Error Parsing
+        async function fetchWithRetry(url, payload, maxRetries = 5) {
+            for (let i = 0; i < maxRetries; i++) {
+                try {
+                    const res = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    // Handle Service Unavailable / Rate Limits by throwing to catch block
+                    if (res.status === 429 || res.status === 503) {
+                         throw new Error(`Transient Error: ${res.status}`);
+                    }
+
+                    if (!res.ok) {
+                        let errorMsg = res.statusText || `Error ${res.status}`;
+                        // Try to parse detailed JSON error from API safely
+                        try {
+                            const text = await res.text();
+                            // Attempt to parse JSON
+                            try {
+                                const errorBody = JSON.parse(text);
+                                if (errorBody.error && errorBody.error.message) {
+                                    errorMsg = `${res.status} - ${errorBody.error.message}`;
+                                } else {
+                                    errorMsg = `${res.status} - ${JSON.stringify(errorBody)}`;
+                                }
+                            } catch (jsonErr) {
+                                // If not JSON, use truncated text if short, or just status
+                                if (text.length < 500) {
+                                    errorMsg = `${res.status} - ${text}`;
+                                }
+                            }
+                        } catch (readError) {
+                            // Failed to read response body, keep default statusText
+                        }
+                        throw new Error(errorMsg);
+                    }
+                    return await res.json();
+
+                } catch (e) {
+                    // Stop retrying if max retries reached
+                    if (i === maxRetries - 1) throw e;
+                    
+                    // Exponential backoff: 1s, 2s, 4s, 8s, 16s
+                    await new Promise(r => setTimeout(r, 1000 * Math.pow(2, i)));
+                }
+            }
+        }
+        
+        // --- Robust Cleaner for LaTeX Artifacts ---
+        function stripLatex(text) {
+            if (!text) return "";
+            return text
+                // 1. Remove wrapping $ delimiters for inline math
+                .replace(/\$([^$]+)\$/g, '$1')
+                // 2. Remove \text{content} wrappers
+                .replace(/\\text\s*\{([^}]+)\}/g, '$1')
+                // 3. Replace common math symbols
+                .replace(/\\geq/g, '≥')
+                .replace(/\\leq/g, '≤')
+                .replace(/\\approx/g, '≈')
+                .replace(/\\pm/g, '±')
+                .replace(/\\rightarrow/g, '→')
+                .replace(/\\times/g, 'x')
+                .replace(/\\cdot/g, '·')
+                .replace(/\\%/g, '%')
+                // 4. Remove generic backslashes before words
+                .replace(/\\([a-zA-Z]+)/g, ' $1 ')
+                .trim();
+        }
+
+        // --- Utility: Robust Copy to Clipboard (Fallback Support) ---
+        function copyToClipboard(text) {
+            if (!text) { 
+                showToast("Nothing to copy yet!"); 
+                return; 
+            }
+            
+            // Method 1: Modern API
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showToast("Copied to clipboard!");
+                }).catch((err) => {
+                    console.warn("Clipboard API failed, trying fallback...", err);
+                    fallbackCopy(text);
+                });
+            } else {
+                // Method 2: Fallback
+                fallbackCopy(text);
+            }
+        }
+        
+        function fallbackCopy(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            
+            // Ensure element is not visible but part of DOM
+            textarea.style.position = 'fixed';
+            textarea.style.left = '-9999px';
+            textarea.style.top = '0';
+            document.body.appendChild(textarea);
+            
+            textarea.focus();
+            textarea.select();
+            
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showToast("Copied to clipboard!");
+                } else {
+                    showToast("Copy failed. Manual selection required.");
+                }
+            } catch (err) {
+                console.error('Fallback copy failed', err);
+                showToast("Copy failed.");
+            }
+            
+            document.body.removeChild(textarea);
+        }
+
+        // --- Navigation Logic ---
+        
+        // Back to Step 1 (From Refinement)
+        el('btnBackToStep1').onclick = function() {
+            el('step2').classList.add('hidden');
+            el('step1').classList.remove('hidden');
+        };
+
+        // Back to Step 2 (From Results)
+        el('btnBackToRefine').onclick = function() {
+            el('results').classList.add('hidden');
+            el('step2').classList.remove('hidden');
+        };
+
+        // New Topic (Manual Reset) - Using .onclick to prevent stacking
+        el('btnNewTopic').onclick = function() {
+             // 1. Reset Views
+             el('results').classList.add('hidden');
+             el('step2').classList.add('hidden');
+             el('audioContainer').classList.add('hidden');
+             
+             // 2. Show Step 1
+             el('step1').classList.remove('hidden');
+             
+             // 3. Clear Data
+             el('initialQuestion').value = "";
+             dynamicInputs.innerHTML = "";
+             storedSummary = "";
+             storedContext = "";
+             
+             // 4. Reset Audio
+             const player = el('audioPlayer');
+             player.pause();
+             player.src = "";
+             player.classList.add('hidden');
+             el('audioProgressContainer').classList.add('hidden');
+             
+             // 5. Reset Tabs to Default (Summary)
+             const summaryTab = document.querySelector('.tab-btn[data-target="summary"]');
+             if (summaryTab) { 
+                 summaryTab.click(); 
+             }
+             
+             showToast("Topic reset. Ready for new query.");
+        };
+
+
+        // STEP 1: Handle Initial Query (Get Refinement Questions)
+        queryForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const topic = el('initialQuestion').value;
+            
+            showLoader("Consulting Joint Trauma System (JTS) Guidelines...");
+            el('step1').classList.add('hidden');
+
+            const prompt = `
+                Topic: "${topic}"
+                Role: Expert Military Medical Planner & JTS CPG Specialist.
+                Task: Generate 5 specific *operational* clarifying questions to help the user narrow their search scope for a deployed environment.
+                
+                CRITICAL INSTRUCTION: Focus on Echelon of Care (Role 1 vs Role 3), Resource Availability, Evacuation Constraints, and Tactical Context.
+                Example questions: "Is this for Prolonged Field Care (PFC) or established Role 2?", "Are you looking for TCCC or PCC guidelines?", "Are blood products available?"
+                
+                Output: A simple list of questions, one per line. No bullets, no numbering, just the text.
+            `;
+
+            try {
+                const data = await fetchWithRetry(GENERATE_URL, {
+                    contents: [{ parts: [{ text: prompt }] }],
+                    safetySettings: [
+                        { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
+                    ]
+                });
+                
+                const text = data.candidates[0].content.parts[0].text;
+                const questions = text.split('\n').filter(line => line.trim().length > 5).slice(0, 5);
+                
+                dynamicInputs.innerHTML = '';
+                questions.forEach((q, idx) => {
+                    dynamicInputs.innerHTML += `
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-1">${q.replace(/^[Q\-*0-9: ]+/, '')}</label>
+                            <input type="text" name="q${idx}" class="w-full bg-slate-800 border border-slate-600 rounded p-3 text-white focus:border-orange-500" placeholder="Enter details...">
+                        </div>
+                    `;
+                });
+
+                hideLoader();
+                el('step2').classList.remove('hidden');
+            } catch (err) {
+                showToast("Error. Please try again.");
+                el('step1').classList.remove('hidden');
+                hideLoader();
+            }
+        });
+
+        // STEP 2: Generate Journal Club Content
+        refineForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const topic = el('initialQuestion').value;
+            const details = Array.from(dynamicInputs.querySelectorAll('input')).map(i => `${i.previousElementSibling.innerText}: ${i.value}`).join('\n');
+
+            showLoader("Synthesizing Doctrine: Searching JTS CPGs, JSOM, and Deployed Medicine...");
+            el('step2').classList.add('hidden');
+
+            const mainPrompt = `
+                Role: Dr. Matthew Holtkamp (Deployment Medicine & JTS Expert).
+                Task: Create a Clinical & Operational Analysis for: "${topic}".
+                Context (User Inputs): ${details}
+                
+                SOURCE MATERIAL PRIORITY:
+                1. Joint Trauma System (JTS) Clinical Practice Guidelines (CPGs).
+                2. Tactical Combat Casualty Care (TCCC) Guidelines.
+                3. Prolonged Field Care (PFC) Guidelines.
+                4. Journal of Special Operations Medicine (JSOM).
+                5. DoD/DA Regulations & Deployment Health Standards.
+                
+                MANDATORY STRUCTURE:
+                1. Identify EXACTLY 4 Key Documents/Studies:
+                   - Item 1 & 2: Foundational Doctrine (The JTS CPG or Landmark Military Study).
+                   - Item 3 & 4: Recent Updates or Emerging Evidence (Deployed Medicine updates, recent JSOM papers).
+                
+                2. Use Google Search to find real citations (JTS CPG numbers, Publication Dates).
+                
+                OUTPUT FORMAT (Use Markdown). You MUST use the separators |||SECTION_PLAN||| and |||SECTION_REFS||| exactly as written below.
+                
+                # Operational Medical Review
+                
+                ## Introduction
+                BLUF (Bottom Line Up Front) on the operational relevance.
+                
+                ## Foundational Doctrine 1: [CPG/Guideline Name]
+                * **Publication/Update:** [YYYY]
+                * **Operational Relevance:**
+                * **Key Directive:**
+                * **Limitations/Austere Considerations:**
+                * **Link:** [Click to Search](https://www.google.com/search?q=[CPG Name]+JTS)
+                
+                ## Foundational Doctrine 2: [CPG/Guideline Name]
+                * **Publication/Update:** [YYYY]
+                * **Operational Relevance:**
+                * **Key Directive:**
+                * **Limitations/Austere Considerations:**
+                * **Link:** [Click to Search](https://www.google.com/search?q=[CPG Name]+JTS)
+                
+                ## Emerging Evidence / Update 1: [Topic/Article]
+                * **Source/Year:** [Source, YYYY]
+                * **Why it matters downrange:**
+                * **Key Findings:**
+                * **Link:** [Click to Search](https://www.google.com/search?q=[Topic]+military+medicine)
+                
+                ## Emerging Evidence / Update 2: [Topic/Article]
+                * **Source/Year:** [Source, YYYY]
+                * **Why it matters downrange:**
+                * **Key Findings:**
+                * **Link:** [Click to Search](https://www.google.com/search?q=[Topic]+military+medicine)
+                
+                ## Dr. Holtkamp's Tactical Pearls
+                * [Pearl 1 - Focus on Resource constrained environment]
+                * [Pearl 2 - Focus on Evacuation/Regulation]
+                * [Pearl 3]
+
+                |||SECTION_PLAN|||
+                
+                # Operational Management & Plan
+                Based on JTS/PFC guidelines, provide a stepwise plan.
+                1. **Role 1 / Point of Injury:** (MARCH, Immediate actions)
+                2. **Prolonged Field Care / Role 2:** (Nursing care, maintenance, Telemed consultation)
+                3. **Evacuation / Role 3:** (Handover, documentation requirements)
+                
+                |||SECTION_REFS|||
+                
+                [Full Citation List - Format as JTS CPGs or Military Journals]
+                
+                CLEANLINESS INSTRUCTION: DO NOT use LaTeX syntax. Use simple UTF-8 symbols. Use separate paragraphs for clarity.
+            `;
+
+            try {
+                const data = await fetchWithRetry(GENERATE_URL, {
+                    contents: [{ parts: [{ text: mainPrompt }] }],
+                    tools: [{ google_search: {} }],
+                    safetySettings: [
+                        { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
+                    ]
+                });
+
+                const rawText = data.candidates[0].content.parts[0].text;
+                storedContext = rawText; // Save for follow up
+
+                // ROBUST SPLIT LOGIC
+                // We split by the distinct tokens.
+                const split1 = rawText.split('|||SECTION_PLAN|||');
+                storedSummary = split1[0];
+                let remaining = split1[1] || "";
+                
+                const split2 = remaining.split('|||SECTION_REFS|||');
+                const planText = split2[0] || "No plan generated. Try refining.";
+                const refsText = split2[1] || "No references generated.";
+
+                // APPLY CLEANER (without aggressive newline stripping)
+                const cleanSummary = stripLatex(storedSummary);
+                const cleanPlan = stripLatex(planText);
+                const cleanRefs = stripLatex(refsText);
+
+                el('summaryContent').innerHTML = marked.parse(cleanSummary);
+                el('planContent').innerHTML = marked.parse(cleanPlan);
+                el('refsContent').innerText = cleanRefs.trim();
+
+                // Typeset Math (only if any valid MathJax remains, though we stripped most)
+                MathJax.typesetPromise();
+
+                hideLoader();
+                el('results').classList.remove('hidden');
+
+            } catch (err) {
+                console.error(err);
+                showToast("Error synthesizing data.");
+                el('step2').classList.remove('hidden');
+                hideLoader();
+            }
+        });
+
+        // TABS Logic
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => {
+                    b.classList.remove('text-orange-500', 'border-b-2', 'border-orange-500', 'active');
+                    b.classList.add('text-gray-400');
+                });
+                btn.classList.add('text-orange-500', 'border-b-2', 'border-orange-500', 'active');
+                btn.classList.remove('text-gray-400');
+
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+                const target = btn.dataset.target;
+                if(target === 'summary') el('summaryContent').classList.remove('hidden');
+                if(target === 'plan') el('planContent').classList.remove('hidden');
+                if(target === 'refs') el('refsContent').classList.remove('hidden');
+            });
+        });
+
+        // AUDIO GENERATION (The Holtkamp Persona)
+        el('btnAudio').addEventListener('click', async () => {
+            const btn = el('btnAudio');
+            btn.disabled = true;
+            
+            // Declare intervals outside try block so they can be cleared in catch
+            let scriptInterval, audioInterval;
+
+            // Show Container & Progress
+            el('audioContainer').classList.remove('hidden');
+            progressContainer.classList.remove('hidden');
+            progressBar.style.width = '2%';
+            progressText.innerText = "Step 1: Scripting Operational Brief (Dr. Holtkamp Style)...";
+
+            // Simulated Progress: Step 1 (Scripting) - Fast
+            let progress = 2;
+            scriptInterval = setInterval(() => {
+                if (progress < 20) {
+                    progress += 2;
+                    progressBar.style.width = `${progress}%`;
+                }
+            }, 300);
+
+            try {
+                // Step 1: Generate the Persona Script (Requested shorter length)
+                const scriptPrompt = `
+                    You are Dr. Matthew Holtkamp, an expert in Operational Medicine. Convert the following summary into a specialized Audio Briefing.
+                    
+                    Tone: Humble but confident, decisive, and clear. Use "BLUF" (Bottom Line Up Front).
+                    Style: Military briefing style but engaging. Use terms like "Downrange," "Role 1," "Force Multiplier," "Ccp."
+                    
+                    Structure:
+                    1. Introduction (BLUF - What is the takeaway).
+                    2. Brief review of the Core CPGs/Doctrine.
+                    3. Update on recent evidence (Deployed Medicine).
+                    4. "The Holtkamp Standard" - Final clear directive for deployment readiness.
+                    
+                    Length: Detailed but concise. Aim for ~5000 words (approx 7 minutes spoken).
+                    
+                    TEXT TO ADAPT:
+                    ${storedSummary.substring(0, 6000)}
+                `;
+
+                const scriptRes = await fetchWithRetry(GENERATE_URL, {
+                    contents: [{ parts: [{ text: scriptPrompt }] }],
+                    safetySettings: [
+                        { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
+                    ]
+                });
+                let script = scriptRes.candidates[0].content.parts[0].text;
+                
+                // Stop script interval
+                clearInterval(scriptInterval);
+                progress = 25;
+                progressBar.style.width = '25%';
+
+                // --- TRUNCATE FOR SAFETY ---
+                // Limit to 10000 chars for safe TTS generation (approx 7 mins)
+                if (script.length > 10000) {
+                    script = script.substring(0, 10000);
+                    const lastPeriod = script.lastIndexOf('.');
+                    if (lastPeriod > 0) script = script.substring(0, lastPeriod + 1);
+                }
+
+                // Step 2: TTS - Slow Progress simulation
+                progressText.innerText = "Step 2: Synthesizing Secure Audio (Est. wait: ~5-7 mins)...";
+                
+                // Create a slow crawl for the heavy lifting
+                audioInterval = setInterval(() => {
+                    if (progress < 90) {
+                        // Slower increment
+                        progress += 0.5; 
+                        progressBar.style.width = `${progress}%`;
+                    }
+                }, 500); // Update every half second
+                
+                // NOTE: Safety Settings REMOVED for TTS call to prevent 400 Bad Request
+                const ttsRes = await fetchWithRetry(TTS_URL, {
+                    contents: [{ parts: [{ text: script }] }],
+                    generationConfig: {
+                        responseModalities: ["AUDIO"],
+                        speechConfig: {
+                            voiceConfig: { prebuiltVoiceConfig: { voiceName: "Sadaltager" } } // Deep, professional voice
+                        }
+                    }
+                });
+                
+                if (!ttsRes.candidates || !ttsRes.candidates[0]) {
+                     throw new Error("TTS API returned no candidates. Text might be too long.");
+                }
+
+                const audioData = ttsRes.candidates[0].content.parts[0].inlineData.data;
+                const binary = atob(audioData);
+                const bytes = new Uint8Array(binary.length);
+                for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+                
+                // Convert PCM to WAV
+                const pcm16 = new Int16Array(bytes.buffer);
+                const wavBlob = pcmToWav(pcm16, 1, 24000);
+                const audioUrl = URL.createObjectURL(wavBlob);
+
+                const player = el('audioPlayer');
+                player.src = audioUrl;
+                
+                // Finish Progress
+                clearInterval(audioInterval);
+                progressBar.style.width = '100%';
+                progressText.innerText = "Briefing Ready! (Duration: ~6 mins)";
+                
+                // Slight delay before showing player
+                setTimeout(() => {
+                    progressContainer.classList.add('hidden');
+                    player.classList.remove('hidden');
+                    player.play();
+                }, 1000);
+
+            } catch (err) {
+                // Clear intervals on error
+                if (scriptInterval) clearInterval(scriptInterval);
+                if (audioInterval) clearInterval(audioInterval);
+                
+                progressContainer.classList.add('hidden');
+                console.error(err);
+                showToast("Audio generation failed.");
+            } finally {
+                btn.disabled = false;
+            }
+        });
+
+        // FOLLOW UP
+        followUpForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const q = el('followUpInput').value;
+            const container = el('followUpResult');
+            
+            container.innerHTML = '<span class="animate-pulse">Dr. Holtkamp is consulting the CPGs...</span>';
+            container.classList.remove('hidden');
+
+            const prompt = `
+                Context: ${storedContext}
+                User Question: "${q}"
+                Role: Dr. Holtkamp (JTS Expert).
+                Task: Answer the question specifically referencing Military Doctrine, TCCC, or JTS CPGs. Be concise.
+            `;
+
+            try {
+                const data = await fetchWithRetry(GENERATE_URL, {
+                    contents: [{ parts: [{ text: prompt }] }],
+                    tools: [{ google_search: {} }],
+                    safetySettings: [
+                        { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
+                    ]
+                });
+                const rawFollowUp = data.candidates[0].content.parts[0].text;
+                container.innerHTML = marked.parse(stripLatex(rawFollowUp)); // Apply cleaner here too
+            } catch (err) {
+                container.innerText = "Error getting response.";
+            }
+        });
+
+        // Utilities
+        function showLoader(text) {
+            el('loaderText').innerText = text;
+            el('loader').classList.remove('hidden');
+        }
+        function hideLoader() {
+            el('loader').classList.add('hidden');
+        }
+        
+        // Updated onclick handlers to use the robust copy function
+        el('btnCopy').onclick = () => {
+            copyToClipboard(storedSummary);
+        };
+        el('btnPlan').onclick = () => {
+            copyToClipboard(el('planContent').innerText);
+        };
+
+    </script>
+</body>
+</html>
