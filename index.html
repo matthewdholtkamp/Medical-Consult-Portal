@@ -6,40 +6,7 @@
     <title>AI Medical Specialist Consult Portal</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    },
-                    colors: {
-                        gemini: {
-                            900: '#0b0f19', // Deepest background
-                            800: '#13161f', // Sidebar/Surface
-                            700: '#1e2330', // Hover states
-                            600: '#2d3342', // Borders
-                            accent: '#3b82f6', // Blue accent
-                        }
-                    },
-                    typography: (theme) => ({
-                        DEFAULT: {
-                            css: {
-                                color: theme('colors.gray.300'),
-                                strong: { color: theme('colors.white') },
-                                a: { color: theme('colors.blue.400') },
-                                h1: { color: theme('colors.white') },
-                                h2: { color: theme('colors.white') },
-                                h3: { color: theme('colors.white') },
-                                h4: { color: theme('colors.white') },
-                            },
-                        },
-                    }),
-                }
-            }
-        }
-    </script>
+    <script src="js/theme.js"></script>
 
     <!-- Marked.js for Markdown Parsing -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -676,116 +643,108 @@ All statements must be based solely on current medical guidelines, high-quality 
 Do not speculate beyond evidence; cite guideline or study sources in APA style with superscripted citations.
 Use standard Markdown formatting. Do not use LaTeX-style formatting (e.g., Avoid $, {}, or \ for math/citations) unless absolutely necessary for a formula, and if used, ensure it is compatible with standard Markdown readers.
 Tone should be authoritative, educational, and analytically rigorous.`;
+    </script> <!-- Close previous script tag -->
 
-    // Function to clean "amateur" characters and LaTeX artifacts
-    function cleanMedicalResponse(text) {
-        if (!text) return "";
-        let cleaned = text;
-
-        // 1. Handle the specific complex pattern: ${}^{1}$ or similar
-        // Matches literal: $ { } ^ { number } $
-        cleaned = cleaned.replace(/\$\{\}\^\{(\d+)\}\$/g, "<sup>$1</sup>");
-
-        // 2. Handle sloppy variants: ${}^{1} without closing, or spacing
-        cleaned = cleaned.replace(/\$\{\}\^(\d+)/g, "<sup>$1</sup>");
-
-        // 3. Handle standard LaTeX: $^{1}$ or $^1$ or ${^1}$
-        cleaned = cleaned.replace(/\$\^\{?(\d+)\}?\$?/g, "<sup>$1</sup>");
-        cleaned = cleaned.replace(/\$\{\^(\d+)\}\$/g, "<sup>$1</sup>");
-
-        // 4. Remove $_ and other common artifacts
-        cleaned = cleaned.replace(/\$\_/g, "");
-        
-        return cleaned;
-    }
-
-    // New function to reset the consult state
-    function resetConsult() {
-        document.getElementById('chatInput').value = '';
-        const responseArea = document.getElementById('responseArea');
-        responseArea.classList.add('hidden');
-        responseArea.innerHTML = '';
-        document.getElementById('newQuestionBtn').classList.add('hidden');
-    }
-
-    async function askDrHoltkamp() {
-        const queryInput = document.getElementById('chatInput');
-        const query = queryInput.value;
-        const responseArea = document.getElementById('responseArea');
-        const askBtn = document.getElementById('askBtn');
-        const newQuestionBtn = document.getElementById('newQuestionBtn');
-
-        if (!query.trim()) return;
-
-        askBtn.disabled = true;
-        askBtn.textContent = "Consulting...";
-        responseArea.classList.remove('hidden');
-        newQuestionBtn.classList.add('hidden');
-
-        responseArea.innerHTML = `
-            <div class="flex items-center gap-3 text-slate-400">
-                <span class="material-symbols-outlined animate-brain text-3xl">psychology</span>
-                <span class="font-medium text-sm tracking-wide">Dr. Holtkamp is reviewing clinical guidelines...</span>
-            </div>
-        `;
+    <!-- Import Shared API Logic -->
+    <script type="module">
+        import { callGeminiText } from './js/api.js';
 
         const apiKey = "AIzaSyDPIfqwivYMHpicaT2FfkJn5hDmQtQwV70";
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-
-        const payload = {
-            contents: [{ parts: [{ text: query }] }],
-            systemInstruction: { parts: [{ text: DR_HOLTKAMP_SYSTEM_INSTRUCTION }] }
-        };
-
-        try {
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-
-            if (!response.ok) throw new Error(`API Error: ${response.status}`);
-
-            const data = await response.json();
-            let text = data.candidates?.[0]?.content?.parts?.[0]?.text || "No response generated. Please clarify your clinical query.";
-            text = cleanMedicalResponse(text);
-
-            responseArea.innerHTML = `
-                <div class="flex items-start gap-4 animate-fade-in">
-                     <div class="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center flex-shrink-0 mt-1">
-                        <span class="material-symbols-outlined text-blue-400">smart_toy</span>
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <div class="flex items-center justify-between mb-2">
-                            <h3 class="font-bold text-white text-sm uppercase tracking-wider">Dr. Holtkamp Analysis</h3>
-                            <span class="text-[10px] text-slate-500 bg-slate-800 px-2 py-0.5 rounded border border-slate-700">AI Generated • Review Verify</span>
-                        </div>
-                        <div class="prose-content text-slate-300 text-sm leading-relaxed">
-                            ${marked.parse(text)}
-                        </div>
-                    </div>
-                </div>
-            `;
-            newQuestionBtn.classList.remove('hidden');
-
-        } catch (error) {
-            console.error(error);
-            responseArea.innerHTML = `
-                <div class="p-4 bg-red-900/20 border border-red-500/30 rounded-xl text-red-200 flex items-start gap-3">
-                    <span class="material-symbols-outlined text-red-400">error</span>
-                    <div>
-                        <strong class="block font-semibold text-red-100 text-sm">Consult Error</strong>
-                        <span class="text-xs opacity-80">Unable to reach Dr. Holtkamp service. Check network or API configuration.</span>
-                    </div>
-                </div>
-            `;
-            newQuestionBtn.classList.remove('hidden');
-        } finally {
-            askBtn.disabled = false;
-            askBtn.textContent = "Ask Dr. Holtkamp";
+        
+        window.resetConsult = function() {
+            document.getElementById('chatInput').value = '';
+            const responseArea = document.getElementById('responseArea');
+            responseArea.classList.add('hidden');
+            responseArea.innerHTML = '';
+            document.getElementById('newQuestionBtn').classList.add('hidden');
         }
-    }
 
+        // Function to clean "amateur" characters and LaTeX artifacts
+        function cleanMedicalResponse(text) {
+            if (!text) return "";
+            let cleaned = text;
+
+            // 1. Handle the specific complex pattern: ${}^{1}$ or similar
+            // Matches literal: $ { } ^ { number } $
+            cleaned = cleaned.replace(/\$\{\}\^\{(\d+)\}\$/g, "<sup>$1</sup>");
+
+            // 2. Handle sloppy variants: ${}^{1} without closing, or spacing
+            cleaned = cleaned.replace(/\$\{\}\^(\d+)/g, "<sup>$1</sup>");
+
+            // 3. Handle standard LaTeX: $^{1}$ or $^1$ or ${^1}$
+            cleaned = cleaned.replace(/\$\^\{?(\d+)\}?\$?/g, "<sup>$1</sup>");
+            cleaned = cleaned.replace(/\$\{\^(\d+)\}\$/g, "<sup>$1</sup>");
+
+            // 4. Remove $_ and other common artifacts
+            cleaned = cleaned.replace(/\$\_/g, "");
+
+            return cleaned;
+        }
+
+        window.askDrHoltkamp = async function() {
+            const queryInput = document.getElementById('chatInput');
+            const query = queryInput.value;
+            const responseArea = document.getElementById('responseArea');
+            const askBtn = document.getElementById('askBtn');
+            const newQuestionBtn = document.getElementById('newQuestionBtn');
+
+            if (!query.trim()) return;
+
+            askBtn.disabled = true;
+            askBtn.textContent = "Consulting...";
+            responseArea.classList.remove('hidden');
+            newQuestionBtn.classList.add('hidden');
+
+            responseArea.innerHTML = `
+                <div class="flex items-center gap-3 text-slate-400">
+                    <span class="material-symbols-outlined animate-brain text-3xl">psychology</span>
+                    <span class="font-medium text-sm tracking-wide">Dr. Holtkamp is reviewing clinical guidelines...</span>
+                </div>
+            `;
+
+            try {
+                // Use Shared API Function
+                let text = await callGeminiText(apiKey, DR_HOLTKAMP_SYSTEM_INSTRUCTION, query);
+                text = cleanMedicalResponse(text);
+
+                responseArea.innerHTML = `
+                    <div class="flex items-start gap-4 animate-fade-in">
+                        <div class="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center flex-shrink-0 mt-1">
+                            <span class="material-symbols-outlined text-blue-400">smart_toy</span>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center justify-between mb-2">
+                                <h3 class="font-bold text-white text-sm uppercase tracking-wider">Dr. Holtkamp Analysis</h3>
+                                <span class="text-[10px] text-slate-500 bg-slate-800 px-2 py-0.5 rounded border border-slate-700">AI Generated • Review Verify</span>
+                            </div>
+                            <div class="prose-content text-slate-300 text-sm leading-relaxed">
+                                ${marked.parse(text)}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                newQuestionBtn.classList.remove('hidden');
+
+            } catch (error) {
+                console.error(error);
+                responseArea.innerHTML = `
+                    <div class="p-4 bg-red-900/20 border border-red-500/30 rounded-xl text-red-200 flex items-start gap-3">
+                        <span class="material-symbols-outlined text-red-400">error</span>
+                        <div>
+                            <strong class="block font-semibold text-red-100 text-sm">Consult Error</strong>
+                            <span class="text-xs opacity-80">Unable to reach Dr. Holtkamp service. Check network or API configuration.</span>
+                        </div>
+                    </div>
+                `;
+                newQuestionBtn.classList.remove('hidden');
+            } finally {
+                askBtn.disabled = false;
+                askBtn.textContent = "Ask Dr. Holtkamp";
+            }
+        }
+    </script>
+
+    <script>
     // --- GLOBAL SEARCH LOGIC ---
     function handleGlobalSearch(term) {
         const resultsContainer = document.getElementById("search-results-container");

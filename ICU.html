@@ -5,11 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI ICU Critical Care Consultant</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="js/theme.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        h1, h2, h3, h4, summary, button, .header-font { font-family: 'Roboto Condensed', sans-serif; letter-spacing: 0.5px; }
         .hidden { display: none !important; }
         .spinner {
             border: 4px solid rgba(0, 0, 0, 0.1);
@@ -53,7 +52,7 @@
         }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-200">
+<body class="bg-gemini-900 text-gray-200 font-sans">
 
     <div class="max-w-6xl mx-auto p-4 sm:p-8">
         
@@ -382,7 +381,9 @@
 
     </div>
 
-    <script>
+    <script type="module">
+        import { callGeminiApi, callGeminiText } from './js/api.js';
+
         // --- Global State ---
         const apiKey = "AIzaSyD5OPC5Ij1SlDyOZfqWuWnkwJ7VSgfnlpg";
         
@@ -469,42 +470,6 @@
             });
         }
 
-        // --- API Logic ---
-        async function callGeminiApi(systemPrompt, userQuery) {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-            const payload = {
-                contents: [{ parts: [{ text: userQuery }] }],
-                systemInstruction: { parts: [{ text: systemPrompt }] },
-                generationConfig: { responseMimeType: "application/json" }
-            };
-
-            try {
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                if (!response.ok) throw new Error(`API Error: ${response.status}`);
-                const data = await response.json();
-                return JSON.parse(data.candidates[0].content.parts[0].text);
-            } catch (error) {
-                console.error(error);
-                throw error;
-            }
-        }
-
-        // Added for text-only refine queries
-        async function callGeminiText(systemPrompt, userQuery) {
-             const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-             const payload = {
-                contents: [{ parts: [{ text: userQuery }] }],
-                systemInstruction: { parts: [{ text: systemPrompt }] }
-            };
-            const response = await fetch(url, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload)});
-            const data = await response.json();
-            return data.candidates[0].content.parts[0].text;
-        }
-
         // --- Step 1: Intake Logic ---
         document.getElementById('load-example-btn').addEventListener('click', () => {
             setMode('Initial');
@@ -559,7 +524,7 @@
             `;
 
             try {
-                const result = await callGeminiApi(systemPrompt, clinicalContext);
+                const result = await callGeminiApi(apiKey, systemPrompt, clinicalContext);
                 const container = document.getElementById('questions-container');
                 container.innerHTML = '';
                 result.questions.forEach((q, i) => {
@@ -640,7 +605,7 @@
             `;
 
             try {
-                const result = await callGeminiApi(systemPrompt, contextData);
+                const result = await callGeminiApi(apiKey, systemPrompt, contextData);
                 state.generatedPlan = result;
                 
                 // Populate Review
@@ -745,7 +710,7 @@
             const ctx = `Patient: ${state.age}. Condition: ${document.getElementById('assessment-summary').textContent}. Question: ${q}`;
             
             try {
-                const ans = await callGeminiText(sys, ctx);
+                const ans = await callGeminiText(apiKey, sys, ctx);
                 box.textContent = `Consultant: ${ans}`;
             } catch(e) {
                 box.textContent = "Connection error.";
