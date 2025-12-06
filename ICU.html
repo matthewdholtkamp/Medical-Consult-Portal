@@ -125,32 +125,32 @@
                 
                 <!-- Core Demographics -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 bg-slate-950 p-4 rounded-lg border border-slate-800">
-                     <div class="md:col-span-1">
-                        <label class="block text-xs font-bold text-rose-400 mb-2 uppercase tracking-wide">
+                      <div class="md:col-span-1">
+                         <label class="block text-xs font-bold text-rose-400 mb-2 uppercase tracking-wide">
                              <i class="fa-solid fa-hashtag mr-1"></i> Age / Sex
-                        </label>
-                        <input type="text" id="age-input" class="w-full p-3 border border-slate-700 rounded bg-slate-900 text-white focus:ring-2 focus:ring-rose-500 outline-none" placeholder="e.g. 65yo M">
-                     </div>
-                     <div class="md:col-span-1">
-                        <label class="block text-xs font-bold text-rose-400 mb-2 uppercase tracking-wide">
-                            <i class="fa-solid fa-hospital-user mr-1"></i> Location
                          </label>
-                         <select id="location-input" class="w-full p-3 border border-slate-700 rounded bg-slate-900 text-white focus:ring-2 focus:ring-rose-500 outline-none">
+                         <input type="text" id="age-input" class="w-full p-3 border border-slate-700 rounded bg-slate-900 text-white focus:ring-2 focus:ring-rose-500 outline-none" placeholder="e.g. 65yo M">
+                      </div>
+                      <div class="md:col-span-1">
+                         <label class="block text-xs font-bold text-rose-400 mb-2 uppercase tracking-wide">
+                             <i class="fa-solid fa-hospital-user mr-1"></i> Location
+                          </label>
+                          <select id="location-input" class="w-full p-3 border border-slate-700 rounded bg-slate-900 text-white focus:ring-2 focus:ring-rose-500 outline-none">
                              <option value="ICU">Inpatient ICU</option>
                              <option value="Inpatient Ward">Inpatient Ward</option>
                              <option value="ER">Emergency Room (ER)</option>
-                         </select>
-                     </div>
-                     <div class="md:col-span-1">
-                        <label class="block text-xs font-bold text-rose-400 mb-2 uppercase tracking-wide">
+                          </select>
+                      </div>
+                      <div class="md:col-span-1">
+                         <label class="block text-xs font-bold text-rose-400 mb-2 uppercase tracking-wide">
                              <i class="fa-solid fa-bed-pulse mr-1"></i> Code Status
-                        </label>
-                        <select id="code-status" class="w-full p-3 border border-slate-700 rounded bg-slate-900 text-white focus:ring-2 focus:ring-rose-500 outline-none">
+                         </label>
+                         <select id="code-status" class="w-full p-3 border border-slate-700 rounded bg-slate-900 text-white focus:ring-2 focus:ring-rose-500 outline-none">
                             <option value="Full Code">Full Code</option>
                             <option value="DNR/DNI">DNR / DNI</option>
                             <option value="DNR/Ok to Intubate">DNR / OK to Intubate</option>
                         </select>
-                     </div>
+                      </div>
                 </div>
 
                 <!-- DYNAMIC CONTENT AREA -->
@@ -384,7 +384,8 @@
 
     <script>
         // --- Global State ---
-        const apiKey = "AIzaSyD5OPC5Ij1SlDyOZfqWuWnkwJ7VSgfnlpg";
+        // Setting apiKey to empty string as per instructions; environment handles auth.
+        const apiKey = "AIzaSyD5OPC5Ij1SlDyOZfqWuWnkwJ7VSgfnlpg"; 
         
         let state = {
             mode: "Initial", // or "Followup"
