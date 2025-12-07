@@ -627,6 +627,7 @@
 
                 const player = el('audioPlayer');
                 player.src = audioUrl;
+                player.playbackRate = 1.25; // Speed up playback
                 
                 // Finish Progress
                 clearInterval(audioInterval);

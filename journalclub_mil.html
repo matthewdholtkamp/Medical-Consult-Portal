@@ -680,7 +680,7 @@
             try {
                 // Step 1: Generate the Persona Script (Requested shorter length)
                 const scriptPrompt = `
-                    You are Dr. Matthew Holtkamp, an expert in Operational Medicine. Convert the following summary into a specialized Audio Briefing.
+                    You are Dr. Matthew Holtkamp, an expert in Operational Medicine. Convert the following summary into a specialized, seamless Audio Briefing.
                     
                     Tone: **High-Energy, Direct, Witty, and "In the Suck" capable.**
                     Style:
@@ -765,6 +765,7 @@
 
                 const player = el('audioPlayer');
                 player.src = audioUrl;
+                player.playbackRate = 1.25; // Speed up playback
                 
                 // Finish Progress
                 clearInterval(audioInterval);
