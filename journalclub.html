@@ -543,18 +543,22 @@
             try {
                 // Step 1: Generate the Persona Script (Requested shorter length)
                 const scriptPrompt = `
-                    You are Dr. Matthew Holtkamp. Convert the following medical summary into a robust audio transcript.
+                    You are Dr. Matthew Holtkamp. Convert the following medical summary into a high-energy, podcast-style audio transcript.
                     
-                    Tone: Fun, Professional, Authoritative, but Conversational. 
-                    Style: Use rhetorical questions. Say things like "Here is the kicker," "Welcome back to Journal Club," or "Let's cut through the noise."
+                    Tone: **Fun, Witty, Fast-Paced, and Conversational.**
+                    Style:
+                    - Use short, punchy sentences to keep the tempo up.
+                    - Be charismatic and less formal. Use humor where appropriate.
+                    - Say things like "Here's the kicker," "Let's cut through the noise," "Boom, there it is," or "Welcome back to Journal Club."
+                    - Avoid long, dragging explanations. Keep it moving.
                     
                     Structure:
-                    1. Intro (High energy).
-                    2. Discuss the 2 Landmark trials (The history).
-                    3. Discuss the 2 Recent trials (The update).
-                    4. Give the "Bottom Line" advice.
+                    1. Intro (High energy, hook the listener immediately).
+                    2. Discuss the 2 Landmark trials (The history - keep it snappy).
+                    3. Discuss the 2 Recent trials (The update - what's new and exciting).
+                    4. The "Bottom Line" advice (Clear, actionable, confident).
                     
-                    Length: detailed and comprehensive. Aim for roughly 4000-6000 words (approx 7 minutes spoken).
+                    Length: Detailed but efficient. Aim for roughly 4000 words to ensure a brisk pace without dragging.
                     
                     TEXT TO ADAPT:
                     ${storedSummary.substring(0, 6000)}
@@ -602,7 +606,7 @@
                     generationConfig: {
                         responseModalities: ["AUDIO"],
                         speechConfig: {
-                            voiceConfig: { prebuiltVoiceConfig: { voiceName: "Sadaltager" } } // Deep, professional voice
+                            voiceConfig: { prebuiltVoiceConfig: { voiceName: "Puck" } } // Energetic, fun male voice
                         }
                     }
                 });
