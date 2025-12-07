@@ -682,16 +682,21 @@
                 const scriptPrompt = `
                     You are Dr. Matthew Holtkamp, an expert in Operational Medicine. Convert the following summary into a specialized Audio Briefing.
                     
-                    Tone: Humble but confident, decisive, and clear. Use "BLUF" (Bottom Line Up Front).
-                    Style: Military briefing style but engaging. Use terms like "Downrange," "Role 1," "Force Multiplier," "Ccp."
+                    Tone: **High-Energy, Direct, Witty, and "In the Suck" capable.**
+                    Style:
+                    - Move fast. No droning.
+                    - Use military slang/lingo naturally ("Downrange," "Role 1," "Force Multiplier," "Mike Mike").
+                    - Be like a charismatic Squad Leader briefing the team before a mission, not a boring lecture.
+                    - Humor is good. Use it to keep attention.
+                    - Short, punchy sentences.
                     
                     Structure:
-                    1. Introduction (BLUF - What is the takeaway).
-                    2. Brief review of the Core CPGs/Doctrine.
-                    3. Update on recent evidence (Deployed Medicine).
-                    4. "The Holtkamp Standard" - Final clear directive for deployment readiness.
+                    1. Introduction (BLUF - Hit hard with the main takeaway immediately).
+                    2. Core Doctrine (The "Textbook" answer - keep it brief).
+                    3. Real World Application (The "Street" answer - what actually works).
+                    4. "The Holtkamp Standard" - Final clear directive.
                     
-                    Length: Detailed but concise. Aim for ~5000 words (approx 7 minutes spoken).
+                    Length: Concise and punchy. Aim for ~4000 words to keep the tempo high.
                     
                     TEXT TO ADAPT:
                     ${storedSummary.substring(0, 6000)}
@@ -739,7 +744,7 @@
                     generationConfig: {
                         responseModalities: ["AUDIO"],
                         speechConfig: {
-                            voiceConfig: { prebuiltVoiceConfig: { voiceName: "Sadaltager" } } // Deep, professional voice
+                            voiceConfig: { prebuiltVoiceConfig: { voiceName: "Puck" } } // Energetic, fun male voice
                         }
                     }
                 });
