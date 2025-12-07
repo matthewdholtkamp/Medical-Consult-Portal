@@ -9,10 +9,27 @@ import { GEMINI_MODEL_ID } from './config.js';
  * @param {number} retries - Number of times to retry on failure (default 3).
  * @returns {Promise<Object>} - The parsed JSON response from the AI.
  */
-export async function callGeminiApi(apiKey, systemPrompt, userQuery, retries = 3) {
+export async function callGeminiApi(apiKey, systemPrompt, userQuery, images = [], retries = 3) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL_ID}:generateContent?key=${apiKey}`;
+
+    // Construct Parts
+    const parts = [{ text: userQuery }];
+
+    // Append Images if present
+    if (images && images.length > 0) {
+        images.forEach(img => {
+            // img should be { mime: "image/jpeg", data: "base64..." }
+            parts.push({
+                inline_data: {
+                    mime_type: img.mime,
+                    data: img.data
+                }
+            });
+        });
+    }
+
     const payload = {
-        contents: [{ parts: [{ text: userQuery }] }],
+        contents: [{ parts: parts }],
         systemInstruction: { parts: [{ text: systemPrompt }] },
         generationConfig: { responseMimeType: "application/json" }
     };
@@ -36,7 +53,7 @@ export async function callGeminiApi(apiKey, systemPrompt, userQuery, retries = 3
         if (retries > 0) {
             // Exponential backoff
             await new Promise(r => setTimeout(r, 1000 + (3 - retries) * 1000));
-            return callGeminiApi(apiKey, systemPrompt, userQuery, retries - 1);
+            return callGeminiApi(apiKey, systemPrompt, userQuery, images, retries - 1);
         }
         throw error;
     }
