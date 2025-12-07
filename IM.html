@@ -5,12 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Internal Medicine Consultant</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="js/theme.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <!-- Font Awesome for medical icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        h1, h2, h3, h4, summary, button { font-family: 'Roboto Condensed', sans-serif; letter-spacing: 0.5px; }
         .hidden { display: none !important; }
         .spinner {
             border: 4px solid rgba(0, 0, 0, 0.1);
@@ -38,7 +37,7 @@
         .note-preview::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
     </style>
 </head>
-<body class="bg-slate-900 text-slate-200">
+<body class="bg-gemini-900 text-gray-200 font-sans">
 
     <div class="max-w-5xl mx-auto p-4 sm:p-8">
         
@@ -273,7 +272,9 @@
 
     </div>
 
-    <script>
+    <script type="module">
+        import { callGeminiApi, callGeminiText } from './js/api.js';
+
         // --- Global State ---
         const apiKey = "AIzaSyC5mVibf7r5PCuTMgPr4SGlUaDtlWx1CUM";
         
@@ -332,44 +333,6 @@
             });
         }
 
-        // --- API Logic ---
-        async function callGeminiApi(systemPrompt, userQuery, retries = 3) {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-            const payload = {
-                contents: [{ parts: [{ text: userQuery }] }],
-                systemInstruction: { parts: [{ text: systemPrompt }] },
-                generationConfig: { responseMimeType: "application/json" }
-            };
-
-            try {
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                if (!response.ok) throw new Error(`API Error: ${response.status}`);
-                const data = await response.json();
-                return JSON.parse(data.candidates[0].content.parts[0].text);
-            } catch (error) {
-                if (retries > 0) {
-                    await new Promise(r => setTimeout(r, 1000 + (3-retries)*2000));
-                    return callGeminiApi(systemPrompt, userQuery, retries - 1);
-                }
-                throw error;
-            }
-        }
-
-        async function callGeminiText(systemPrompt, userQuery) {
-             const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-             const payload = {
-                contents: [{ parts: [{ text: userQuery }] }],
-                systemInstruction: { parts: [{ text: systemPrompt }] }
-            };
-            const response = await fetch(url, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload)});
-            const data = await response.json();
-            return data.candidates[0].content.parts[0].text;
-        }
-
 
         // --- Step 1: Intake Logic ---
         document.getElementById('example-complaint-btn').addEventListener('click', () => {
@@ -416,7 +379,7 @@
             `;
 
             try {
-                const result = await callGeminiApi(prompt, context);
+                const result = await callGeminiApi(apiKey, prompt, context);
                 const container = document.getElementById('questions-container');
                 container.innerHTML = '';
                 result.questions.forEach(q => {
@@ -492,7 +455,7 @@
             `;
 
             try {
-                const result = await callGeminiApi(systemPrompt, contextData);
+                const result = await callGeminiApi(apiKey, systemPrompt, contextData);
                 state.generatedPlan = result;
                 renderReview(result);
                 showSection('review');
@@ -635,7 +598,7 @@
             const ctx = `Patient Context: ${state.chiefComplaint}. Plan: ${JSON.stringify(state.generatedPlan.plan)}. Question: ${q}`;
             
             try {
-                const ans = await callGeminiText(sys, ctx);
+                const ans = await callGeminiText(apiKey, sys, ctx);
                 box.textContent = `Consultant: ${ans}`;
             } catch(e) {
                 box.textContent = "Connection error.";
