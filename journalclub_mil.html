@@ -683,20 +683,20 @@
                     You are Dr. Matthew Holtkamp, an expert in Operational Medicine. Convert the following summary into a specialized, seamless Audio Briefing.
                     
                     Tone: **High-Energy, Direct, Witty, and "In the Suck" capable.**
-
-                    CRITICAL INSTRUCTIONS:
-                    1. **NO ACRONYMS:** You MUST expand ALL acronyms (e.g., say "Prolonged Field Care" instead of "PFC"). It is hard to follow acronyms in audio.
-                    2. **SEAMLESS FLOW:** Do NOT use section headers, numbered lists, or awkward pauses. The briefing should flow like a charismatic Squad Leader talking to his team.
-                    3. **NO SOUND EFFECTS:** Do NOT include text like [Intro Music], [Background Noise], or [End Transmission]. Just the spoken words.
-                    4. **STYLE:** Move fast. No droning. Use military lingo naturally but fully spoken out. Be fun but authoritative.
+                    Style:
+                    - Move fast. No droning.
+                    - Use military slang/lingo naturally ("Downrange," "Role 1," "Force Multiplier," "Mike Mike").
+                    - Be like a charismatic Squad Leader briefing the team before a mission, not a boring lecture.
+                    - Humor is good. Use it to keep attention.
+                    - Short, punchy sentences.
                     
                     Structure:
-                    - Start with the BLUF (Bottom Line Up Front) immediately.
-                    - Transition smoothly into the Doctrine ("Here's what the book says...").
-                    - Pivot to Real World Application ("But here's what happens downrange...").
-                    - End with "The Holtkamp Standard" directive.
+                    1. Introduction (BLUF - Hit hard with the main takeaway immediately).
+                    2. Core Doctrine (The "Textbook" answer - keep it brief).
+                    3. Real World Application (The "Street" answer - what actually works).
+                    4. "The Holtkamp Standard" - Final clear directive.
                     
-                    Length: Concise and punchy. Aim for ~4000 words.
+                    Length: Concise and punchy. Aim for ~4000 words to keep the tempo high.
                     
                     TEXT TO ADAPT:
                     ${storedSummary.substring(0, 6000)}
@@ -744,7 +744,7 @@
                     generationConfig: {
                         responseModalities: ["AUDIO"],
                         speechConfig: {
-                            voiceConfig: { prebuiltVoiceConfig: { voiceName: "Fenrir" } } // Deep, authoritative male voice
+                            voiceConfig: { prebuiltVoiceConfig: { voiceName: "Puck" } } // Energetic, fun male voice
                         }
                     }
                 });
