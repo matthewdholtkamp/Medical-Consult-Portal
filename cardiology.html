@@ -41,12 +41,17 @@
 
     <div class="max-w-5xl mx-auto p-4 sm:p-8">
         
-        <header class="text-center mb-8 border-b border-slate-700 pb-6">
+        <header class="text-center mb-8 border-b border-slate-700 pb-6 relative">
             <div class="flex justify-center items-center mb-2">
                 <i class="fa-solid fa-heart-pulse text-red-500 text-4xl mr-3"></i>
                 <h1 class="text-4xl font-bold text-white tracking-wider">AI CARDIOLOGY <span class="text-red-500">CONSULTANT</span></h1>
             </div>
             <p class="text-lg text-slate-400">Decision Support for Inpatient & Outpatient Cardiac Care</p>
+
+            <!-- Share Button -->
+            <button id="share-btn" class="absolute top-0 right-0 mt-2 mr-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-4 py-2 rounded-md border border-slate-600 text-sm font-medium transition flex items-center shadow-sm">
+                <i class="fa-solid fa-share-nodes mr-2 text-blue-400"></i> Share
+            </button>
         </header>
 
         <!-- HIPAA WARNING (UPDATED WITH 18 IDENTIFIERS) -->
@@ -272,11 +277,54 @@
 
     </div>
 
+    <!-- SHARE MODAL -->
+    <div id="share-modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-50 backdrop-blur-sm">
+        <div class="bg-slate-800 p-6 rounded-lg shadow-2xl border border-slate-600 max-w-lg w-full mx-4">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-white flex items-center">
+                    <i class="fa-solid fa-share-nodes mr-2 text-blue-500"></i> Share Consult
+                </h3>
+                <button id="close-share-modal" class="text-slate-400 hover:text-white transition">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <p class="text-slate-300 text-sm mb-4">
+                Generate a secure link to share this consult with another physician.
+                They will see the exact current state and can make edits.
+            </p>
+
+            <div id="share-loading" class="hidden text-center py-4">
+                <div class="spinner border-l-blue-500 mx-auto mb-2"></div>
+                <p class="text-slate-400 text-xs">Generating Link...</p>
+            </div>
+
+            <div id="share-result" class="hidden">
+                <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Shareable Link</label>
+                <div class="flex space-x-2 mb-4">
+                    <input type="text" id="share-link-input" readonly class="flex-1 bg-slate-900 border border-slate-600 text-white text-sm p-2 rounded focus:outline-none focus:border-blue-500">
+                    <button id="copy-link-btn" class="bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded text-sm font-medium transition">
+                        Copy
+                    </button>
+                </div>
+                <p id="share-copy-msg" class="text-green-400 text-xs text-center hidden mb-2">Link copied to clipboard!</p>
+            </div>
+
+            <div id="share-error" class="hidden bg-red-900/30 border border-red-800 text-red-200 p-3 rounded text-sm mb-4"></div>
+
+            <button id="generate-link-btn" class="w-full bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 rounded-lg transition border border-slate-500">
+                Generate Link
+            </button>
+        </div>
+    </div>
+
     <script type="module">
         import { callGeminiApi, callGeminiText } from './js/api.js';
+        import { saveStateToBin, loadStateFromBin } from './js/sharing.js';
 
         // --- Global State ---
         const apiKey = "AIzaSyD5JyHwXeuNJRHMIx41E-z06FdIL9MCc9k";
+        const jsonBinKey = ""; // TODO: Enter your JSONBin Master Key here
         
         let state = {
             location: "",
@@ -380,6 +428,7 @@
 
             try {
                 const result = await callGeminiApi(apiKey, prompt, context);
+                state.questions = result.questions; // Save to state
                 const container = document.getElementById('questions-container');
                 container.innerHTML = '';
                 result.questions.forEach(q => {
@@ -626,9 +675,192 @@
         });
 
         document.getElementById('start-over-btn').addEventListener('click', () => location.reload());
-        
+
+        // --- Sharing Logic ---
+        const shareModal = document.getElementById('share-modal');
+        const shareBtn = document.getElementById('share-btn');
+        const closeShareBtn = document.getElementById('close-share-modal');
+        const generateLinkBtn = document.getElementById('generate-link-btn');
+        const shareResult = document.getElementById('share-result');
+        const shareLoading = document.getElementById('share-loading');
+        const shareError = document.getElementById('share-error');
+        const shareLinkInput = document.getElementById('share-link-input');
+        const copyLinkBtn = document.getElementById('copy-link-btn');
+
+        shareBtn.addEventListener('click', () => {
+            shareModal.classList.remove('hidden');
+            resetShareModal();
+        });
+
+        closeShareBtn.addEventListener('click', () => shareModal.classList.add('hidden'));
+        shareModal.addEventListener('click', (e) => {
+            if(e.target === shareModal) shareModal.classList.add('hidden');
+        });
+
+        function resetShareModal() {
+            shareResult.classList.add('hidden');
+            shareLoading.classList.add('hidden');
+            shareError.classList.add('hidden');
+            generateLinkBtn.classList.remove('hidden');
+        }
+
+        generateLinkBtn.addEventListener('click', async () => {
+            if(!jsonBinKey) {
+                shareError.textContent = "Error: JSONBin API Key is missing in the code. Please update 'jsonBinKey' in cardiology.html.";
+                shareError.classList.remove('hidden');
+                return;
+            }
+
+            shareLoading.classList.remove('hidden');
+            generateLinkBtn.classList.add('hidden');
+            shareError.classList.add('hidden');
+
+            try {
+                // Capture current form values into state before saving
+                updateStateFromDOM();
+
+                const binId = await saveStateToBin(jsonBinKey, state);
+                const url = new URL(window.location.href);
+                url.searchParams.set('id', binId);
+
+                shareLinkInput.value = url.toString();
+                shareResult.classList.remove('hidden');
+                shareLoading.classList.add('hidden');
+            } catch (err) {
+                console.error(err);
+                shareError.textContent = "Failed to generate link: " + err.message;
+                shareError.classList.remove('hidden');
+                shareLoading.classList.add('hidden');
+                generateLinkBtn.classList.remove('hidden');
+            }
+        });
+
+        copyLinkBtn.addEventListener('click', () => {
+            shareLinkInput.select();
+            document.execCommand('copy');
+            const msg = document.getElementById('share-copy-msg');
+            msg.classList.remove('hidden');
+            setTimeout(() => msg.classList.add('hidden'), 2000);
+        });
+
+        function updateStateFromDOM() {
+            // Helper to ensure state object matches current inputs
+            state.location = document.getElementById('location-input').value;
+            state.chiefComplaint = document.getElementById('initial-symptoms').value;
+            state.vitals = document.getElementById('vitals-input').value;
+            state.physicalExam = document.getElementById('pe-input').value;
+            state.meds = document.getElementById('meds-input').value;
+            state.labs = document.getElementById('prior-labs-input').value;
+            state.pmh = document.getElementById('pmh-input').value;
+
+            // Capture answers from DOM
+            const questionInputs = document.querySelectorAll('#questions-container input');
+            if (questionInputs.length > 0) {
+                state.answers = [];
+                questionInputs.forEach(inp => {
+                    state.answers.push({ q: inp.dataset.q, a: inp.value });
+                });
+            }
+
+            // Capture plan modifications (checkboxes) if review section is active
+            if (document.querySelectorAll('.item-check').length > 0) {
+                state.planModifications = {
+                    workup: Array.from(document.querySelectorAll('.item-check[data-cat="workup"]:checked')).map(c => c.dataset.val),
+                    treatment: Array.from(document.querySelectorAll('.item-check[data-cat="treatment"]:checked')).map(c => c.dataset.val),
+                    profile: Array.from(document.querySelectorAll('.item-check[data-cat="profile"]:checked')).map(c => c.dataset.val),
+                    days: document.getElementById('profile-days').value
+                };
+            }
+        }
+
+        // --- Load State on Init ---
+        async function init() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const binId = urlParams.get('id');
+
+            if (binId) {
+                if(!jsonBinKey) {
+                    alert("Consult ID found, but JSONBin API Key is missing. Cannot load consult.");
+                    showSection('intake');
+                    return;
+                }
+
+                showLoading(true, "Loading Shared Consult...");
+                try {
+                    const loadedState = await loadStateFromBin(jsonBinKey, binId);
+                    restoreUIFromState(loadedState);
+                } catch (err) {
+                    console.error(err);
+                    alert("Failed to load shared consult: " + err.message);
+                    showSection('intake');
+                }
+            } else {
+                showSection('intake');
+            }
+        }
+
+        function restoreUIFromState(loadedState) {
+            state = loadedState;
+
+            // Restore Intake Inputs
+            document.getElementById('location-input').value = state.location || "Inpatient";
+            document.getElementById('initial-symptoms').value = state.chiefComplaint || "";
+            document.getElementById('vitals-input').value = state.vitals || "";
+            document.getElementById('pe-input').value = state.physicalExam || "";
+            document.getElementById('meds-input').value = state.meds || "";
+            document.getElementById('prior-labs-input').value = state.labs || "";
+            document.getElementById('pmh-input').value = state.pmh || "";
+
+            // Restore Questions if they exist
+            if (state.questions && state.questions.length > 0) {
+                const container = document.getElementById('questions-container');
+                container.innerHTML = '';
+
+                // Reconstruct questions UI
+                const questionsToRender = state.questions;
+
+                questionsToRender.forEach(q => {
+                    const ansObj = state.answers ? state.answers.find(a => a.q === q) : null;
+                    const val = ansObj ? ansObj.a : "";
+
+                    container.innerHTML += `
+                        <div class="bg-slate-900 p-3 rounded border border-slate-700">
+                            <label class="block text-sm text-red-300 mb-1 font-medium">${q}</label>
+                            <input type="text" data-q="${q}" value="${val}" class="w-full p-2 border-b border-slate-600 bg-transparent text-white focus:border-red-500 outline-none transition-colors" placeholder="Answer...">
+                        </div>`;
+                });
+            }
+
+            // Decide which section to show
+            if (state.generatedPlan) {
+                renderReview(state.generatedPlan);
+
+                // Restore modifications if they exist
+                if (state.planModifications) {
+                    document.getElementById('profile-days').value = state.planModifications.days || 3;
+
+                    const applyChecks = (cat, selectedVals) => {
+                        if(!selectedVals) return;
+                        document.querySelectorAll(`.item-check[data-cat="${cat}"]`).forEach(cb => {
+                            cb.checked = selectedVals.includes(cb.dataset.val);
+                        });
+                    };
+
+                    applyChecks('workup', state.planModifications.workup);
+                    applyChecks('treatment', state.planModifications.treatment);
+                    applyChecks('profile', state.planModifications.profile);
+                }
+
+                showSection('review');
+            } else if (state.questions && state.questions.length > 0) {
+                showSection('questions');
+            } else {
+                showSection('intake');
+            }
+        }
+
         // Init
-        showSection('intake');
+        init();
     </script>
 </body>
 </html>
