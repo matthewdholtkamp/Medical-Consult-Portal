@@ -296,8 +296,11 @@
     <textarea id="clipboard-helper" class="absolute -left-full"></textarea>
 
     <script type="module">
+        import { setupSharing } from './js/sharing.js';
+
         // --- Gemini API Configuration ---
         const API_KEY = "AIzaSyCWaYs3kvosNiQx9xMlrqC6bJEtPHCFHkw";
+        const jsonBinKey = "$2a$10$J/Gr0x7KT4o8YHMdHtRgV.MokfRSRnPPdXBI5jJidEiqrvJfbH5Py";
         const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${API_KEY}`;
         
         // --- State Management ---
@@ -1036,7 +1039,77 @@ Your task is to provide a concise, clear, and precise answer to the user's *most
                     initializeSpeechRecognition();
                 }
                 registerEventListeners();
-                showStep(1); // Show the first step on load
+
+                // --- Sharing Setup ---
+                setupSharing({
+                    apiKey: jsonBinKey,
+                    getState: () => {
+                        // Ensure state is up to date with DOM
+                        // We check which step is visible to know what to save
+                        if (!steps[1].classList.contains('hidden')) saveStep1Data();
+                        if (!steps[2].classList.contains('hidden') || !steps[3].classList.contains('hidden')) {
+                            saveStep1Data();
+                            saveStep2Data();
+                        }
+
+                        return {
+                            appState: state,
+                            chatHistory: chatHistory,
+                            consultOutputHtml: consultOutput.innerHTML,
+                            commanderOutputHtml: document.getElementById('profile-commander-output').innerHTML,
+                            soldierOutputHtml: document.getElementById('profile-soldier-output').innerHTML,
+                            addendumHtml: document.getElementById('follow-up-addendum-area').innerHTML,
+                            profileDays: document.getElementById('profile-days').value,
+                            currentStep: !steps[3].classList.contains('hidden') ? 3
+                                       : !steps[2].classList.contains('hidden') ? 2 : 1
+                        };
+                    },
+                    restoreState: (saved) => {
+                        // Restore State Object
+                        Object.assign(state, saved.appState);
+                        chatHistory = saved.chatHistory || [];
+
+                        // Restore Inputs
+                        if(state.hpi) document.getElementById('hpi').value = state.hpi;
+                        if(state.pmh) document.getElementById('pmh').value = state.pmh;
+                        if(state.psh) document.getElementById('psh').value = state.psh;
+                        if(state.allergies) document.getElementById('allergies').value = state.allergies;
+                        if(state.medications) document.getElementById('medications').value = state.medications;
+                        if(state.ros) document.getElementById('ros').value = state.ros;
+                        if(state.consultSource) document.getElementById('consult-source').value = state.consultSource;
+
+                        if(state.opqrst) document.getElementById('opqrst').value = state.opqrst;
+                        if(state.exam) document.getElementById('exam').value = state.exam;
+                        if(state.urinalysis) document.getElementById('urinalysis').value = state.urinalysis;
+                        if(state.labs) document.getElementById('labs').value = state.labs;
+                        if(state.imaging) document.getElementById('imaging').value = state.imaging;
+
+                        // Restore Step 3 Outputs
+                        if (saved.currentStep === 3) {
+                            consultOutput.innerHTML = saved.consultOutputHtml || "";
+                            document.getElementById('profile-commander-output').innerHTML = saved.commanderOutputHtml || "";
+                            document.getElementById('profile-soldier-output').innerHTML = saved.soldierOutputHtml || "";
+                            document.getElementById('follow-up-addendum-area').innerHTML = saved.addendumHtml || "";
+                            document.getElementById('profile-days').value = saved.profileDays || "";
+
+                            // Show/Hide appropriate containers
+                            if (saved.addendumHtml) {
+                                document.getElementById('follow-up-addendum-area').classList.remove('hidden');
+                            }
+                            consultOutputContainer.classList.remove('hidden');
+                            document.getElementById('military-profile-section').classList.remove('hidden');
+                            document.getElementById('follow-up-section').classList.remove('hidden');
+                            showStep(3);
+                        } else {
+                            showStep(saved.currentStep || 1);
+                        }
+                    }
+                });
+
+                if (!new URLSearchParams(window.location.search).get('id')) {
+                    showStep(1);
+                }
+
             } catch (error) {
                 console.error("Initialization Error:", error);
                 // Use a standard browser alert as a last resort if the page is broken.
