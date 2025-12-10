@@ -209,9 +209,12 @@
     </script>
 
     <!-- Main Logic -->
-    <script>
+    <script type="module">
+        import { setupSharing } from './js/sharing.js';
+
         // API Configuration
         const apiKey = "AIzaSyD2CAh8chhZkxqQnwuRa2WOMBF3ESYH6yk";
+        const jsonBinKey = "$2a$10$J/Gr0x7KT4o8YHMdHtRgV.MokfRSRnPPdXBI5jJidEiqrvJfbH5Py";
         const GENERATE_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
         const TTS_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
 
@@ -705,6 +708,89 @@
             navigator.clipboard.writeText(el('planContent').innerText);
             alert("Plan copied!");
         };
+
+        // --- Sharing Logic ---
+        // Need to be careful about inputs since they are dynamic
+        function getDynamicInputValues() {
+            const inputs = [];
+            if(dynamicInputs.innerHTML.trim() !== "") {
+                const labels = dynamicInputs.querySelectorAll('label');
+                const textInputs = dynamicInputs.querySelectorAll('input');
+                labels.forEach((label, i) => {
+                     inputs.push({
+                         label: label.innerText,
+                         value: textInputs[i] ? textInputs[i].value : ""
+                     });
+                });
+            }
+            return inputs;
+        }
+
+        function restoreDynamicInputs(savedInputs) {
+            dynamicInputs.innerHTML = '';
+            if(savedInputs && savedInputs.length) {
+                savedInputs.forEach((item, idx) => {
+                    dynamicInputs.innerHTML += `
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-1">${item.label}</label>
+                            <input type="text" name="q${idx}" value="${item.value}" class="w-full bg-slate-800 border border-slate-600 rounded p-3 text-white focus:border-orange-500" placeholder="Enter details...">
+                        </div>
+                    `;
+                });
+            }
+        }
+
+        setupSharing({
+            apiKey: jsonBinKey,
+            getState: () => {
+                return {
+                    initialQuestion: el('initialQuestion').value,
+                    dynamicInputs: getDynamicInputValues(),
+                    summaryContent: storedSummary,
+                    planContent: el('planContent').innerHTML,
+                    refsContent: el('refsContent').innerText,
+                    context: storedContext,
+                    currentStep: !el('results').classList.contains('hidden') ? 3
+                               : !el('step2').classList.contains('hidden') ? 2 : 1
+                };
+            },
+            restoreState: (state) => {
+                el('initialQuestion').value = state.initialQuestion || "";
+
+                if (state.dynamicInputs) {
+                    restoreDynamicInputs(state.dynamicInputs);
+                }
+
+                if (state.summaryContent) {
+                    storedSummary = state.summaryContent;
+                    storedContext = state.context || "";
+                    el('summaryContent').innerHTML = marked.parse(stripLatex(state.summaryContent));
+                    el('planContent').innerHTML = state.planContent || ""; // planContent is likely already HTML if saved via innerHTML? No, wait.
+                    // Actually, in getState above: planContent: el('planContent').innerHTML
+                    // So we can assign it back directly.
+                    // But in original logic, we parse markdown.
+                    // If we saved innerHTML, we restore innerHTML.
+                    el('planContent').innerHTML = state.planContent || "";
+                    el('refsContent').innerText = state.refsContent || "";
+
+                    // MathJax
+                    if(window.MathJax) MathJax.typesetPromise();
+                }
+
+                // Show correct step
+                el('step1').classList.add('hidden');
+                el('step2').classList.add('hidden');
+                el('results').classList.add('hidden');
+
+                if (state.currentStep === 3) {
+                    el('results').classList.remove('hidden');
+                } else if (state.currentStep === 2) {
+                    el('step2').classList.remove('hidden');
+                } else {
+                    el('step1').classList.remove('hidden');
+                }
+            }
+        });
 
     </script>
 </body>
