@@ -24,7 +24,18 @@ export async function callGeminiApi(apiKey, systemPrompt, userQuery, retries = 3
             body: JSON.stringify(payload)
         });
 
-        if (!response.ok) throw new Error(`API Error: ${response.status}`);
+        if (!response.ok) {
+            let errorMsg = `API Error: ${response.status}`;
+            try {
+                const errorData = await response.json();
+                if (errorData.error && errorData.error.message) {
+                    errorMsg += ` - ${errorData.error.message}`;
+                }
+            } catch (e) {
+                // Ignore JSON parse error
+            }
+            throw new Error(errorMsg);
+        }
 
         const data = await response.json();
         const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
@@ -63,7 +74,18 @@ export async function callGeminiText(apiKey, systemPrompt, userQuery) {
         body: JSON.stringify(payload)
     });
 
-    if (!response.ok) throw new Error(`API Error: ${response.status}`);
+    if (!response.ok) {
+        let errorMsg = `API Error: ${response.status}`;
+        try {
+            const errorData = await response.json();
+            if (errorData.error && errorData.error.message) {
+                errorMsg += ` - ${errorData.error.message}`;
+            }
+        } catch (e) {
+            // Ignore JSON parse error
+        }
+        throw new Error(errorMsg);
+    }
 
     const data = await response.json();
     return data.candidates?.[0]?.content?.parts?.[0]?.text || "No response.";
