@@ -647,11 +647,33 @@ Tone should be authoritative, educational, and analytically rigorous.`;
 
     <!-- Import Shared API Logic -->
     <script type="module">
-        import { callGeminiText } from './js/api.js';
-
+        // Inline API logic to match ADTMCplus.html and ensure consistency
         const keyPartA = "AIzaSyDrhBujL0cwcXDdlTDCyGFH5BOA";
         const keyPartB = "_7xaxbQ";
         const apiKey = keyPartA + keyPartB;
+
+        async function callGeminiText(apiKey, systemPrompt, userQuery) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+            const payload = {
+                contents: [{ parts: [{ text: userQuery }] }],
+                systemInstruction: { parts: [{ text: systemPrompt }] }
+            };
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                const errData = await response.json().catch(() => ({}));
+                console.error("Gemini API Error Details:", errData);
+                throw new Error(`API Error: ${response.status} - ${errData.error?.message || response.statusText}`);
+            }
+
+            const data = await response.json();
+            return data.candidates?.[0]?.content?.parts?.[0]?.text || "No response.";
+        }
         
         window.resetConsult = function() {
             document.getElementById('chatInput').value = '';
