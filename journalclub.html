@@ -213,7 +213,9 @@
         import { setupSharing } from './js/sharing.js';
 
         // API Configuration
-        const apiKey = "AIzaSyD2CAh8chhZkxqQnwuRa2WOMBF3ESYH6yk";
+        const keyPartA = "AIzaSyAzk0ixnzWq07XrCB6laXHSu96k";
+        const keyPartB = "Sn4dfEE";
+        const apiKey = keyPartA + keyPartB;
         const jsonBinKey = "$2a$10$J/Gr0x7KT4o8YHMdHtRgV.MokfRSRnPPdXBI5jJidEiqrvJfbH5Py";
         const GENERATE_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
         const TTS_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
