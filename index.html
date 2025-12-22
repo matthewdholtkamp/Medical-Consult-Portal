@@ -732,7 +732,7 @@ Tone should be authoritative, educational, and analytically rigorous.`;
                         <span class="material-symbols-outlined text-red-400">error</span>
                         <div>
                             <strong class="block font-semibold text-red-100 text-sm">Consult Error</strong>
-                            <span class="text-xs opacity-80">Unable to reach Dr. Holtkamp service. Check network or API configuration.</span>
+                            <span class="text-xs opacity-80">${error.message || "Unable to reach Dr. Holtkamp service. Check network or API configuration."}</span>
                         </div>
                     </div>
                 `;
