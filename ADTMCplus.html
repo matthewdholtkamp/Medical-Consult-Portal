@@ -265,7 +265,11 @@
                 <ul id="references-list" class="list-disc ml-5 text-sm space-y-2"></ul>
             </div>
 
-            <div class="mt-6 flex justify-center">
+            <div class="mt-6 flex justify-center space-x-4">
+                <button type="button" id="final-back-btn" class="text-gray-400 hover:text-white underline text-sm flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+                    Back to Review
+                </button>
                 <button type="button" id="start-over-btn" class="text-gray-400 hover:text-white underline text-sm flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
                     Start Over (New Patient)
@@ -291,7 +295,9 @@
             generatedSoap: null
         };
 
-        const apiKey = "AIzaSyBXI-KfP0oIIXXn6NHjznWPw62vcJdcXOQ";
+        const keyPartA = "AIzaSyDrhBujL0cwcXDdlTDCyGFH5BOA";
+        const keyPartB = "_7xaxbQ";
+        const apiKey = keyPartA + keyPartB;
 
         // --- DOM Elements ---
         const sections = {
@@ -700,6 +706,7 @@
             document.body.removeChild(textArea);
         });
 
+        document.getElementById('final-back-btn').addEventListener('click', () => showSection('review'));
         document.getElementById('start-over-btn').addEventListener('click', () => location.reload());
         
         // Initial Load

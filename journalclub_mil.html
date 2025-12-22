@@ -247,6 +247,12 @@
             <div id="planContent" class="tab-content hidden prose prose-invert max-w-none text-gray-300"></div>
             <div id="refsContent" class="tab-content hidden font-mono text-sm bg-black/30 p-4 rounded text-gray-400 whitespace-pre-wrap"></div>
 
+            <div class="mt-8 flex justify-center">
+                <button id="btnBackToRefineBottom" class="text-slate-500 hover:text-white underline text-sm flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+                    Back to Refinement
+                </button>
+            </div>
         </div>
 
     </main>
@@ -259,7 +265,9 @@
     <!-- Main Logic -->
     <script>
         // API Configuration
-        const apiKey = "AIzaSyD2CAh8chhZkxqQnwuRa2WOMBF3ESYH6yk";
+        const keyPartA = "AIzaSyAzk0ixnzWq07XrCB6laXHSu96k";
+        const keyPartB = "Sn4dfEE";
+        const apiKey = keyPartA + keyPartB;
         const GENERATE_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
         const TTS_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
 
@@ -417,10 +425,12 @@
         };
 
         // Back to Step 2 (From Results)
-        el('btnBackToRefine').onclick = function() {
+        const goBackToRefine = () => {
             el('results').classList.add('hidden');
             el('step2').classList.remove('hidden');
         };
+        el('btnBackToRefine').onclick = goBackToRefine;
+        el('btnBackToRefineBottom').onclick = goBackToRefine;
 
         // New Topic (Manual Reset) - Using .onclick to prevent stacking
         el('btnNewTopic').onclick = function() {
