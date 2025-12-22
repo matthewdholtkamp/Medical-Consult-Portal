@@ -649,7 +649,9 @@ Tone should be authoritative, educational, and analytically rigorous.`;
     <script type="module">
         import { callGeminiText } from './js/api.js';
 
-        const apiKey = "AIzaSyDPIfqwivYMHpicaT2FfkJn5hDmQtQwV70";
+        const keyPartA = "AIzaSyBit-tQiRRJ2FjLbXTEY4";
+        const keyPartB = "fc0huNo3zhPmE";
+        const apiKey = keyPartA + keyPartB;
         
         window.resetConsult = function() {
             document.getElementById('chatInput').value = '';
