@@ -52,8 +52,8 @@ jobs:
 
           # Write config file using environment variables
           cat <<EOF > js/config.js
-          // Global configuration (Production Injected)
-          export const GEMINI_MODEL_ID = "gemini-2.5-flash-preview-09-2025";
+          // Global configuration (Production Injected at $TIMESTAMP)
+          export const GEMINI_MODEL_ID = "gemini-1.5-flash";
 
           export const API_KEYS = {
               ADTMC: "$KEY_ADTMC",

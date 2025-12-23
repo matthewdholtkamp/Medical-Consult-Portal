@@ -2,7 +2,7 @@
 // NOTE: These keys are exposed for development/preview purposes.
 // In the production deployment (GitHub Pages), these values are replaced
 // by the GitHub Secrets via the .github/workflows/deploy.yml workflow.
-export const GEMINI_MODEL_ID = "gemini-2.5-flash-preview-09-2025";
+export const GEMINI_MODEL_ID = "gemini-1.5-flash";
 
 export const API_KEYS = {
     // Shared key for ADTMC pages
