@@ -136,6 +136,16 @@ export function setupSharing({ apiKey, getState, restoreState }) {
         modalContainer.innerHTML = modalHtml;
         document.body.appendChild(modalContainer);
 
+        // 2a. Inject Loading Overlay HTML
+        const loadingOverlayHtml = `
+        <div id="consult-loading-overlay" class="hidden fixed inset-0 bg-black/90 flex flex-col items-center justify-center z-[100] font-sans">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-4"></div>
+            <p class="text-slate-200 text-lg font-medium animate-pulse">Loading Shared Consult...</p>
+        </div>`;
+        const loadingOverlayContainer = document.createElement('div');
+        loadingOverlayContainer.innerHTML = loadingOverlayHtml;
+        document.body.appendChild(loadingOverlayContainer);
+
         // 3. Event Listeners
         const shareModal = document.getElementById('share-modal');
         const closeShareBtn = document.getElementById('close-share-modal');
@@ -214,7 +224,9 @@ export function setupSharing({ apiKey, getState, restoreState }) {
                     return;
                 }
 
-                // Show some loading indicator if possible, or just rely on async restoration
+                const loadingOverlay = document.getElementById('consult-loading-overlay');
+                if(loadingOverlay) loadingOverlay.classList.remove('hidden');
+
                 try {
                     const loadedState = await loadStateFromBin(apiKey, binId);
                     restoreState(loadedState);
@@ -222,6 +234,8 @@ export function setupSharing({ apiKey, getState, restoreState }) {
                 } catch (err) {
                     console.error("Failed to load shared consult:", err);
                     alert("Failed to load shared consult: " + err.message);
+                } finally {
+                    if(loadingOverlay) loadingOverlay.classList.add('hidden');
                 }
             }
         }
