@@ -778,7 +778,7 @@ Tone should be authoritative, educational, and analytically rigorous.`;
 
         async function callGeminiText(apiKey, systemPrompt, userQuery) {
             const cleanKey = apiKey ? apiKey.trim() : "";
-            const modelId = (typeof GEMINI_MODEL_ID !== 'undefined' && GEMINI_MODEL_ID) ? GEMINI_MODEL_ID : "gemini-1.5-flash";
+            const modelId = (typeof GEMINI_MODEL_ID !== 'undefined' && GEMINI_MODEL_ID) ? GEMINI_MODEL_ID : "gemini-3-flash-preview";
             const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${cleanKey}`;
             const payload = {
                 contents: [{ parts: [{ text: userQuery }] }],
