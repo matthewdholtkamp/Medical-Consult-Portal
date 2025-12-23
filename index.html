@@ -773,11 +773,8 @@ Tone should be authoritative, educational, and analytically rigorous.`;
 
     <!-- Import Shared API Logic -->
     <script type="module">
-        // Inline API logic to match ADTMCplus.html and ensure consistency
-        const k1 = "AIzaSyDUEbCL9xRaR";
-        const k2 = "B5jsDj3JNY985j";
-        const k3 = "xBp-gdws";
-        const apiKey = k1 + k2 + k3;
+        import { API_KEYS } from './js/config.js';
+        const apiKey = API_KEYS.START_PAGE;
 
         async function callGeminiText(apiKey, systemPrompt, userQuery) {
             const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;

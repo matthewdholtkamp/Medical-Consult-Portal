@@ -287,11 +287,10 @@
 
     <script type="module">
         import { setupSharing } from './js/sharing.js';
+        import { API_KEYS } from './js/config.js';
 
         // --- Global State ---
-        const keyPartA = "AIzaSyA5t-mwc_9QDR-yFcRNw3JYfljwqwg";
-        const keyPartB = "NWuE";
-        const apiKey = keyPartA + keyPartB;
+        const apiKey = API_KEYS.PSYCHIATRY;
         const jsonBinKey = "$2a$10$J/Gr0x7KT4o8YHMdHtRgV.MokfRSRnPPdXBI5jJidEiqrvJfbH5Py";
         
         let state = {
