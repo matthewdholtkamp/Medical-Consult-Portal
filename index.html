@@ -773,7 +773,7 @@ Tone should be authoritative, educational, and analytically rigorous.`;
 
     <!-- Import Shared API Logic -->
     <script type="module">
-        import { API_KEYS } from './js/config.js';
+        import { API_KEYS } from './js/config.js?v=secure';
         const apiKey = API_KEYS.START_PAGE;
 
         async function callGeminiText(apiKey, systemPrompt, userQuery) {
