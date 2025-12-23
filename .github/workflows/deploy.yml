@@ -24,30 +24,35 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Inject API Keys from Secrets
+        run: |
+          # Overwrite js/config.js with secrets
+          echo "Generating production config..."
+          cat <<EOF > js/config.js
+          // Global configuration (Production Injected)
+          export const GEMINI_MODEL_ID = "gemini-2.5-flash-preview-09-2025";
+
+          export const API_KEYS = {
+              ADTMC: "${{ secrets.KEY_ADTMC }}",
+              CARDIOLOGY: "${{ secrets.KEY_CARDIOLOGY }}",
+              IM: "${{ secrets.KEY_IM }}",
+              JOURNAL_CLUB: "${{ secrets.KEY_JOURNAL_CLUB }}",
+              NEUROLOGY: "${{ secrets.KEY_NEUROLOGY }}",
+              ORTHOPEDICS: "${{ secrets.KEY_ORTHOPEDICS }}",
+              PSYCHIATRY: "${{ secrets.KEY_PSYCHIATRY }}",
+              RHEUMATOLOGY: "${{ secrets.KEY_RHEUMATOLOGY }}",
+              START_PAGE: "${{ secrets.KEY_START_PAGE }}"
+          };
+          EOF
+
+          echo "Production config generated."
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
-
-      - name: Inject API Keys
-        env:
-          KEY_ADTMC: ${{ secrets.KEY_ADTMC }}
-          KEY_CARDIOLOGY: ${{ secrets.KEY_CARDIOLOGY }}
-          KEY_IM: ${{ secrets.KEY_IM }}
-          KEY_JOURNAL_CLUB: ${{ secrets.KEY_JOURNAL_CLUB }}
-          KEY_NEUROLOGY: ${{ secrets.KEY_NEUROLOGY }}
-          KEY_ORTHOPEDICS: ${{ secrets.KEY_ORTHOPEDICS }}
-          KEY_PSYCHIATRY: ${{ secrets.KEY_PSYCHIATRY }}
-          KEY_RHEUMATOLOGY: ${{ secrets.KEY_RHEUMATOLOGY }}
-          KEY_START_PAGE: ${{ secrets.KEY_START_PAGE }}
-        run: |
-          # Use envsubst to replace placeholders in js/config.js
-          # Note: We must export the variables for envsubst to see them
-          envsubst < js/config.js > js/config.js.tmp && mv js/config.js.tmp js/config.js
-          echo "API Keys injected into js/config.js"
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Upload entire repository
           path: '.'
 
       - name: Deploy to GitHub Pages

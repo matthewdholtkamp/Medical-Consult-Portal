@@ -1,62 +1,45 @@
 #!/bin/bash
 
-# Check if .env file exists
-if [ ! -f .env ]; then
-    echo "Error: .env file not found."
-    echo "Please create a .env file based on .env.example"
+# Configuration
+CONFIG_FILE="js/config.js"
+ENV_FILE=".env"
+
+# Colors
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+RED='\033[0;31m'
+NC='\033[0m' # No Color
+
+echo -e "${YELLOW}Starting configuration generation...${NC}"
+
+if [ ! -f "$ENV_FILE" ]; then
+    echo -e "${RED}Error: .env file not found!${NC}"
+    echo "Please copy .env.example to .env and fill in your keys."
     exit 1
 fi
 
-# Load environment variables
-set -a
-source .env
-set +a
+# Load .env variables
+export $(grep -v '^#' $ENV_FILE | xargs)
 
-# Create a temp file
-cp js/config.js js/config.js.tmp
+# Create the config file
+echo -e "${YELLOW}Generating $CONFIG_FILE...${NC}"
 
-# Function to replace placeholder with value using sed
-# We use | as delimiter to avoid issues with / in keys
-replace_key() {
-    local key_name=$1
-    local key_value=${!1}
+cat <<EOF > $CONFIG_FILE
+// Global configuration (Local Generated)
+export const GEMINI_MODEL_ID = "gemini-2.5-flash-preview-09-2025";
 
-    if [ -z "$key_value" ]; then
-        echo "Warning: $key_name is empty in .env"
-    fi
+export const API_KEYS = {
+    ADTMC: "$KEY_ADTMC",
+    CARDIOLOGY: "$KEY_CARDIOLOGY",
+    IM: "$KEY_IM",
+    JOURNAL_CLUB: "$KEY_JOURNAL_CLUB",
+    NEUROLOGY: "$KEY_NEUROLOGY",
+    ORTHOPEDICS: "$KEY_ORTHOPEDICS",
+    PSYCHIATRY: "$KEY_PSYCHIATRY",
+    RHEUMATOLOGY: "$KEY_RHEUMATOLOGY",
+    START_PAGE: "$KEY_START_PAGE"
+};
+EOF
 
-    # Escape special characters in key_value for sed
-    escaped_value=$(echo "$key_value" | sed 's/[\/&]/\\&/g')
-
-    # We match $KEY_NAME and replace with the value
-    sed -i "s|\$$key_name|$escaped_value|g" js/config.js.tmp
-}
-
-# List of keys to replace
-KEYS=(
-"KEY_ADTMC"
-"KEY_CARDIOLOGY"
-"KEY_IM"
-"KEY_JOURNAL_CLUB"
-"KEY_NEUROLOGY"
-"KEY_ORTHOPEDICS"
-"KEY_PSYCHIATRY"
-"KEY_RHEUMATOLOGY"
-"KEY_START_PAGE"
-)
-
-# Perform replacements
-for key in "${KEYS[@]}"; do
-    replace_key "$key"
-done
-
-# Move temp file to final location
-mv js/config.js.tmp js/config.js
-
-echo "---------------------------------------------------------"
-echo "SUCCESS: js/config.js has been updated with keys from .env"
-echo ""
-echo "⚠️  IMPORTANT SECURITY WARNING ⚠️"
-echo "DO NOT commit 'js/config.js' to git while it contains real keys!"
-echo "Run 'git checkout js/config.js' to restore the template before committing."
-echo "---------------------------------------------------------"
+echo -e "${GREEN}Success! $CONFIG_FILE has been updated with local keys.${NC}"
+echo -e "${YELLOW}WARNING: Do not commit $CONFIG_FILE with real keys!${NC}"
