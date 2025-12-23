@@ -279,7 +279,9 @@
 
     </div>
 
-    <script>
+    <script type="module">
+        import { setupSharing } from './js/sharing.js';
+
         // --- State Management ---
         let intakeState = {
             location: "",
@@ -295,9 +297,11 @@
             generatedSoap: null
         };
 
-        const keyPartA = "AIzaSyDrhBujL0cwcXDdlTDCyGFH5BOA";
-        const keyPartB = "_7xaxbQ";
-        const apiKey = keyPartA + keyPartB;
+        const k1 = "AIzaSyDUEbCL9xRaR";
+        const k2 = "B5jsDj3JNY985j";
+        const k3 = "xBp-gdws";
+        const apiKey = k1 + k2 + k3;
+        const jsonBinKey = "$2a$10$J/Gr0x7KT4o8YHMdHtRgV.MokfRSRnPPdXBI5jJidEiqrvJfbH5Py";
 
         // --- DOM Elements ---
         const sections = {
@@ -709,8 +713,116 @@
         document.getElementById('final-back-btn').addEventListener('click', () => showSection('review'));
         document.getElementById('start-over-btn').addEventListener('click', () => location.reload());
         
-        // Initial Load
-        showSection('intake');
+        // --- Sharing Setup ---
+        function getPlanModifications() {
+            // Helper to capture checkboxes in review section
+            return {
+                workup: Array.from(document.querySelectorAll('.item-check[data-cat="workup"]:checked')).map(cb => cb.dataset.val),
+                treatment: Array.from(document.querySelectorAll('.item-check[data-cat="treatment"]:checked')).map(cb => cb.dataset.val),
+                profile: Array.from(document.querySelectorAll('.item-check[data-cat="profile"]:checked')).map(cb => cb.dataset.val),
+                profDays: document.getElementById('profile-days').value
+            };
+        }
+
+        setupSharing({
+            apiKey: jsonBinKey,
+            getState: () => {
+                // Ensure state captures current inputs even if not submitted
+                intakeState.location = document.getElementById('location-input').value;
+                intakeState.chiefComplaint = document.getElementById('initial-symptoms').value;
+                intakeState.vitals = document.getElementById('vitals-input').value;
+                intakeState.physicalExam = document.getElementById('pe-input').value;
+                intakeState.meds = document.getElementById('meds-input').value;
+                intakeState.allergies = document.getElementById('allergies-input').value;
+                intakeState.pmh = document.getElementById('pmh-input').value;
+                intakeState.priorLabs = document.getElementById('prior-labs-input').value;
+
+                // Capture Questions Answers
+                const qInputs = document.querySelectorAll('#questions-container input');
+                if (qInputs.length > 0) {
+                    intakeState.answers = [];
+                    qInputs.forEach(inp => {
+                        intakeState.answers.push({ q: inp.dataset.q, a: inp.value });
+                    });
+                }
+
+                return {
+                    intakeState: intakeState,
+                    planModifications: getPlanModifications(),
+                    currentSection: !document.getElementById('section-final').classList.contains('hidden') ? 'final' :
+                                    !document.getElementById('section-review').classList.contains('hidden') ? 'review' :
+                                    !document.getElementById('section-questions').classList.contains('hidden') ? 'questions' : 'intake',
+                    finalNoteContent: document.getElementById('final-note-content').textContent,
+                    refineHistory: document.getElementById('refine-response').textContent
+                };
+            },
+            restoreState: (saved) => {
+                if (saved.intakeState) Object.assign(intakeState, saved.intakeState);
+
+                // Restore Intake Inputs
+                document.getElementById('location-input').value = intakeState.location || "CTMC";
+                document.getElementById('initial-symptoms').value = intakeState.chiefComplaint || "";
+                document.getElementById('vitals-input').value = intakeState.vitals || "";
+                document.getElementById('pe-input').value = intakeState.physicalExam || "";
+                document.getElementById('meds-input').value = intakeState.meds || "";
+                document.getElementById('allergies-input').value = intakeState.allergies || "";
+                document.getElementById('pmh-input').value = intakeState.pmh || "";
+                document.getElementById('prior-labs-input').value = intakeState.priorLabs || "";
+
+                // Restore Questions if they exist
+                if (intakeState.questions && intakeState.questions.length > 0) {
+                    const container = document.getElementById('questions-container');
+                    container.innerHTML = '';
+                    intakeState.questions.forEach(q => {
+                        const ans = intakeState.answers ? intakeState.answers.find(a => a.q === q) : null;
+                        const val = ans ? ans.a : "";
+                        container.innerHTML += `
+                            <div>
+                                <label class="block text-sm text-orange-300 mb-1 font-medium">${q}</label>
+                                <input type="text" data-q="${q}" value="${val}" class="w-full p-2 border border-gray-600 rounded bg-gray-700 text-white focus:border-orange-500 outline-none" required>
+                            </div>`;
+                    });
+                }
+
+                // Restore Generated Plan/Review
+                if (intakeState.generatedSoap) {
+                    renderReview(intakeState.generatedSoap);
+
+                    // Apply Modifications
+                    if (saved.planModifications) {
+                        const mods = saved.planModifications;
+                        document.getElementById('profile-days').value = mods.profDays || "";
+
+                        const applyChecks = (cat, items) => {
+                            if (!items) return;
+                            document.querySelectorAll(`.item-check[data-cat="${cat}"]`).forEach(cb => {
+                                cb.checked = items.includes(cb.dataset.val);
+                            });
+                        };
+                        applyChecks('workup', mods.workup);
+                        applyChecks('treatment', mods.treatment);
+                        applyChecks('profile', mods.profile);
+                    }
+                }
+
+                // Restore Final Note
+                if (saved.finalNoteContent) {
+                    document.getElementById('final-note-content').textContent = saved.finalNoteContent;
+                }
+                if (saved.refineHistory) {
+                    document.getElementById('refine-response').textContent = saved.refineHistory;
+                    document.getElementById('refine-response').classList.remove('hidden');
+                }
+
+                // Show Section
+                showSection(saved.currentSection || 'intake');
+            }
+        });
+
+        // Initial Load (handled by setupSharing if ID present, else default)
+        if (!new URLSearchParams(window.location.search).get('id')) {
+            showSection('intake');
+        }
 
     </script>
 </body>

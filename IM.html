@@ -277,11 +277,13 @@
 
     <script type="module">
         import { callGeminiApi, callGeminiText } from './js/api.js';
+        import { setupSharing } from './js/sharing.js';
 
         // --- Global State ---
         const keyPartA = "AIzaSyDzAymkb0bIZ7c11rfqcw85eHMc0B";
         const keyPartB = "-LfZk";
         const apiKey = keyPartA + keyPartB;
+        const jsonBinKey = "$2a$10$J/Gr0x7KT4o8YHMdHtRgV.MokfRSRnPPdXBI5jJidEiqrvJfbH5Py";
         
         let state = {
             location: "",
@@ -631,8 +633,111 @@
         document.getElementById('final-back-btn').addEventListener('click', () => showSection('review'));
         document.getElementById('start-over-btn').addEventListener('click', () => location.reload());
         
+        // --- Sharing Setup ---
+        function getPlanModifications() {
+            return {
+                workup: Array.from(document.querySelectorAll('.item-check[data-cat="workup"]:checked')).map(cb => cb.dataset.val),
+                treatment: Array.from(document.querySelectorAll('.item-check[data-cat="treatment"]:checked')).map(cb => cb.dataset.val),
+                profile: Array.from(document.querySelectorAll('.item-check[data-cat="profile"]:checked')).map(cb => cb.dataset.val),
+                days: document.getElementById('profile-days').value
+            };
+        }
+
+        setupSharing({
+            apiKey: jsonBinKey,
+            getState: () => {
+                // Sync inputs
+                state.location = document.getElementById('location-input').value;
+                state.chiefComplaint = document.getElementById('initial-symptoms').value;
+                state.vitals = document.getElementById('vitals-input').value;
+                state.physicalExam = document.getElementById('pe-input').value;
+                state.meds = document.getElementById('meds-input').value;
+                state.labs = document.getElementById('prior-labs-input').value;
+                state.pmh = document.getElementById('pmh-input').value;
+
+                // Sync Answers
+                const qInputs = document.querySelectorAll('#questions-container input');
+                if (qInputs.length > 0) {
+                    state.answers = [];
+                    qInputs.forEach(inp => {
+                        state.answers.push({ q: inp.dataset.q, a: inp.value });
+                    });
+                }
+
+                return {
+                    appState: state,
+                    planModifications: getPlanModifications(),
+                    currentSection: !document.getElementById('section-final').classList.contains('hidden') ? 'final' :
+                                    !document.getElementById('section-review').classList.contains('hidden') ? 'review' :
+                                    !document.getElementById('section-questions').classList.contains('hidden') ? 'questions' : 'intake',
+                    finalNoteContent: document.getElementById('final-note-content').textContent,
+                    refineHistory: document.getElementById('refine-response').textContent
+                };
+            },
+            restoreState: (saved) => {
+                if(saved.appState) Object.assign(state, saved.appState);
+
+                // Restore Inputs
+                document.getElementById('location-input').value = state.location || "Inpatient";
+                document.getElementById('initial-symptoms').value = state.chiefComplaint || "";
+                document.getElementById('vitals-input').value = state.vitals || "";
+                document.getElementById('pe-input').value = state.physicalExam || "";
+                document.getElementById('meds-input').value = state.meds || "";
+                document.getElementById('prior-labs-input').value = state.labs || "";
+                document.getElementById('pmh-input').value = state.pmh || "";
+
+                // Restore Questions
+                if (state.questions && state.questions.length > 0) {
+                    const container = document.getElementById('questions-container');
+                    container.innerHTML = '';
+                    state.questions.forEach(q => {
+                        const ans = state.answers ? state.answers.find(a => a.q === q) : null;
+                        const val = ans ? ans.a : "";
+                        container.innerHTML += `
+                            <div class="bg-slate-900 p-3 rounded border border-slate-700">
+                                <label class="block text-sm text-indigo-300 mb-1 font-medium">${q}</label>
+                                <input type="text" data-q="${q}" value="${val}" class="w-full p-2 border-b border-slate-600 bg-transparent text-white focus:border-indigo-500 outline-none transition-colors" placeholder="Answer...">
+                            </div>`;
+                    });
+                }
+
+                // Restore Review
+                if (state.generatedPlan) {
+                    renderReview(state.generatedPlan);
+
+                    if (saved.planModifications) {
+                        const mods = saved.planModifications;
+                        document.getElementById('profile-days').value = mods.days || "";
+
+                        const applyChecks = (cat, items) => {
+                            if (!items) return;
+                            document.querySelectorAll(`.item-check[data-cat="${cat}"]`).forEach(cb => {
+                                cb.checked = items.includes(cb.dataset.val);
+                            });
+                        };
+                        applyChecks('workup', mods.workup);
+                        applyChecks('treatment', mods.treatment);
+                        applyChecks('profile', mods.profile);
+                    }
+                }
+
+                // Restore Final Note
+                if (saved.finalNoteContent) {
+                    document.getElementById('final-note-content').textContent = saved.finalNoteContent;
+                }
+                if (saved.refineHistory) {
+                    document.getElementById('refine-response').textContent = saved.refineHistory;
+                    document.getElementById('refine-response').classList.remove('hidden');
+                }
+
+                showSection(saved.currentSection || 'intake');
+            }
+        });
+
         // Init
-        showSection('intake');
+        if (!new URLSearchParams(window.location.search).get('id')) {
+            showSection('intake');
+        }
     </script>
 </body>
 </html>

@@ -386,12 +386,14 @@
 
     <script type="module">
         import { callGeminiApi, callGeminiText } from './js/api.js';
+        import { setupSharing } from './js/sharing.js';
 
         // --- Global State ---
         // Setting apiKey to empty string as per instructions; environment handles auth.
         const keyPartA = "AIzaSyDuDdz2_vEtk48eHM4mnKTW5FRnUQ";
         const keyPartB = "XXSJY";
         const apiKey = keyPartA + keyPartB;
+        const jsonBinKey = "$2a$10$J/Gr0x7KT4o8YHMdHtRgV.MokfRSRnPPdXBI5jJidEiqrvJfbH5Py";
         
         let state = {
             mode: "Initial", // or "Followup"
@@ -743,9 +745,131 @@
         document.getElementById('final-back-btn').addEventListener('click', () => showSection('review'));
         document.getElementById('start-over-btn').addEventListener('click', () => location.reload());
 
+        // --- Sharing Setup ---
+        function getSystemsData() {
+            return {
+                neuro: document.getElementById('sys-neuro').value,
+                cv: document.getElementById('sys-cv').value,
+                resp: document.getElementById('sys-resp').value,
+                renal: document.getElementById('sys-renal').value,
+                heme: document.getElementById('sys-heme').value,
+                abcde: {
+                    a: document.getElementById('abcde-a').checked,
+                    b: document.getElementById('abcde-b').checked,
+                    c: document.getElementById('abcde-c').checked,
+                    d: document.getElementById('abcde-d').checked,
+                    e: document.getElementById('abcde-e').checked
+                },
+                assessment: document.getElementById('assessment-summary').textContent
+            };
+        }
+
+        setupSharing({
+            apiKey: jsonBinKey,
+            getState: () => {
+                // Sync inputs
+                state.age = document.getElementById('age-input').value;
+                state.location = document.getElementById('location-input').value;
+                state.codeStatus = document.getElementById('code-status').value;
+                state.vitals = document.getElementById('vitals-input').value;
+                state.vent = document.getElementById('vent-input').value;
+                state.labs = document.getElementById('labs-input').value;
+                state.lines = document.getElementById('lines-input').value;
+                state.hpi = document.getElementById('hpi-input').value;
+                state.pmh = document.getElementById('pmh-input').value;
+                state.priorNote = document.getElementById('prior-note-input').value;
+                state.events = document.getElementById('events-input').value;
+
+                // Sync Questions Answers
+                const qInputs = document.querySelectorAll('#questions-container input');
+                if (qInputs.length > 0) {
+                    state.answers = [];
+                    qInputs.forEach(inp => {
+                        state.answers.push({ q: inp.dataset.q, a: inp.value });
+                    });
+                }
+
+                return {
+                    appState: state,
+                    systemsData: getSystemsData(),
+                    currentSection: !document.getElementById('section-final').classList.contains('hidden') ? 'final' :
+                                    !document.getElementById('section-review').classList.contains('hidden') ? 'review' :
+                                    !document.getElementById('section-questions').classList.contains('hidden') ? 'questions' : 'intake',
+                    finalNoteContent: document.getElementById('final-note-content').textContent,
+                    refineHistory: document.getElementById('refine-response').textContent
+                };
+            },
+            restoreState: (saved) => {
+                if(saved.appState) Object.assign(state, saved.appState);
+
+                // Restore Mode
+                setMode(state.mode || 'Initial');
+
+                // Restore Inputs
+                document.getElementById('age-input').value = state.age || "";
+                document.getElementById('location-input').value = state.location || "ICU";
+                document.getElementById('code-status').value = state.codeStatus || "Full Code";
+                document.getElementById('vitals-input').value = state.vitals || "";
+                document.getElementById('vent-input').value = state.vent || "";
+                document.getElementById('labs-input').value = state.labs || "";
+                document.getElementById('lines-input').value = state.lines || "";
+                document.getElementById('hpi-input').value = state.hpi || "";
+                document.getElementById('pmh-input').value = state.pmh || "";
+                document.getElementById('prior-note-input').value = state.priorNote || "";
+                document.getElementById('events-input').value = state.events || "";
+
+                // Restore Questions
+                if (state.questions && state.questions.length > 0) {
+                    const container = document.getElementById('questions-container');
+                    container.innerHTML = '';
+                    state.questions.forEach(q => {
+                        const ans = state.answers ? state.answers.find(a => a.q === q) : null;
+                        const val = ans ? ans.a : "";
+                        container.innerHTML += `
+                            <div class="bg-slate-800 p-3 rounded border border-slate-700">
+                                <label class="block text-sm text-rose-300 mb-1 font-medium">${q}</label>
+                                <input type="text" data-q="${q}" value="${val}" class="w-full p-2 border-b border-slate-600 bg-transparent text-white focus:border-rose-500 outline-none transition-colors" placeholder="Answer...">
+                            </div>`;
+                    });
+                }
+
+                // Restore Systems Data
+                if (saved.systemsData) {
+                    const sys = saved.systemsData;
+                    document.getElementById('sys-neuro').value = sys.neuro || "";
+                    document.getElementById('sys-cv').value = sys.cv || "";
+                    document.getElementById('sys-resp').value = sys.resp || "";
+                    document.getElementById('sys-renal').value = sys.renal || "";
+                    document.getElementById('sys-heme').value = sys.heme || "";
+                    document.getElementById('assessment-summary').textContent = sys.assessment || "";
+
+                    if(sys.abcde) {
+                        document.getElementById('abcde-a').checked = sys.abcde.a;
+                        document.getElementById('abcde-b').checked = sys.abcde.b;
+                        document.getElementById('abcde-c').checked = sys.abcde.c;
+                        document.getElementById('abcde-d').checked = sys.abcde.d;
+                        document.getElementById('abcde-e').checked = sys.abcde.e;
+                    }
+                }
+
+                // Restore Final Note
+                if (saved.finalNoteContent) {
+                    document.getElementById('final-note-content').textContent = saved.finalNoteContent;
+                }
+                if (saved.refineHistory) {
+                    document.getElementById('refine-response').textContent = saved.refineHistory;
+                    document.getElementById('refine-response').classList.remove('hidden');
+                }
+
+                showSection(saved.currentSection || 'intake');
+            }
+        });
+
         // Init
-        setMode('Initial');
-        showSection('intake');
+        if (!new URLSearchParams(window.location.search).get('id')) {
+            setMode('Initial');
+            showSection('intake');
+        }
     </script>
 </body>
 </html>
