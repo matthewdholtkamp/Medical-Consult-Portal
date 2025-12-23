@@ -25,27 +25,60 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Inject API Keys from Secrets
+        env:
+          KEY_ADTMC: ${{ secrets.KEY_ADTMC }}
+          KEY_CARDIOLOGY: ${{ secrets.KEY_CARDIOLOGY }}
+          KEY_IM: ${{ secrets.KEY_IM }}
+          KEY_JOURNAL_CLUB: ${{ secrets.KEY_JOURNAL_CLUB }}
+          KEY_NEUROLOGY: ${{ secrets.KEY_NEUROLOGY }}
+          KEY_ORTHOPEDICS: ${{ secrets.KEY_ORTHOPEDICS }}
+          KEY_PSYCHIATRY: ${{ secrets.KEY_PSYCHIATRY }}
+          KEY_RHEUMATOLOGY: ${{ secrets.KEY_RHEUMATOLOGY }}
+          KEY_START_PAGE: ${{ secrets.KEY_START_PAGE }}
         run: |
-          # Overwrite js/config.js with secrets
-          echo "Generating production config..."
+          echo "Starting API Key Injection..."
+
+          # Debug: Check secret presence
+          echo "Secret lengths check:"
+          echo "ADTMC: ${#KEY_ADTMC}"
+          echo "RHEUMATOLOGY: ${#KEY_RHEUMATOLOGY}"
+
+          # Force remove existing file
+          if [ -f js/config.js ]; then
+            echo "Removing existing js/config.js"
+            rm js/config.js
+          fi
+
+          # Generate timestamp
+          TIMESTAMP=$(date)
+
+          echo "Writing new js/config.js..."
           cat <<EOF > js/config.js
-          // Global configuration (Production Injected)
+          // Global configuration (Production Injected at $TIMESTAMP)
           export const GEMINI_MODEL_ID = "gemini-2.5-flash-preview-09-2025";
 
           export const API_KEYS = {
-              ADTMC: "${{ secrets.KEY_ADTMC }}",
-              CARDIOLOGY: "${{ secrets.KEY_CARDIOLOGY }}",
-              IM: "${{ secrets.KEY_IM }}",
-              JOURNAL_CLUB: "${{ secrets.KEY_JOURNAL_CLUB }}",
-              NEUROLOGY: "${{ secrets.KEY_NEUROLOGY }}",
-              ORTHOPEDICS: "${{ secrets.KEY_ORTHOPEDICS }}",
-              PSYCHIATRY: "${{ secrets.KEY_PSYCHIATRY }}",
-              RHEUMATOLOGY: "${{ secrets.KEY_RHEUMATOLOGY }}",
-              START_PAGE: "${{ secrets.KEY_START_PAGE }}"
+              ADTMC: "$KEY_ADTMC",
+              CARDIOLOGY: "$KEY_CARDIOLOGY",
+              IM: "$KEY_IM",
+              JOURNAL_CLUB: "$KEY_JOURNAL_CLUB",
+              NEUROLOGY: "$KEY_NEUROLOGY",
+              ORTHOPEDICS: "$KEY_ORTHOPEDICS",
+              PSYCHIATRY: "$KEY_PSYCHIATRY",
+              RHEUMATOLOGY: "$KEY_RHEUMATOLOGY",
+              START_PAGE: "$KEY_START_PAGE"
           };
           EOF
 
-          echo "Production config generated."
+          # Verify file creation
+          if [ -f js/config.js ]; then
+             echo "File js/config.js successfully created."
+             echo "Content preview (top 3 lines):"
+             head -n 3 js/config.js
+          else
+             echo "ERROR: js/config.js was NOT created."
+             exit 1
+          fi
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
