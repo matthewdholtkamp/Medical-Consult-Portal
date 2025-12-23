@@ -285,11 +285,14 @@
 
     </div>
 
-    <script>
+    <script type="module">
+        import { setupSharing } from './js/sharing.js';
+
         // --- Global State ---
         const keyPartA = "AIzaSyA5t-mwc_9QDR-yFcRNw3JYfljwqwg";
         const keyPartB = "NWuE";
         const apiKey = keyPartA + keyPartB;
+        const jsonBinKey = "$2a$10$J/Gr0x7KT4o8YHMdHtRgV.MokfRSRnPPdXBI5jJidEiqrvJfbH5Py";
         
         let state = {
             location: "",
@@ -716,8 +719,105 @@
         document.getElementById('final-back-btn').addEventListener('click', () => showSection('review'));
         document.getElementById('start-over-btn').addEventListener('click', () => location.reload());
         
+        // --- Sharing Setup ---
+        function getPlanModifications() {
+            return {
+                workup: Array.from(document.querySelectorAll('.item-check[data-cat="workup"]:checked')).map(cb => cb.dataset.val),
+                treatment: Array.from(document.querySelectorAll('.item-check[data-cat="treatment"]:checked')).map(cb => cb.dataset.val),
+                profile: Array.from(document.querySelectorAll('.item-check[data-cat="profile"]:checked')).map(cb => cb.dataset.val),
+                days: document.getElementById('profile-days').value
+            };
+        }
+
+        setupSharing({
+            apiKey: jsonBinKey,
+            getState: () => {
+                state.location = document.getElementById('location-input').value;
+                state.hpi = document.getElementById('initial-symptoms').value;
+                state.safety = document.getElementById('safety-input').value;
+                state.mse = document.getElementById('mse-input').value;
+                state.tox = document.getElementById('tox-input').value;
+                state.medHx = document.getElementById('med-hx-input').value;
+                state.psychHx = document.getElementById('psych-hx-input').value;
+
+                const qInputs = document.querySelectorAll('#questions-container input');
+                if (qInputs.length > 0) {
+                    state.answers = [];
+                    qInputs.forEach(inp => {
+                        state.answers.push({ q: inp.dataset.q, a: inp.value });
+                    });
+                }
+
+                return {
+                    appState: state,
+                    planModifications: getPlanModifications(),
+                    currentSection: !document.getElementById('section-final').classList.contains('hidden') ? 'final' :
+                                    !document.getElementById('section-review').classList.contains('hidden') ? 'review' :
+                                    !document.getElementById('section-questions').classList.contains('hidden') ? 'questions' : 'intake',
+                    finalNoteContent: document.getElementById('final-note-content').textContent,
+                    refineHistory: document.getElementById('refine-response').textContent
+                };
+            },
+            restoreState: (saved) => {
+                if(saved.appState) Object.assign(state, saved.appState);
+
+                document.getElementById('location-input').value = state.location || "ER";
+                document.getElementById('initial-symptoms').value = state.hpi || "";
+                document.getElementById('safety-input').value = state.safety || "";
+                document.getElementById('mse-input').value = state.mse || "";
+                document.getElementById('tox-input').value = state.tox || "";
+                document.getElementById('med-hx-input').value = state.medHx || "";
+                document.getElementById('psych-hx-input').value = state.psychHx || "";
+
+                if (state.questions && state.questions.length > 0) {
+                    const container = document.getElementById('questions-container');
+                    container.innerHTML = '';
+                    state.questions.forEach(q => {
+                        const ans = state.answers ? state.answers.find(a => a.q === q) : null;
+                        const val = ans ? ans.a : "";
+                        container.innerHTML += `
+                            <div class="bg-slate-900 p-3 rounded border border-slate-700">
+                                <label class="block text-sm text-teal-300 mb-1 font-medium">${q}</label>
+                                <input type="text" data-q="${q}" value="${val}" class="w-full p-2 border-b border-slate-600 bg-transparent text-white focus:border-teal-500 outline-none transition-colors" placeholder="Answer...">
+                            </div>`;
+                    });
+                }
+
+                if (state.generatedPlan) {
+                    renderReview(state.generatedPlan);
+
+                    if (saved.planModifications) {
+                        const mods = saved.planModifications;
+                        document.getElementById('profile-days').value = mods.days || "";
+
+                        const applyChecks = (cat, items) => {
+                            if (!items) return;
+                            document.querySelectorAll(`.item-check[data-cat="${cat}"]`).forEach(cb => {
+                                cb.checked = items.includes(cb.dataset.val);
+                            });
+                        };
+                        applyChecks('workup', mods.workup);
+                        applyChecks('treatment', mods.treatment);
+                        applyChecks('profile', mods.profile);
+                    }
+                }
+
+                if (saved.finalNoteContent) {
+                    document.getElementById('final-note-content').textContent = saved.finalNoteContent;
+                }
+                if (saved.refineHistory) {
+                    document.getElementById('refine-response').textContent = saved.refineHistory;
+                    document.getElementById('refine-response').classList.remove('hidden');
+                }
+
+                showSection(saved.currentSection || 'intake');
+            }
+        });
+
         // Init
-        showSection('intake');
+        if (!new URLSearchParams(window.location.search).get('id')) {
+            showSection('intake');
+        }
     </script>
 </body>
 </html>
