@@ -1,30 +1,20 @@
 // Global configuration
-// NOTE: These keys are exposed for development/preview purposes.
-// In the production deployment (GitHub Pages), these values are replaced
-// by the GitHub Secrets via the .github/workflows/deploy.yml workflow.
+// NOTE: This file is a placeholder for local development safety.
+// In production (GitHub Pages), this file is OVERWRITTEN by the .github/workflows/deploy.yml workflow
+// which injects the actual API keys from GitHub Secrets.
+
 export const GEMINI_MODEL_ID = "gemini-1.5-flash";
 
 export const API_KEYS = {
-    // Shared key for ADTMC pages
-    ADTMC: "AIzaSyDUEbCL9xRaRB5jsDj3JNY985jxBp-gdws",
-
-    // Shared key for Cardiology and ICU
-    CARDIOLOGY: "AIzaSyDuDdz2_vEtk48eHM4mnKTW5FRnUQ-P-5A",
-
-    // Shared key for IM and Pediatrics
-    IM: "AIzaSyDzAymkb0bIZ7c11rfqcw85eHMc0B-m168",
-
-    // Shared key for Journal Club pages
-    JOURNAL_CLUB: "AIzaSyAzk0ixnzWq07XrCB6laXHSu96k_X4_o",
-
-    // Unique keys
-    NEUROLOGY: "AIzaSyCzVEg5gtXcQhhx866u-5zwLFCxHw1M",
-    ORTHOPEDICS: "AIzaSyDJPVQR_JC2YTROVK2W6UZruJtU2c4fU",
-    PSYCHIATRY: "AIzaSyA5t-mwc_9QDR-yFcRNw3JYfljwqwgU9c",
-
-    // Shared key for Rheumatology and 17 other consults
-    RHEUMATOLOGY: "AIzaSyBJMITlbJVxqHgU2b6l5C9z-61z6s4",
-
-    // Start Page / Dashboard key (matches ADTMC in legacy, using distinct mapping for clarity)
-    START_PAGE: "AIzaSyDUEbCL9xRaRB5jsDj3JNY985jxBp-gdws"
+    // Keys are injected at build time.
+    // Locally, you must use a local override or environment variables if you need to test API calls.
+    ADTMC: "",
+    CARDIOLOGY: "",
+    IM: "",
+    JOURNAL_CLUB: "",
+    NEUROLOGY: "",
+    ORTHOPEDICS: "",
+    PSYCHIATRY: "",
+    RHEUMATOLOGY: "",
+    START_PAGE: ""
 };
