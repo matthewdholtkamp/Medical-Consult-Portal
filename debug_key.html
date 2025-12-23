@@ -19,6 +19,10 @@
             <div id="snippet" class="font-mono bg-black p-2 rounded text-green-400">...</div>
         </div>
 
+        <div id="whitespace-warning" class="hidden mb-6 p-3 bg-yellow-900/50 border border-yellow-600 rounded text-yellow-200 text-sm">
+            <strong>⚠️ Warning:</strong> Whitespace detected in API key. It has been automatically trimmed for this test. Please check your GitHub Secrets for accidental spaces or newlines.
+        </div>
+
         <button id="test-btn" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 px-4 rounded">
             Test Connection (gemini-1.5-flash)
         </button>
@@ -27,12 +31,20 @@
     </div>
 
     <script type="module">
-        import { API_KEYS } from './js/config.js?v=secure';
+        import { API_KEYS, GEMINI_MODEL_ID } from './js/config.js?v=secure';
 
-        const key = API_KEYS.START_PAGE || "";
+        const rawKey = API_KEYS.START_PAGE || "";
+        const key = rawKey.trim();
+
         const statusEl = document.getElementById('status');
         const snippetEl = document.getElementById('snippet');
         const resultEl = document.getElementById('result');
+        const warningEl = document.getElementById('whitespace-warning');
+
+        // Check for whitespace issues
+        if (rawKey !== key) {
+            warningEl.classList.remove('hidden');
+        }
 
         // Display Info
         if (!key) {
@@ -56,7 +68,10 @@
                 return;
             }
 
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`;
+            // Use the globally configured model ID or fallback
+            const modelId = (typeof GEMINI_MODEL_ID !== 'undefined' && GEMINI_MODEL_ID) ? GEMINI_MODEL_ID : "gemini-1.5-flash";
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${key}`;
+
             const payload = {
                 contents: [{ parts: [{ text: "Hello" }] }]
             };

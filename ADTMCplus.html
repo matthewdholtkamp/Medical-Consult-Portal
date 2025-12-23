@@ -281,7 +281,7 @@
 
     <script type="module">
         import { setupSharing } from './js/sharing.js';
-        import { API_KEYS } from './js/config.js?v=secure';
+        import { API_KEYS, GEMINI_MODEL_ID } from './js/config.js?v=secure';
 
         // --- State Management ---
         let intakeState = {
@@ -348,7 +348,9 @@
 
         // --- API Logic ---
         async function callGeminiApi(systemPrompt, userQuery, retries = 3) {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+            const cleanKey = apiKey ? apiKey.trim() : "";
+            const modelId = (typeof GEMINI_MODEL_ID !== 'undefined' && GEMINI_MODEL_ID) ? GEMINI_MODEL_ID : "gemini-1.5-flash";
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${cleanKey}`;
             const payload = {
                 contents: [{ parts: [{ text: userQuery }] }],
                 systemInstruction: { parts: [{ text: systemPrompt }] },
@@ -375,7 +377,9 @@
         }
 
         async function callGeminiText(systemPrompt, userQuery) {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+            const cleanKey = apiKey ? apiKey.trim() : "";
+            const modelId = (typeof GEMINI_MODEL_ID !== 'undefined' && GEMINI_MODEL_ID) ? GEMINI_MODEL_ID : "gemini-1.5-flash";
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${cleanKey}`;
              const payload = {
                 contents: [{ parts: [{ text: userQuery }] }],
                 systemInstruction: { parts: [{ text: systemPrompt }] }

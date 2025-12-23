@@ -10,7 +10,8 @@ import { GEMINI_MODEL_ID } from './config.js';
  * @returns {Promise<Object>} - The parsed JSON response from the AI.
  */
 export async function callGeminiApi(apiKey, systemPrompt, userQuery, retries = 3) {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL_ID}:generateContent?key=${apiKey}`;
+    const cleanKey = apiKey ? apiKey.trim() : "";
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL_ID}:generateContent?key=${cleanKey}`;
     const payload = {
         contents: [{ parts: [{ text: userQuery }] }],
         systemInstruction: { parts: [{ text: systemPrompt }] },
@@ -62,7 +63,8 @@ export async function callGeminiApi(apiKey, systemPrompt, userQuery, retries = 3
  * @returns {Promise<string>} - The raw text response.
  */
 export async function callGeminiText(apiKey, systemPrompt, userQuery) {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL_ID}:generateContent?key=${apiKey}`;
+    const cleanKey = apiKey ? apiKey.trim() : "";
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL_ID}:generateContent?key=${cleanKey}`;
     const payload = {
         contents: [{ parts: [{ text: userQuery }] }],
         systemInstruction: { parts: [{ text: systemPrompt }] }
