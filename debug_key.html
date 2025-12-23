@@ -24,7 +24,7 @@
         </div>
 
         <button id="test-btn" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 px-4 rounded">
-            Test Connection (gemini-1.5-flash)
+            Test Connection (gemini-3-flash-preview)
         </button>
 
         <div id="result" class="mt-4 p-3 bg-slate-900 rounded border border-slate-700 hidden text-xs font-mono whitespace-pre-wrap"></div>
@@ -69,7 +69,7 @@
             }
 
             // Use the globally configured model ID or fallback
-            const modelId = (typeof GEMINI_MODEL_ID !== 'undefined' && GEMINI_MODEL_ID) ? GEMINI_MODEL_ID : "gemini-1.5-flash";
+            const modelId = (typeof GEMINI_MODEL_ID !== 'undefined' && GEMINI_MODEL_ID) ? GEMINI_MODEL_ID : "gemini-3-flash-preview";
             const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${key}`;
 
             const payload = {

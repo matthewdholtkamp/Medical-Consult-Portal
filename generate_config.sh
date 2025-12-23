@@ -26,7 +26,7 @@ echo -e "${YELLOW}Generating $CONFIG_FILE...${NC}"
 
 cat <<EOF > $CONFIG_FILE
 // Global configuration (Local Generated)
-export const GEMINI_MODEL_ID = "gemini-2.5-flash-preview-09-2025";
+export const GEMINI_MODEL_ID = "gemini-3-flash-preview";
 
 export const API_KEYS = {
     ADTMC: "$KEY_ADTMC",

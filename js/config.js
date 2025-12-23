@@ -3,7 +3,7 @@
 // In production (GitHub Pages), this file is OVERWRITTEN by the .github/workflows/deploy.yml workflow
 // which injects the actual API keys from GitHub Secrets.
 
-export const GEMINI_MODEL_ID = "gemini-1.5-flash";
+export const GEMINI_MODEL_ID = "gemini-3-flash-preview";
 
 export const API_KEYS = {
     // Keys are injected at build time.
