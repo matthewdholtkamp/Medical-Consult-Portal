@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>API Key Debugger</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-white p-8">
+    <div class="max-w-md mx-auto bg-slate-800 p-6 rounded shadow-lg">
+        <h1 class="text-2xl font-bold mb-4 text-indigo-400">API Key Debugger</h1>
+
+        <div class="mb-4">
+            <h2 class="font-bold text-sm text-slate-400 uppercase">Start Page Key Status</h2>
+            <div id="status" class="text-lg">Loading...</div>
+        </div>
+
+        <div class="mb-6">
+            <h2 class="font-bold text-sm text-slate-400 uppercase">Key Snippet</h2>
+            <div id="snippet" class="font-mono bg-black p-2 rounded text-green-400">...</div>
+        </div>
+
+        <button id="test-btn" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 px-4 rounded">
+            Test Connection (gemini-1.5-flash)
+        </button>
+
+        <div id="result" class="mt-4 p-3 bg-slate-900 rounded border border-slate-700 hidden text-xs font-mono whitespace-pre-wrap"></div>
+    </div>
+
+    <script type="module">
+        import { API_KEYS } from './js/config.js';
+
+        const key = API_KEYS.START_PAGE || "";
+        const statusEl = document.getElementById('status');
+        const snippetEl = document.getElementById('snippet');
+        const resultEl = document.getElementById('result');
+
+        // Display Info
+        if (!key) {
+            statusEl.textContent = "❌ MISSING / EMPTY";
+            statusEl.classList.add("text-red-500");
+            snippetEl.textContent = "(empty)";
+        } else {
+            statusEl.textContent = `✅ Present (Length: ${key.length})`;
+            statusEl.classList.add("text-green-500");
+            const visible = key.length > 4 ? key.slice(-4) : key;
+            snippetEl.textContent = `...${visible}`;
+        }
+
+        // Test Connection
+        document.getElementById('test-btn').addEventListener('click', async () => {
+            resultEl.classList.remove('hidden');
+            resultEl.textContent = "Testing...";
+
+            if(!key) {
+                resultEl.textContent = "Aborting: No Key.";
+                return;
+            }
+
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`;
+            const payload = {
+                contents: [{ parts: [{ text: "Hello" }] }]
+            };
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    resultEl.textContent = "✅ SUCCESS!\n" + JSON.stringify(data, null, 2);
+                    resultEl.classList.add("text-green-300");
+                    resultEl.classList.remove("text-red-300");
+                } else {
+                    let errText = `HTTP ${response.status} ${response.statusText}`;
+                    try {
+                        const errJson = await response.json();
+                        errText += "\n" + JSON.stringify(errJson, null, 2);
+                    } catch(e) {}
+                    resultEl.textContent = "❌ ERROR:\n" + errText;
+                    resultEl.classList.add("text-red-300");
+                    resultEl.classList.remove("text-green-300");
+                }
+            } catch (err) {
+                resultEl.textContent = "❌ NETWORK ERROR:\n" + err.toString();
+                resultEl.classList.add("text-red-300");
+            }
+        });
+    </script>
+</body>
+</html>
