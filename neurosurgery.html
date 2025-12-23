@@ -308,9 +308,10 @@
 
     <script type="module">
         import { setupSharing } from './js/sharing.js';
+        import { API_KEYS } from './js/config.js';
 
         // --- Gemini API Configuration ---
-        const API_KEY = "AIzaSyAyAQ96QdTF4b2rRn_yMQ8O4poLOtzz72o";
+        const API_KEY = API_KEYS.RHEUMATOLOGY;
         const jsonBinKey = "$2a$10$J/Gr0x7KT4o8YHMdHtRgV.MokfRSRnPPdXBI5jJidEiqrvJfbH5Py";
         const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${API_KEY}`;
         

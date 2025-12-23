@@ -265,11 +265,10 @@
     <!-- Main Logic -->
     <script type="module">
         import { setupSharing } from './js/sharing.js';
+        import { API_KEYS } from './js/config.js';
 
         // API Configuration
-        const keyPartA = "AIzaSyAzk0ixnzWq07XrCB6laXHSu96k";
-        const keyPartB = "Sn4dfEE";
-        const apiKey = keyPartA + keyPartB;
+        const apiKey = API_KEYS.JOURNAL_CLUB;
         const jsonBinKey = "$2a$10$J/Gr0x7KT4o8YHMdHtRgV.MokfRSRnPPdXBI5jJidEiqrvJfbH5Py";
         const GENERATE_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
         const TTS_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;

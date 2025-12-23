@@ -1,5 +1,14 @@
-// Global configuration for the application
+// Global configuration
+export const GEMINI_MODEL_ID = "gemini-2.5-flash-preview-09-2025";
 
-// The Gemini Model ID to use across the entire platform.
-// Update this single value to upgrade the AI model for all consults.
-export const GEMINI_MODEL_ID = "gemini-2.5-flash";
+export const API_KEYS = {
+    ADTMC: "$KEY_ADTMC",
+    CARDIOLOGY: "$KEY_CARDIOLOGY",
+    IM: "$KEY_IM",
+    JOURNAL_CLUB: "$KEY_JOURNAL_CLUB",
+    NEUROLOGY: "$KEY_NEUROLOGY",
+    ORTHOPEDICS: "$KEY_ORTHOPEDICS",
+    PSYCHIATRY: "$KEY_PSYCHIATRY",
+    RHEUMATOLOGY: "$KEY_RHEUMATOLOGY",
+    START_PAGE: "$KEY_START_PAGE"
+};
