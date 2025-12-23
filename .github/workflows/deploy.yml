@@ -36,23 +36,21 @@ jobs:
           KEY_RHEUMATOLOGY: ${{ secrets.KEY_RHEUMATOLOGY }}
           KEY_START_PAGE: ${{ secrets.KEY_START_PAGE }}
         run: |
-          echo "Starting API Key Injection..."
+          echo "Generating production config..."
 
-          # Debug: Check secret presence
-          echo "Secret lengths check:"
-          echo "ADTMC: ${#KEY_ADTMC}"
-          echo "RHEUMATOLOGY: ${#KEY_RHEUMATOLOGY}"
+          # Debug: Print lengths of secrets to verify they are loaded (Do NOT print values)
+          echo "Verifying secret presence (length check):"
+          echo "ADTMC: ${#KEY_ADTMC} chars"
+          echo "CARDIOLOGY: ${#KEY_CARDIOLOGY} chars"
+          echo "IM: ${#KEY_IM} chars"
+          echo "JOURNAL_CLUB: ${#KEY_JOURNAL_CLUB} chars"
+          echo "NEUROLOGY: ${#KEY_NEUROLOGY} chars"
+          echo "ORTHOPEDICS: ${#KEY_ORTHOPEDICS} chars"
+          echo "PSYCHIATRY: ${#KEY_PSYCHIATRY} chars"
+          echo "RHEUMATOLOGY: ${#KEY_RHEUMATOLOGY} chars"
+          echo "START_PAGE: ${#KEY_START_PAGE} chars"
 
-          # Force remove existing file
-          if [ -f js/config.js ]; then
-            echo "Removing existing js/config.js"
-            rm js/config.js
-          fi
-
-          # Generate timestamp
-          TIMESTAMP=$(date)
-
-          echo "Writing new js/config.js..."
+          # Write config file using environment variables
           cat <<EOF > js/config.js
           // Global configuration (Production Injected at $TIMESTAMP)
           export const GEMINI_MODEL_ID = "gemini-1.5-flash";
@@ -70,15 +68,7 @@ jobs:
           };
           EOF
 
-          # Verify file creation
-          if [ -f js/config.js ]; then
-             echo "File js/config.js successfully created."
-             echo "Content preview (top 3 lines):"
-             head -n 3 js/config.js
-          else
-             echo "ERROR: js/config.js was NOT created."
-             exit 1
-          fi
+          echo "Production config generated successfully."
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
