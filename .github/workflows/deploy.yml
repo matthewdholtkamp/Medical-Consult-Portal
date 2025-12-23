@@ -1,0 +1,60 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Inject API Keys from Secrets
+        run: |
+          # Overwrite js/config.js with secrets
+          echo "Generating production config..."
+          cat <<EOF > js/config.js
+          // Global configuration (Production Injected)
+          export const GEMINI_MODEL_ID = "gemini-2.5-flash-preview-09-2025";
+
+          export const API_KEYS = {
+              ADTMC: "${{ secrets.KEY_ADTMC }}",
+              CARDIOLOGY: "${{ secrets.KEY_CARDIOLOGY }}",
+              IM: "${{ secrets.KEY_IM }}",
+              JOURNAL_CLUB: "${{ secrets.KEY_JOURNAL_CLUB }}",
+              NEUROLOGY: "${{ secrets.KEY_NEUROLOGY }}",
+              ORTHOPEDICS: "${{ secrets.KEY_ORTHOPEDICS }}",
+              PSYCHIATRY: "${{ secrets.KEY_PSYCHIATRY }}",
+              RHEUMATOLOGY: "${{ secrets.KEY_RHEUMATOLOGY }}",
+              START_PAGE: "${{ secrets.KEY_START_PAGE }}"
+          };
+          EOF
+
+          echo "Production config generated."
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
