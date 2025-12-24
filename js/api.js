@@ -15,7 +15,7 @@ export async function callGeminiApi(apiKey, systemPrompt, userQuery, retries = 3
     const payload = {
         contents: [{ parts: [{ text: userQuery }] }],
         systemInstruction: { parts: [{ text: systemPrompt }] },
-        generationConfig: { responseMimeType: "application/json" }
+        generationConfig: { responseMimeType: "application/json", temperature: 1.0 }
     };
 
     try {
@@ -67,7 +67,8 @@ export async function callGeminiText(apiKey, systemPrompt, userQuery) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL_ID}:generateContent?key=${cleanKey}`;
     const payload = {
         contents: [{ parts: [{ text: userQuery }] }],
-        systemInstruction: { parts: [{ text: systemPrompt }] }
+        systemInstruction: { parts: [{ text: systemPrompt }] },
+        generationConfig: { temperature: 1.0 }
     };
 
     const response = await fetch(url, {
