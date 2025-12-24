@@ -130,7 +130,7 @@
 <!-- DISCLAIMER MODAL -->
 <!-- =================================================================== -->
 <div id="disclaimerModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 transition-opacity duration-300">
-  <div id="disclaimerDialog" class="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl bg-slate-800 border border-slate-700 p-6 text-left text-slate-100 shadow-2xl ring-1 ring-white/10" tabindex="-1">
+  <div id="disclaimerDialog" class="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl bg-gemini-800 border border-slate-700/50 p-6 text-left text-slate-100 shadow-2xl ring-1 ring-white/10" tabindex="-1">
     <div class="flex items-start justify-between gap-4">
       <div>
         <h2 id="disclaimerTitle" class="text-2xl font-bold mb-1 text-white">Quick challenge — one small step</h2>
@@ -378,16 +378,27 @@
                                     rows="1"
                                     oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px'"></textarea>
                                 
-                                <div class="flex items-center justify-end px-3 pb-3 relative">
+                                <div class="flex items-center justify-between px-3 pb-3 relative">
                                     <!-- New Question Button (Hidden by default) -->
-                                    <button id="newQuestionBtn" onclick="resetConsult()" class="hidden absolute left-3 flex items-center gap-1.5 px-3 py-1.5 bg-slate-700/50 hover:bg-slate-600 text-slate-300 hover:text-white text-xs font-medium rounded-lg border border-slate-600 transition-all">
+                                    <button id="newQuestionBtn" onclick="resetConsult()" class="hidden flex items-center gap-1.5 px-3 py-1.5 bg-slate-700/50 hover:bg-slate-600 text-slate-300 hover:text-white text-xs font-medium rounded-lg border border-slate-600 transition-all">
                                         <span class="material-symbols-outlined text-[14px]">refresh</span>
                                         New Question
                                     </button>
                                     
-                                    <button id="askBtn" onclick="askDrHoltkamp()" class="px-4 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-500 transition-all shadow-lg shadow-blue-900/20 disabled:opacity-50 disabled:cursor-not-allowed">
-                                        Ask Dr. H
-                                    </button>
+                                    <div class="flex items-center gap-4 ml-auto">
+                                        <!-- Deep Thinking Toggle -->
+                                        <label class="toggle-switch-container flex items-center gap-2 cursor-pointer group">
+                                            <div class="relative">
+                                                <input type="checkbox" id="deepThinkToggle" class="sr-only peer">
+                                                <div class="w-9 h-5 bg-slate-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500/30 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                                            </div>
+                                            <span class="text-xs font-medium text-slate-400 group-hover:text-slate-200 transition-colors">Deep Thinking</span>
+                                        </label>
+
+                                        <button id="askBtn" onclick="askDrHoltkamp()" class="px-4 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-500 transition-all shadow-lg shadow-blue-900/20 disabled:opacity-50 disabled:cursor-not-allowed">
+                                            Ask Dr. H
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                             <p class="text-xs text-slate-500 mt-3 ml-1">
@@ -775,16 +786,39 @@ Tone should be authoritative, educational, and analytically rigorous.`;
 
     <!-- Import Shared API Logic -->
     <script type="module">
-        import { API_KEYS, GEMINI_MODEL_ID } from './js/config.js?v=secure';
+        import { API_KEYS } from './js/config.js?v=secure';
         const apiKey = API_KEYS.START_PAGE;
 
-        async function callGeminiText(apiKey, systemPrompt, userQuery) {
+        // Chat History for Stateful Reasoning
+        let chatHistory = [];
+
+        async function callGeminiDrHoltkamp(apiKey, systemPrompt, userQuery) {
             const cleanKey = apiKey ? apiKey.trim() : "";
-            const modelId = (typeof GEMINI_MODEL_ID !== 'undefined' && GEMINI_MODEL_ID) ? GEMINI_MODEL_ID : "gemini-3-flash-preview";
+            // Use gemini-3-pro-preview for Home Page
+            const modelId = "gemini-3-pro-preview";
             const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${cleanKey}`;
+
+            // Check Deep Thinking Toggle
+            const isDeepThink = document.getElementById('deepThinkToggle') ? document.getElementById('deepThinkToggle').checked : false;
+
+            // Build Content Part
+            const userContent = { role: "user", parts: [{ text: userQuery }] };
+            const currentContents = [...chatHistory, userContent];
+
+            // Modify System Prompt for Deep Thinking if enabled (since thinking_level is not supported via API yet)
+            let currentSystemPrompt = systemPrompt;
+            if (isDeepThink) {
+                currentSystemPrompt += "\n\nCRITICAL INSTRUCTION: ENGAGE DEEP THINKING. Use a step-by-step chain of thought to analyze the query comprehensively before providing the final answer. Ensure high reasoning rigor.";
+            }
+
+            // Build Payload
             const payload = {
-                contents: [{ parts: [{ text: userQuery }] }],
-                systemInstruction: { parts: [{ text: systemPrompt }] }
+                contents: currentContents,
+                systemInstruction: { parts: [{ text: currentSystemPrompt }] },
+                generationConfig: {
+                    temperature: 1.0
+                    // thinking_level removed to fix 400 Bad Request
+                }
             };
 
             const response = await fetch(url, {
@@ -800,7 +834,20 @@ Tone should be authoritative, educational, and analytically rigorous.`;
             }
 
             const data = await response.json();
-            return data.candidates?.[0]?.content?.parts?.[0]?.text || "No response.";
+            const candidate = data.candidates?.[0];
+
+            if (!candidate || !candidate.content) {
+                throw new Error("No content generated");
+            }
+
+            // CRITICAL: Preserve the full content object (text + thought_signature)
+            // Save user query to history first
+            chatHistory.push(userContent);
+            // Save model response to history
+            chatHistory.push(candidate.content);
+
+            // Extract text for display
+            return candidate.content.parts.find(p => p.text)?.text || "No text response.";
         }
         
         window.resetConsult = function() {
@@ -809,6 +856,9 @@ Tone should be authoritative, educational, and analytically rigorous.`;
             responseArea.classList.add('hidden');
             responseArea.innerHTML = '';
             document.getElementById('newQuestionBtn').classList.add('hidden');
+
+            // Reset History
+            chatHistory = [];
         }
 
         // Function to clean "amateur" characters and LaTeX artifacts
@@ -855,8 +905,8 @@ Tone should be authoritative, educational, and analytically rigorous.`;
             `;
 
             try {
-                // Use Shared API Function
-                let text = await callGeminiText(apiKey, DR_HOLTKAMP_SYSTEM_INSTRUCTION, query);
+                // Use Specific Dr. Holtkamp Function
+                let text = await callGeminiDrHoltkamp(apiKey, DR_HOLTKAMP_SYSTEM_INSTRUCTION, query);
                 text = cleanMedicalResponse(text);
 
                 responseArea.innerHTML = `
