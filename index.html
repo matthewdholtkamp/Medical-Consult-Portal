@@ -824,9 +824,9 @@ Tone should be authoritative, educational, and analytically rigorous.`;
             const payload = {
                 contents: currentContents,
                 systemInstruction: { parts: [{ text: systemPrompt }] },
+                thinking_level: isDeepThink ? "high" : "low",
                 generationConfig: {
-                    temperature: 1.0,
-                    thinking_level: isDeepThink ? "high" : "low"
+                    temperature: 1.0
                 }
             };
 
@@ -856,7 +856,7 @@ Tone should be authoritative, educational, and analytically rigorous.`;
             chatHistory.push(candidate.content);
 
             // Extract text for display
-            return candidate.content.parts.find(p => p.text)?.text || "No text response.";
+            return candidate.content.parts.filter(p => p.text).map(p => p.text).join('') || "No text response.";
         }
         
         window.resetConsult = function() {
