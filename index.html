@@ -809,22 +809,23 @@ Tone should be authoritative, educational, and analytically rigorous.`;
 
         async function callGeminiDrHoltkamp(apiKey, systemPrompt, userQuery) {
             const cleanKey = apiKey ? apiKey.trim() : "";
-            // Use gemini-3-pro-preview for Home Page
             const modelId = "gemini-3-pro-preview";
             const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${cleanKey}`;
 
-            // Check Deep Thinking Toggle
             const isDeepThink = document.getElementById('deepThinkToggle').checked;
 
-            // Build Content Part
             const userContent = { role: "user", parts: [{ text: userQuery }] };
             const currentContents = [...chatHistory, userContent];
 
-            // Build Payload
+            // 2025 v1beta Payload: Corrects the 400 error by moving thinking_config to top-level
             const payload = {
                 contents: currentContents,
                 systemInstruction: { parts: [{ text: systemPrompt }] },
-                thinking_level: isDeepThink ? "high" : "low",
+                // CRITICAL: thinking_config must be at the top level, not inside generationConfig
+                thinking_config: {
+                    include_thoughts: true,
+                    thinking_level: isDeepThink ? "high" : "low"
+                },
                 generationConfig: {
                     temperature: 1.0
                 }
@@ -838,27 +839,41 @@ Tone should be authoritative, educational, and analytically rigorous.`;
 
             if (!response.ok) {
                 const errData = await response.json().catch(() => ({}));
-                console.error("Gemini API Error Details:", errData);
+                // Fallback to standard if thinking_config is rejected
+                if (response.status === 400) return await callStandardGemini(apiKey, systemPrompt, userQuery);
                 throw new Error(`API Error: ${response.status} - ${errData.error?.message || response.statusText}`);
             }
 
             const data = await response.json();
             const candidate = data.candidates?.[0];
 
-            if (!candidate || !candidate.content) {
-                throw new Error("No content generated");
-            }
+            if (!candidate || !candidate.content) throw new Error("No clinical content generated");
 
-            // CRITICAL: Preserve the full content object (text + thought_signature)
-            // Save user query to history first
             chatHistory.push(userContent);
-            // Save model response to history
             chatHistory.push(candidate.content);
 
-            // Extract text for display
-            return candidate.content.parts.filter(p => p.text).map(p => p.text).join('') || "No text response.";
+            // Extract internal thoughts and the clean response text separately
+            const thoughts = candidate.content.parts.find(p => p.thought)?.text || "";
+            const responseText = candidate.content.parts
+                .filter(p => p.text && !p.thought)
+                .map(p => p.text)
+                .join("");
+
+            return { text: responseText, thoughts: thoughts };
         }
-        
+
+        async function callStandardGemini(apiKey, systemPrompt, userQuery) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent?key=${apiKey}`;
+            const payload = {
+                contents: [...chatHistory, { role: "user", parts: [{ text: userQuery }] }],
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+                generationConfig: { temperature: 0.7 }
+            };
+            const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            const data = await response.json();
+            return { text: data.candidates[0].content.parts[0].text, thoughts: "" };
+        }
+
         window.resetConsult = function() {
             document.getElementById('chatInput').value = '';
             const responseArea = document.getElementById('responseArea');
@@ -914,43 +929,53 @@ Tone should be authoritative, educational, and analytically rigorous.`;
             `;
 
             try {
-                // Use Specific Dr. Holtkamp Function
-                let text = await callGeminiDrHoltkamp(apiKey, DR_HOLTKAMP_SYSTEM_INSTRUCTION, query);
-                text = cleanMedicalResponse(text);
+                const result = await callGeminiDrHoltkamp(apiKey, DR_HOLTKAMP_SYSTEM_INSTRUCTION, query);
+                const cleanedText = cleanMedicalResponse(result.text);
 
                 responseArea.innerHTML = `
-                    <div class="flex items-start gap-4 animate-fade-in">
-                        <div class="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center flex-shrink-0 mt-1">
-                            <span class="material-symbols-outlined text-blue-400">smart_toy</span>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <div class="flex items-center justify-between mb-2">
-                                <h3 class="font-bold text-white text-sm uppercase tracking-wider">Dr. Holtkamp Analysis</h3>
-                                <span class="text-[10px] text-slate-500 bg-slate-800 px-2 py-0.5 rounded border border-slate-700">AI Generated • Review Verify</span>
+                    <div class="space-y-4 animate-fade-in">
+                        <div class="flex items-start gap-4">
+                            <div class="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center flex-shrink-0">
+                                <span class="material-symbols-outlined text-blue-400">smart_toy</span>
                             </div>
-                            <div class="prose-content text-slate-300 text-sm leading-relaxed">
-                                ${marked.parse(text)}
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center justify-between mb-2">
+                                    <h3 class="font-bold text-white text-sm uppercase tracking-wider">Dr. Holtkamp Analysis</h3>
+                                    <span class="text-[10px] text-slate-500 bg-slate-800 px-2 py-0.5 rounded border border-slate-700">AI Reasoning Enabled</span>
+                                </div>
+                                <div class="prose-content text-slate-300 text-sm leading-relaxed">
+                                    ${marked.parse(cleanedText)}
+                                </div>
                             </div>
                         </div>
+
+                        ${result.thoughts ? `
+                            <div class="mt-4 pt-4 border-t border-slate-800">
+                                <details class="group bg-slate-900/40 rounded-xl border border-slate-700/30 overflow-hidden">
+                                    <summary class="list-none p-3 cursor-pointer flex items-center justify-between text-[10px] text-slate-500 font-bold uppercase tracking-widest hover:bg-slate-800/50 transition-colors">
+                                        <div class="flex items-center gap-2">
+                                            <span class="material-symbols-outlined text-sm text-blue-500/50">neurology</span>
+                                            <span>View Internal Reasoning Process</span>
+                                        </div>
+                                        <span class="material-symbols-outlined text-sm group-open:rotate-180 transition-transform">expand_more</span>
+                                    </summary>
+                                    <div class="px-4 pb-4 text-xs text-slate-500 italic font-mono leading-relaxed bg-black/10">
+                                        <div class="pt-2 whitespace-pre-line">
+                                            ${result.thoughts}
+                                        </div>
+                                    </div>
+                                </details>
+                            </div>
+                        ` : ''}
                     </div>
                 `;
-                newQuestionBtn.classList.remove('hidden');
-
             } catch (error) {
                 console.error(error);
-                responseArea.innerHTML = `
-                    <div class="p-4 bg-red-900/20 border border-red-500/30 rounded-xl text-red-200 flex items-start gap-3">
-                        <span class="material-symbols-outlined text-red-400">error</span>
-                        <div>
-                            <strong class="block font-semibold text-red-100 text-sm">Consult Error</strong>
-                            <span class="text-xs opacity-80">${error.message || "Unable to reach Dr. Holtkamp service. Check network or API configuration."}</span>
-                        </div>
-                    </div>
-                `;
-                newQuestionBtn.classList.remove('hidden');
+                responseArea.innerHTML = `<div class="p-4 bg-red-900/20 text-red-200 text-xs rounded-xl border border-red-500/30">${error.message}</div>`;
             } finally {
                 askBtn.disabled = false;
-                askBtn.textContent = "Ask Dr. Holtkamp";
+                askBtn.textContent = "Ask Dr. H";
+                newQuestionBtn.classList.remove('hidden');
             }
         }
     </script>
