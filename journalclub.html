@@ -68,9 +68,57 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        /* Toast Notification */
+        #toast {
+            visibility: hidden;
+            min-width: 250px;
+            margin-left: -125px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 8px;
+            padding: 16px;
+            position: fixed;
+            z-index: 50;
+            left: 50%;
+            bottom: 30px;
+            font-size: 17px;
+            border: 1px solid var(--accent);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        #toast.show {
+            visibility: visible;
+            -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+
+        @-webkit-keyframes fadein {
+            from {bottom: 0; opacity: 0;}
+            to {bottom: 30px; opacity: 1;}
+        }
+
+        @keyframes fadein {
+            from {bottom: 0; opacity: 0;}
+            to {bottom: 30px; opacity: 1;}
+        }
+
+        @-webkit-keyframes fadeout {
+            from {bottom: 30px; opacity: 1;}
+            to {bottom: 0; opacity: 0;}
+        }
+
+        @keyframes fadeout {
+            from {bottom: 30px; opacity: 1;}
+            to {bottom: 0; opacity: 0;}
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center p-4 md:p-8">
+
+    <!-- Toast Notification -->
+    <div id="toast">Notification Message</div>
 
     <!-- Header -->
     <header class="w-full max-w-4xl text-center mb-10">
@@ -238,6 +286,9 @@
         // API Configuration
         const apiKey = API_KEYS.JOURNAL_CLUB;
         const jsonBinKey = "$2a$10$J/Gr0x7KT4o8YHMdHtRgV.MokfRSRnPPdXBI5jJidEiqrvJfbH5Py";
+        // Use Flash for quick Step 1 queries to avoid Rate Limits (429)
+        const FAST_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+        // Use Pro for Step 2 Deep Thinking
         const GENERATE_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent?key=${apiKey}`;
         const TTS_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview-tts:generateContent?key=${apiKey}`;
 
@@ -252,9 +303,17 @@
         const progressBar = el('audioProgressBar');
         const progressContainer = el('audioProgressContainer');
         const progressText = el('audioProgressText');
+        const toast = el('toast');
         
         let storedSummary = "";
         let storedContext = "";
+
+        // Toast Notification Function
+        function showToast(message) {
+            toast.innerText = message;
+            toast.className = "show";
+            setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 3000);
+        }
 
         // Improved Retry Logic with Error Parsing
         async function fetchWithRetry(url, payload, maxRetries = 5) {
@@ -373,7 +432,8 @@
             `;
 
             try {
-                const data = await fetchWithRetry(GENERATE_URL, {
+                // Use FAST_URL (Flash) for simple question generation
+                const data = await fetchWithRetry(FAST_URL, {
                     contents: [{ parts: [{ text: prompt }] }],
                     safetySettings: [
                         { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
@@ -399,7 +459,7 @@
                 hideLoader();
                 el('step2').classList.remove('hidden');
             } catch (err) {
-                alert("Error generating questions. Please try again. " + err.message);
+                showToast("Error generating questions. Please try again. " + err.message);
                 el('step1').classList.remove('hidden');
                 hideLoader();
             }
@@ -573,7 +633,7 @@
 
             } catch (err) {
                 console.error(err);
-                alert("Error synthesizing data. Check API key/Quota. " + err.message);
+                showToast("Error synthesizing data. Check API key/Quota. " + err.message);
                 el('step2').classList.remove('hidden');
                 hideLoader();
             }
@@ -779,11 +839,11 @@
         
         el('btnCopy').onclick = () => {
             navigator.clipboard.writeText(storedSummary);
-            alert("Summary copied!");
+            showToast("Summary copied!");
         };
         el('btnPlan').onclick = () => {
             navigator.clipboard.writeText(el('planContent').innerText);
-            alert("Plan copied!");
+            showToast("Plan copied!");
         };
 
         // --- Sharing Logic ---
