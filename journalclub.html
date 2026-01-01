@@ -287,9 +287,9 @@
         const apiKey = API_KEYS.JOURNAL_CLUB;
         const jsonBinKey = "$2a$10$J/Gr0x7KT4o8YHMdHtRgV.MokfRSRnPPdXBI5jJidEiqrvJfbH5Py";
         // Use Flash for quick Step 1 queries to avoid Rate Limits (429)
-        const FAST_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-        // Use Pro for Step 2 Deep Thinking
-        const GENERATE_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent?key=${apiKey}`;
+        const FAST_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview:generateContent?key=${apiKey}`;
+        // Use 2.5 Flash for Step 2 as well
+        const GENERATE_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview:generateContent?key=${apiKey}`;
         const TTS_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview-tts:generateContent?key=${apiKey}`;
 
         // DOM Elements
@@ -543,10 +543,6 @@
                 const data = await fetchWithRetry(GENERATE_URL, {
                     contents: [{ parts: [{ text: mainPrompt }] }],
                     tools: [{ google_search: {} }],
-                    thinking_config: {
-                        include_thoughts: true,
-                        thinking_level: "high"
-                    },
                     safetySettings: [
                         { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
                         { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
@@ -558,17 +554,11 @@
                 const candidate = data.candidates[0];
                 const parts = candidate.content.parts;
 
-                // Extract Thoughts and Text
-                const thoughts = parts.find(p => p.thought)?.text || "";
-                const rawText = parts.filter(p => p.text && !p.thought).map(p => p.text).join("");
+                // Extract Text (No thinking model support in 2.5 Flash)
+                const rawText = parts.map(p => p.text).join("");
 
-                // Show Thoughts if available
-                if(thoughts) {
-                    el('thinkingContainer').classList.remove('hidden');
-                    el('thinkingContent').innerText = thoughts;
-                } else {
-                    el('thinkingContainer').classList.add('hidden');
-                }
+                // Hide thinking container
+                el('thinkingContainer').classList.add('hidden');
 
                 storedContext = rawText; // Save for follow up
 
