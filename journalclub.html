@@ -289,8 +289,8 @@
         // Use Flash for quick Step 1 queries to avoid Rate Limits (429)
         const FAST_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
         // Use 2.5 Pro for Step 2
-        const GENERATE_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${apiKey}`;
-        const TTS_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro-tts:generateContent?key=${apiKey}`;
+        const GENERATE_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+        const TTS_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-tts:generateContent?key=${apiKey}`;
 
         // DOM Elements
         const el = id => document.getElementById(id);
