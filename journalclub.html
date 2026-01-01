@@ -177,6 +177,22 @@
                 <audio id="audioPlayer" controls class="w-full hidden"></audio>
             </div>
 
+            <!-- Thinking Process (New) -->
+            <div id="thinkingContainer" class="hidden mb-6">
+                <details class="group bg-slate-900/40 rounded-xl border border-slate-700/30 overflow-hidden">
+                    <summary class="list-none p-3 cursor-pointer flex items-center justify-between text-[10px] text-slate-500 font-bold uppercase tracking-widest hover:bg-slate-800/50 transition-colors">
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm text-blue-500/50">🧠</span>
+                            <span>View Research Logic</span>
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 group-open:rotate-180 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                    </summary>
+                    <div class="px-4 pb-4 text-xs text-slate-500 italic font-mono leading-relaxed bg-black/10">
+                        <div id="thinkingContent" class="pt-2 whitespace-pre-line"></div>
+                    </div>
+                </details>
+            </div>
+
             <!-- Follow Up (MOVED TO TOP) -->
             <div class="mb-8 p-6 bg-slate-800/30 rounded-lg border border-slate-700">
                 <h3 class="text-lg font-bold text-white mb-2">Interactive Discussion</h3>
@@ -222,7 +238,7 @@
         // API Configuration
         const apiKey = API_KEYS.JOURNAL_CLUB;
         const jsonBinKey = "$2a$10$J/Gr0x7KT4o8YHMdHtRgV.MokfRSRnPPdXBI5jJidEiqrvJfbH5Py";
-        const GENERATE_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+        const GENERATE_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent?key=${apiKey}`;
         const TTS_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview-tts:generateContent?key=${apiKey}`;
 
         // DOM Elements
@@ -467,6 +483,10 @@
                 const data = await fetchWithRetry(GENERATE_URL, {
                     contents: [{ parts: [{ text: mainPrompt }] }],
                     tools: [{ google_search: {} }],
+                    thinking_config: {
+                        include_thoughts: true,
+                        thinking_level: "high"
+                    },
                     safetySettings: [
                         { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
                         { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
@@ -475,20 +495,68 @@
                     ]
                 });
 
-                const rawText = data.candidates[0].content.parts[0].text;
+                const candidate = data.candidates[0];
+                const parts = candidate.content.parts;
+
+                // Extract Thoughts and Text
+                const thoughts = parts.find(p => p.thought)?.text || "";
+                const rawText = parts.filter(p => p.text && !p.thought).map(p => p.text).join("");
+
+                // Show Thoughts if available
+                if(thoughts) {
+                    el('thinkingContainer').classList.remove('hidden');
+                    el('thinkingContent').innerText = thoughts;
+                } else {
+                    el('thinkingContainer').classList.add('hidden');
+                }
+
                 storedContext = rawText; // Save for follow up
 
-                // ROBUST SPLIT LOGIC
-                // We split by the distinct tokens.
-                const split1 = rawText.split('|||SECTION_PLAN|||');
-                storedSummary = split1[0];
-                let remaining = split1[1] || "";
+                // DEFENSIVE SPLIT LOGIC
+                let split1 = rawText.split('|||SECTION_PLAN|||');
+                let remaining = "";
                 
-                const split2 = remaining.split('|||SECTION_REFS|||');
-                const planText = split2[0] || "No plan generated. Try refining.";
-                const refsText = split2[1] || "No references generated.";
+                if (split1.length > 1) {
+                    storedSummary = split1[0];
+                    remaining = split1[1];
+                } else {
+                    // Fallback: Try regex for Header
+                    const planMatch = rawText.match(/\n#\s*(Treatment & Plan|Plan|Management)/i);
+                    if (planMatch) {
+                        storedSummary = rawText.substring(0, planMatch.index);
+                        remaining = rawText.substring(planMatch.index + planMatch[0].length);
+                    } else {
+                        // Failed to find plan separator, put everything in summary
+                        storedSummary = rawText;
+                        remaining = "";
+                    }
+                }
 
-                // APPLY CLEANER (without aggressive newline stripping)
+                let planText = "";
+                let refsText = "";
+
+                if (remaining) {
+                    let split2 = remaining.split('|||SECTION_REFS|||');
+                    if (split2.length > 1) {
+                        planText = split2[0];
+                        refsText = split2[1];
+                    } else {
+                         // Fallback: Try regex for Refs
+                         const refMatch = remaining.match(/\n(?:\|\|\|SECTION_REFS\|\|\||#\s*References)/i);
+                         if (refMatch) {
+                             planText = remaining.substring(0, refMatch.index);
+                             refsText = remaining.substring(refMatch.index + refMatch[0].length);
+                         } else {
+                             planText = remaining;
+                             refsText = "No explicit references found.";
+                         }
+                    }
+                } else {
+                    planText = "No plan section generated.";
+                    refsText = "No references section generated.";
+                }
+
+                // APPLY CLEANER
                 const cleanSummary = stripLatex(storedSummary);
                 const cleanPlan = stripLatex(planText);
                 const cleanRefs = stripLatex(refsText);
@@ -497,7 +565,7 @@
                 el('planContent').innerHTML = marked.parse(cleanPlan);
                 el('refsContent').innerText = cleanRefs.trim();
 
-                // Typeset Math (only if any valid MathJax remains, though we stripped most)
+                // Typeset Math
                 MathJax.typesetPromise();
 
                 hideLoader();
