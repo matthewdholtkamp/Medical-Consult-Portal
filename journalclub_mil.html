@@ -23,10 +23,10 @@
 </head>
 <body class="min-h-screen flex flex-col items-center p-4 md:p-8">
 
-    <div id="toast">Notification Message</div>
+    <div id="toast">Message</div>
 
     <header class="w-full max-w-4xl text-center mb-10">
-        <h1 class="text-4xl md:text-5xl font-extrabold text-orange-500 mb-3">Operational Medicine Journal Club</h1>
+        <h1 class="text-4xl md:text-5xl font-extrabold text-orange-500 mb-3">Operational Medical Journal Club</h1>
         <p class="text-blue-50 text-2xl font-semibold">JTS CPGs & Tactical Evidence Analysis</p>
     </header>
 
@@ -34,8 +34,11 @@
         <div id="step1" class="glass-panel rounded-xl p-6 shadow-2xl mb-6">
             <form id="queryForm" class="space-y-4">
                 <label class="block text-lg font-semibold mb-2">Operational Topic or Clinical Question</label>
-                <input type="text" id="initialQuestion" class="w-full bg-slate-800 border border-slate-600 rounded-lg p-4 text-white outline-none focus:ring-2 focus:ring-orange-500" placeholder="e.g., Freeze Dried Plasma in Role 1 care" required>
-                <button type="submit" class="w-full bg-indigo-700 hover:bg-indigo-600 text-white font-bold py-3 rounded-lg">Initialize Refinement</button>
+                <input type="text" id="initialQuestion" class="w-full bg-slate-800 border border-slate-600 rounded-lg p-4 text-white outline-none focus:ring-2 focus:ring-orange-500" placeholder="e.g., REBOA in Role 1 care" required>
+                <button type="submit" class="w-full bg-indigo-700 hover:bg-indigo-600 text-white font-bold py-3 rounded-lg flex flex-col items-center">
+                    <span>Initialize Refinement</span>
+                    <span class="text-[9px] uppercase tracking-widest text-indigo-300/60 font-mono">Waterfall Priority: 3-Flash > Lite</span>
+                </button>
             </form>
         </div>
 
@@ -45,23 +48,24 @@
                 <div id="dynamicInputs" class="space-y-4"></div>
                 <div class="flex gap-4 pt-2">
                     <button type="button" id="btnBackToStep1" class="w-1/3 bg-slate-700 text-white font-bold py-3 rounded-lg">Back</button>
-                    <button type="submit" class="w-2/3 bg-gradient-to-r from-orange-600 to-red-600 text-white font-bold py-3 rounded-lg">Generate Analysis</button>
+                    <button type="submit" class="w-2/3 bg-gradient-to-r from-orange-600 to-red-600 text-white font-bold py-3 rounded-lg flex flex-col items-center">
+                        <span>Generate Analysis</span>
+                        <span class="text-[9px] uppercase tracking-widest text-white/60 font-mono">Auto-Failover Strategy Enabled</span>
+                    </button>
                 </div>
             </form>
         </div>
 
-        <div id="loader" class="hidden text-center py-12">
-            <div class="pulse-ring"></div>
-            <p id="loaderText" class="mt-4 text-orange-400 font-mono text-sm animate-pulse">Processing...</p>
-        </div>
+        <div id="loader" class="hidden text-center py-12"><div class="pulse-ring"></div><p id="loaderText" class="mt-4 text-orange-400 font-mono text-sm animate-pulse">Processing...</p></div>
 
         <div id="results" class="hidden">
-            <div class="grid grid-cols-2 md:grid-cols-8 gap-2 mb-6 bg-slate-800/50 p-3 rounded-lg border border-slate-700">
-                <button id="btnAudio" class="col-span-2 md:col-span-4 bg-teal-700 text-white px-4 py-3 rounded-lg font-bold">🎙️ Listen to Brief</button>
-                <button id="btnNewTopic" class="md:col-span-1 bg-red-900/40 text-red-200 rounded-lg text-xs font-semibold">New Topic</button>
-                <button id="btnBackToRefine" class="md:col-span-1 bg-slate-700 text-gray-200 rounded-lg text-xs font-medium">Back</button>
-                <button id="btnCopy" class="md:col-span-1 bg-slate-700 text-gray-200 rounded-lg text-xs font-medium">Copy Text</button>
-                <button id="btnPlan" class="md:col-span-1 bg-slate-700 text-gray-200 rounded-lg text-xs font-medium">Copy Plan</button>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-6 bg-slate-800/50 p-3 rounded-lg border border-slate-700">
+                <button id="btnAudio" class="col-span-2 bg-teal-700 text-white px-4 py-3 rounded-lg font-bold flex flex-col items-center shadow-lg">
+                    <span>🎙️ Listen to Brief</span>
+                    <span class="text-[9px] uppercase tracking-widest text-teal-300/60 font-mono">Unlimited Native-Audio Bucket</span>
+                </button>
+                <button id="btnNewTopic" class="bg-red-900/40 text-red-200 rounded-lg text-xs font-semibold">New Topic</button>
+                <button id="btnBackToRefine" class="bg-slate-700 text-gray-200 rounded-lg text-xs font-medium">Back</button>
             </div>
             
             <div id="audioContainer" class="hidden mb-6 p-4 bg-teal-900/30 border border-teal-800 rounded-lg">
@@ -77,109 +81,92 @@
     </main>
 
     <script>
-    // PCM TO WAV LIB
     !function(e,t){"object"==typeof exports&&"object"==typeof module?module.exports=t():"function"==typeof define&&define.amd?define([],t):"object"==typeof exports?exports.pcmToWav=t():e.pcmToWav=t()}(window,function(){return function(e){var t={};function r(n){if(t[n])return t[n].exports;var o=t[n]={i:n,l:!1,exports:{}};return e[n].call(o.exports,o,o.exports,r),o.l=!0,o.exports}return r.m=e,r.c=t,r.d=function(e,t,n){r.o(e,t)||Object.defineProperty(e,t,{enumerable:!0,get:n})},r.r=function(e){"undefined"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(e,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(e,"__esModule",{value:!0})},r.t=function(e,t){if(1&t&&(e=r(e)),8&t)return e;if(4&t&&"object"==typeof e&&e&&e.__esModule)return e;var n=Object.create(null);if(r.r(n),Object.defineProperty(n,"default",{enumerable:!0,value:e}),2&t&&"string"!=typeof e)for(var o in e)r.d(n,o,function(t){return e[t]}.bind(null,o));return n},r.n=function(e){var t=e&&e.__esModule?function(){return e.default}:function(){return e};return r.d(t,"a",t),t},r.o=function(e,t){return Object.prototype.hasOwnProperty.call(e,t)},r.p="",r(r.s=0)}([function(e,t,r){"use strict";Object.defineProperty(t,"__esModule",{value:!0}),t.default=function(e,t,r){var n,o,a,i,f,c,u,d=new DataView(new ArrayBuffer(44+e.length*t*2));return d.setUint32(0,1380533830,!1),d.setUint32(4,36+e.length*t*2,!0),d.setUint32(8,1463899717,!1),d.setUint32(12,1718449184,!1),d.setUint16(20,1,!0),n=t,d.setUint16(22,n,!0),o=r,d.setUint32(24,o,!0),a=r*t*2,d.setUint32(28,a,!0),i=2*t,d.setUint16(32,i,!0),f=16,d.setUint16(34,f,!0),d.setUint32(36,1684108385,!1),c=e.length*t*2,d.setUint32(40,c,!0),u=new Uint8Array(d.buffer,44),e.forEach(function(e,t){var r=44+2*t;d.setInt16(r,e,!0)}),new Blob([d.buffer],{type:"audio/wav"})},e.exports=t.default}])});
     </script>
 
     <script type="module">
+        import { setupSharing } from './js/sharing.js';
         import { API_KEYS } from './js/config.js?v=secure';
-        const apiKey = API_KEYS.JOURNAL_CLUB;
 
-        const MODELS = {
-            TEXT: "gemini-2.5-flash-lite", // Fresh daily bucket (20 RPD)
-            AUDIO: "gemini-2.5-flash-native-audio-dialog" // UNLIMITED audio
-        };
+        const apiKey = API_KEYS.JOURNAL_CLUB;
+        const WATERFALL_MODELS = ["gemini-3-flash", "gemini-2.5-flash-lite", "gemini-1.5-flash"];
+        const AUDIO_MODEL = "gemini-2.5-flash-native-audio-dialog";
 
         const el = id => document.getElementById(id);
-        let storedSummary = "";
+        const dynamicInputs = el('dynamicInputs');
+        let storedSummary = "", storedContext = "";
 
         function showToast(m) { const t = el('toast'); t.innerText = m; t.className = "show"; setTimeout(() => t.className = "", 3000); }
         function showLoader(t) { el('loaderText').innerText = t; el('loader').classList.remove('hidden'); }
         function hideLoader() { el('loader').classList.add('hidden'); }
 
-        async function fetchWithRetry(modelId, payload, maxRetries = 3) {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${apiKey}`;
-            for (let i = 0; i < maxRetries; i++) {
+        /**
+         * WATERFALL CORE: Tries models in sequence to bypass 429 errors
+         */
+        async function callGeminiWaterfall(payload) {
+            for (const modelId of WATERFALL_MODELS) {
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${apiKey}`;
                 try {
+                    showLoader(`Consulting ${modelId}...`);
                     const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                    if (res.status === 429) {
-                        const wait = (i+1) * 10000;
-                        showToast(`Limit Hit. Pausing ${wait/1000}s...`);
-                        await new Promise(r => setTimeout(r, wait));
-                        continue;
-                    }
-                    if (!res.ok) throw new Error(await res.text());
-                    return await res.json();
-                } catch (e) { if (i === maxRetries - 1) throw e; await new Promise(r => setTimeout(r, 2000)); }
+                    if (res.status === 429) continue; 
+                    if (!res.ok) throw new Error(res.status);
+                    const data = await res.json();
+                    return data;
+                } catch (e) { continue; }
             }
+            throw new Error("Quota Exhausted on All Models.");
         }
 
-        // STEP 1: INITIAL TRIAGE
+        // STEP 1: INITIAL TOPIC
         el('queryForm').onsubmit = async (e) => {
             e.preventDefault();
             el('step1').classList.add('hidden');
-            showLoader("Consulting JTS Guidelines (Flash-Lite)...");
             try {
-                const data = await fetchWithRetry(MODELS.TEXT, {
-                    contents: [{ parts: [{ text: `Topic: "${el('initialQuestion').value}". Generate 5 tactical medical triage questions. One per line.` }] }]
-                });
+                const data = await callGeminiWaterfall({ contents: [{ parts: [{ text: `Topic: "${el('initialQuestion').value}". Generate 5 tactical medical triage questions. 1 per line.` }] }] });
                 const qs = data.candidates[0].content.parts[0].text.split('\n').filter(l => l.trim().length > 5).slice(0, 5);
-                el('dynamicInputs').innerHTML = qs.map(q => `<div class="mb-3"><label class="block text-xs text-gray-400 mb-1">${q}</label><input type="text" class="w-full bg-slate-800 border border-slate-600 rounded p-2 text-white text-sm"></div>`).join('');
+                dynamicInputs.innerHTML = qs.map(q => `<div class="mb-3"><label class="block text-xs text-gray-400 mb-1">${q}</label><input type="text" class="w-full bg-slate-800 border border-slate-600 rounded p-2 text-white text-sm"></div>`).join('');
                 hideLoader(); el('step2').classList.remove('hidden');
-            } catch (err) { showToast("Quota Error. Wait 15s."); hideLoader(); el('step1').classList.remove('hidden'); }
+            } catch (err) { showToast("All models busy."); hideLoader(); el('step1').classList.remove('hidden'); }
         };
 
         // STEP 2: DOCTRINE ANALYSIS
         el('refinementForm').onsubmit = async (e) => {
             e.preventDefault();
             el('step2').classList.add('hidden');
-            showLoader("Synthesizing Clinical Evidence...");
+            const details = Array.from(dynamicInputs.querySelectorAll('input')).map(i => i.value).join('. ');
             try {
-                const details = Array.from(el('dynamicInputs').querySelectorAll('input')).map(i => `${i.previousElementSibling.innerText}: ${i.value}`).join('. ');
-                const res = await fetchWithRetry(MODELS.TEXT, {
-                    contents: [{ parts: [{ text: `Analyze "${el('initialQuestion').value}" with details: ${details}. Cross-reference JTS CPGs. Separator: |||PLAN|||. No LaTeX.` }] }]
-                });
-                const text = res.candidates[0].content.parts[0].text;
+                const data = await callGeminiWaterfall({ contents: [{ parts: [{ text: `Analyze "${el('initialQuestion').value}" with Details: ${details}. Use JTS CPGs. Separator: |||PLAN|||` }] }] });
+                const text = data.candidates[0].content.parts[0].text;
                 const splits = text.split('|||PLAN|||');
                 storedSummary = splits[0];
-                el('summaryContent').innerHTML = marked.parse(storedSummary);
-                el('planContent').innerHTML = marked.parse(splits[1] || "Plan data pending Theater Director approval.");
+                el('summaryContent').innerHTML = marked.parse(splits[0]);
+                el('planContent').innerHTML = marked.parse(splits[1] || "Plan processing...");
                 hideLoader(); el('results').classList.remove('hidden');
                 MathJax.typesetPromise();
-            } catch (err) { showToast("Analysis failed."); hideLoader(); el('step2').classList.remove('hidden'); }
+            } catch (err) { showToast("Critical Quota Error."); hideLoader(); el('step2').classList.remove('hidden'); }
         };
 
         // STEP 3: NATIVE AUDIO (UNLIMITED)
         el('btnAudio').onclick = async () => {
             el('btnAudio').disabled = true;
-            el('audioContainer').classList.remove('hidden');
             el('audioProgressContainer').classList.remove('hidden');
             el('audioProgressBar').style.width = '20%';
-            
             try {
-                // Generate Script (Preserving RPD)
-                const scriptRes = await fetchWithRetry(MODELS.TEXT, { 
-                    contents: [{ parts: [{ text: `You are Dr. Matthew Holtkamp. Convert this to a punchy medical brief: ${storedSummary.substring(0, 2000)}` }] }] 
-                });
-                const script = scriptRes.candidates[0].content.parts[0].text;
+                const scriptData = await callGeminiWaterfall({ contents: [{ parts: [{ text: `You are Dr. Matthew Holtkamp. Brief this summary tactical update: ${storedSummary.substring(0, 2000)}` }] }] });
+                const script = scriptData.candidates[0].content.parts[0].text;
                 el('audioProgressBar').style.width = '60%';
+                await new Promise(r => setTimeout(r, 2000));
                 
-                await new Promise(r => setTimeout(r, 2000)); // RPM Breather
-
-                // Use the UNLIMITED Native Audio Model
-                const ttsRes = await fetchWithRetry(MODELS.AUDIO, {
-                    contents: [{ parts: [{ text: `Speak as a senior medical officer: ${script}` }] }],
-                    generationConfig: {
-                        responseModalities: ["AUDIO"],
-                        speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Aoede" } } }
-                    }
+                const ttsRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${AUDIO_MODEL}:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: `Brief this: ${script}` }] }], generationConfig: { responseModalities: ["AUDIO"] } })
                 });
 
-                const audioPart = ttsRes.candidates[0].content.parts.find(p => p.inlineData);
-                const binary = atob(audioPart.inlineData.data);
-                const bytes = new Uint8Array(binary.length);
-                for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-                
+                const ttsData = await ttsRes.json();
+                const audioPart = ttsData.candidates[0].content.parts.find(p => p.inlineData);
+                const bytes = new Uint8Array(atob(audioPart.inlineData.data).split("").map(c => c.charCodeAt(0)));
                 el('audioPlayer').src = URL.createObjectURL(pcmToWav(new Int16Array(bytes.buffer), 1, 24000));
                 el('audioProgressBar').style.width = '100%';
                 setTimeout(() => { el('audioProgressContainer').classList.add('hidden'); el('audioPlayer').classList.remove('hidden'); el('audioPlayer').play(); }, 500);
@@ -187,8 +174,6 @@
         };
 
         el('btnNewTopic').onclick = () => location.reload();
-        el('btnCopy').onclick = () => { navigator.clipboard.writeText(storedSummary); showToast("Summary Copied"); };
-        el('btnPlan').onclick = () => { navigator.clipboard.writeText(el('planContent').innerText); showToast("Plan Copied"); };
         el('btnBackToStep1').onclick = () => { el('step2').classList.add('hidden'); el('step1').classList.remove('hidden'); };
         el('btnBackToRefine').onclick = () => { el('results').classList.add('hidden'); el('step2').classList.remove('hidden'); };
     </script>
