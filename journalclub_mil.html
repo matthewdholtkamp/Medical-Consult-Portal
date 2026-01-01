@@ -9,6 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
     <style>
+        /* Custom Theme Overrides */
         :root {
             --bg-primary: #1a1a2e;
             --bg-secondary: #16213e;
@@ -29,7 +30,7 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        /* Markdown Content Styling */
+        /* Markdown Styles */
         .prose-invert h1, .prose-invert h2, .prose-invert h3 {
             color: #F39C12;
             margin-top: 1.5em;
@@ -39,10 +40,11 @@
         .prose-invert h2 { border-bottom: 1px solid #333; padding-bottom: 5px; }
         .prose-invert strong { color: var(--accent); }
         .prose-invert ul { list-style-type: disc; padding-left: 20px; margin: 10px 0; }
+        .prose-invert li { margin-bottom: 5px; }
         .prose-invert p { margin-bottom: 1em; line-height: 1.7; }
         .prose-invert a { color: #38bdf8; text-decoration: underline; }
         
-        /* Animations */
+        /* Loading Animation */
         .pulse-ring {
             display: inline-block;
             width: 64px;
@@ -59,7 +61,10 @@
             border-color: var(--accent) transparent var(--accent) transparent;
             animation: ring 1.2s linear infinite;
         }
-        @keyframes ring { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes ring {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
 
         /* Toast Notification */
         #toast {
@@ -72,14 +77,20 @@
             border-radius: 8px;
             padding: 16px;
             position: fixed;
-            z-index: 100;
+            z-index: 50;
             left: 50%;
             bottom: 30px;
             font-size: 17px;
             border: 1px solid var(--accent);
             box-shadow: 0 4px 6px rgba(0,0,0,0.3);
         }
-        #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
+
+        #toast.show {
+            visibility: visible;
+            -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+
         @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
         @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
     </style>
@@ -96,8 +107,8 @@
 
     <main class="w-full max-w-4xl">
         
-        <div class="bg-blue-900/30 border border-blue-800 rounded-lg p-4 mb-8 text-center text-xs text-blue-200 uppercase tracking-widest font-bold">
-            Operational Use Only // Verify via Theater Medical Director
+        <div class="bg-blue-900/30 border border-blue-800 rounded-lg p-4 mb-8 text-center text-xs text-blue-200">
+            <strong>Operational Use Only.</strong> Verify with current JTS Clinical Practice Guidelines (CPGs) and Theater Medical Directors.
         </div>
 
         <div id="step1" class="glass-panel rounded-xl p-6 shadow-2xl mb-6">
@@ -106,110 +117,92 @@
                     <label class="block text-lg font-semibold mb-2">Operational Topic or Clinical Question</label>
                     <input type="text" id="initialQuestion" 
                            class="w-full bg-slate-800 border border-slate-600 rounded-lg p-4 text-white focus:ring-2 focus:ring-orange-500 outline-none transition"
-                           placeholder="e.g., Freeze Dried Plasma in PFC" required>
+                           placeholder="e.g., Fresh Whole Blood transfusion in Prolonged Field Care" required>
                 </div>
                 <button type="submit" id="btnRefine"
-                        class="w-full bg-indigo-700 hover:bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg transition duration-200 flex flex-col items-center gap-1">
+                        class="w-full bg-indigo-700 hover:bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg transition duration-200 flex justify-center items-center gap-2">
                     <span>Initialize Refinement</span>
-                    <span class="text-[9px] text-indigo-300/60 uppercase">Echelon: gemini-2.5-flash-lite</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
                 </button>
             </form>
         </div>
 
         <div id="step2" class="glass-panel rounded-xl p-6 shadow-2xl mb-6 hidden">
-            <h3 class="text-xl font-bold text-orange-400 mb-4 border-b border-gray-700 pb-2 uppercase text-sm tracking-tighter">Mission Context Parameters</h3>
+            <h3 class="text-xl font-bold text-orange-400 mb-4 border-b border-gray-700 pb-2">Refining Operational Context</h3>
             <form id="refinementForm" class="space-y-4">
                 <div id="dynamicInputs" class="space-y-4"></div>
                 <div class="flex gap-4 pt-2">
                     <button type="button" id="btnBackToStep1" class="w-1/3 bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 px-4 rounded-lg">Back</button>
-                    <button type="submit" id="btnGenerate" class="w-2/3 bg-gradient-to-r from-orange-600 to-red-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg flex flex-col items-center">
-                        <span>Generate Tactical Analysis</span>
-                        <span class="text-[9px] text-white/60 uppercase">Engine: Gemini-2.5-Flash (Lite-Failover)</span>
-                    </button>
+                    <button type="submit" id="btnGenerate" class="w-2/3 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform transition hover:scale-[1.01]">Generate Analysis</button>
                 </div>
             </form>
         </div>
 
         <div id="loader" class="hidden text-center py-12">
             <div class="pulse-ring"></div>
-            <p id="loaderText" class="mt-4 text-orange-400 font-mono text-sm animate-pulse uppercase">Consulting Doctrine...</p>
+            <p id="loaderText" class="mt-4 text-orange-400 font-mono text-sm animate-pulse">Analyzing JTS CPGs & Doctrine...</p>
         </div>
 
         <div id="results" class="hidden">
             
             <div class="grid grid-cols-2 md:grid-cols-8 gap-2 mb-6 bg-slate-800/50 p-3 rounded-lg border border-slate-700 items-stretch">
-                <button id="btnAudio" type="button" class="col-span-2 md:col-span-4 bg-teal-700 hover:bg-teal-600 text-white px-4 py-3 rounded-lg font-bold text-lg flex flex-col items-center justify-center shadow-lg h-full">
-                    <span>🎙️ Listen to Command Brief</span>
-                    <span class="text-[9px] text-teal-300/60 uppercase tracking-widest">Unlimited Audio Bucket</span>
+                <button id="btnAudio" type="button" class="col-span-2 md:col-span-4 bg-teal-700 hover:bg-teal-600 text-white px-4 py-3 rounded-lg font-bold text-lg flex items-center justify-center gap-2 shadow-lg transition-all h-full">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" /></svg>
+                    Listen to Brief
                 </button>
-                <button id="btnNewTopic" type="button" class="md:col-span-1 bg-red-900/40 text-red-200 rounded-lg text-[10px] font-bold uppercase tracking-tighter border border-red-900/50">New Topic</button>
-                <button id="btnBackToRefine" type="button" class="md:col-span-1 bg-slate-700 text-gray-200 rounded-lg text-[10px] font-bold uppercase">Back</button>
-                <button id="btnCopy" type="button" class="md:col-span-1 bg-slate-700 text-gray-200 rounded-lg text-[10px] font-bold uppercase">Copy Text</button>
-                <button id="btnPlan" type="button" class="md:col-span-1 bg-slate-700 text-gray-200 rounded-lg text-[10px] font-bold uppercase">Copy Plan</button>
+                <button id="btnNewTopic" type="button" class="md:col-span-1 bg-red-900/40 hover:bg-red-900/60 text-red-200 px-2 py-3 rounded-lg font-semibold text-xs md:text-sm border border-red-900/50 flex items-center justify-center h-full">New Topic</button>
+                <button id="btnBackToRefine" type="button" class="md:col-span-1 bg-slate-700 hover:bg-slate-600 text-gray-200 px-2 py-3 rounded-lg font-medium text-xs md:text-sm flex items-center justify-center h-full">Back</button>
+                <button id="btnCopy" type="button" class="md:col-span-1 bg-slate-700 hover:bg-slate-600 text-gray-200 px-2 py-3 rounded-lg font-medium text-xs md:text-sm flex items-center justify-center h-full">Copy Text</button>
+                <button id="btnPlan" type="button" class="md:col-span-1 bg-slate-700 hover:bg-slate-600 text-gray-200 px-2 py-3 rounded-lg font-medium text-xs md:text-sm flex items-center justify-center h-full">Copy Plan</button>
             </div>
             
-            <div id="audioContainer" class="hidden mb-6 p-4 bg-teal-900/30 border border-teal-800 rounded-lg transition-all">
+            <div id="audioContainer" class="hidden mb-6 p-4 bg-teal-900/30 border border-teal-800 rounded-lg transition-all duration-300">
+                <p class="text-teal-200 text-sm mb-2 font-semibold">🎙️ Dr. Holtkamp's Operational Analysis</p>
                 <div id="audioProgressContainer" class="w-full bg-gray-700 rounded-full h-2.5 mb-3 hidden">
                     <div id="audioProgressBar" class="bg-teal-500 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
-                    <p id="audioProgressText" class="text-[10px] text-teal-400 text-center mt-1 uppercase font-mono">Synthesizing...</p>
+                    <p id="audioProgressText" class="text-xs text-teal-400 text-center mt-1">Generating Briefing...</p>
                 </div>
                 <audio id="audioPlayer" controls class="w-full hidden"></audio>
             </div>
 
             <div id="thinkingContainer" class="hidden mb-6">
                 <details class="group bg-slate-900/40 rounded-xl border border-slate-700/30 overflow-hidden">
-                    <summary class="list-none p-3 cursor-pointer flex items-center justify-between text-[10px] text-slate-500 font-bold uppercase tracking-widest hover:bg-slate-800/50">
-                        <div class="flex items-center gap-2"><span>🧠</span><span>Tactical Reasoning (Trace Log)</span></div>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M19 9l-7 7-7-7" stroke-width="2" /></svg>
+                    <summary class="list-none p-3 cursor-pointer flex items-center justify-between text-[10px] text-slate-500 font-bold uppercase tracking-widest hover:bg-slate-800/50 transition-colors">
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm text-blue-500/50">🧠</span>
+                            <span>View Tactical Reasoning</span>
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 group-open:rotate-180 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
                     </summary>
-                    <div id="thinkingContent" class="px-4 pb-4 text-[10px] text-slate-500 italic font-mono leading-relaxed bg-black/10 pt-2 whitespace-pre-line"></div>
+                    <div class="px-4 pb-4 text-xs text-slate-500 italic font-mono leading-relaxed bg-black/10">
+                        <div id="thinkingContent" class="pt-2 whitespace-pre-line"></div>
+                    </div>
                 </details>
             </div>
 
             <div class="mb-8 p-6 bg-slate-800/30 rounded-lg border border-slate-700">
-                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Interactive Doctrine Discussion</h3>
+                <h3 class="text-lg font-bold text-white mb-2">Interactive Discussion</h3>
                 <form id="followUpForm" class="flex gap-2">
-                    <input type="text" id="followUpInput" class="flex-1 bg-slate-800 border border-slate-600 rounded-lg p-3 text-white text-sm outline-none" placeholder="Ask Dr. Holtkamp a specific follow-up...">
-                    <button type="submit" class="bg-orange-600 hover:bg-orange-500 text-white px-6 rounded-lg font-bold text-sm">Ask</button>
+                    <input type="text" id="followUpInput" class="flex-1 bg-slate-800 border border-slate-600 rounded-lg p-3 text-white focus:border-orange-500 outline-none" placeholder="Ask Dr. Holtkamp a follow-up about regulations or protocol...">
+                    <button type="submit" class="bg-orange-600 hover:bg-orange-500 text-white px-6 rounded-lg font-bold">Ask</button>
                 </form>
-                <div id="followUpResult" class="mt-4 p-4 bg-slate-800/50 rounded-lg border-l-4 border-orange-500 hidden prose prose-invert max-w-none text-sm"></div>
+                <div id="followUpResult" class="mt-4 p-4 bg-slate-800/50 rounded-lg border-l-4 border-orange-500 hidden prose prose-invert max-w-none"></div>
             </div>
 
             <div class="mb-4 border-b border-gray-700 flex gap-6 overflow-x-auto">
-                <button class="tab-btn active text-orange-500 border-b-2 border-orange-500 pb-2 px-1 font-bold text-sm uppercase tracking-tighter" data-target="summary">Guideline Review</button>
-                <button class="tab-btn text-gray-400 hover:text-white pb-2 px-1 font-medium text-sm uppercase tracking-tighter" data-target="plan">Operational Plan</button>
-                <button class="tab-btn text-gray-400 hover:text-white pb-2 px-1 font-medium text-sm uppercase tracking-tighter" data-target="refs">References</button>
+                <button class="tab-btn active text-orange-500 border-b-2 border-orange-500 pb-2 px-1 font-bold" data-target="summary">Guideline Review</button>
+                <button class="tab-btn text-gray-400 hover:text-white pb-2 px-1 font-medium" data-target="plan">Operational Plan</button>
+                <button class="tab-btn text-gray-400 hover:text-white pb-2 px-1 font-medium" data-target="refs">References</button>
             </div>
 
             <div id="summaryContent" class="tab-content prose prose-invert max-w-none text-gray-300"></div>
-            
-            <div id="planContent" class="tab-content hidden space-y-6">
-                <div id="planTextContent" class="prose prose-invert max-w-none text-gray-300"></div>
-                
-                <div class="mt-8 border-t border-slate-700 pt-6">
-                    <h4 class="text-orange-400 font-bold uppercase tracking-widest text-xs mb-4 flex items-center gap-2">
-                        Theater Evacuation & Route COP
-                    </h4>
-                    <div class="relative w-full h-64 bg-slate-900 rounded-xl border border-slate-700 overflow-hidden flex items-center justify-center">
-                        <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
-                        <div class="relative z-10 text-center p-6">
-                            <p class="text-slate-500 font-mono text-[10px] mb-4 uppercase">Source: External_Vantage_Link_Required</p>
-                            <div class="flex flex-col md:flex-row gap-3 justify-center">
-                                <button onclick="window.open('https://vantage.army.mil', '_blank')" class="bg-indigo-900/40 hover:bg-indigo-800 border border-indigo-500/50 text-indigo-200 px-4 py-2 rounded text-xs font-bold transition-all">Launch Army Vantage</button>
-                                <button onclick="showToast('Secure terminal required.')" class="bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-300 px-4 py-2 rounded text-xs font-bold transition-all">Load GRG Overlay</button>
-                            </div>
-                        </div>
-                    </div>
-                    <p class="mt-2 text-[9px] text-slate-600 italic font-mono">Real-time MGRS coordinates require CAC authentication.</p>
-                </div>
-            </div>
-
-            <div id="refsContent" class="tab-content hidden font-mono text-xs bg-black/30 p-4 rounded text-gray-400 whitespace-pre-wrap"></div>
+            <div id="planContent" class="tab-content hidden prose prose-invert max-w-none text-gray-300"></div>
+            <div id="refsContent" class="tab-content hidden font-mono text-sm bg-black/30 p-4 rounded text-gray-400 whitespace-pre-wrap"></div>
 
             <div class="mt-8 flex justify-center">
-                <button id="btnBackToRefineBottom" class="text-slate-500 hover:text-white underline text-[10px] uppercase font-bold tracking-widest flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M10 19l-7-7m0 0l7-7m-7 7h18" stroke-width="2" /></svg>
-                    Modify Mission Parameters
+                <button id="btnBackToRefineBottom" class="text-slate-500 hover:text-white underline text-sm flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+                    Back to Refinement
                 </button>
             </div>
         </div>
@@ -223,150 +216,160 @@
         import { setupSharing } from './js/sharing.js';
         import { API_KEYS } from './js/config.js?v=secure';
 
+        // API Configuration
         const apiKey = API_KEYS.JOURNAL_CLUB;
         const jsonBinKey = "$2a$10$J/Gr0x7KT4o8YHMdHtRgV.MokfRSRnPPdXBI5jJidEiqrvJfbH5Py";
-
-        // WATERFALL STRATEGY CONFIG
-        const WATERFALL_MODELS = ["gemini-2.5-flash-lite", "gemini-1.5-flash"];
-        const AUDIO_MODEL = "gemini-2.5-flash-native-audio-dialog"; // UNLIMITED Bucket
+        
+        // --- 2026 MODEL CONFIGURATION ---
+        const MODELS = {
+            STEP1: "gemini-2.5-flash-lite", // High RPD for questions
+            STEP2: "gemini-3-flash",        // High reasoning for analysis
+            STEP2_FAILOVER: "gemini-2.5-flash-lite", // Backup if 3-Flash hits quota
+            STEP3: "gemini-2.5-flash-native-audio-dialog" // Unlimited Audio
+        };
 
         const el = id => document.getElementById(id);
         const dynamicInputs = el('dynamicInputs');
         const toast = el('toast');
-        
         let storedSummary = "", storedContext = "";
 
-        function showToast(m) { toast.innerText = m; toast.className = "show"; setTimeout(() => toast.className = "", 3000); }
+        // Toast & Utils
+        function showToast(message) {
+            toast.innerText = message; toast.className = "show";
+            setTimeout(() => { toast.className = ""; }, 3000);
+        }
         function stripLatex(t) { return t ? t.replace(/\$([^$]+)\$/g, '$1').replace(/\\text\s*\{([^}]+)\}/g, '$1').replace(/\\([a-zA-Z]+)/g, ' $1 ').trim() : ""; }
         function showLoader(t) { el('loaderText').innerText = t; el('loader').classList.remove('hidden'); }
         function hideLoader() { el('loader').classList.add('hidden'); }
 
-        /**
-         * MISSION WATERFALL: Tries models in sequence to bypass rate limits
-         */
-        async function fetchWaterfall(payload) {
-            for (const modelId of WATERFALL_MODELS) {
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${apiKey}`;
-                try {
-                    showLoader(`Consulting echelon ${modelId}...`);
-                    const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                    if (res.status === 429) { console.warn(`${modelId} busy, falling back...`); continue; }
-                    if (!res.ok) throw new Error(res.status);
-                    return await res.json();
-                } catch (e) { continue; }
-            }
-            throw new Error("Critical: Quota Exhausted.");
+        // Robust Fetcher
+        async function fetchWithModel(modelId, payload) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${apiKey}`;
+            const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            if (res.status === 429) throw new Error("429");
+            if (!res.ok) throw new Error(await res.text());
+            return await res.json();
         }
 
-        // STEP 1: INITIAL QUESTIONS
-        el('queryForm').onsubmit = async (e) => {
+        // STEP 1: Questions via 2.5 Flash Lite
+        el('queryForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const topic = el('initialQuestion').value;
+            showLoader("Consulting JTS Guidelines (Flash Lite)...");
             el('step1').classList.add('hidden');
-            try {
-                const data = await fetchWaterfall({
-                    contents: [{ parts: [{ text: `Topic: "${topic}". Generate 5 tactical clinical triage questions. 1 per line.` }] }]
-                });
-                const qs = data.candidates[0].content.parts[0].text.split('\n').filter(l => l.length > 5).slice(0, 5);
-                dynamicInputs.innerHTML = qs.map(q => `<div><label class="block text-[11px] uppercase font-bold text-slate-500 mb-1 tracking-tight">${q}</label><input type="text" class="w-full bg-slate-800 border border-slate-600 rounded p-3 text-white text-sm focus:border-orange-500 outline-none"></div>`).join('');
-                hideLoader(); el('step2').classList.remove('hidden');
-            } catch (err) { showToast("Quota Error. Try in 60s."); hideLoader(); el('step1').classList.remove('hidden'); }
-        };
 
-        // STEP 2: DOCTRINE ANALYSIS
-        el('refinementForm').onsubmit = async (e) => {
-            e.preventDefault();
-            el('step2').classList.add('hidden');
-            const details = Array.from(dynamicInputs.querySelectorAll('input')).map(i => i.value).join('. ');
             try {
-                const data = await fetchWaterfall({
-                    contents: [{ 
-                        parts: [{ 
-                            text: `Analyze "${el('initialQuestion').value}" with mission details: ${details}. Cross-reference JTS CPGs. Structure with separators: |||PLAN||| and |||REFS|||. No LaTeX.` 
-                        }] 
-                    }],
+                const data = await fetchWithModel(MODELS.STEP1, {
+                    contents: [{ parts: [{ text: `Topic: "${topic}". Generate 5 operational clarifying questions for a deployed medical scope. Output one per line.` }] }]
+                });
+                const questions = data.candidates[0].content.parts[0].text.split('\n').filter(l => l.trim().length > 5).slice(0, 5);
+                dynamicInputs.innerHTML = questions.map((q, i) => `<div><label class="block text-sm text-gray-400 mb-1">${q}</label><input type="text" name="q${i}" class="w-full bg-slate-800 border border-slate-600 rounded p-3 text-white focus:border-orange-500 outline-none"></div>`).join('');
+                hideLoader(); el('step2').classList.remove('hidden');
+            } catch (err) { showToast("API Error."); el('step1').classList.remove('hidden'); hideLoader(); }
+        });
+
+        // STEP 2: Analysis via Gemini 3 Flash (with Failover)
+        el('refinementForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const details = Array.from(dynamicInputs.querySelectorAll('input')).map(i => `${i.previousElementSibling.innerText}: ${i.value}`).join('\n');
+            const prompt = `Analyze "${el('initialQuestion').value}" with Context: ${details}. Use JTS CPGs. Separators: |||SECTION_PLAN||| and |||SECTION_REFS|||. No LaTeX.`;
+            
+            showLoader("Synthesizing Doctrine (Gemini 3 Flash)...");
+            el('step2').classList.add('hidden');
+
+            try {
+                // Try Primary (Gemini 3)
+                const res = await fetchWithModel(MODELS.STEP2, {
+                    contents: [{ parts: [{ text: prompt }] }],
                     generationConfig: { thinking_config: { include_thoughts: true } }
                 });
+                processResponse(res);
+            } catch (err) {
+                if (err.message === "429") {
+                    showLoader("Gemini 3 Quota Hit. Failing over to Lite...");
+                    try {
+                        const resBackup = await fetchWithModel(MODELS.STEP2_FAILOVER, { contents: [{ parts: [{ text: prompt }] }] });
+                        processResponse(resBackup);
+                    } catch (e) { showToast("Analysis Failed."); hideLoader(); el('step2').classList.remove('hidden'); }
+                } else { showToast("Error."); hideLoader(); el('step2').classList.remove('hidden'); }
+            }
+        });
 
-                const cand = data.candidates[0];
-                const parts = cand.content.parts;
-                
-                // Thoughts Trace
-                const thought = parts.find(p => p.thought);
-                if (thought) { el('thinkingContent').innerText = thought.thought; el('thinkingContainer').classList.remove('hidden'); }
+        function processResponse(data) {
+            const cand = data.candidates[0];
+            
+            // Thoughts (if available)
+            const thought = cand.content.parts.find(p => p.thought);
+            if (thought) { el('thinkingContent').innerText = thought.thought; el('thinkingContainer').classList.remove('hidden'); }
 
-                const rawText = parts.find(p => p.text).text;
-                storedContext = rawText;
-                const splits = rawText.split('|||PLAN|||');
-                storedSummary = splits[0];
-                const remaining = (splits[1] || "").split('|||REFS|||');
-                
-                el('summaryContent').innerHTML = marked.parse(stripLatex(storedSummary));
-                el('planTextContent').innerHTML = marked.parse(stripLatex(remaining[0]));
-                el('refsContent').innerText = stripLatex(remaining[1] || "References available in JTS library.");
-                
-                hideLoader(); el('results').classList.remove('hidden');
-                MathJax.typesetPromise();
-            } catch (err) { showToast("Analysis failed."); hideLoader(); el('step2').classList.remove('hidden'); }
-        };
+            const rawText = cand.content.parts.find(p => p.text).text;
+            storedContext = rawText;
+            const splits = rawText.split('|||SECTION_PLAN|||');
+            storedSummary = stripLatex(splits[0]);
+            const remaining = (splits[1] || "").split('|||SECTION_REFS|||');
+            
+            el('summaryContent').innerHTML = marked.parse(storedSummary);
+            el('planContent').innerHTML = marked.parse(stripLatex(remaining[0] || ""));
+            el('refsContent').innerText = stripLatex(remaining[1] || "");
+            
+            hideLoader(); el('results').classList.remove('hidden');
+            MathJax.typesetPromise();
+        }
 
-        // STEP 3: NATIVE UNLIMITED AUDIO
-        el('btnAudio').onclick = async () => {
+        // STEP 3: Audio via Native Audio Dialog
+        el('btnAudio').addEventListener('click', async () => {
             const btn = el('btnAudio'); btn.disabled = true;
+            el('audioContainer').classList.remove('hidden');
             el('audioProgressContainer').classList.remove('hidden');
             const pBar = el('audioProgressBar');
             const pText = el('audioProgressText');
+
             try {
                 pBar.style.width = '20%';
-                pText.innerText = "Scripting Military Update...";
+                pText.innerText = "Scripting Brief...";
                 // Use Lite for script to save reasoning quota
-                const { candidates } = await fetchWaterfall({ contents: [{ parts: [{ text: `You are Dr. Matthew Holtkamp. Brief this summary tactically: ${storedSummary.substring(0, 2000)}` }] }] });
-                const script = candidates[0].content.parts[0].text;
-                
+                const scriptRes = await fetchWithModel(MODELS.STEP1, { 
+                    contents: [{ parts: [{ text: `You are Dr. Matthew Holtkamp. Brief this as a 4-minute military update: ${storedSummary.substring(0, 3000)}` }] }] 
+                });
+                const script = scriptRes.candidates[0].content.parts[0].text;
+
                 pBar.style.width = '60%';
-                pText.innerText = "Synthesizing Secure Audio...";
+                pText.innerText = "Synthesizing Native Audio...";
                 await new Promise(r => setTimeout(r, 2000));
 
-                const ttsRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${AUDIO_MODEL}:generateContent?key=${apiKey}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: script }] }],
-                        generationConfig: { responseModalities: ["AUDIO"] }
-                    })
+                const ttsRes = await fetchWithModel(MODELS.STEP3, {
+                    contents: [{ parts: [{ text: script }] }],
+                    generationConfig: { responseModalities: ["AUDIO"] }
                 });
 
-                const ttsData = await ttsRes.json();
-                const audioPart = ttsData.candidates[0].content.parts.find(p => p.inlineData);
+                const audioPart = ttsRes.candidates[0].content.parts.find(p => p.inlineData);
                 const bytes = new Uint8Array(atob(audioPart.inlineData.data).split("").map(c => c.charCodeAt(0)));
                 el('audioPlayer').src = URL.createObjectURL(pcmToWav(new Int16Array(bytes.buffer), 1, 24000));
                 
                 pBar.style.width = '100%';
                 pText.innerText = "Ready!";
                 setTimeout(() => { el('audioProgressContainer').classList.add('hidden'); el('audioPlayer').classList.remove('hidden'); el('audioPlayer').play(); }, 500);
-            } catch (err) { showToast("Audio bucket error."); } finally { btn.disabled = false; }
-        };
+            } catch (err) { showToast("Audio quota reached."); } finally { btn.disabled = false; }
+        });
 
-        // Follow Up
-        el('followUpForm').onsubmit = async (e) => {
+        // Interactive & Utils
+        el('followUpForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const input = el('followUpInput');
             const resBox = el('followUpResult');
-            resBox.innerHTML = '<span class="animate-pulse">Consulting JTS Guidelines...</span>';
+            resBox.innerHTML = '<span class="animate-pulse">Consulting CPGs...</span>';
             resBox.classList.remove('hidden');
             try {
-                const data = await fetchWaterfall({ contents: [{ parts: [{ text: `Context: ${storedContext}\nQuestion: ${input.value}. Answer as Dr. Holtkamp.` }] }] });
+                const data = await fetchWithModel(MODELS.STEP1, { contents: [{ parts: [{ text: `Context: ${storedContext}\nQuestion: ${input.value}. Answer as Dr. Holtkamp.` }] }] });
                 resBox.innerHTML = marked.parse(stripLatex(data.candidates[0].content.parts[0].text));
-            } catch (err) { resBox.innerText = "Error consulting doctrine."; }
-        };
+            } catch (err) { resBox.innerText = "Error."; }
+        });
 
-        // UTILS
         el('btnNewTopic').onclick = () => location.reload();
         el('btnBackToRefine').onclick = () => { el('results').classList.add('hidden'); el('step2').classList.remove('hidden'); };
-        el('btnBackToRefineBottom').onclick = () => el('btnBackToRefine').click();
         el('btnBackToStep1').onclick = () => { el('step2').classList.add('hidden'); el('step1').classList.remove('hidden'); };
         el('btnCopy').onclick = () => { navigator.clipboard.writeText(storedSummary); showToast("Summary Copied"); };
-        el('btnPlan').onclick = () => { navigator.clipboard.writeText(el('planTextContent').innerText); showToast("Plan Copied"); };
+        el('btnPlan').onclick = () => { navigator.clipboard.writeText(el('planContent').innerText); showToast("Plan Copied"); };
 
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.onclick = () => {
@@ -377,7 +380,6 @@
             };
         });
 
-        // Plug-and-play sharing logic
         setupSharing({
             apiKey: jsonBinKey,
             getState: () => ({ initialQuestion: el('initialQuestion').value, summaryContent: storedSummary, context: storedContext }),
