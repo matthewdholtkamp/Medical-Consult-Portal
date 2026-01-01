@@ -30,7 +30,7 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        /* Markdown Styles */
+        /* Markdown Styles within the content area */
         .prose-invert h1, .prose-invert h2, .prose-invert h3 {
             color: #F39C12;
             margin-top: 1.5em;
@@ -209,7 +209,7 @@
     </main>
 
     <script>
-    !function(e,t){"object"==typeof exports&&"object"==typeof module?module.exports=t():"function"==typeof define&&define.amd?define([],t):"object"==typeof exports?exports.pcmToWav=t():e.pcmToWav=t()}(window,function(){return function(e){var t={};function r(n){if(t[n])return t[n].exports;var o=t[n]={i:n,l:!1,exports:{}};return e[n].call(o.exports,o,o.exports,r),o.l=!0,o.exports}return r.m=e,r.c=t,r.d=function(e,t,n){r.o(e,t)||Object.defineProperty(e,t,{enumerable:!0,get:n})},r.r=function(e){"undefined"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(e,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(e,"__esModule",{value:!0})},r.t=function(e,t){if(1&t&&(e=r(e)),8&t)return e;if(4&t&&"object"==typeof e&&e&&e.__esModule)return e;var n=Object.create(null);if(r.r(n),Object.defineProperty(n,"default",{enumerable:!0,value:e}),2&t&&"string"!=typeof e)for(var o in e)r.d(n,o,function(t){return e[t]}.bind(null,o));return n},r.n=function(e){var t=e&&e.__esModule?function(){return e.default}:function(){return e};return r.d(t,"a",t),t},r.o=function(e,t){return Object.prototype.hasOwnProperty.call(e,t)},r.p="",r(r.s=0)}([function(e,t,r){"use strict";Object.defineProperty(t,"__esModule",{value:!0}),t.default=function(e,t,r){var n,o,a,i,f,c,u,d=new DataView(new ArrayBuffer(44+e.length*t*2));return d.setUint32(0,1380533830,!1),d.setUint32(4,36+e.length*t*2,!0),d.setUint32(8,1463899717,!1),d.setUint32(12,1718449184,!1),d.setUint16(20,1,!0),n=t,d.setUint16(22,n,!0),o=r,d.setUint32(24,o,!0),a=r*t*2,d.setUint32(28,a,!0),i=2*t,d.setUint16(32,i,!0),f=16,d.setUint16(34,f,!0),d.setUint32(36,1684108385,!1),c=e.length*t*2,d.setUint32(40,c,!0),u=new Uint8Array(d.buffer,44),e.forEach(function(e,t){var r=44+2*t;d.setInt16(r,e,!0)}),new Blob([d.buffer],{type:"audio/wav"})},e.exports=t.default}])});
+    !function(e,t){"object"==typeof exports&&"object"==typeof module?module.exports=t():"function"==typeof define&&define.amd?define([],t):"object"==typeof exports?exports.pcmToWav=t():e.pcmToWav=t()}(window,function(){return function(e){var t={};function r(n){if(t[n])return t[n].exports;var o=t[n]={i:n,l:!1,exports:{}};return e[n].call(o.exports,o,o.exports,r),o.l=!0,o.exports}return r.m=e,r.c=t,r.d=function(e,t,n){r.o(e,t)||Object.defineProperty(e,t,{enumerable:!0,get:n})},r.r=function(e){"undefined"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(e,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(e,"__esModule",{value:!0})},r.t=function(e,t){if(1&t&&(e=r(e)),8&t)return e;if(4&t&&"object"==typeof e&&e&&e.__esModule)return e;var n=Object.create(null);if(r.r(n),Object.defineProperty(n,"default",{enumerable:!0,value:e}),2&t&&"string"!=typeof e)for(var o in e)r.d(n,o,function(t){return e[t]}.bind(null,o));return n},r.n=function(e){var t=e&&e.__esModule?function(){return e.default}:function(){return e};return r.d(t,"a",t),t},r.o=function(e,t){return Object.prototype.hasOwnProperty.call(e,t)},r.p="",r(r.s=0)}([function(e,t,r){"use strict";Object.defineProperty(t,"__esModule",{value:!0}),t.default=function(e,t,r){var n,o,a,i,f,c,u,d=new DataView(new ArrayBuffer(44+e.length*t*2));return d.setUint32(0,1380533830,!1),d.setUint32(4,36+e.length*t*2,!0),d.setUint32(8,1463899717,!1),d.setUint32(12,1718449184,!1),d.setUint32(16,16,!0),d.setUint16(20,1,!0),n=t,d.setUint16(22,n,!0),o=r,d.setUint32(24,o,!0),a=r*t*2,d.setUint32(28,a,!0),i=2*t,d.setUint16(32,i,!0),f=16,d.setUint16(34,f,!0),d.setUint32(36,1684108385,!1),c=e.length*t*2,d.setUint32(40,c,!0),u=new Uint8Array(d.buffer,44),e.forEach(function(e,t){var r=44+2*t;d.setInt16(r,e,!0)}),new Blob([d.buffer],{type:"audio/wav"})},e.exports=t.default}])});
     </script>
 
     <script type="module">
@@ -224,7 +224,7 @@
         const MODELS = {
             STEP1: "gemini-2.5-flash-lite", // High RPD for questions
             STEP2: "gemini-3-flash",        // High reasoning for analysis
-            STEP2_FAILOVER: "gemini-2.5-flash-lite", // Backup if 3-Flash hits quota
+            STEP2_FAILOVER: "gemini-2.5-flash-lite", // Backup (Must NOT use thinking config)
             STEP3: "gemini-2.5-flash-native-audio-dialog" // Unlimited Audio
         };
 
@@ -232,6 +232,14 @@
         const dynamicInputs = el('dynamicInputs');
         const toast = el('toast');
         let storedSummary = "", storedContext = "";
+
+        // Safety Settings
+        const SAFETY_SETTINGS = [
+            { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+            { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+            { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+            { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
+        ];
 
         // Toast & Utils
         function showToast(message) {
@@ -245,9 +253,17 @@
         // Robust Fetcher
         async function fetchWithModel(modelId, payload) {
             const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${apiKey}`;
+            // Add safety settings to every call
+            payload.safetySettings = SAFETY_SETTINGS;
+            
             const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-            if (res.status === 429) throw new Error("429");
-            if (!res.ok) throw new Error(await res.text());
+            
+            if (res.status === 429) throw new Error("429"); // Trigger failover
+            if (!res.ok) {
+                const errText = await res.text();
+                console.error("API Error:", errText);
+                throw new Error(res.status);
+            }
             return await res.json();
         }
 
@@ -265,10 +281,10 @@
                 const questions = data.candidates[0].content.parts[0].text.split('\n').filter(l => l.trim().length > 5).slice(0, 5);
                 dynamicInputs.innerHTML = questions.map((q, i) => `<div><label class="block text-sm text-gray-400 mb-1">${q}</label><input type="text" name="q${i}" class="w-full bg-slate-800 border border-slate-600 rounded p-3 text-white focus:border-orange-500 outline-none"></div>`).join('');
                 hideLoader(); el('step2').classList.remove('hidden');
-            } catch (err) { showToast("API Error."); el('step1').classList.remove('hidden'); hideLoader(); }
+            } catch (err) { showToast("API Error. Check Console."); el('step1').classList.remove('hidden'); hideLoader(); }
         });
 
-        // STEP 2: Analysis via Gemini 3 Flash (with Failover)
+        // STEP 2: Analysis via Gemini 3 Flash (with CORRECT Failover)
         el('refinementForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const details = Array.from(dynamicInputs.querySelectorAll('input')).map(i => `${i.previousElementSibling.innerText}: ${i.value}`).join('\n');
@@ -278,29 +294,44 @@
             el('step2').classList.add('hidden');
 
             try {
-                // Try Primary (Gemini 3)
+                // ATTEMPT 1: Primary (Gemini 3) WITH Thinking
                 const res = await fetchWithModel(MODELS.STEP2, {
                     contents: [{ parts: [{ text: prompt }] }],
                     generationConfig: { thinking_config: { include_thoughts: true } }
                 });
                 processResponse(res);
             } catch (err) {
-                if (err.message === "429") {
-                    showLoader("Gemini 3 Quota Hit. Failing over to Lite...");
-                    try {
-                        const resBackup = await fetchWithModel(MODELS.STEP2_FAILOVER, { contents: [{ parts: [{ text: prompt }] }] });
-                        processResponse(resBackup);
-                    } catch (e) { showToast("Analysis Failed."); hideLoader(); el('step2').classList.remove('hidden'); }
-                } else { showToast("Error."); hideLoader(); el('step2').classList.remove('hidden'); }
+                console.warn("Primary Model Failed:", err);
+                showLoader("Gemini 3 Busy. Switching to Lite (No Thinking)...");
+                
+                try {
+                    // ATTEMPT 2: Failover (Lite) WITHOUT Thinking Config
+                    // Removing thinking_config is critical here, otherwise Lite returns 400 Bad Request
+                    const resBackup = await fetchWithModel(MODELS.STEP2_FAILOVER, { 
+                        contents: [{ parts: [{ text: prompt }] }] 
+                    });
+                    processResponse(resBackup);
+                } catch (e) { 
+                    console.error("Failover Failed:", e);
+                    showToast("Analysis Failed. Quota Exhausted."); 
+                    hideLoader(); 
+                    el('step2').classList.remove('hidden'); 
+                }
             }
         });
 
         function processResponse(data) {
             const cand = data.candidates[0];
             
-            // Thoughts (if available)
+            // Thoughts (Only exists if Gemini 3 succeeded)
             const thought = cand.content.parts.find(p => p.thought);
-            if (thought) { el('thinkingContent').innerText = thought.thought; el('thinkingContainer').classList.remove('hidden'); }
+            if (thought) { 
+                el('thinkingContent').innerText = thought.thought; 
+                el('thinkingContainer').classList.remove('hidden'); 
+            } else {
+                // Hide thinking if we used Lite
+                el('thinkingContainer').classList.add('hidden');
+            }
 
             const rawText = cand.content.parts.find(p => p.text).text;
             storedContext = rawText;
