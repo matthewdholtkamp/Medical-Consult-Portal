@@ -822,8 +822,8 @@ Tone should be authoritative, educational, and analytically rigorous.`;
             const cleanKey = apiKey ? apiKey.trim() : "";
 
             const isThinkingMode = document.getElementById('deepThinkToggle').checked;
-            // Toggle Logic: Checked = gemini-3-flash, Unchecked = gemini-2.5-flash-lite
-            const modelId = isThinkingMode ? "gemini-3-flash" : "gemini-2.5-flash-lite";
+            // Toggle Logic: Checked = gemini-3-flash-preview, Unchecked = gemini-2.5-flash-lite
+            const modelId = isThinkingMode ? "gemini-3-flash-preview" : "gemini-2.5-flash-lite";
 
             const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${cleanKey}`;
 
