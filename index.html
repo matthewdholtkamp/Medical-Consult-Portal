@@ -1,758 +1,532 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Medical Specialist Consult Portal</title>
-
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="js/theme.js"></script>
-
+    <title>Dr. Holtkamp | AI Assistant</title>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
-
     <style>
-        body { font-family: 'Inter', sans-serif; }
-
-        /* Scrollbar styling */
-        .custom-scroll::-webkit-scrollbar { width: 6px; }
-        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
-        .custom-scroll::-webkit-scrollbar-thumb:hover { background: #475569; }
-
-        /* Animations */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        :root {
+            --primary: #0F172A; /* Navy */
+            --accent: #2563EB; /* Royal Blue */
+            --bg: #F8FAFC;
+            --chat-bg: #FFFFFF;
+            --user-msg: #EFF6FF;
+            --ai-msg: #FFFFFF;
+            --border: #E2E8F0;
         }
-        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            color: #334155;
+        }
+
+        /* --- Header --- */
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header-title h1 { margin: 0; font-size: 1.25rem; font-weight: 600; }
+        .header-title p { margin: 0; font-size: 0.8rem; opacity: 0.8; }
+        .api-status { font-size: 0.75rem; background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 4px; }
+
+        /* --- Chat Area --- */
+        #chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            max-width: 900px;
+            margin: 0 auto;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .message {
+            display: flex;
+            gap: 1rem;
+            animation: fadeIn 0.3s ease;
+        }
+        .message.user { flex-direction: row-reverse; }
         
-        /* Dr. Holtkamp "Thinking Brain" Animation */
-        @keyframes brain-think {
-            0% { color: #60a5fa; transform: scale(1); filter: drop-shadow(0 0 2px rgba(96, 165, 250, 0.2)); }
-            33% { color: #a78bfa; transform: scale(1.15); filter: drop-shadow(0 0 8px rgba(167, 139, 250, 0.4)); }
-            66% { color: #2dd4bf; transform: scale(1); filter: drop-shadow(0 0 2px rgba(45, 212, 191, 0.2)); }
-            100% { color: #60a5fa; transform: scale(1); filter: drop-shadow(0 0 2px rgba(96, 165, 250, 0.2)); }
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+            font-size: 0.9rem;
         }
-        .animate-brain { animation: brain-think 3s ease-in-out infinite; }
+        .ai-avatar { background-color: var(--primary); color: white; }
+        .user-avatar { background-color: var(--accent); color: white; }
 
-        /* Audio Recording Pulse */
-        @keyframes pulse-red {
-            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        .bubble {
+            background-color: var(--ai-msg);
+            border: 1px solid var(--border);
+            padding: 1rem 1.5rem;
+            border-radius: 0 12px 12px 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            max-width: 80%;
+            line-height: 1.6;
         }
-        .animate-pulse-red { 
-            animation: pulse-red 1.5s infinite; 
-            background-color: #ef4444 !important; 
-            border-color: #ef4444 !important; 
-            color: white !important; 
+        .message.user .bubble {
+            background-color: var(--user-msg);
+            border-color: #DBEAFE;
+            border-radius: 12px 0 12px 12px;
         }
 
-        /* Card Styles */
-        .card { transition: transform 0.25s ease, box-shadow 0.25s ease; }
-        .card:hover { transform: translateY(-4px) scale(1.01); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); }
-        .card-blocked { opacity: 0.5; filter: grayscale(0.8); pointer-events: none; user-select: none; background: #0f172a; border: 1px solid #1e293b; }
+        /* Markdown Styling */
+        .bubble h1, .bubble h2, .bubble h3 { margin-top: 0; color: var(--primary); font-size: 1.1rem; }
+        .bubble ul, .bubble ol { padding-left: 1.2rem; margin: 0.5rem 0; }
+        .bubble strong { color: var(--primary); }
+        .bubble code { background: #f1f5f9; padding: 2px 5px; border-radius: 4px; font-family: monospace; font-size: 0.9em; }
+
+        /* --- Input Area --- */
+        .input-wrapper {
+            background: white;
+            border-top: 1px solid var(--border);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column; 
+            align-items: center;
+            gap: 1rem;
+        }
+
+        /* Controls Row (Think Toggle) */
+        .controls-row {
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            font-size: 0.85rem;
+            color: #64748B;
+        }
+
+        .toggle-switch {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+        .toggle-switch input {
+            cursor: pointer;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 0.75rem;
+            width: 100%;
+            max-width: 900px;
+            position: relative;
+            align-items: flex-end; 
+        }
+
+        textarea {
+            flex: 1;
+            padding: 1rem;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            resize: none;
+            height: 50px;
+            min-height: 50px;
+            max-height: 150px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s;
+            line-height: 1.4;
+        }
+        textarea:focus { border-color: var(--accent); }
+
+        button {
+            border: none;
+            cursor: pointer;
+            border-radius: 12px;
+            transition: all 0.2s;
+            font-weight: 600;
+            height: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Mic Button */
+        #micBtn {
+            width: 52px;
+            background-color: #F1F5F9;
+            color: #64748B;
+            font-size: 1.5rem;
+        }
+        #micBtn:hover { background-color: #E2E8F0; }
+        #micBtn.recording {
+            background-color: #FECACA;
+            color: #DC2626;
+            animation: pulse 1.5s infinite;
+        }
+        #micBtn.processing {
+            background-color: #FEF3C7;
+            color: #D97706;
+            animation: none;
+        }
+
+        /* Send Button */
+        #sendBtn {
+            padding: 0 1.5rem;
+            background-color: var(--primary);
+            color: white;
+        }
+        #sendBtn:hover { background-color: #1e293b; }
+
+        /* Status Text */
+        #status-bar {
+            position: absolute;
+            top: -25px;
+            left: 0;
+            font-size: 0.8rem;
+            color: #64748B;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(220, 38, 38, 0); } 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); } }
         
-        /* Glass effect */
-        .glass-search { background: rgba(30, 41, 59, 0.4); backdrop-filter: blur(8px); }
-
-        /* Background Overlay */
-        .background-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
-            background-image: radial-gradient(circle at 2px 2px, rgba(255,255,255,0.05) 1px, transparent 0);
-            background-size: 32px 32px; opacity: 0.5; pointer-events: none; 
+        /* Setup Modal */
+        #setupModal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000;
         }
+        .modal-content {
+            background: white; padding: 2rem; border-radius: 12px; width: 400px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+        .modal-content input { width: 90%; padding: 0.8rem; margin: 1rem 0; border: 1px solid #ccc; border-radius: 8px; }
+        .hidden { display: none !important; }
 
-        /* Simple Prose */
-        .prose-content ul { list-style-type: disc; padding-left: 1.5rem; margin: 0.5rem 0; }
-        .prose-content ol { list-style-type: decimal; padding-left: 1.5rem; margin: 0.5rem 0; }
-        .prose-content p { margin-bottom: 0.75rem; line-height: 1.6; }
-        .prose-content strong { color: #e2e8f0; font-weight: 700; }
-        .prose-content h1, .prose-content h2, .prose-content h3 { color: #f8fafc; font-weight: 700; margin: 1.5rem 0 0.75rem; }
-        .prose-content li { margin-bottom: 0.25rem; }
-        .prose-content sup { color: #3b82f6; font-weight: 600; font-size: 0.75em; margin-left: 1px; }
-
-        /* Toggle Switch */
-        .toggle-checkbox:checked { right: 0; border-color: #68D391; }
-        .toggle-checkbox:checked + .toggle-label { background-color: #68D391; }
-        .toggle-switch-container { display: inline-flex; align-items: center; cursor: pointer; }
     </style>
 </head>
+<body>
 
-<body class="bg-gemini-900 text-gray-200 h-screen overflow-hidden flex selection:bg-sky-500 selection:text-white relative">
-
-<div class="background-overlay"></div>
-
-<audio id="audioPlayer" class="hidden"></audio>
-
-<div id="disclaimerModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 transition-opacity duration-300">
-  <div id="disclaimerDialog" class="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl bg-gemini-800 border border-slate-700 p-6 text-left text-slate-100 shadow-2xl ring-1 ring-white/10" tabindex="-1">
-    <div class="flex items-start justify-between gap-4">
-      <div>
-        <h2 id="disclaimerTitle" class="text-2xl font-bold mb-1 text-white">Quick challenge — one small step</h2>
-        <p class="text-sm text-slate-400">Use only de-identified examples. You'll be prompted if something looks like PHI.</p>
-      </div>
-      <div class="hidden sm:inline-flex items-center gap-2 text-sm">
-        <span class="inline-block px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/20 font-medium text-xs uppercase tracking-wider">Safety First</span>
-      </div>
-    </div>
-    <hr class="my-4 border-slate-700/60"/>
-    <p id="disclaimerDesc" class="text-sm text-slate-300 mb-3 leading-relaxed">
-      This site generates consult drafts and provides clinical decision support. It does <strong>not</strong> replace your clinical judgment. Enter only de-identified information here.
-    </p>
-    <div class="bg-amber-950/30 border-l-4 border-amber-500 p-3 mb-4 rounded-r">
-        <p class="text-sm font-semibold text-amber-200">This platform is <u>NOT HIPAA compliant</u>. Do <strong>NOT</strong> enter PHI.</p>
-    </div>
-    <div class="flex flex-col gap-4 mt-6 pt-4 border-t border-slate-700/60">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div class="space-y-2">
-            <label class="flex items-center gap-3 cursor-pointer group">
-                <input id="ackCheckbox" type="checkbox" class="peer h-5 w-5 rounded border-slate-600 bg-slate-700 text-amber-500 focus:ring-amber-500/50" />
-                <span class="text-sm text-slate-300 group-hover:text-white transition-colors">I confirm I will not enter PHI.</span>
-            </label>
-            <label class="flex items-center gap-3 cursor-pointer group">
-                <input id="dontShowAgain" type="checkbox" class="peer h-5 w-5 rounded border-slate-600 bg-slate-700 text-sky-500 focus:ring-sky-500/50" />
-                <span class="text-sm text-slate-300 group-hover:text-white transition-colors">Don't show this again on this device</span>
-            </label>
-          </div>
-          <button id="ackBtn" onclick="acceptDisclaimer()" disabled class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-2.5 rounded-xl bg-amber-600 text-white font-semibold shadow-lg shadow-amber-900/20 hover:bg-amber-500 disabled:opacity-50 disabled:cursor-not-allowed">
-            I Understand — Continue
-          </button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script>
-(function() {
-  const MODAL_KEY = 'consultDisclaimerAck_v1';
-  const modal = document.getElementById('disclaimerModal');
-  const ackCheckbox = document.getElementById('ackCheckbox');
-  const ackBtn = document.getElementById('ackBtn');
-  const dontShowAgain = document.getElementById('dontShowAgain');
-
-  try {
-    if (localStorage.getItem(MODAL_KEY)) {
-      if (modal) modal.style.display = 'none';
-      return;
-    }
-  } catch (e) {}
-
-  document.body.style.overflow = 'hidden';
-
-  if(ackCheckbox){
-      ackCheckbox.addEventListener('change', () => {
-        ackBtn.disabled = !ackCheckbox.checked;
-        ackBtn.classList.toggle('opacity-50', !ackCheckbox.checked);
-        ackBtn.classList.toggle('cursor-not-allowed', !ackCheckbox.checked);
-      });
-  }
-
-  window.acceptDisclaimer = function() {
-    try {
-      if (dontShowAgain && dontShowAgain.checked) {
-        localStorage.setItem(MODAL_KEY, new Date().toISOString());
-      }
-    } catch (err) {}
-    if (modal) {
-        modal.style.opacity = '0';
-        setTimeout(() => { modal.style.display = 'none'; }, 300);
-    }
-    document.body.style.overflow = '';
-  };
-})();
-</script>
-
-<aside id="main-sidebar" class="w-64 bg-gemini-800 flex-col border-r border-white/5 hidden md:flex transition-all duration-300 z-40 fixed md:relative h-full">
-    <div class="p-6 pb-2 flex justify-between items-center">
-        <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
-                <span class="material-symbols-outlined text-white text-[20px]">medical_services</span>
-            </div>
-            <div class="flex flex-col">
-                <span class="font-bold text-slate-100 tracking-tight">MedCon Portal</span>
-                <span class="text-[10px] text-slate-500 uppercase tracking-wider font-medium">MTF Provider Portal</span>
-            </div>
+    <div id="setupModal">
+        <div class="modal-content">
+            <h2>Welcome, Dr. Holtkamp</h2>
+            <p>Please enter your Gemini API Key to initialize the dashboard.</p>
+            <input type="password" id="apiKeyInput" placeholder="Paste API Key here...">
+            <button id="saveKeyBtn" style="width:100%; padding: 1rem; background: var(--accent); color: white; border:none; border-radius:8px; cursor:pointer;">Initialize System</button>
         </div>
-        <button onclick="toggleSidebar()" class="md:hidden text-slate-400 hover:text-white" aria-label="Close sidebar">
-            <span class="material-symbols-outlined">close</span>
-        </button>
     </div>
 
-    <div class="flex-1 overflow-y-auto custom-scroll px-3 py-2">
-        <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 px-3">Main Menu</div>
-        <nav class="space-y-1 mb-8">
-            <button onclick="switchView('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-white bg-blue-600/10 border border-blue-600/20 transition-all group text-left">
-                <span class="material-symbols-outlined text-[20px] text-blue-400">dashboard</span>
-                <span class="text-sm font-medium">Dashboard</span>
-            </button>
-            <button onclick="switchView('consults')" id="nav-consults" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:bg-white/5 hover:text-white transition-all group text-left">
-                <span class="material-symbols-outlined text-[20px] text-slate-500 group-hover:text-teal-400">clinical_notes</span>
-                <span class="text-sm font-medium">Consult Generator</span>
-            </button>
-            <button onclick="switchView('journal')" id="nav-journal" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:bg-white/5 hover:text-white transition-all group text-left">
-                <span class="material-symbols-outlined text-[20px] text-slate-500 group-hover:text-amber-400">menu_book</span>
-                <span class="text-sm font-medium">Journal Clubs</span>
-            </button>
-        </nav>
-
-        <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 px-3">Quick Reference</div>
-        <nav class="space-y-1 mb-6">
-            <button onclick="window.open('https://www.express-scripts.com/frontend/open-enrollment/tricare/fst/#/', '_blank')" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-colors group text-left">
-                <span class="material-symbols-outlined text-[18px] text-slate-500 group-hover:text-slate-300">medication</span>
-                <span class="text-sm truncate">Formulary (DOD)</span>
-            </button>
-            <button onclick="window.open('https://www.mdcalc.com/', '_blank')" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-colors group text-left">
-                <span class="material-symbols-outlined text-[18px] text-slate-500 group-hover:text-slate-300">calculate</span>
-                <span class="text-sm truncate">MedCalc</span>
-            </button>
-            <button onclick="window.open('https://www.openevidence.com/', '_blank')" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-colors group text-left">
-                <span class="material-symbols-outlined text-[18px] text-slate-500 group-hover:text-slate-300">search</span>
-                <span class="text-sm truncate">OpenEvidence</span>
-            </button>
-            <button onclick="window.open('https://www.pubmed.ai/search/', '_blank')" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-colors group text-left">
-                <span class="material-symbols-outlined text-[18px] text-slate-500 group-hover:text-slate-300">science</span>
-                <span class="text-sm truncate">PubMed AI</span>
-            </button>
-            <button onclick="window.open('https://chat.genai.army.mil/login?code=CDAO-NORTHCOM/', '_blank')" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-colors group text-left">
-                <span class="material-symbols-outlined text-[18px] text-slate-500 group-hover:text-slate-300">military_tech</span>
-                <span class="text-sm truncate">Ask Sage</span>
-            </button>
-        </nav>
-        
-        <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 px-3 border-t border-white/5 pt-4">Military (CAC Required)</div>
-        <nav class="space-y-1">
-            <button onclick="window.open('https://avhe.health.mil', '_blank')" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-colors group text-left">
-                <span class="material-symbols-outlined text-[18px] text-slate-500 group-hover:text-slate-300">dns</span>
-                <span class="text-sm truncate">Genesis (EMR)</span>
-            </button>
-            <button onclick="window.open('https://www.mods.army.mil', '_blank')" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-colors group text-left">
-                <span class="material-symbols-outlined text-[18px] text-slate-500 group-hover:text-slate-300">admin_panel_settings</span>
-                <span class="text-sm truncate">MODS</span>
-            </button>
-            <button onclick="window.open('https://client.wvd.azure.us/arm/webclient/index.html', '_blank')" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-colors group text-left">
-                <span class="material-symbols-outlined text-[18px] text-slate-500 group-hover:text-slate-300">monitor_heart</span>
-                <span class="text-sm truncate">Army Remote Dash</span>
-            </button>
-        </nav>
-    </div>
-</aside>
-
-<div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/50 z-30 hidden md:hidden glass-search"></div>
-
-<main class="flex-1 flex flex-col relative h-full bg-gemini-900">
-    
-    <header class="h-16 flex-shrink-0 flex items-center justify-between px-6 border-b border-white/5 bg-gemini-900/95 backdrop-blur-sm z-30">
-        <div class="flex items-center gap-4">
-            <button onclick="toggleSidebar()" class="md:hidden text-slate-400 hover:text-white" aria-label="Open sidebar">
-                <span class="material-symbols-outlined">menu</span>
-            </button>
-            <h1 id="page-title" class="text-xl font-bold text-slate-100">Dashboard</h1>
+    <header>
+        <div class="header-title">
+            <h1>GLWACH / MSCoE Leadership Dashboard</h1>
+            <p>Dr. Holtkamp | Virtual Assistant</p>
         </div>
-
-        <div class="flex items-center gap-4">
-             <div class="relative w-64 hidden sm:block">
-                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <span class="material-symbols-outlined text-slate-500 text-[18px]">search</span>
-                 </div>
-                 <input type="text" 
-                        id="top-search-input"
-                        aria-label="Search protocols"
-                        oninput="handleGlobalSearch(this.value)"
-                        class="glass-search border border-slate-700 text-slate-200 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2 placeholder-slate-500 transition-all focus:bg-slate-800" 
-                        placeholder="Search protocols...">
-            </div>
-            
-            <div id="frame-controls" class="hidden flex items-center gap-2">
-                <button onclick="switchView('dashboard')" class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-700 text-slate-300 hover:bg-slate-600 hover:text-white transition-colors text-xs font-medium">
-                    <span class="material-symbols-outlined text-[14px]">close</span>
-                    <span>Close View</span>
-                </button>
-                <a id="external-link-btn" href="#" target="_blank" class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-blue-600/10 text-blue-400 hover:bg-blue-600 hover:text-white transition-colors text-xs font-medium border border-blue-600/20">
-                    <span>Open in New Tab</span>
-                    <span class="material-symbols-outlined text-[14px]">open_in_new</span>
-                </a>
-            </div>
-        </div>
+        <div class="api-status" id="modelDisplay">Model: Gemini 2.5 Flash Lite</div>
     </header>
 
-    <div class="flex-1 overflow-hidden relative">
-
-        <div id="view-dashboard" class="absolute inset-0 flex flex-col transition-opacity duration-300">
-            <div class="flex-1 overflow-y-auto custom-scroll p-6 pb-32">
-                <div class="max-w-6xl mx-auto w-full animate-fade-in space-y-8">
-                    
-                    <div class="relative rounded-3xl overflow-hidden p-8 border border-white/5 shadow-2xl">
-                         <div class="absolute inset-0 bg-gradient-to-br from-blue-900/40 via-gemini-800 to-gemini-900 z-0"></div>
-                        <div class="absolute top-0 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"></div>
-
-                        <div class="relative z-10">
-                            <h2 class="text-3xl font-bold text-white mb-2">What's on your mind, Doc? </h2>
-                            <p class="text-slate-400 mb-8 max-w-2xl"></p>
-
-                            <div class="bg-gemini-800/80 backdrop-blur-md border border-slate-600/50 rounded-2xl shadow-lg flex flex-col relative focus-within:ring-2 focus-within:ring-blue-500/30 transition-all max-w-3xl">
-                                <textarea 
-                                    id="chatInput"
-                                    aria-label="Clinical query"
-                                    placeholder="Clinical query (e.g., 'Latest STEMI guidelines')..." 
-                                    class="w-full bg-transparent text-slate-200 placeholder-slate-500 p-4 pl-5 min-h-[60px] max-h-48 resize-none focus:outline-none rounded-2xl"
-                                    rows="1"
-                                    oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px'"></textarea>
-                                
-                                <div class="flex items-center justify-between px-3 pb-3 relative">
-                                    
-                                    <button id="newQuestionBtn" onclick="resetConsult()" class="hidden flex items-center gap-1.5 px-3 py-1.5 bg-slate-700/50 hover:bg-slate-600 text-slate-300 hover:text-white text-xs font-medium rounded-lg border border-slate-600 transition-all">
-                                        <span class="material-symbols-outlined text-[14px]">refresh</span>
-                                        New Question
-                                    </button>
-                                    
-                                    <div class="flex items-center gap-4 ml-auto">
-                                        <label class="toggle-switch-container flex items-center gap-2 cursor-pointer group">
-                                            <div class="relative">
-                                                <input type="checkbox" id="deepThinkToggle" class="sr-only peer">
-                                                <div class="w-9 h-5 bg-slate-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500/30 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-                                            </div>
-                                            <span class="text-xs font-medium text-slate-400 group-hover:text-slate-200 transition-colors">Deep Thinking</span>
-                                        </label>
-
-                                        <button id="micBtn" onmousedown="startRecording()" onmouseup="stopRecording()" onmouseleave="stopRecordingIfActive()" 
-                                                class="w-8 h-8 rounded-full bg-slate-700 text-slate-300 hover:bg-slate-600 hover:text-white flex items-center justify-center transition-all border border-slate-600 active:scale-95"
-                                                title="Hold to speak">
-                                            <span class="material-symbols-outlined text-[20px]">mic</span>
-                                        </button>
-
-                                        <button id="askBtn" onclick="askDrHoltkamp()" class="px-4 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-500 transition-all shadow-lg shadow-blue-900/20 disabled:opacity-50 disabled:cursor-not-allowed">
-                                            Ask Dr. H
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            <p class="text-xs text-slate-500 mt-3 ml-1">
-                                Strictly evidence-based (guidelines/RCTs). No PHI.
-                            </p>
-
-                            <div id="responseArea" class="hidden mt-6 bg-gemini-800/90 backdrop-blur-sm p-6 rounded-2xl border border-blue-500/30 shadow-2xl animate-fade-in relative overflow-hidden">
-                                </div>
-                        </div>
-                    </div>
-
-                    <div>
-                        <h3 class="text-lg font-bold text-slate-300 mb-4 px-1">Fast Links</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-                            <div onclick="openFrame('ADTMC.html', 'ADTMC')" class="block group cursor-pointer">
-                                <div class="bg-gemini-800 hover:bg-slate-800 border border-slate-700/50 rounded-xl p-5 h-full transition-all hover:shadow-lg hover:shadow-green-500/10 hover:-translate-y-1">
-                                    <div class="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center mb-4 group-hover:bg-green-500/20 transition-colors">
-                                        <span class="material-symbols-outlined text-green-400">medical_services</span>
-                                    </div>
-                                    <h4 class="text-base font-bold text-slate-100 mb-1">ADTMC</h4>
-                                    <p class="text-sm text-slate-500 leading-relaxed">Medic sick call services.</p>
-                                </div>
-                            </div>
-                            <div onclick="openFrame('ADTMCplus.html', 'ADTMC+')" class="block group cursor-pointer">
-                                <div class="bg-gemini-800 hover:bg-slate-800 border border-slate-700/50 rounded-xl p-5 h-full transition-all hover:shadow-lg hover:shadow-indigo-500/10 hover:-translate-y-1">
-                                    <div class="w-10 h-10 rounded-lg bg-indigo-500/10 flex items-center justify-center mb-4 group-hover:bg-indigo-500/20 transition-colors">
-                                        <span class="material-symbols-outlined text-indigo-400">medical_services</span>
-                                    </div>
-                                    <h4 class="text-base font-bold text-slate-100 mb-1">ADTMC+</h4>
-                                    <p class="text-sm text-slate-500 leading-relaxed">Sick call services for providers. Generate notes fast.</p>
-                                </div>
-                            </div>
-                            <div onclick="openFrame('journalclub.html', 'General Journal Club')" class="block group cursor-pointer">
-                                <div class="bg-gemini-800 hover:bg-slate-800 border border-slate-700/50 rounded-xl p-5 h-full transition-all hover:shadow-lg hover:shadow-red-500/10 hover:-translate-y-1">
-                                    <div class="w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center mb-4 group-hover:bg-red-500/20 transition-colors">
-                                        <span class="material-symbols-outlined text-red-400">menu_book</span>
-                                    </div>
-                                    <h4 class="text-base font-bold text-slate-100 mb-1">General Journal Club</h4>
-                                    <p class="text-sm text-slate-500 leading-relaxed">Evidence summaries and audio breakdowns.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
+    <div id="chat-container">
+        <div class="message ai">
+            <div class="avatar ai-avatar">AI</div>
+            <div class="bubble">
+                Good afternoon, Sir. <br><br>
+                <strong>System Ready.</strong><br>
+                I am configured with your leadership context (GLWACH/MSCoE) and preferred formats.
+                <br><br>
+                <em>Use the toggle below to switch between Speed (Flash Lite) and Deep Reasoning (Gemini 3 Pro).</em>
             </div>
         </div>
-
-        <div id="view-consults" class="absolute inset-0 overflow-y-auto custom-scroll p-6 hidden">
-            <div class="max-w-7xl mx-auto">
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pb-20" id="consult-grid-container"></div>
-            </div>
-        </div>
-
-        <div id="view-journal" class="absolute inset-0 overflow-y-auto custom-scroll p-6 hidden">
-             <div class="max-w-7xl mx-auto">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-red-900/40 to-slate-900 border border-red-500/30 p-8 shadow-2xl group transition-all hover:border-red-500/60 cursor-pointer" onclick="openFrame('journalclub.html', 'General Journal Club')">
-                         <div class="absolute top-0 right-0 w-64 h-64 bg-red-600/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none group-hover:bg-red-600/20 transition-all"></div>
-                         <div class="relative z-10">
-                            <div class="flex items-center gap-3 mb-4">
-                                <span class="bg-red-500/20 p-2 rounded-lg text-red-400"><span class="material-symbols-outlined">menu_book</span></span>
-                                <h3 class="text-2xl font-bold text-white">General Journal Club</h3>
-                            </div>
-                            <p class="text-slate-300 text-lg mb-8">Evidence summaries and audio breakdowns, and landmark trials across all specialties.</p>
-                            <span class="inline-flex items-center justify-center px-6 py-3 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-red-900/30">Open Journal Club</span>
-                         </div>
-                    </div>
-                    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-900/40 to-slate-900 border border-emerald-500/30 p-8 shadow-2xl group transition-all hover:border-emerald-500/60 cursor-pointer" onclick="openFrame('journalclub_mil.html', 'Military Medicine')">
-                         <div class="absolute top-0 right-0 w-64 h-64 bg-emerald-600/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none group-hover:bg-emerald-600/20 transition-all"></div>
-                         <div class="relative z-10">
-                            <div class="flex items-center gap-3 mb-4">
-                                <span class="bg-emerald-500/20 p-2 rounded-lg text-emerald-400"><span class="material-symbols-outlined">medical_services</span></span>
-                                <h3 class="text-2xl font-bold text-white">Military Medicine</h3>
-                            </div>
-                            <p class="text-slate-300 text-lg mb-8">Operational medicine updates, TCCC guidelines, and deployment health resources.</p>
-                            <span class="inline-flex items-center justify-center px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-emerald-900/30">Open Military Journal</span>
-                         </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="view-search-results" class="absolute inset-0 overflow-y-auto custom-scroll p-6 hidden">
-            <div class="max-w-6xl mx-auto">
-                <h2 class="text-2xl font-bold text-white mb-6">Search Results</h2>
-                <div id="search-results-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-            </div>
-        </div>
-
-        <div id="view-iframe" class="absolute inset-0 flex flex-col hidden bg-white">
-            <div class="w-full h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500"></div>
-            <iframe id="main-frame" src="" class="w-full h-full border-0" sandbox="allow-same-origin allow-scripts allow-forms allow-popups"></iframe>
-        </div>
-
     </div>
-</main>
 
-<script>
-    // --- SITE CONTENT INDEX (Preserved for Search & Consult Grid) ---
-    const siteContent = [
-        { title: "ADTMC", type: "consult", desc: "Medic sick call services. Note Generation.", tags: "sick call, medic, notes", action: "openFrame('ADTMC.html', 'ADTMC')", color: "green" },
-        { title: "ADTMC+", type: "consult", desc: "Sick call for providers. Note Generation.", tags: "sick call, provider, notes", action: "openFrame('ADTMCplus.html', 'ADTMC+')", color: "indigo" },
-        { title: "Internal Medicine", type: "consult", desc: "Adult hospital medicine.", tags: "im, hospitalist, general", action: "openFrame('IM.html', 'Internal Medicine')", color: "blue" },
-        { title: "ICU", type: "consult", desc: "Critical Care consults.", tags: "critical care, intensive, shock", action: "openFrame('ICU.html', 'ICU')", color: "purple" },
-        { title: "Cardiology", type: "consult", desc: "Consults for cardiovascular.", tags: "heart, stemi, cardio", action: "openFrame('cardiology.html', 'Cardiology')", color: "red" },
-        { title: "Neurology", type: "consult", desc: "Brain + CNS consults.", tags: "neuro, stroke, seizure", action: "openFrame('neurology.html', 'Neurology')", color: "yellow" },
-        { title: "Pediatrics", type: "consult", desc: "Infants + children.", tags: "peds, kids, baby", action: "openFrame('pediatrics.html', 'Pediatrics')", color: "pink" },
-        { title: "Psychiatry", type: "consult", desc: "Mental health consults.", tags: "mental, psych, behavioral", action: "openFrame('psychiatry.html', 'Psychiatry')", color: "teal" },
-        { title: "Orthopedics", type: "consult", desc: "Bone + joint consults.", tags: "ortho, surgery, fracture", action: "openFrame('orthopedic_surgery.html', 'Orthopedics')", color: "orange" },
-        { title: "Rheumatology", type: "consult", desc: "Autoimmune consults.", tags: "rheum, joints, immune", action: "openFrame('rheumatology.html', 'Rheumatology')", color: "cyan" },
-        { title: "Endocrinology", type: "consult", desc: "Hormone/metabolism.", tags: "endo, diabetes, thyroid", action: "openFrame('endocrinology.html', 'Endocrinology')", color: "fuchsia" },
-        { title: "Gastroenterology", type: "consult", desc: "Digestive consults.", tags: "gi, stomach, liver", action: "openFrame('gastroenterology.html', 'Gastroenterology')", color: "emerald" },
-        { title: "ENT", type: "consult", desc: "Ear, Nose, Throat.", tags: "ent, ears, sinus", action: "openFrame('ent.html', 'ENT')", color: "teal" },
-        { title: "General Surgery", type: "consult", desc: "Acute Abdomen, Hernia.", tags: "surgery, appendix, gallstone", action: "openFrame('general_surgery.html', 'General Surgery')", color: "stone" },
-        { title: "Heme/Onc", type: "consult", desc: "Blood and Cancer.", tags: "heme, onc, anemia", action: "openFrame('hematology_oncology.html', 'Heme/Onc')", color: "rose" },
-        { title: "Hepatology", type: "consult", desc: "Liver Disease.", tags: "liver, cirrhosis, hep", action: "openFrame('hepatology.html', 'Hepatology')", color: "amber" },
-        { title: "Infectious Disease", type: "consult", desc: "Sepsis, STI, Tropical.", tags: "id, infection, sepsis", action: "openFrame('infectious_disease.html', 'Infectious Disease')", color: "lime" },
-        { title: "Nephrology", type: "consult", desc: "Kidney, Electrolytes.", tags: "renal, kidney, aki", action: "openFrame('nephrology.html', 'Nephrology')", color: "sky" },
-        { title: "Neurosurgery", type: "consult", desc: "Spine, Trauma, Cranial.", tags: "neuro, spine, trauma", action: "openFrame('neurosurgery.html', 'Neurosurgery')", color: "zinc" },
-        { title: "OB/GYN", type: "consult", desc: "Women's Health.", tags: "obgyn, pregnancy, gyn", action: "openFrame('obgyn.html', 'OB/GYN')", color: "pink" },
-        { title: "Occ. Therapy", type: "consult", desc: "ADLs, Hands.", tags: "ot, rehab, hands", action: "openFrame('occupational_therapy.html', 'Occupational Therapy')", color: "orange" },
-        { title: "Pharmacology", type: "consult", desc: "Dosing, Interactions.", tags: "pharm, meds, drugs", action: "openFrame('pharmacology.html', 'Pharmacology')", color: "cyan" },
-        { title: "Physical Therapy", type: "consult", desc: "MSK, Gait, Rehab.", tags: "pt, rehab, muscle", action: "openFrame('physical_therapy.html', 'Physical Therapy')", color: "blue" },
-        { title: "PM&R", type: "consult", desc: "Rehab, TBI, Pain.", tags: "pmr, rehab, pain", action: "openFrame('pmr.html', 'PM&R')", color: "violet" },
-        { title: "Pulmonary", type: "consult", desc: "Lungs, Breathing.", tags: "pulm, copd, asthma", action: "openFrame('pulmonary.html', 'Pulmonary')", color: "cyan" },
-        { title: "Radiology", type: "consult", desc: "Imaging Guidance.", tags: "rad, xray, ct", action: "openFrame('radiology.html', 'Radiology')", color: "gray" },
-        { title: "Urology", type: "consult", desc: "Stones, Retention.", tags: "uro, stones, bladder", action: "openFrame('urology.html', 'Urology')", color: "yellow" },
-        { title: "General Journal Club", type: "journal", desc: "Evidence summaries and audio breakdowns.", tags: "research, papers, evidence", action: "openFrame('journalclub.html', 'General Journal Club')", color: "red" },
-        { title: "Military Medicine", type: "journal", desc: "Operational medicine updates, TCCC guidelines.", tags: "operational, deployment, tccc", action: "openFrame('journalclub_mil.html', 'Military Medicine')", color: "emerald" },
-        { title: "Tricare Formulary", type: "tool", desc: "DOD Medication Formulary.", tags: "drugs, meds, pharmacy", action: "window.open('https://www.express-scripts.com/frontend/open-enrollment/tricare/fst/#/', '_blank')", icon: "medication" },
-        { title: "MedCalc", type: "tool", desc: "Clinical Calculators.", tags: "calc, score, risk", action: "window.open('https://www.mdcalc.com/', '_blank')", icon: "calculate" },
-        { title: "OpenEvidence", type: "tool", desc: "Medical Search Engine.", tags: "search, guidelines", action: "window.open('https://www.openevidence.com/', '_blank')", icon: "search" },
-        { title: "PubMed AI", type: "tool", desc: "AI-Powered Citation Search.", tags: "research, literature", action: "window.open('https://www.pubmed.ai/search/', '_blank')", icon: "science" },
-        { title: "Ask Sage", type: "tool", desc: "Military AI Assistant.", tags: "ai, army, dod", action: "window.open('https://chat.genai.army.mil/login?code=CDAO-NORTHCOM/', '_blank')", icon: "military_tech" },
-        { title: "Genesis (EMR)", type: "military", desc: "Electronic Medical Record.", tags: "mhs, cerner, record", action: "window.open('https://genesis.health.mil', '_blank')", icon: "dns" },
-        { title: "MODS", type: "military", desc: "Medical Operational Data System.", tags: "admin, manpower", action: "window.open('https://www.mods.army.mil', '_blank')", icon: "admin_panel_settings" },
-        { title: "Army Remote Dashboard", type: "military", desc: "Remote Patient Monitoring.", tags: "telehealth, monitoring", action: "window.open('https://client.wvd.azure.us/arm/webclient/index.html', '_blank')", icon: "monitor_heart" }
-    ];
+    <div class="input-wrapper">
+        
+        <div class="controls-row">
+            <label class="toggle-switch" title="Enable for complex reasoning (slower)">
+                <input type="checkbox" id="thinkToggle"> 
+                <span>Enable Gemini 3 Pro (High Reasoning)</span>
+            </label>
+        </div>
 
-    const DR_HOLTKAMP_SYSTEM_INSTRUCTION = `Respond as Dr. Holtkamp, serving in the role of Expert Medical Educator. Provide answers that are clear, concise, and precise. All statements must be based solely on current medical guidelines and high-quality evidence.`;
-</script>
+        <div class="input-group">
+            <span id="status-bar"></span>
+            
+            <button id="micBtn" title="Hold to Speak">🎤</button>
+            
+            <textarea id="userInput" placeholder="Type your directive or hold mic to dictate..."></textarea>
+            
+            <button id="sendBtn">Send</button>
+        </div>
+    </div>
 
-<script type="module">
-    import { API_KEYS } from './js/config.js?v=secure';
-    const apiKey = API_KEYS.START_PAGE;
+    <script>
+        // --- Configuration ---
+        const MODEL_FAST = "gemini-2.0-flash-lite-preview-02-05"; 
+        const MODEL_SMART = "gemini-3.0-pro-preview"; 
+        const MODEL_AUDIO = "gemini-2.0-flash"; 
+        
+        let API_KEY = localStorage.getItem("gemini_api_key");
 
-    // Chat History for Text Mode
-    let chatHistory = [];
+        // --- DOM Elements ---
+        const chatContainer = document.getElementById('chat-container');
+        const userInput = document.getElementById('userInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const micBtn = document.getElementById('micBtn');
+        const thinkToggle = document.getElementById('thinkToggle');
+        const modelDisplay = document.getElementById('modelDisplay');
+        const statusBar = document.getElementById('status-bar');
+        const setupModal = document.getElementById('setupModal');
+        const apiKeyInput = document.getElementById('apiKeyInput');
+        const saveKeyBtn = document.getElementById('saveKeyBtn');
 
-    // --- AUDIO RECORDER LOGIC ---
-    let mediaRecorder;
-    let audioChunks = [];
-    let isRecording = false;
+        // --- System Prompt ---
+        const SYSTEM_INSTRUCTION = `
+            You are acting as the virtual assistant for LTC Matthew D. Holtkamp, DO (GLWACH CMO / MSCoE Surgeon).
+            
+            CORE DATA:
+            - Role: Deputy Commander for Clinical Services (DCCS) & CMO at GLWACH.
+            - Background: Neurologist, Army Officer (O-5).
+            - Family: Wife Alex, Daughters Quinn, Blair, Zoe, Ivy.
+            
+            GUIDELINES:
+            1. VOICE: Professional, confident, clear, and "Humble but decisive."
+            2. FORMAT: Use BLUF (Bottom Line Up Front). Use Tables/Bullets.
+            3. FAMILY TONE: Creative and supportive if asked about family.
+            4. ACCURACY: Prioritize factual accuracy and doctrinal correctness over creativity.
+        `;
 
-    window.startRecording = async function() {
-        if (isRecording) return;
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+        // --- Initialization ---
+        if (API_KEY) {
+            setupModal.classList.add('hidden');
+        }
+
+        saveKeyBtn.addEventListener('click', () => {
+            const key = apiKeyInput.value.trim();
+            if (key) {
+                localStorage.setItem("gemini_api_key", key);
+                API_KEY = key;
+                setupModal.classList.add('hidden');
+            }
+        });
+
+        // Toggle Visual Update
+        thinkToggle.addEventListener('change', () => {
+            if (thinkToggle.checked) {
+                modelDisplay.innerText = "Model: Gemini 3 Pro (High Reasoning)";
+                modelDisplay.style.backgroundColor = "#FECACA"; 
+                modelDisplay.style.color = "#7F1D1D";
+            } else {
+                modelDisplay.innerText = "Model: Gemini 2.5 Flash Lite";
+                modelDisplay.style.backgroundColor = "rgba(255,255,255,0.1)";
+                modelDisplay.style.color = "white";
+            }
+        });
+
+        // --- Chat Logic ---
+        let chatHistory = [
+            { role: "user", parts: [{ text: SYSTEM_INSTRUCTION }] },
+            { role: "model", parts: [{ text: "Understood. Ready for instructions, Sir." }] }
+        ];
+
+        async function sendMessage() {
+            const text = userInput.value.trim();
+            if (!text) return;
+
+            addMessageToUI("user", text);
+            userInput.value = "";
+            userInput.style.height = '50px';
+
+            const loadingId = addLoadingBubble();
+
+            // Prepare History
+            const historyForApi = chatHistory.slice(2).concat([{ role: "user", parts: [{ text: text }] }]);
+            
+            // SELECT MODEL & CONFIG
+            const isSmart = thinkToggle.checked;
+            const currentModel = isSmart ? MODEL_SMART : MODEL_FAST;
+            
+            let payload = {
+                contents: historyForApi,
+                systemInstruction: { parts: [{ text: SYSTEM_INSTRUCTION }] },
+                // *** ACCURACY SETTINGS ***
+                generationConfig: {
+                    temperature: 0.0, // FORCE 0 for Maximum Accuracy
+                    topP: 0.95,
+                    topK: 40
+                }
+            };
+
+            // ADD HIGH REASONING FOR SMART MODEL
+            if (isSmart) {
+                payload.generationConfig.thinkingConfig = {
+                    thinkingLevel: "HIGH" // Maximum Thinking Depth
+                };
+            }
+
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${currentModel}:generateContent?key=${API_KEY}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+                removeLoadingBubble(loadingId);
+
+                if (data.candidates && data.candidates[0].content) {
+                    const reply = data.candidates[0].content.parts[0].text;
+                    addMessageToUI("ai", reply);
+                    
+                    chatHistory.push({ role: "user", parts: [{ text: text }] });
+                    chatHistory.push({ role: "model", parts: [{ text: reply }] });
+                } else {
+                    addMessageToUI("ai", "Error: " + JSON.stringify(data));
+                }
+
+            } catch (error) {
+                removeLoadingBubble(loadingId);
+                addMessageToUI("ai", "Network Error: " + error.message);
+            }
+        }
+
+        sendBtn.addEventListener('click', sendMessage);
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        userInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
+
+        // --- UI Helper Functions ---
+        function addMessageToUI(role, text) {
+            const div = document.createElement('div');
+            div.className = `message ${role}`;
+            div.innerHTML = `
+                <div class="avatar ${role}-avatar">${role === 'ai' ? 'AI' : 'Me'}</div>
+                <div class="bubble">${marked.parse(text)}</div>
+            `;
+            chatContainer.appendChild(div);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function addLoadingBubble() {
+            const id = "loading-" + Date.now();
+            const div = document.createElement('div');
+            div.id = id;
+            div.className = `message ai`;
+            div.innerHTML = `
+                <div class="avatar ai-avatar">AI</div>
+                <div class="bubble" style="color:#888;">Thinking...</div>
+            `;
+            chatContainer.appendChild(div);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            return id;
+        }
+
+        function removeLoadingBubble(id) {
+            const el = document.getElementById(id);
+            if (el) el.remove();
+        }
+
+        // --- AUDIO LOGIC (Mic Button) ---
+        let mediaRecorder;
+        let audioChunks = [];
+
+        micBtn.addEventListener('mousedown', startRecording);
+        micBtn.addEventListener('mouseup', stopRecording);
+        micBtn.addEventListener('mouseleave', () => { if(mediaRecorder && mediaRecorder.state === "recording") stopRecording(); });
+        micBtn.addEventListener('touchstart', (e) => { e.preventDefault(); startRecording(); });
+        micBtn.addEventListener('touchend', (e) => { e.preventDefault(); stopRecording(); });
+
+        async function startRecording() {
+            if (!API_KEY) { alert("Please enter API Key first."); return; }
+            statusBar.innerText = "Listening... (Release to finish)";
+            micBtn.classList.add("recording");
             audioChunks = [];
-            
-            document.getElementById('micBtn').classList.add('animate-pulse-red');
-            isRecording = true;
-
-            mediaRecorder.ondataavailable = event => {
-                if(event.data.size > 0) audioChunks.push(event.data);
-            };
-
-            mediaRecorder.onstop = async () => {
-                document.getElementById('micBtn').classList.remove('animate-pulse-red');
-                const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                await processAudioInput(audioBlob);
-                isRecording = false;
-                stream.getTracks().forEach(track => track.stop());
-            };
-
-            mediaRecorder.start();
-        } catch (err) {
-            console.error("Mic Error:", err);
-            alert("Microphone access denied. " + err.message);
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                mediaRecorder.ondataavailable = event => audioChunks.push(event.data);
+                mediaRecorder.start();
+            } catch (err) {
+                statusBar.innerText = "Mic Error: " + err.message;
+                micBtn.classList.remove("recording");
+            }
         }
-    }
 
-    window.stopRecording = function() {
-        if (mediaRecorder && mediaRecorder.state !== "inactive") {
+        async function stopRecording() {
+            if (!mediaRecorder || mediaRecorder.state === "inactive") return;
             mediaRecorder.stop();
-        }
-    }
-
-    window.stopRecordingIfActive = function() {
-        if(isRecording) window.stopRecording();
-    }
-
-    async function processAudioInput(audioBlob) {
-        const reader = new FileReader();
-        reader.readAsDataURL(audioBlob);
-        reader.onloadend = async () => {
-            const base64Audio = reader.result.split(',')[1];
-            
-            const responseArea = document.getElementById('responseArea');
-            responseArea.classList.remove('hidden');
-            responseArea.innerHTML = `
-                <div class="flex items-center gap-3 text-slate-400">
-                    <span class="material-symbols-outlined animate-brain text-3xl">mic</span>
-                    <span class="font-medium text-sm tracking-wide">Dr. Holtkamp is listening...</span>
-                </div>
-            `;
-
-            await callGeminiAudio(base64Audio);
-        };
-    }
-
-    // --- GEMINI AUDIO API CALL (2.0-flash-exp) ---
-    async function callGeminiAudio(base64Input) {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`;
-        
-        const payload = {
-            contents: [{
-                parts: [
-                    { text: DR_HOLTKAMP_SYSTEM_INSTRUCTION },
-                    { inline_data: { mime_type: "audio/webm", data: base64Input } }
-                ]
-            }],
-            generationConfig: {
-                response_modalities: ["AUDIO"]
-            }
-        };
-
-        try {
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-
-            if (!response.ok) {
-                const err = await response.json().catch(() => ({}));
-                throw new Error(err.error?.message || response.statusText);
-            }
-
-            const data = await response.json();
-            const audioData = data.candidates[0].content.parts[0].inline_data.data;
-            
-            const audioPlayer = document.getElementById('audioPlayer');
-            audioPlayer.src = "data:audio/wav;base64," + audioData; 
-            audioPlayer.play();
-
-            document.getElementById('responseArea').innerHTML = `
-                <div class="flex items-center gap-3 text-blue-400 animate-fade-in">
-                    <span class="material-symbols-outlined text-3xl">volume_up</span>
-                    <span class="font-medium text-sm tracking-wide">Dr. Holtkamp is speaking...</span>
-                </div>
-            `;
-
-        } catch (error) {
-            console.error("Audio API Error:", error);
-            document.getElementById('responseArea').innerHTML = `<div class="text-red-400 text-sm">Audio Error: ${error.message}</div>`;
-        }
-    }
-
-    // --- TEXT LOGIC (gemini-3-pro + Failover) ---
-    async function callGeminiDrHoltkamp(apiKey, systemPrompt, userQuery) {
-        const isDeepThink = document.getElementById('deepThinkToggle').checked;
-        
-        try {
-            const modelId = "gemini-3-pro-preview";
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${apiKey}`;
-            
-            const payload = {
-                contents: [...chatHistory, { role: "user", parts: [{ text: userQuery }] }],
-                systemInstruction: { parts: [{ text: systemPrompt }] },
-                thinking_config: { include_thoughts: true, thinking_level: isDeepThink ? "high" : "low" },
-                generationConfig: { temperature: 1.0 }
+            micBtn.classList.remove("recording");
+            micBtn.classList.add("processing");
+            statusBar.innerText = "Transcribing...";
+            mediaRecorder.onstop = async () => {
+                const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                const base64Audio = await blobToBase64(audioBlob);
+                await transcribeAudio(base64Audio);
+                const tracks = mediaRecorder.stream.getTracks();
+                tracks.forEach(track => track.stop());
+                micBtn.classList.remove("processing");
             };
-
-            const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-            
-            if (response.status === 429 || response.status === 400) throw new Error("Failover");
-            if (!response.ok) throw new Error("API Error");
-
-            const data = await response.json();
-            return processResponse(data, userQuery);
-
-        } catch (e) {
-            console.warn("Primary Model Failed, Switching to Lite:", e);
-            return await callStandardGemini(apiKey, systemPrompt, userQuery);
         }
-    }
 
-    async function callStandardGemini(apiKey, systemPrompt, userQuery) {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`;
-        const payload = {
-            contents: [...chatHistory, { role: "user", parts: [{ text: userQuery }] }],
-            systemInstruction: { parts: [{ text: systemPrompt }] },
-            generationConfig: { temperature: 0.7 }
-        };
-        const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-        if (!r.ok) throw new Error("All models failed.");
-        const d = await r.json();
-        return processResponse(d, userQuery);
-    }
-
-    function processResponse(data, userQuery) {
-        const candidate = data.candidates?.[0];
-        if (!candidate) throw new Error("No content");
-
-        chatHistory.push({ role: "user", parts: [{ text: userQuery }] });
-        chatHistory.push(candidate.content);
-
-        const thoughts = candidate.content.parts.find(p => p.thought)?.text || "";
-        const responseText = candidate.content.parts.filter(p => p.text && !p.thought).map(p => p.text).join("");
-
-        return { text: responseText, thoughts: thoughts };
-    }
-
-    window.askDrHoltkamp = async function() {
-        const query = document.getElementById('chatInput').value;
-        if (!query.trim()) return;
-        
-        const btn = document.getElementById('askBtn');
-        btn.disabled = true; btn.innerText = "Consulting...";
-        const respArea = document.getElementById('responseArea');
-        respArea.classList.remove('hidden');
-        respArea.innerHTML = `<div class="flex items-center gap-3 text-slate-400"><span class="material-symbols-outlined animate-brain text-3xl">psychology</span><span class="text-sm">Reviewing guidelines...</span></div>`;
-
-        try {
-            const res = await callGeminiDrHoltkamp(apiKey, DR_HOLTKAMP_SYSTEM_INSTRUCTION, query);
-            const cleaned = res.text.replace(/\$\{\}\^\{(\d+)\}\$/g, "<sup>$1</sup>"); 
-            
-            respArea.innerHTML = `
-                <div class="space-y-4 animate-fade-in">
-                    <div class="flex items-start gap-4">
-                        <div class="w-10 h-10 rounded-xl bg-blue-600/20 flex items-center justify-center flex-shrink-0"><span class="material-symbols-outlined text-blue-400">smart_toy</span></div>
-                        <div class="flex-1 min-w-0">
-                            <div class="prose-content text-slate-300 text-sm leading-relaxed">${marked.parse(cleaned)}</div>
-                        </div>
-                    </div>
-                    ${res.thoughts ? `<div class="mt-4 pt-4 border-t border-slate-800"><details class="group bg-slate-900/40 rounded-xl"><summary class="list-none p-3 cursor-pointer text-[10px] text-slate-500 font-bold uppercase hover:bg-slate-800/50">View Internal Reasoning</summary><div class="px-4 pb-4 text-xs text-slate-500 italic bg-black/10 whitespace-pre-line">${res.thoughts}</div></details></div>` : ''}
-                </div>
-            `;
-        } catch (e) {
-            respArea.innerHTML = `<div class="text-red-400 text-xs">${e.message}</div>`;
-        } finally {
-            btn.disabled = false; btn.innerText = "Ask Dr. H";
-            document.getElementById('newQuestionBtn').classList.remove('hidden');
+        async function transcribeAudio(base64) {
+            const payload = {
+                contents: [{
+                    parts: [
+                        { text: "Transcribe this audio exactly. Just the text." },
+                        { inline_data: { mime_type: "audio/wav", data: base64 } }
+                    ]
+                }],
+                generationConfig: {
+                    temperature: 0.0 // Force accurate transcription
+                }
+            };
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL_AUDIO}:generateContent?key=${API_KEY}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await response.json();
+                if (data.candidates) {
+                    const text = data.candidates[0].content.parts[0].text;
+                    const currentVal = userInput.value;
+                    userInput.value = currentVal ? currentVal + " " + text : text;
+                    userInput.focus();
+                    statusBar.innerText = "Transcribed.";
+                } else {
+                    statusBar.innerText = "Transcription failed.";
+                }
+            } catch (err) {
+                statusBar.innerText = "Error: " + err.message;
+            }
         }
-    }
 
-    window.resetConsult = function() {
-        document.getElementById('chatInput').value = '';
-        document.getElementById('responseArea').innerHTML = '';
-        document.getElementById('responseArea').classList.add('hidden');
-        document.getElementById('newQuestionBtn').classList.add('hidden');
-        chatHistory = [];
-    }
-
-    // --- VIEW LOGIC & CONSULT GRID GENERATION ---
-    window.renderConsultGrid = function() {
-        const container = document.getElementById("consult-grid-container");
-        if (!container) return;
-        
-        const consults = siteContent.filter(item => item.type === "consult");
-        container.innerHTML = consults.map(item => `
-            <div class="card bg-gemini-800 border border-slate-700/50 rounded-2xl p-6 flex flex-col group cursor-pointer" onclick="${item.action}">
-                <div class="flex items-start justify-between mb-4">
-                    <div class="w-10 h-10 rounded-lg bg-${item.color}-500/10 flex items-center justify-center group-hover:bg-${item.color}-500/20 transition-colors">
-                        <span class="material-symbols-outlined text-${item.color}-400">medical_services</span>
-                    </div>
-                </div>
-                <h3 class="text-xl font-bold text-white mb-2">${item.title}</h3>
-                <p class="text-slate-400 mb-6 flex-grow text-sm">${item.desc}<br><strong class="text-${item.color}-400 text-xs">Note Generation</strong></p>
-                <button class="mt-auto w-full bg-slate-700 group-hover:bg-${item.color}-600 text-white font-medium py-2.5 px-4 rounded-xl text-center transition-all">Go to Consult</button>
-            </div>
-        `).join('');
-    }
-
-    window.handleGlobalSearch = function(term) {
-        const container = document.getElementById("search-results-container");
-        if (!term.trim()) { switchView('dashboard'); return; }
-        if (currentView !== 'search-results') switchView('search-results');
-        
-        const results = siteContent.filter(item => item.title.toLowerCase().includes(term.toLowerCase()) || item.tags.toLowerCase().includes(term.toLowerCase()));
-        
-        if (results.length === 0) container.innerHTML = `<div class="col-span-full py-20 text-center text-slate-500">No results</div>`;
-        else container.innerHTML = results.map(item => `
-            <div onclick="${item.action}" class="card bg-gemini-800 border border-slate-700/50 rounded-xl p-5 cursor-pointer hover:bg-slate-800">
-                <h4 class="font-bold text-slate-100">${item.title}</h4>
-                <p class="text-sm text-slate-500">${item.desc}</p>
-            </div>`).join('');
-    }
-
-    let currentView = 'dashboard';
-    window.switchView = function(viewId) {
-        currentView = viewId;
-        ['view-dashboard', 'view-consults', 'view-journal', 'view-iframe', 'view-search-results'].forEach(id => document.getElementById(id).classList.add('hidden'));
-        document.getElementById(`view-${viewId}`).classList.remove('hidden');
-        
-        // Auto-render grid if switching to consults
-        if (viewId === 'consults') renderConsultGrid();
-    }
-    
-    window.openFrame = function(url, title) {
-        ['view-dashboard', 'view-consults', 'view-journal', 'view-search-results'].forEach(id => document.getElementById(id).classList.add('hidden'));
-        const f = document.getElementById('view-iframe');
-        f.classList.remove('hidden');
-        document.getElementById('main-frame').src = url;
-        document.getElementById('page-title').textContent = title;
-        document.getElementById('frame-controls').classList.remove('hidden');
-        document.getElementById('frame-controls').classList.add('flex');
-        document.getElementById('external-link-btn').href = url;
-    }
-
-    window.toggleSidebar = function() {
-        const sb = document.getElementById('main-sidebar');
-        const ov = document.getElementById('sidebar-overlay');
-        sb.classList.toggle('hidden');
-        ov.classList.toggle('hidden');
-    }
-
-    // Initial Render
-    renderConsultGrid();
-</script>
-
+        function blobToBase64(blob) {
+            return new Promise((resolve, _) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result.split(',')[1]);
+                reader.readAsDataURL(blob);
+            });
+        }
+    </script>
 </body>
 </html>
