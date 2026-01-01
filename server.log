@@ -1,4 +1,8 @@
-127.0.0.1 - - [01/Jan/2026 15:49:16] "GET /journalclub.html HTTP/1.1" 200 -
-127.0.0.1 - - [01/Jan/2026 15:49:17] "GET /js/sharing.js HTTP/1.1" 200 -
-127.0.0.1 - - [01/Jan/2026 15:49:17] "GET /js/config.js?v=secure HTTP/1.1" 200 -
-127.0.0.1 - - [01/Jan/2026 15:49:18] "GET /journalclub_mil.html HTTP/1.1" 200 -
+127.0.0.1 - - [01/Jan/2026 16:46:33] "GET /journalclub.html HTTP/1.1" 200 -
+127.0.0.1 - - [01/Jan/2026 16:46:34] "GET /js/config.js?v=secure HTTP/1.1" 200 -
+127.0.0.1 - - [01/Jan/2026 16:46:34] "GET /js/sharing.js HTTP/1.1" 200 -
+127.0.0.1 - - [01/Jan/2026 16:46:35] "GET /journalclub_mil.html HTTP/1.1" 200 -
+127.0.0.1 - - [01/Jan/2026 16:48:04] "GET /journalclub.html HTTP/1.1" 200 -
+127.0.0.1 - - [01/Jan/2026 16:48:04] "GET /js/sharing.js HTTP/1.1" 200 -
+127.0.0.1 - - [01/Jan/2026 16:48:04] "GET /js/config.js?v=secure HTTP/1.1" 200 -
+127.0.0.1 - - [01/Jan/2026 16:48:05] "GET /journalclub_mil.html HTTP/1.1" 200 -

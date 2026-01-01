@@ -287,10 +287,10 @@
         const apiKey = API_KEYS.JOURNAL_CLUB;
         const jsonBinKey = "$2a$10$J/Gr0x7KT4o8YHMdHtRgV.MokfRSRnPPdXBI5jJidEiqrvJfbH5Py";
         // Use Flash for quick Step 1 queries to avoid Rate Limits (429)
-        const FAST_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview:generateContent?key=${apiKey}`;
-        // Use 2.5 Flash for Step 2 as well
-        const GENERATE_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview:generateContent?key=${apiKey}`;
-        const TTS_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview-tts:generateContent?key=${apiKey}`;
+        const FAST_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+        // Use 2.5 Pro for Step 2
+        const GENERATE_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${apiKey}`;
+        const TTS_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro-tts:generateContent?key=${apiKey}`;
 
         // DOM Elements
         const el = id => document.getElementById(id);
@@ -731,13 +731,18 @@
                 }, 500); // Update every half second
                 
                 // NOTE: Safety Settings REMOVED for TTS call to prevent 400 Bad Request
+                const ttsPrompt = `
+Style: You are a senior medical officer delivering a briefing. Use a professional, steady pace with clear pronunciation of medical terminology. Sound authoritative yet accessible.
+
+TEXT TO SPEAK:
+${script}
+                `;
+
                 const ttsRes = await fetchWithRetry(TTS_URL, {
-                    contents: [{ parts: [{ text: script }] }],
+                    contents: [{ parts: [{ text: ttsPrompt }] }],
                     generationConfig: {
                         responseModalities: ["AUDIO"],
-                        speechConfig: {
-                            voiceConfig: { prebuiltVoiceConfig: { voiceName: "Puck" } } // Energetic, fun male voice
-                        }
+                        // voiceConfig removed to allow natural language prompting for style
                     }
                 });
                 
