@@ -791,8 +791,8 @@
 
                 // --- TRUNCATE FOR SAFETY ---
                 // Limit to 10000 chars for safe TTS generation (approx 7 mins)
-                if (script.length > 10000) {
-                    script = script.substring(0, 10000);
+                if (script.length > 7000) {
+                    script = script.substring(0, 7000);
                     const lastPeriod = script.lastIndexOf('.');
                     if (lastPeriod > 0) script = script.substring(0, lastPeriod + 1);
                 }
@@ -821,7 +821,13 @@ ${script}
                     contents: [{ parts: [{ text: ttsPrompt }] }],
                     generationConfig: {
                         responseModalities: ["AUDIO"],
-                        // voiceConfig removed to allow natural language prompting for style
+                        speechConfig: {
+                            voiceConfig: {
+                                prebuiltVoiceConfig: {
+                                    voiceName: "Aoede"
+                                }
+                            }
+                        }
                     }
                 });
                 
