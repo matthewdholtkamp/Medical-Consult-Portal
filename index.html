@@ -380,8 +380,7 @@
 
         <div id="view-consults" class="absolute inset-0 overflow-y-auto custom-scroll p-6 hidden">
             <div class="max-w-7xl mx-auto">
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pb-20" id="consult-grid-container">
-                    </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pb-20" id="consult-grid-container"></div>
             </div>
         </div>
 
@@ -430,7 +429,7 @@
 </main>
 
 <script>
-    // --- SITE CONTENT INDEX (Preserved for Search) ---
+    // --- SITE CONTENT INDEX (Preserved for Search & Consult Grid) ---
     const siteContent = [
         { title: "ADTMC", type: "consult", desc: "Medic sick call services. Note Generation.", tags: "sick call, medic, notes", action: "openFrame('ADTMC.html', 'ADTMC')", color: "green" },
         { title: "ADTMC+", type: "consult", desc: "Sick call for providers. Note Generation.", tags: "sick call, provider, notes", action: "openFrame('ADTMCplus.html', 'ADTMC+')", color: "indigo" },
@@ -438,7 +437,37 @@
         { title: "ICU", type: "consult", desc: "Critical Care consults.", tags: "critical care, intensive, shock", action: "openFrame('ICU.html', 'ICU')", color: "purple" },
         { title: "Cardiology", type: "consult", desc: "Consults for cardiovascular.", tags: "heart, stemi, cardio", action: "openFrame('cardiology.html', 'Cardiology')", color: "red" },
         { title: "Neurology", type: "consult", desc: "Brain + CNS consults.", tags: "neuro, stroke, seizure", action: "openFrame('neurology.html', 'Neurology')", color: "yellow" },
-        // ... (truncated for brevity, logic remains valid with the array) ...
+        { title: "Pediatrics", type: "consult", desc: "Infants + children.", tags: "peds, kids, baby", action: "openFrame('pediatrics.html', 'Pediatrics')", color: "pink" },
+        { title: "Psychiatry", type: "consult", desc: "Mental health consults.", tags: "mental, psych, behavioral", action: "openFrame('psychiatry.html', 'Psychiatry')", color: "teal" },
+        { title: "Orthopedics", type: "consult", desc: "Bone + joint consults.", tags: "ortho, surgery, fracture", action: "openFrame('orthopedic_surgery.html', 'Orthopedics')", color: "orange" },
+        { title: "Rheumatology", type: "consult", desc: "Autoimmune consults.", tags: "rheum, joints, immune", action: "openFrame('rheumatology.html', 'Rheumatology')", color: "cyan" },
+        { title: "Endocrinology", type: "consult", desc: "Hormone/metabolism.", tags: "endo, diabetes, thyroid", action: "openFrame('endocrinology.html', 'Endocrinology')", color: "fuchsia" },
+        { title: "Gastroenterology", type: "consult", desc: "Digestive consults.", tags: "gi, stomach, liver", action: "openFrame('gastroenterology.html', 'Gastroenterology')", color: "emerald" },
+        { title: "ENT", type: "consult", desc: "Ear, Nose, Throat.", tags: "ent, ears, sinus", action: "openFrame('ent.html', 'ENT')", color: "teal" },
+        { title: "General Surgery", type: "consult", desc: "Acute Abdomen, Hernia.", tags: "surgery, appendix, gallstone", action: "openFrame('general_surgery.html', 'General Surgery')", color: "stone" },
+        { title: "Heme/Onc", type: "consult", desc: "Blood and Cancer.", tags: "heme, onc, anemia", action: "openFrame('hematology_oncology.html', 'Heme/Onc')", color: "rose" },
+        { title: "Hepatology", type: "consult", desc: "Liver Disease.", tags: "liver, cirrhosis, hep", action: "openFrame('hepatology.html', 'Hepatology')", color: "amber" },
+        { title: "Infectious Disease", type: "consult", desc: "Sepsis, STI, Tropical.", tags: "id, infection, sepsis", action: "openFrame('infectious_disease.html', 'Infectious Disease')", color: "lime" },
+        { title: "Nephrology", type: "consult", desc: "Kidney, Electrolytes.", tags: "renal, kidney, aki", action: "openFrame('nephrology.html', 'Nephrology')", color: "sky" },
+        { title: "Neurosurgery", type: "consult", desc: "Spine, Trauma, Cranial.", tags: "neuro, spine, trauma", action: "openFrame('neurosurgery.html', 'Neurosurgery')", color: "zinc" },
+        { title: "OB/GYN", type: "consult", desc: "Women's Health.", tags: "obgyn, pregnancy, gyn", action: "openFrame('obgyn.html', 'OB/GYN')", color: "pink" },
+        { title: "Occ. Therapy", type: "consult", desc: "ADLs, Hands.", tags: "ot, rehab, hands", action: "openFrame('occupational_therapy.html', 'Occupational Therapy')", color: "orange" },
+        { title: "Pharmacology", type: "consult", desc: "Dosing, Interactions.", tags: "pharm, meds, drugs", action: "openFrame('pharmacology.html', 'Pharmacology')", color: "cyan" },
+        { title: "Physical Therapy", type: "consult", desc: "MSK, Gait, Rehab.", tags: "pt, rehab, muscle", action: "openFrame('physical_therapy.html', 'Physical Therapy')", color: "blue" },
+        { title: "PM&R", type: "consult", desc: "Rehab, TBI, Pain.", tags: "pmr, rehab, pain", action: "openFrame('pmr.html', 'PM&R')", color: "violet" },
+        { title: "Pulmonary", type: "consult", desc: "Lungs, Breathing.", tags: "pulm, copd, asthma", action: "openFrame('pulmonary.html', 'Pulmonary')", color: "cyan" },
+        { title: "Radiology", type: "consult", desc: "Imaging Guidance.", tags: "rad, xray, ct", action: "openFrame('radiology.html', 'Radiology')", color: "gray" },
+        { title: "Urology", type: "consult", desc: "Stones, Retention.", tags: "uro, stones, bladder", action: "openFrame('urology.html', 'Urology')", color: "yellow" },
+        { title: "General Journal Club", type: "journal", desc: "Evidence summaries and audio breakdowns.", tags: "research, papers, evidence", action: "openFrame('journalclub.html', 'General Journal Club')", color: "red" },
+        { title: "Military Medicine", type: "journal", desc: "Operational medicine updates, TCCC guidelines.", tags: "operational, deployment, tccc", action: "openFrame('journalclub_mil.html', 'Military Medicine')", color: "emerald" },
+        { title: "Tricare Formulary", type: "tool", desc: "DOD Medication Formulary.", tags: "drugs, meds, pharmacy", action: "window.open('https://www.express-scripts.com/frontend/open-enrollment/tricare/fst/#/', '_blank')", icon: "medication" },
+        { title: "MedCalc", type: "tool", desc: "Clinical Calculators.", tags: "calc, score, risk", action: "window.open('https://www.mdcalc.com/', '_blank')", icon: "calculate" },
+        { title: "OpenEvidence", type: "tool", desc: "Medical Search Engine.", tags: "search, guidelines", action: "window.open('https://www.openevidence.com/', '_blank')", icon: "search" },
+        { title: "PubMed AI", type: "tool", desc: "AI-Powered Citation Search.", tags: "research, literature", action: "window.open('https://www.pubmed.ai/search/', '_blank')", icon: "science" },
+        { title: "Ask Sage", type: "tool", desc: "Military AI Assistant.", tags: "ai, army, dod", action: "window.open('https://chat.genai.army.mil/login?code=CDAO-NORTHCOM/', '_blank')", icon: "military_tech" },
+        { title: "Genesis (EMR)", type: "military", desc: "Electronic Medical Record.", tags: "mhs, cerner, record", action: "window.open('https://genesis.health.mil', '_blank')", icon: "dns" },
+        { title: "MODS", type: "military", desc: "Medical Operational Data System.", tags: "admin, manpower", action: "window.open('https://www.mods.army.mil', '_blank')", icon: "admin_panel_settings" },
+        { title: "Army Remote Dashboard", type: "military", desc: "Remote Patient Monitoring.", tags: "telehealth, monitoring", action: "window.open('https://client.wvd.azure.us/arm/webclient/index.html', '_blank')", icon: "monitor_heart" }
     ];
 
     const DR_HOLTKAMP_SYSTEM_INSTRUCTION = `Respond as Dr. Holtkamp, serving in the role of Expert Medical Educator. Provide answers that are clear, concise, and precise. All statements must be based solely on current medical guidelines and high-quality evidence.`;
@@ -460,28 +489,28 @@
         if (isRecording) return;
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            mediaRecorder = new MediaRecorder(stream);
+            mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
             audioChunks = [];
             
-            // Visual feedback
             document.getElementById('micBtn').classList.add('animate-pulse-red');
             isRecording = true;
 
             mediaRecorder.ondataavailable = event => {
-                audioChunks.push(event.data);
+                if(event.data.size > 0) audioChunks.push(event.data);
             };
 
             mediaRecorder.onstop = async () => {
                 document.getElementById('micBtn').classList.remove('animate-pulse-red');
-                const audioBlob = new Blob(audioChunks, { type: 'audio/webm' }); // Browsers usually record in webm
+                const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
                 await processAudioInput(audioBlob);
                 isRecording = false;
+                stream.getTracks().forEach(track => track.stop());
             };
 
             mediaRecorder.start();
         } catch (err) {
             console.error("Mic Error:", err);
-            alert("Microphone access denied or not available.");
+            alert("Microphone access denied. " + err.message);
         }
     }
 
@@ -501,7 +530,6 @@
         reader.onloadend = async () => {
             const base64Audio = reader.result.split(',')[1];
             
-            // Show "Thinking" State
             const responseArea = document.getElementById('responseArea');
             responseArea.classList.remove('hidden');
             responseArea.innerHTML = `
@@ -511,24 +539,23 @@
                 </div>
             `;
 
-            // Call Gemini Audio Logic
             await callGeminiAudio(base64Audio);
         };
     }
 
-    // --- GEMINI AUDIO API CALL (2.5-flash-native-audio-dialog) ---
+    // --- GEMINI AUDIO API CALL (2.0-flash-exp) ---
     async function callGeminiAudio(base64Input) {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-native-audio-dialog:generateContent?key=${apiKey}`;
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`;
         
         const payload = {
             contents: [{
                 parts: [
-                    { text: DR_HOLTKAMP_SYSTEM_INSTRUCTION }, // System prompt as text part
+                    { text: DR_HOLTKAMP_SYSTEM_INSTRUCTION },
                     { inline_data: { mime_type: "audio/webm", data: base64Input } }
                 ]
             }],
             generationConfig: {
-                response_modalities: ["AUDIO"] // Request Audio Output
+                response_modalities: ["AUDIO"]
             }
         };
 
@@ -539,21 +566,22 @@
                 body: JSON.stringify(payload)
             });
 
-            if (!response.ok) throw new Error(response.statusText);
+            if (!response.ok) {
+                const err = await response.json().catch(() => ({}));
+                throw new Error(err.error?.message || response.statusText);
+            }
 
             const data = await response.json();
             const audioData = data.candidates[0].content.parts[0].inline_data.data;
             
-            // Play Audio
             const audioPlayer = document.getElementById('audioPlayer');
-            audioPlayer.src = "data:audio/wav;base64," + audioData; // Model returns WAV usually, or compatible
+            audioPlayer.src = "data:audio/wav;base64," + audioData; 
             audioPlayer.play();
 
-            // Update UI to show "Audio Response"
             document.getElementById('responseArea').innerHTML = `
-                <div class="flex items-center gap-3 text-blue-400">
+                <div class="flex items-center gap-3 text-blue-400 animate-fade-in">
                     <span class="material-symbols-outlined text-3xl">volume_up</span>
-                    <span class="font-medium text-sm tracking-wide">Dr. Holtkamp is speaking.</span>
+                    <span class="font-medium text-sm tracking-wide">Dr. Holtkamp is speaking...</span>
                 </div>
             `;
 
@@ -563,26 +591,49 @@
         }
     }
 
-    // --- TEXT LOGIC (Existing gemini-3-pro) ---
+    // --- TEXT LOGIC (gemini-3-pro + Failover) ---
     async function callGeminiDrHoltkamp(apiKey, systemPrompt, userQuery) {
-        const modelId = "gemini-3-pro-preview";
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${apiKey}`;
         const isDeepThink = document.getElementById('deepThinkToggle').checked;
+        
+        try {
+            const modelId = "gemini-3-pro-preview";
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${apiKey}`;
+            
+            const payload = {
+                contents: [...chatHistory, { role: "user", parts: [{ text: userQuery }] }],
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+                thinking_config: { include_thoughts: true, thinking_level: isDeepThink ? "high" : "low" },
+                generationConfig: { temperature: 1.0 }
+            };
 
+            const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            
+            if (response.status === 429 || response.status === 400) throw new Error("Failover");
+            if (!response.ok) throw new Error("API Error");
+
+            const data = await response.json();
+            return processResponse(data, userQuery);
+
+        } catch (e) {
+            console.warn("Primary Model Failed, Switching to Lite:", e);
+            return await callStandardGemini(apiKey, systemPrompt, userQuery);
+        }
+    }
+
+    async function callStandardGemini(apiKey, systemPrompt, userQuery) {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`;
         const payload = {
             contents: [...chatHistory, { role: "user", parts: [{ text: userQuery }] }],
             systemInstruction: { parts: [{ text: systemPrompt }] },
-            thinking_config: { include_thoughts: true, thinking_level: isDeepThink ? "high" : "low" },
-            generationConfig: { temperature: 1.0 }
+            generationConfig: { temperature: 0.7 }
         };
+        const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        if (!r.ok) throw new Error("All models failed.");
+        const d = await r.json();
+        return processResponse(d, userQuery);
+    }
 
-        const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-        
-        // Fallback logic if thinking fails
-        if (!response.ok && response.status === 400) return await callStandardGemini(apiKey, systemPrompt, userQuery);
-        if (!response.ok) throw new Error("API Error");
-
-        const data = await response.json();
+    function processResponse(data, userQuery) {
         const candidate = data.candidates?.[0];
         if (!candidate) throw new Error("No content");
 
@@ -593,18 +644,6 @@
         const responseText = candidate.content.parts.filter(p => p.text && !p.thought).map(p => p.text).join("");
 
         return { text: responseText, thoughts: thoughts };
-    }
-
-    async function callStandardGemini(apiKey, systemPrompt, userQuery) {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent?key=${apiKey}`;
-        const payload = {
-            contents: [...chatHistory, { role: "user", parts: [{ text: userQuery }] }],
-            systemInstruction: { parts: [{ text: systemPrompt }] },
-            generationConfig: { temperature: 0.7 }
-        };
-        const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-        const d = await r.json();
-        return { text: d.candidates[0].content.parts[0].text, thoughts: "" };
     }
 
     window.askDrHoltkamp = async function() {
@@ -619,7 +658,7 @@
 
         try {
             const res = await callGeminiDrHoltkamp(apiKey, DR_HOLTKAMP_SYSTEM_INSTRUCTION, query);
-            const cleaned = res.text.replace(/\$\{\}\^\{(\d+)\}\$/g, "<sup>$1</sup>"); // Clean latex
+            const cleaned = res.text.replace(/\$\{\}\^\{(\d+)\}\$/g, "<sup>$1</sup>"); 
             
             respArea.innerHTML = `
                 <div class="space-y-4 animate-fade-in">
@@ -648,7 +687,26 @@
         chatHistory = [];
     }
 
-    // --- Search & View Logic ---
+    // --- VIEW LOGIC & CONSULT GRID GENERATION ---
+    window.renderConsultGrid = function() {
+        const container = document.getElementById("consult-grid-container");
+        if (!container) return;
+        
+        const consults = siteContent.filter(item => item.type === "consult");
+        container.innerHTML = consults.map(item => `
+            <div class="card bg-gemini-800 border border-slate-700/50 rounded-2xl p-6 flex flex-col group cursor-pointer" onclick="${item.action}">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="w-10 h-10 rounded-lg bg-${item.color}-500/10 flex items-center justify-center group-hover:bg-${item.color}-500/20 transition-colors">
+                        <span class="material-symbols-outlined text-${item.color}-400">medical_services</span>
+                    </div>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-2">${item.title}</h3>
+                <p class="text-slate-400 mb-6 flex-grow text-sm">${item.desc}<br><strong class="text-${item.color}-400 text-xs">Note Generation</strong></p>
+                <button class="mt-auto w-full bg-slate-700 group-hover:bg-${item.color}-600 text-white font-medium py-2.5 px-4 rounded-xl text-center transition-all">Go to Consult</button>
+            </div>
+        `).join('');
+    }
+
     window.handleGlobalSearch = function(term) {
         const container = document.getElementById("search-results-container");
         if (!term.trim()) { switchView('dashboard'); return; }
@@ -669,6 +727,9 @@
         currentView = viewId;
         ['view-dashboard', 'view-consults', 'view-journal', 'view-iframe', 'view-search-results'].forEach(id => document.getElementById(id).classList.add('hidden'));
         document.getElementById(`view-${viewId}`).classList.remove('hidden');
+        
+        // Auto-render grid if switching to consults
+        if (viewId === 'consults') renderConsultGrid();
     }
     
     window.openFrame = function(url, title) {
@@ -688,6 +749,9 @@
         sb.classList.toggle('hidden');
         ov.classList.toggle('hidden');
     }
+
+    // Initial Render
+    renderConsultGrid();
 </script>
 
 </body>
