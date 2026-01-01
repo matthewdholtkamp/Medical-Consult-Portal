@@ -9,74 +9,209 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
     <style>
-        :root { --bg-primary: #1a1a2e; --bg-secondary: #16213e; --accent: #e94560; --text-main: #e0e0e0; }
-        body { background-color: var(--bg-primary); color: var(--text-main); font-family: 'Segoe UI', sans-serif; }
-        .glass-panel { background: rgba(22, 33, 62, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .prose-invert h1, .prose-invert h2, .prose-invert h3 { color: #F39C12; margin-top: 1.5em; font-weight: 700; }
-        .pulse-ring { display: inline-block; width: 64px; height: 64px; }
-        .pulse-ring:after { content: " "; display: block; width: 46px; height: 46px; margin: 1px; border-radius: 50%; border: 5px solid var(--accent); border-color: var(--accent) transparent var(--accent) transparent; animation: ring 1.2s linear infinite; }
+        :root {
+            --bg-primary: #1a1a2e;
+            --bg-secondary: #16213e;
+            --accent: #e94560;
+            --text-main: #e0e0e0;
+            --text-muted: #a0a0a0;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        .glass-panel {
+            background: rgba(22, 33, 62, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Markdown Content Styling */
+        .prose-invert h1, .prose-invert h2, .prose-invert h3 {
+            color: #F39C12;
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+            font-weight: 700;
+        }
+        .prose-invert h2 { border-bottom: 1px solid #333; padding-bottom: 5px; }
+        .prose-invert strong { color: var(--accent); }
+        .prose-invert ul { list-style-type: disc; padding-left: 20px; margin: 10px 0; }
+        .prose-invert p { margin-bottom: 1em; line-height: 1.7; }
+        .prose-invert a { color: #38bdf8; text-decoration: underline; }
+        
+        /* Animations */
+        .pulse-ring {
+            display: inline-block;
+            width: 64px;
+            height: 64px;
+        }
+        .pulse-ring:after {
+            content: " ";
+            display: block;
+            width: 46px;
+            height: 46px;
+            margin: 1px;
+            border-radius: 50%;
+            border: 5px solid var(--accent);
+            border-color: var(--accent) transparent var(--accent) transparent;
+            animation: ring 1.2s linear infinite;
+        }
         @keyframes ring { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 8px; padding: 16px; position: fixed; z-index: 50; left: 50%; bottom: 30px; transform: translateX(-50%); border: 1px solid var(--accent); }
+
+        /* Toast Notification */
+        #toast {
+            visibility: hidden;
+            min-width: 250px;
+            margin-left: -125px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 8px;
+            padding: 16px;
+            position: fixed;
+            z-index: 100;
+            left: 50%;
+            bottom: 30px;
+            font-size: 17px;
+            border: 1px solid var(--accent);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
         #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
         @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+        @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center p-4 md:p-8">
 
-    <div id="toast">Message</div>
+    <div id="toast">Notification Message</div>
 
     <header class="w-full max-w-4xl text-center mb-10">
-        <h1 class="text-4xl md:text-5xl font-extrabold text-orange-500 mb-3">Operational Medical Journal Club</h1>
-        <p class="text-blue-50 text-2xl font-semibold">JTS CPGs & Tactical Evidence Analysis</p>
+        <h1 class="text-4xl md:text-5xl font-extrabold text-orange-500 tracking-tight mb-3">Operational Medicine Journal Club</h1>
+        <p class="text-blue-50 mt-2 text-2xl font-semibold leading-relaxed">JTS CPGs, Deployed Medicine, and Tactical Evidence</p>
+        <p class="text-gray-500 text-sm mt-3 italic">Deployment Readiness Starts Now - Brought to you by Dr. Matthew Holtkamp</p>
     </header>
 
     <main class="w-full max-w-4xl">
+        
+        <div class="bg-blue-900/30 border border-blue-800 rounded-lg p-4 mb-8 text-center text-xs text-blue-200 uppercase tracking-widest font-bold">
+            Operational Use Only // Verify via Theater Medical Director
+        </div>
+
         <div id="step1" class="glass-panel rounded-xl p-6 shadow-2xl mb-6">
             <form id="queryForm" class="space-y-4">
-                <label class="block text-lg font-semibold mb-2">Operational Topic or Clinical Question</label>
-                <input type="text" id="initialQuestion" class="w-full bg-slate-800 border border-slate-600 rounded-lg p-4 text-white outline-none focus:ring-2 focus:ring-orange-500" placeholder="e.g., REBOA in Role 1 care" required>
-                <button type="submit" class="w-full bg-indigo-700 hover:bg-indigo-600 text-white font-bold py-3 rounded-lg flex flex-col items-center">
+                <div>
+                    <label class="block text-lg font-semibold mb-2">Operational Topic or Clinical Question</label>
+                    <input type="text" id="initialQuestion" 
+                           class="w-full bg-slate-800 border border-slate-600 rounded-lg p-4 text-white focus:ring-2 focus:ring-orange-500 outline-none transition"
+                           placeholder="e.g., Freeze Dried Plasma in PFC" required>
+                </div>
+                <button type="submit" id="btnRefine"
+                        class="w-full bg-indigo-700 hover:bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg transition duration-200 flex flex-col items-center gap-1">
                     <span>Initialize Refinement</span>
-                    <span class="text-[9px] uppercase tracking-widest text-indigo-300/60 font-mono">Waterfall Priority: 3-Flash > Lite</span>
+                    <span class="text-[9px] text-indigo-300/60 uppercase">Echelon: gemini-2.5-flash-lite</span>
                 </button>
             </form>
         </div>
 
         <div id="step2" class="glass-panel rounded-xl p-6 shadow-2xl mb-6 hidden">
-            <h3 class="text-xl font-bold text-orange-400 mb-4 border-b border-gray-700 pb-2">Refining Operational Context</h3>
+            <h3 class="text-xl font-bold text-orange-400 mb-4 border-b border-gray-700 pb-2 uppercase text-sm tracking-tighter">Mission Context Parameters</h3>
             <form id="refinementForm" class="space-y-4">
                 <div id="dynamicInputs" class="space-y-4"></div>
                 <div class="flex gap-4 pt-2">
-                    <button type="button" id="btnBackToStep1" class="w-1/3 bg-slate-700 text-white font-bold py-3 rounded-lg">Back</button>
-                    <button type="submit" class="w-2/3 bg-gradient-to-r from-orange-600 to-red-600 text-white font-bold py-3 rounded-lg flex flex-col items-center">
-                        <span>Generate Analysis</span>
-                        <span class="text-[9px] uppercase tracking-widest text-white/60 font-mono">Auto-Failover Strategy Enabled</span>
+                    <button type="button" id="btnBackToStep1" class="w-1/3 bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 px-4 rounded-lg">Back</button>
+                    <button type="submit" id="btnGenerate" class="w-2/3 bg-gradient-to-r from-orange-600 to-red-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg flex flex-col items-center">
+                        <span>Generate Tactical Analysis</span>
+                        <span class="text-[9px] text-white/60 uppercase">Engine: Gemini-2.5-Flash (Lite-Failover)</span>
                     </button>
                 </div>
             </form>
         </div>
 
-        <div id="loader" class="hidden text-center py-12"><div class="pulse-ring"></div><p id="loaderText" class="mt-4 text-orange-400 font-mono text-sm animate-pulse">Processing...</p></div>
+        <div id="loader" class="hidden text-center py-12">
+            <div class="pulse-ring"></div>
+            <p id="loaderText" class="mt-4 text-orange-400 font-mono text-sm animate-pulse uppercase">Consulting Doctrine...</p>
+        </div>
 
         <div id="results" class="hidden">
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-6 bg-slate-800/50 p-3 rounded-lg border border-slate-700">
-                <button id="btnAudio" class="col-span-2 bg-teal-700 text-white px-4 py-3 rounded-lg font-bold flex flex-col items-center shadow-lg">
-                    <span>🎙️ Listen to Brief</span>
-                    <span class="text-[9px] uppercase tracking-widest text-teal-300/60 font-mono">Unlimited Native-Audio Bucket</span>
+            
+            <div class="grid grid-cols-2 md:grid-cols-8 gap-2 mb-6 bg-slate-800/50 p-3 rounded-lg border border-slate-700 items-stretch">
+                <button id="btnAudio" type="button" class="col-span-2 md:col-span-4 bg-teal-700 hover:bg-teal-600 text-white px-4 py-3 rounded-lg font-bold text-lg flex flex-col items-center justify-center shadow-lg h-full">
+                    <span>🎙️ Listen to Command Brief</span>
+                    <span class="text-[9px] text-teal-300/60 uppercase tracking-widest">Unlimited Audio Bucket</span>
                 </button>
-                <button id="btnNewTopic" class="bg-red-900/40 text-red-200 rounded-lg text-xs font-semibold">New Topic</button>
-                <button id="btnBackToRefine" class="bg-slate-700 text-gray-200 rounded-lg text-xs font-medium">Back</button>
+                <button id="btnNewTopic" type="button" class="md:col-span-1 bg-red-900/40 text-red-200 rounded-lg text-[10px] font-bold uppercase tracking-tighter border border-red-900/50">New Topic</button>
+                <button id="btnBackToRefine" type="button" class="md:col-span-1 bg-slate-700 text-gray-200 rounded-lg text-[10px] font-bold uppercase">Back</button>
+                <button id="btnCopy" type="button" class="md:col-span-1 bg-slate-700 text-gray-200 rounded-lg text-[10px] font-bold uppercase">Copy Text</button>
+                <button id="btnPlan" type="button" class="md:col-span-1 bg-slate-700 text-gray-200 rounded-lg text-[10px] font-bold uppercase">Copy Plan</button>
             </div>
             
-            <div id="audioContainer" class="hidden mb-6 p-4 bg-teal-900/30 border border-teal-800 rounded-lg">
+            <div id="audioContainer" class="hidden mb-6 p-4 bg-teal-900/30 border border-teal-800 rounded-lg transition-all">
                 <div id="audioProgressContainer" class="w-full bg-gray-700 rounded-full h-2.5 mb-3 hidden">
                     <div id="audioProgressBar" class="bg-teal-500 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+                    <p id="audioProgressText" class="text-[10px] text-teal-400 text-center mt-1 uppercase font-mono">Synthesizing...</p>
                 </div>
                 <audio id="audioPlayer" controls class="w-full hidden"></audio>
             </div>
 
-            <div id="summaryContent" class="prose prose-invert max-w-none text-gray-300 mb-8"></div>
-            <div id="planContent" class="prose prose-invert max-w-none text-gray-300 border-t border-gray-700 pt-8"></div>
+            <div id="thinkingContainer" class="hidden mb-6">
+                <details class="group bg-slate-900/40 rounded-xl border border-slate-700/30 overflow-hidden">
+                    <summary class="list-none p-3 cursor-pointer flex items-center justify-between text-[10px] text-slate-500 font-bold uppercase tracking-widest hover:bg-slate-800/50">
+                        <div class="flex items-center gap-2"><span>🧠</span><span>Tactical Reasoning (Trace Log)</span></div>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M19 9l-7 7-7-7" stroke-width="2" /></svg>
+                    </summary>
+                    <div id="thinkingContent" class="px-4 pb-4 text-[10px] text-slate-500 italic font-mono leading-relaxed bg-black/10 pt-2 whitespace-pre-line"></div>
+                </details>
+            </div>
+
+            <div class="mb-8 p-6 bg-slate-800/30 rounded-lg border border-slate-700">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Interactive Doctrine Discussion</h3>
+                <form id="followUpForm" class="flex gap-2">
+                    <input type="text" id="followUpInput" class="flex-1 bg-slate-800 border border-slate-600 rounded-lg p-3 text-white text-sm outline-none" placeholder="Ask Dr. Holtkamp a specific follow-up...">
+                    <button type="submit" class="bg-orange-600 hover:bg-orange-500 text-white px-6 rounded-lg font-bold text-sm">Ask</button>
+                </form>
+                <div id="followUpResult" class="mt-4 p-4 bg-slate-800/50 rounded-lg border-l-4 border-orange-500 hidden prose prose-invert max-w-none text-sm"></div>
+            </div>
+
+            <div class="mb-4 border-b border-gray-700 flex gap-6 overflow-x-auto">
+                <button class="tab-btn active text-orange-500 border-b-2 border-orange-500 pb-2 px-1 font-bold text-sm uppercase tracking-tighter" data-target="summary">Guideline Review</button>
+                <button class="tab-btn text-gray-400 hover:text-white pb-2 px-1 font-medium text-sm uppercase tracking-tighter" data-target="plan">Operational Plan</button>
+                <button class="tab-btn text-gray-400 hover:text-white pb-2 px-1 font-medium text-sm uppercase tracking-tighter" data-target="refs">References</button>
+            </div>
+
+            <div id="summaryContent" class="tab-content prose prose-invert max-w-none text-gray-300"></div>
+            
+            <div id="planContent" class="tab-content hidden space-y-6">
+                <div id="planTextContent" class="prose prose-invert max-w-none text-gray-300"></div>
+                
+                <div class="mt-8 border-t border-slate-700 pt-6">
+                    <h4 class="text-orange-400 font-bold uppercase tracking-widest text-xs mb-4 flex items-center gap-2">
+                        Theater Evacuation & Route COP
+                    </h4>
+                    <div class="relative w-full h-64 bg-slate-900 rounded-xl border border-slate-700 overflow-hidden flex items-center justify-center">
+                        <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
+                        <div class="relative z-10 text-center p-6">
+                            <p class="text-slate-500 font-mono text-[10px] mb-4 uppercase">Source: External_Vantage_Link_Required</p>
+                            <div class="flex flex-col md:flex-row gap-3 justify-center">
+                                <button onclick="window.open('https://vantage.army.mil', '_blank')" class="bg-indigo-900/40 hover:bg-indigo-800 border border-indigo-500/50 text-indigo-200 px-4 py-2 rounded text-xs font-bold transition-all">Launch Army Vantage</button>
+                                <button onclick="showToast('Secure terminal required.')" class="bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-300 px-4 py-2 rounded text-xs font-bold transition-all">Load GRG Overlay</button>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="mt-2 text-[9px] text-slate-600 italic font-mono">Real-time MGRS coordinates require CAC authentication.</p>
+                </div>
+            </div>
+
+            <div id="refsContent" class="tab-content hidden font-mono text-xs bg-black/30 p-4 rounded text-gray-400 whitespace-pre-wrap"></div>
+
+            <div class="mt-8 flex justify-center">
+                <button id="btnBackToRefineBottom" class="text-slate-500 hover:text-white underline text-[10px] uppercase font-bold tracking-widest flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M10 19l-7-7m0 0l7-7m-7 7h18" stroke-width="2" /></svg>
+                    Modify Mission Parameters
+                </button>
+            </div>
         </div>
     </main>
 
@@ -89,45 +224,53 @@
         import { API_KEYS } from './js/config.js?v=secure';
 
         const apiKey = API_KEYS.JOURNAL_CLUB;
-        const WATERFALL_MODELS = ["gemini-3-flash", "gemini-2.5-flash-lite", "gemini-1.5-flash"];
-        const AUDIO_MODEL = "gemini-2.5-flash-native-audio-dialog";
+        const jsonBinKey = "$2a$10$J/Gr0x7KT4o8YHMdHtRgV.MokfRSRnPPdXBI5jJidEiqrvJfbH5Py";
+
+        // WATERFALL STRATEGY CONFIG
+        const WATERFALL_MODELS = ["gemini-2.5-flash-lite", "gemini-1.5-flash"];
+        const AUDIO_MODEL = "gemini-2.5-flash-native-audio-dialog"; // UNLIMITED Bucket
 
         const el = id => document.getElementById(id);
         const dynamicInputs = el('dynamicInputs');
+        const toast = el('toast');
+        
         let storedSummary = "", storedContext = "";
 
-        function showToast(m) { const t = el('toast'); t.innerText = m; t.className = "show"; setTimeout(() => t.className = "", 3000); }
+        function showToast(m) { toast.innerText = m; toast.className = "show"; setTimeout(() => toast.className = "", 3000); }
+        function stripLatex(t) { return t ? t.replace(/\$([^$]+)\$/g, '$1').replace(/\\text\s*\{([^}]+)\}/g, '$1').replace(/\\([a-zA-Z]+)/g, ' $1 ').trim() : ""; }
         function showLoader(t) { el('loaderText').innerText = t; el('loader').classList.remove('hidden'); }
         function hideLoader() { el('loader').classList.add('hidden'); }
 
         /**
-         * WATERFALL CORE: Tries models in sequence to bypass 429 errors
+         * MISSION WATERFALL: Tries models in sequence to bypass rate limits
          */
-        async function callGeminiWaterfall(payload) {
+        async function fetchWaterfall(payload) {
             for (const modelId of WATERFALL_MODELS) {
                 const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${apiKey}`;
                 try {
-                    showLoader(`Consulting ${modelId}...`);
+                    showLoader(`Consulting echelon ${modelId}...`);
                     const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                    if (res.status === 429) continue; 
+                    if (res.status === 429) { console.warn(`${modelId} busy, falling back...`); continue; }
                     if (!res.ok) throw new Error(res.status);
-                    const data = await res.json();
-                    return data;
+                    return await res.json();
                 } catch (e) { continue; }
             }
-            throw new Error("Quota Exhausted on All Models.");
+            throw new Error("Critical: Quota Exhausted.");
         }
 
-        // STEP 1: INITIAL TOPIC
+        // STEP 1: INITIAL QUESTIONS
         el('queryForm').onsubmit = async (e) => {
             e.preventDefault();
+            const topic = el('initialQuestion').value;
             el('step1').classList.add('hidden');
             try {
-                const data = await callGeminiWaterfall({ contents: [{ parts: [{ text: `Topic: "${el('initialQuestion').value}". Generate 5 tactical medical triage questions. 1 per line.` }] }] });
-                const qs = data.candidates[0].content.parts[0].text.split('\n').filter(l => l.trim().length > 5).slice(0, 5);
-                dynamicInputs.innerHTML = qs.map(q => `<div class="mb-3"><label class="block text-xs text-gray-400 mb-1">${q}</label><input type="text" class="w-full bg-slate-800 border border-slate-600 rounded p-2 text-white text-sm"></div>`).join('');
+                const data = await fetchWaterfall({
+                    contents: [{ parts: [{ text: `Topic: "${topic}". Generate 5 tactical clinical triage questions. 1 per line.` }] }]
+                });
+                const qs = data.candidates[0].content.parts[0].text.split('\n').filter(l => l.length > 5).slice(0, 5);
+                dynamicInputs.innerHTML = qs.map(q => `<div><label class="block text-[11px] uppercase font-bold text-slate-500 mb-1 tracking-tight">${q}</label><input type="text" class="w-full bg-slate-800 border border-slate-600 rounded p-3 text-white text-sm focus:border-orange-500 outline-none"></div>`).join('');
                 hideLoader(); el('step2').classList.remove('hidden');
-            } catch (err) { showToast("All models busy."); hideLoader(); el('step1').classList.remove('hidden'); }
+            } catch (err) { showToast("Quota Error. Try in 60s."); hideLoader(); el('step1').classList.remove('hidden'); }
         };
 
         // STEP 2: DOCTRINE ANALYSIS
@@ -136,46 +279,110 @@
             el('step2').classList.add('hidden');
             const details = Array.from(dynamicInputs.querySelectorAll('input')).map(i => i.value).join('. ');
             try {
-                const data = await callGeminiWaterfall({ contents: [{ parts: [{ text: `Analyze "${el('initialQuestion').value}" with Details: ${details}. Use JTS CPGs. Separator: |||PLAN|||` }] }] });
-                const text = data.candidates[0].content.parts[0].text;
-                const splits = text.split('|||PLAN|||');
+                const data = await fetchWaterfall({
+                    contents: [{ 
+                        parts: [{ 
+                            text: `Analyze "${el('initialQuestion').value}" with mission details: ${details}. Cross-reference JTS CPGs. Structure with separators: |||PLAN||| and |||REFS|||. No LaTeX.` 
+                        }] 
+                    }],
+                    generationConfig: { thinking_config: { include_thoughts: true } }
+                });
+
+                const cand = data.candidates[0];
+                const parts = cand.content.parts;
+                
+                // Thoughts Trace
+                const thought = parts.find(p => p.thought);
+                if (thought) { el('thinkingContent').innerText = thought.thought; el('thinkingContainer').classList.remove('hidden'); }
+
+                const rawText = parts.find(p => p.text).text;
+                storedContext = rawText;
+                const splits = rawText.split('|||PLAN|||');
                 storedSummary = splits[0];
-                el('summaryContent').innerHTML = marked.parse(splits[0]);
-                el('planContent').innerHTML = marked.parse(splits[1] || "Plan processing...");
+                const remaining = (splits[1] || "").split('|||REFS|||');
+                
+                el('summaryContent').innerHTML = marked.parse(stripLatex(storedSummary));
+                el('planTextContent').innerHTML = marked.parse(stripLatex(remaining[0]));
+                el('refsContent').innerText = stripLatex(remaining[1] || "References available in JTS library.");
+                
                 hideLoader(); el('results').classList.remove('hidden');
                 MathJax.typesetPromise();
-            } catch (err) { showToast("Critical Quota Error."); hideLoader(); el('step2').classList.remove('hidden'); }
+            } catch (err) { showToast("Analysis failed."); hideLoader(); el('step2').classList.remove('hidden'); }
         };
 
-        // STEP 3: NATIVE AUDIO (UNLIMITED)
+        // STEP 3: NATIVE UNLIMITED AUDIO
         el('btnAudio').onclick = async () => {
-            el('btnAudio').disabled = true;
+            const btn = el('btnAudio'); btn.disabled = true;
             el('audioProgressContainer').classList.remove('hidden');
-            el('audioProgressBar').style.width = '20%';
+            const pBar = el('audioProgressBar');
+            const pText = el('audioProgressText');
             try {
-                const scriptData = await callGeminiWaterfall({ contents: [{ parts: [{ text: `You are Dr. Matthew Holtkamp. Brief this summary tactical update: ${storedSummary.substring(0, 2000)}` }] }] });
-                const script = scriptData.candidates[0].content.parts[0].text;
-                el('audioProgressBar').style.width = '60%';
-                await new Promise(r => setTimeout(r, 2000));
+                pBar.style.width = '20%';
+                pText.innerText = "Scripting Military Update...";
+                // Use Lite for script to save reasoning quota
+                const { candidates } = await fetchWaterfall({ contents: [{ parts: [{ text: `You are Dr. Matthew Holtkamp. Brief this summary tactically: ${storedSummary.substring(0, 2000)}` }] }] });
+                const script = candidates[0].content.parts[0].text;
                 
+                pBar.style.width = '60%';
+                pText.innerText = "Synthesizing Secure Audio...";
+                await new Promise(r => setTimeout(r, 2000));
+
                 const ttsRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${AUDIO_MODEL}:generateContent?key=${apiKey}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: `Brief this: ${script}` }] }], generationConfig: { responseModalities: ["AUDIO"] } })
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: script }] }],
+                        generationConfig: { responseModalities: ["AUDIO"] }
+                    })
                 });
 
                 const ttsData = await ttsRes.json();
                 const audioPart = ttsData.candidates[0].content.parts.find(p => p.inlineData);
                 const bytes = new Uint8Array(atob(audioPart.inlineData.data).split("").map(c => c.charCodeAt(0)));
                 el('audioPlayer').src = URL.createObjectURL(pcmToWav(new Int16Array(bytes.buffer), 1, 24000));
-                el('audioProgressBar').style.width = '100%';
+                
+                pBar.style.width = '100%';
+                pText.innerText = "Ready!";
                 setTimeout(() => { el('audioProgressContainer').classList.add('hidden'); el('audioPlayer').classList.remove('hidden'); el('audioPlayer').play(); }, 500);
-            } catch (err) { showToast("Audio limit hit."); } finally { el('btnAudio').disabled = false; }
+            } catch (err) { showToast("Audio bucket error."); } finally { btn.disabled = false; }
         };
 
+        // Follow Up
+        el('followUpForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const input = el('followUpInput');
+            const resBox = el('followUpResult');
+            resBox.innerHTML = '<span class="animate-pulse">Consulting JTS Guidelines...</span>';
+            resBox.classList.remove('hidden');
+            try {
+                const data = await fetchWaterfall({ contents: [{ parts: [{ text: `Context: ${storedContext}\nQuestion: ${input.value}. Answer as Dr. Holtkamp.` }] }] });
+                resBox.innerHTML = marked.parse(stripLatex(data.candidates[0].content.parts[0].text));
+            } catch (err) { resBox.innerText = "Error consulting doctrine."; }
+        };
+
+        // UTILS
         el('btnNewTopic').onclick = () => location.reload();
-        el('btnBackToStep1').onclick = () => { el('step2').classList.add('hidden'); el('step1').classList.remove('hidden'); };
         el('btnBackToRefine').onclick = () => { el('results').classList.add('hidden'); el('step2').classList.remove('hidden'); };
+        el('btnBackToRefineBottom').onclick = () => el('btnBackToRefine').click();
+        el('btnBackToStep1').onclick = () => { el('step2').classList.add('hidden'); el('step1').classList.remove('hidden'); };
+        el('btnCopy').onclick = () => { navigator.clipboard.writeText(storedSummary); showToast("Summary Copied"); };
+        el('btnPlan').onclick = () => { navigator.clipboard.writeText(el('planTextContent').innerText); showToast("Plan Copied"); };
+
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.onclick = () => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active', 'text-orange-500', 'border-orange-500'));
+                btn.classList.add('active', 'text-orange-500', 'border-orange-500');
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+                el(btn.dataset.target + 'Content').classList.remove('hidden');
+            };
+        });
+
+        // Plug-and-play sharing logic
+        setupSharing({
+            apiKey: jsonBinKey,
+            getState: () => ({ initialQuestion: el('initialQuestion').value, summaryContent: storedSummary, context: storedContext }),
+            restoreState: (s) => { el('initialQuestion').value = s.initialQuestion; storedSummary = s.summaryContent; storedContext = s.context; }
+        });
     </script>
 </body>
 </html>
