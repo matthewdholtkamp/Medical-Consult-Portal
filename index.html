@@ -401,13 +401,18 @@
                                     </button>
                                     
                                     <div class="flex items-center gap-4 ml-auto">
-                                        <!-- Deep Thinking Toggle -->
+                                        <!-- Mic Button -->
+                                        <button id="micBtn" class="p-2 rounded-full text-slate-400 hover:text-white hover:bg-slate-700 transition-all flex items-center justify-center border border-slate-600/50 hover:border-slate-500" aria-label="Voice Input">
+                                            <span class="material-symbols-outlined text-[20px]">mic</span>
+                                        </button>
+
+                                        <!-- Thinking Mode Toggle -->
                                         <label class="toggle-switch-container flex items-center gap-2 cursor-pointer group">
                                             <div class="relative">
                                                 <input type="checkbox" id="deepThinkToggle" class="sr-only peer">
                                                 <div class="w-9 h-5 bg-slate-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500/30 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
                                             </div>
-                                            <span class="text-xs font-medium text-slate-400 group-hover:text-slate-200 transition-colors">Deep Thinking</span>
+                                            <span class="text-xs font-medium text-slate-400 group-hover:text-slate-200 transition-colors">Thinking Mode</span>
                                         </label>
 
                                         <button id="askBtn" onclick="askDrHoltkamp()" class="px-4 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-500 transition-all shadow-lg shadow-blue-900/20 disabled:opacity-50 disabled:cursor-not-allowed">
@@ -809,23 +814,19 @@ Tone should be authoritative, educational, and analytically rigorous.`;
 
         async function callGeminiDrHoltkamp(apiKey, systemPrompt, userQuery) {
             const cleanKey = apiKey ? apiKey.trim() : "";
-            const modelId = "gemini-3-pro-preview";
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${cleanKey}`;
 
-            const isDeepThink = document.getElementById('deepThinkToggle').checked;
+            const isThinkingMode = document.getElementById('deepThinkToggle').checked;
+            // Toggle Logic: Checked = gemini-3-flash, Unchecked = gemini-2.5-flash-lite
+            const modelId = isThinkingMode ? "gemini-3-flash" : "gemini-2.5-flash-lite";
+
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${cleanKey}`;
 
             const userContent = { role: "user", parts: [{ text: userQuery }] };
             const currentContents = [...chatHistory, userContent];
 
-            // 2025 v1beta Payload: Corrects the 400 error by moving thinking_config to top-level
             const payload = {
                 contents: currentContents,
                 systemInstruction: { parts: [{ text: systemPrompt }] },
-                // CRITICAL: thinking_config must be at the top level, not inside generationConfig
-                thinking_config: {
-                    include_thoughts: true,
-                    thinking_level: isDeepThink ? "high" : "low"
-                },
                 generationConfig: {
                     temperature: 1.0
                 }
@@ -839,12 +840,16 @@ Tone should be authoritative, educational, and analytically rigorous.`;
 
             if (!response.ok) {
                 const errData = await response.json().catch(() => ({}));
-                // Fallback to standard if thinking_config is rejected
+                // Fallback to standard if error occurs (optional, keeping logic similar to before but generalized)
                 if (response.status === 400) return await callStandardGemini(apiKey, systemPrompt, userQuery);
                 throw new Error(`API Error: ${response.status} - ${errData.error?.message || response.statusText}`);
             }
 
             const data = await response.json();
+
+            // Crash Prevention
+            if (!data.candidates) throw new Error(data.error?.message || "No response");
+
             const candidate = data.candidates?.[0];
 
             if (!candidate || !candidate.content) throw new Error("No clinical content generated");
@@ -978,6 +983,69 @@ Tone should be authoritative, educational, and analytically rigorous.`;
                 newQuestionBtn.classList.remove('hidden');
             }
         }
+
+        // --- SPEECH-TO-TEXT LOGIC ---
+        (function() {
+            const micBtn = document.getElementById('micBtn');
+            const chatInput = document.getElementById('chatInput');
+
+            if (!micBtn || !chatInput) return;
+
+            if ('webkitSpeechRecognition' in window) {
+                const recognition = new webkitSpeechRecognition();
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                recognition.lang = 'en-US';
+
+                let isRecording = false;
+
+                micBtn.addEventListener('click', () => {
+                    if (isRecording) {
+                        recognition.stop();
+                    } else {
+                        recognition.start();
+                    }
+                });
+
+                recognition.onstart = () => {
+                    isRecording = true;
+                    // Change icon to mic_off and color to red/orange
+                    micBtn.innerHTML = '<span class="material-symbols-outlined text-[20px]">mic_off</span>';
+                    micBtn.classList.remove('text-slate-400', 'hover:text-white', 'border-slate-600/50');
+                    micBtn.classList.add('text-red-400', 'border-red-500/50', 'bg-red-500/10');
+                };
+
+                recognition.onend = () => {
+                    isRecording = false;
+                    // Reset icon and color
+                    micBtn.innerHTML = '<span class="material-symbols-outlined text-[20px]">mic</span>';
+                    micBtn.classList.add('text-slate-400', 'hover:text-white', 'border-slate-600/50');
+                    micBtn.classList.remove('text-red-400', 'border-red-500/50', 'bg-red-500/10');
+                };
+
+                recognition.onresult = (event) => {
+                    const transcript = event.results[0][0].transcript;
+                    if (transcript) {
+                        // Append with space if needed
+                        if (chatInput.value.length > 0 && !chatInput.value.endsWith(' ')) {
+                            chatInput.value += ' ' + transcript;
+                        } else {
+                            chatInput.value += transcript;
+                        }
+                        // Trigger input event to auto-resize textarea
+                        chatInput.dispatchEvent(new Event('input'));
+                    }
+                };
+
+                recognition.onerror = (event) => {
+                    console.error("Speech recognition error", event.error);
+                    recognition.stop();
+                };
+            } else {
+                // Hide mic if not supported
+                micBtn.style.display = 'none';
+            }
+        })();
     </script>
 
     <script>
