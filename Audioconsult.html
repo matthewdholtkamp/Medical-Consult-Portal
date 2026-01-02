@@ -200,6 +200,9 @@
 
                 <!-- Actions -->
                 <div class="pt-2 border-t border-slate-700 flex flex-col gap-2">
+                     <button onclick="copyFirstFrame()" class="w-full py-1 bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-400 border border-indigo-500/30 rounded text-xs font-mono transition-colors">
+                        COPY FIRST OUTBOUND FRAME
+                    </button>
                     <button onclick="testPingOnly()" id="btn-ping" class="w-full py-1 bg-slate-700 hover:bg-slate-600 text-slate-300 border border-slate-600 rounded text-xs font-mono transition-colors">
                         [TEST] WS PING (NO AUDIO)
                     </button>
@@ -247,11 +250,13 @@
         import { API_KEYS } from '/Medical-Consult-Portal/js/config.js';
 
         // --- Configuration ---
-        // Setup must be first frame; mic gated until setupAck.
         const API_KEY = API_KEYS.ORTHOPEDICS;
 
-        // EXPERIMENTAL: Using known working model for control test
-        const MODEL_ID = "gemini-2.0-flash-exp";
+        // Models
+        const PRIMARY_MODEL = "gemini-2.5-flash-native-audio-preview-12-2025";
+        const CONTROL_MODEL = "gemini-2.0-flash-live-001"; // User specified control
+
+        const MODEL_ID = PRIMARY_MODEL;
 
         const WS_URL = `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent?key=${API_KEY}`;
 
@@ -293,7 +298,8 @@
             msgsReceived: 0,
             frameBuffer: [],
             lastError: null,
-            lastClose: { code: null, reason: null }
+            lastClose: { code: null, reason: null },
+            firstOutboundFrameJson: null
         };
 
         const ui = {
@@ -490,7 +496,7 @@
                 socket = new WebSocket(WS_URL);
 
                 socket.onopen = () => onWsOpen(pingOnly);
-                socket.onmessage = (e) => onWsMessage(e, pingOnly); // Pass pingOnly to message handler
+                socket.onmessage = (e) => onWsMessage(e, pingOnly);
                 socket.onclose = onWsClose;
                 socket.onerror = (e) => console.error("WS Error Event", e);
 
@@ -559,13 +565,14 @@
             updateState(STATE.CONFIGURING);
 
             // 1. Safe Send Setup (MUST BE FIRST)
+            // Minimal Payload per request
             const setup = {
                 setup: {
                     model: `models/${MODEL_ID}`,
                     generationConfig: {
                         responseModalities: ["AUDIO"]
                     },
-                    // Minimal system instruction
+                    // Simple string instruction as requested for test
                     systemInstruction: { parts: [{ text: "You are Dr. Holtkamp." }] }
                 }
             };
@@ -574,12 +581,8 @@
             telemetry.setupSent++;
             hasSentSetup = true;
 
-            // 2. If not ping only, Initialize Audio AFTER setup is sent
-            // But we don't start SENDING mic data until setupAck is true (handled in handleMicData)
-            if (!pingOnly) {
-                initAudioContextAndMic();
-            } else {
-                // For ping test, send a manual text trigger immediately
+            if (pingOnly) {
+                // Send Ping
                 safeSend({ clientContent: { turns: [{ role: "user", parts: [{ text: "PING" }] }], turnComplete: true } }, "ping");
             }
         }
@@ -587,7 +590,8 @@
         function safeSend(obj, label) {
             if (!socket || socket.readyState !== WebSocket.OPEN) return;
 
-            // Strict ordering: Setup must be first
+            // STRICT VALIDATION
+            // 1. Order Check
             if (label !== "setup" && !hasSentSetup) {
                 console.error("Attempted to send frame before setup:", obj);
                 reportError("PROTOCOL_ERR", "Order Violation", "Tried to send non-setup frame first.");
@@ -595,7 +599,21 @@
                 return;
             }
 
+            // 2. Union Check
+            const keys = Object.keys(obj);
+            const topLevel = ['setup', 'clientContent', 'realtimeInput', 'toolResponse'];
+            const present = keys.filter(k => topLevel.includes(k));
+            if (present.length !== 1) {
+                console.error("Invalid Frame Structure:", obj);
+                reportError("PROTOCOL_ERR", "Schema Violation", `Frame must have exactly one top-level field. Found: ${present.join(', ')}`);
+                disconnect(false);
+                return;
+            }
+
             try {
+                if (label === "setup" && !telemetry.firstOutboundFrameJson) {
+                    telemetry.firstOutboundFrameJson = JSON.stringify(obj, null, 2);
+                }
                 logFrame('OUT', obj);
                 socket.send(JSON.stringify(obj));
             } catch (e) {
@@ -615,15 +633,15 @@
 
                 // ACK Logic
                 if (!setupAck) {
-                    setupAck = true; // Any valid frame implies setup accepted
-                    audioGate = true; // Open mic gate
-                    updateTelemetryUI();
+                    setupAck = true;
+                    ui.transcript.innerText = "Connection Established. Handshake complete.";
 
-                    // If ping only, we are good
-                    if (pingOnly) {
-                        ui.transcript.innerText = "Ping Success! Server responded.";
-                        return;
+                    if (!pingOnly) {
+                        // Initialize Audio ONLY after Setup ACK
+                        audioGate = true;
+                        initAudioContextAndMic();
                     }
+                    updateTelemetryUI();
                 }
 
                 if (response.error) {
@@ -688,13 +706,15 @@
                 source.connect(workletNode);
                 workletNode.connect(audioContext.destination);
                 processor = workletNode;
+
+                ui.transcript.innerText = "Mic Active. Listening...";
             } catch (e) {
                 reportError("AUDIO_ERR", "Init Failed", e.message);
             }
         }
 
         function handleMicData(event) {
-            // Strict Gate: No audio sending until Setup is ACKed
+            // Strict Gate
             if (!audioGate || !socket || socket.readyState !== WebSocket.OPEN) return;
 
             const float32Data = event.data;
@@ -709,6 +729,9 @@
             }
 
             const base64 = arrayBufferToBase64(pcmData.buffer);
+
+            // Replaced deprecated mediaChunks with realtimeInput.mediaChunks (standard) or realtimeInput.audio if API changed
+            // Using standard 'mediaChunks' structure but routing via safeSend
             const frame = {
                 realtimeInput: {
                     mediaChunks: [{
@@ -718,13 +741,8 @@
                 }
             };
 
-            // Use safeSend but suppress log spam
-            if(hasSentSetup) {
-                try {
-                    socket.send(JSON.stringify(frame));
-                    telemetry.audioChunksSent++;
-                } catch(e) {}
-            }
+            safeSend(frame, "audio");
+            telemetry.audioChunksSent++;
         }
 
         // --- Helpers ---
@@ -803,6 +821,10 @@
 
         window.copyCloseReason = function() {
             navigator.clipboard.writeText(telemetry.lastClose.reason || "No reason recorded");
+        };
+
+        window.copyFirstFrame = function() {
+            navigator.clipboard.writeText(telemetry.firstOutboundFrameJson || "No frame sent yet");
         };
     </script>
 </body>
