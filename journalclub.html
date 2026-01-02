@@ -731,7 +731,7 @@
                 progressText.innerText = "Step 2: Synthesizing Audio (Est. wait: ~5-7 mins)...";
                 
                 // Use specific TTS model and endpoint as requested
-                const TTS_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-tts:generateContent?key=${apiKey}`;
+                const TTS_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
                 
                 const ttsPrompt = `
 Style: You are a senior medical officer delivering a briefing. Use a professional, steady pace with clear pronunciation of medical terminology. Sound authoritative yet accessible.
