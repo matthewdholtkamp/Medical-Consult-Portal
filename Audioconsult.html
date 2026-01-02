@@ -295,10 +295,12 @@
         const telemetry = {
             setupSent: 0,
             audioChunksSent: 0,
+            audioChunksReceived: 0,
+            textChunksReceived: 0,
             msgsReceived: 0,
             frameBuffer: [],
             lastError: null,
-            lastClose: { code: null, reason: null },
+            lastClose: { code: null, reason: null, wasClean: null },
             firstOutboundFrameJson: null
         };
 
@@ -335,6 +337,10 @@
             cntAudioTx: document.getElementById('cnt-audio-tx'),
             cntMsgsRx: document.getElementById('cnt-msgs-rx')
         };
+
+        // --- Global Error Handlers ---
+        window.addEventListener('error', (e) => reportError('JS_ERROR', 'runtime', e.message));
+        window.addEventListener('unhandledrejection', (e) => reportError('PROMISE_REJECT', 'runtime', String(e.reason)));
 
         // --- UI Logic ---
 
@@ -458,9 +464,25 @@
             updateState(STATE.ERROR);
         }
 
+        function resetTelemetry() {
+            telemetry.setupSent = 0;
+            telemetry.audioChunksSent = 0;
+            telemetry.audioChunksReceived = 0;
+            telemetry.textChunksReceived = 0;
+            telemetry.msgsReceived = 0;
+            telemetry.frameBuffer = [];
+            telemetry.lastError = null;
+            telemetry.lastClose = { code: null, reason: null, wasClean: null };
+            telemetry.firstOutboundFrameJson = null;
+
+            ui.frameLogContainer.innerHTML = '';
+            updateTelemetryUI();
+        }
+
         // --- Connection Management ---
 
         window.toggleConnection = async function() {
+            console.log('toggleConnection clicked', currentState);
             if (currentState === STATE.DISCONNECTED || currentState === STATE.ERROR) {
                 reconnectAttempts = 0;
                 connect();
@@ -690,7 +712,9 @@
                 await audioContext.resume();
                 scheduledTime = audioContext.currentTime;
 
-                await audioContext.audioWorklet.addModule('js/audio-processor.js');
+                // Fixed absolute path for GitHub Pages
+                await audioContext.audioWorklet.addModule('/Medical-Consult-Portal/js/audio-processor.js');
+
                 micStream = await navigator.mediaDevices.getUserMedia({
                     audio: {
                         channelCount: 1,
