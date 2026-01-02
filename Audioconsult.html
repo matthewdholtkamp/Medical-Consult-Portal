@@ -16,6 +16,9 @@
                             800: '#1e293b',
                             900: '#0f172a',
                         }
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
                     }
                 }
             }
@@ -80,6 +83,10 @@
             border-radius: 2px;
             transition: height 0.1s ease;
         }
+
+        /* Error/Diagnostics Panel */
+        .diag-row { display: flex; justify-content: space-between; font-family: monospace; font-size: 11px; color: #94a3b8; border-bottom: 1px solid #334155; padding: 2px 0; }
+        .diag-row span:last-child { color: #e2e8f0; }
     </style>
 </head>
 
@@ -90,6 +97,13 @@
     <!-- Ambient Glow -->
     <div class="absolute inset-0 pointer-events-none overflow-hidden">
         <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-3xl"></div>
+    </div>
+
+    <!-- Demo Mode Warning -->
+    <div id="demo-warning" class="bg-amber-500/10 border-b border-amber-500/20 px-4 py-1 text-center">
+        <p class="text-[10px] font-bold text-amber-500 uppercase tracking-widest">
+            Demo Mode • Client-Side API Key • Not for Production
+        </p>
     </div>
 
     <!-- Header -->
@@ -103,34 +117,52 @@
                 <p class="text-[10px] text-slate-500 uppercase tracking-wider font-medium">Native Audio Dialog</p>
             </div>
         </div>
-        <div id="connection-status" class="flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800 border border-slate-700">
-            <div id="status-dot" class="w-2 h-2 rounded-full bg-red-500"></div>
-            <span id="status-text" class="text-xs text-slate-400 font-mono">DISCONNECTED</span>
+        <div id="connection-status-badge" class="flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800 border border-slate-700 transition-colors">
+            <div id="status-dot" class="w-2 h-2 rounded-full bg-slate-500"></div>
+            <span id="status-text" class="text-xs text-slate-400 font-mono font-bold">DISCONNECTED</span>
         </div>
     </header>
 
     <!-- Main Content -->
     <main class="flex-1 flex flex-col items-center justify-center relative z-10 p-6">
         
+        <!-- Error/Diagnostics Container (Hidden by default) -->
+        <div id="diagnostics-panel" class="hidden absolute top-4 left-1/2 -translate-x-1/2 w-full max-w-md bg-red-900/20 border border-red-500/30 backdrop-blur-md rounded-xl p-4 z-50 animate-fade-in shadow-2xl">
+            <div class="flex items-center gap-2 mb-2 text-red-400 border-b border-red-500/30 pb-2">
+                <span class="material-symbols-outlined text-sm">warning</span>
+                <h3 class="text-xs font-bold uppercase tracking-wider">Connection Failure</h3>
+            </div>
+            <div class="space-y-1">
+                <div class="diag-row"><span>Phase</span><span id="diag-phase">--</span></div>
+                <div class="diag-row"><span>Code</span><span id="diag-code">--</span></div>
+                <div class="diag-row"><span>Reason</span><span id="diag-reason">--</span></div>
+                <div class="diag-row"><span>Model</span><span id="diag-model">--</span></div>
+                <p id="diag-message" class="text-xs text-red-300 mt-2 font-mono break-words"></p>
+            </div>
+            <button onclick="hideDiagnostics()" class="absolute top-2 right-2 text-red-400 hover:text-white">
+                <span class="material-symbols-outlined text-sm">close</span>
+            </button>
+        </div>
+
         <div id="visualizer-container" class="relative w-64 h-64 mb-16 flex items-center justify-center">
             <div id="pulse-layer" class="absolute inset-0 rounded-full"></div>
             
             <button onclick="toggleConnection()" id="main-mic-btn" class="relative w-40 h-40 bg-slate-800 rounded-full border-2 border-slate-700 shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-105 group z-20 focus:outline-none focus:ring-4 focus:ring-blue-500/30">
-                <span class="material-symbols-outlined text-6xl text-slate-400 group-hover:text-blue-400" id="mic-icon">power_settings_new</span>
+                <span class="material-symbols-outlined text-6xl text-slate-400 group-hover:text-blue-400 transition-colors" id="mic-icon">power_settings_new</span>
             </button>
 
             <div class="absolute -bottom-12 w-full text-center">
-                <span id="interaction-status" class="text-sm font-bold tracking-widest text-slate-500 uppercase">Tap Power to Connect</span>
+                <span id="interaction-status" class="text-sm font-bold tracking-widest text-slate-500 uppercase transition-colors">Tap Power to Connect</span>
             </div>
         </div>
 
         <!-- Transcript Logs -->
         <div class="w-full max-w-2xl text-center space-y-4">
-            <div id="transcript-log" class="text-slate-400 text-sm italic font-medium h-12 flex items-center justify-center px-4 overflow-hidden text-center">
+            <div id="transcript-log" class="text-slate-400 text-sm italic font-medium h-12 flex items-center justify-center px-4 overflow-hidden text-center transition-colors">
                 Click the power icon and allow microphone access to begin.
             </div>
             
-            <div class="flex items-center justify-center gap-1 h-8">
+            <div class="flex items-center justify-center gap-1 h-8 opacity-50" id="audio-bars-container">
                 <div class="audio-bar h-2"></div>
                 <div class="audio-bar h-4"></div>
                 <div class="audio-bar h-3"></div>
@@ -146,12 +178,23 @@
     </footer>
 
     <script type="module">
-        import { API_KEYS } from './js/config.js?v=secure';
+        // TODO: Replace this client-side key with a server-minted ephemeral token for production security.
+        // GitHub Pages Deployment: Hardcoded import path as requested for reliability
+        import { API_KEYS } from '/Medical-Consult-Portal/js/config.js';
 
         // --- Configuration ---
         const API_KEY = API_KEYS.ORTHOPEDICS;
         const MODEL_ID = "gemini-2.5-flash-native-audio-preview-12-2025";
         const WS_URL = `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent?key=${API_KEY}`;
+
+        // --- Connection State Machine ---
+        const STATE = {
+            DISCONNECTED: 'DISCONNECTED',
+            CONNECTING: 'CONNECTING',
+            CONFIGURING: 'CONFIGURING',
+            LIVE: 'LIVE',
+            ERROR: 'ERROR'
+        };
 
         // --- Dr. Holtkamp System Instruction ---
         const SYSTEM_INSTRUCTION = `Respond as Dr. Holtkamp, Expert Medical Educator. 
@@ -174,12 +217,12 @@
             "Hello. Let's solve this case."
         ];
 
-        // --- Audio Variables ---
+        // --- Global Variables ---
         let audioContext;
         let micStream;
-        let processor;
+        let processor; // Worklet Node
         let socket;
-        let isConnected = false;
+        let currentState = STATE.DISCONNECTED;
         let playbackQueue = [];
         let scheduledTime = 0;
 
@@ -187,228 +230,370 @@
             btn: document.getElementById('main-mic-btn'),
             icon: document.getElementById('mic-icon'),
             pulse: document.getElementById('pulse-layer'),
+            badge: document.getElementById('connection-status-badge'),
             statusText: document.getElementById('status-text'),
             statusDot: document.getElementById('status-dot'),
             interactionText: document.getElementById('interaction-status'),
             transcript: document.getElementById('transcript-log'),
-            bars: document.querySelectorAll('.audio-bar')
+            barsContainer: document.getElementById('audio-bars-container'),
+            bars: document.querySelectorAll('.audio-bar'),
+            diagPanel: document.getElementById('diagnostics-panel'),
+            diagPhase: document.getElementById('diag-phase'),
+            diagCode: document.getElementById('diag-code'),
+            diagReason: document.getElementById('diag-reason'),
+            diagModel: document.getElementById('diag-model'),
+            diagMessage: document.getElementById('diag-message')
         };
+
+        // --- UI Logic ---
+
+        function updateState(newState) {
+            console.log(`State Transition: ${currentState} -> ${newState}`);
+            currentState = newState;
+            ui.statusText.innerText = newState;
+
+            // Reset Classes
+            ui.statusDot.className = "w-2 h-2 rounded-full";
+            ui.badge.className = "flex items-center gap-2 px-3 py-1 rounded-full border transition-colors";
+            ui.icon.classList.remove('text-blue-400', 'text-amber-400', 'text-red-400');
+            ui.btn.classList.remove('thinking-active', 'border-red-500', 'border-slate-700', 'border-blue-500');
+            ui.pulse.className = "absolute inset-0 rounded-full";
+            ui.barsContainer.classList.add('opacity-50');
+
+            switch (newState) {
+                case STATE.DISCONNECTED:
+                    ui.statusDot.classList.add('bg-slate-500');
+                    ui.badge.classList.add('bg-slate-800', 'border-slate-700');
+                    ui.icon.innerText = "power_settings_new";
+                    ui.btn.classList.add('border-slate-700');
+                    ui.interactionText.innerText = "Tap Power to Connect";
+                    ui.interactionText.classList.remove('text-blue-400', 'text-red-400');
+                    break;
+
+                case STATE.CONNECTING:
+                    ui.statusDot.classList.add('bg-amber-500', 'animate-pulse');
+                    ui.badge.classList.add('bg-amber-900/20', 'border-amber-500/30');
+                    ui.icon.innerText = "settings_input_antenna";
+                    ui.icon.classList.add('text-amber-400');
+                    ui.btn.classList.add('border-slate-700', 'thinking-active'); // Thinking animation used for connecting
+                    ui.interactionText.innerText = "Establishing Secure Link...";
+                    ui.transcript.innerText = "Handshaking with Gemini Live...";
+                    break;
+
+                case STATE.CONFIGURING:
+                    ui.statusDot.classList.add('bg-blue-500', 'animate-pulse');
+                    ui.badge.classList.add('bg-blue-900/20', 'border-blue-500/30');
+                    ui.icon.innerText = "downloading"; // Or similar
+                    ui.icon.classList.add('text-blue-400');
+                    ui.btn.classList.add('border-blue-500', 'thinking-active');
+                    ui.interactionText.innerText = "Configuring Audio Stream...";
+                    break;
+
+                case STATE.LIVE:
+                    ui.statusDot.classList.add('bg-green-500', 'animate-pulse');
+                    ui.badge.classList.add('bg-green-900/20', 'border-green-500/30', 'shadow-lg', 'shadow-green-500/10');
+                    ui.icon.innerText = "mic";
+                    ui.icon.classList.add('text-blue-400'); // Keep blue theme for mic
+                    ui.btn.classList.add('border-slate-700'); // Standard border
+                    ui.pulse.className = "absolute inset-0 rounded-full pulse-active";
+                    ui.interactionText.innerText = "Dr. H is Listening";
+                    ui.interactionText.classList.add('text-blue-400');
+                    ui.transcript.innerText = "System Live. Audio channel open.";
+                    ui.barsContainer.classList.remove('opacity-50');
+                    // Hide errors if we succeed
+                    hideDiagnostics();
+                    break;
+
+                case STATE.ERROR:
+                    ui.statusDot.classList.add('bg-red-500');
+                    ui.badge.classList.add('bg-red-900/20', 'border-red-500/30');
+                    ui.icon.innerText = "error";
+                    ui.icon.classList.add('text-red-400');
+                    ui.btn.classList.add('border-red-500');
+                    ui.interactionText.innerText = "Connection Failed";
+                    ui.interactionText.classList.add('text-red-400');
+                    break;
+            }
+        }
+
+        window.hideDiagnostics = function() {
+            ui.diagPanel.classList.add('hidden');
+        }
+
+        function showDiagnostics(phase, code, reason, msg) {
+            ui.diagPhase.innerText = phase;
+            ui.diagCode.innerText = code || "N/A";
+            ui.diagReason.innerText = reason || "Unknown";
+            ui.diagModel.innerText = MODEL_ID;
+            ui.diagMessage.innerText = msg || "An unexpected error occurred.";
+            ui.diagPanel.classList.remove('hidden');
+        }
 
         // --- Connection Management ---
 
         window.toggleConnection = async function() {
-            if (isConnected) {
-                disconnect();
-            } else {
+            if (currentState === STATE.DISCONNECTED || currentState === STATE.ERROR) {
                 connect();
+            } else {
+                disconnect();
             }
         };
 
         async function connect() {
-            if (API_KEY === "PASTE_YOUR_KEY_HERE" || API_KEY === "") {
-                ui.transcript.innerText = "Error: API Key missing in code.";
+            if (API_KEY === "PASTE_YOUR_KEY_HERE" || !API_KEY) {
+                updateState(STATE.ERROR);
+                showDiagnostics("INIT", "AUTH_FAIL", "Missing Key", "API Key not found in config.");
                 return;
             }
 
-            ui.transcript.innerText = "Requesting System Access...";
-            ui.interactionText.innerText = "Connecting...";
-            ui.btn.classList.add('thinking-active');
+            updateState(STATE.CONNECTING);
 
             try {
-                // 1. Setup Audio Context First (User gesture required)
-                // Use native sample rate (often 44.1k/48k) to avoid hardware conflicts
+                // 1. Setup Audio Context (Native Rate)
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 scheduledTime = audioContext.currentTime;
 
-                // 2. Load AudioWorklet Processor
+                // 2. Load Worklet
                 try {
                     await audioContext.audioWorklet.addModule('js/audio-processor.js');
                 } catch (e) {
                     console.error("Worklet load failed:", e);
-                    throw new Error("Audio Processor Failed to Load");
+                    throw new Error(`Audio Worklet failed to load: ${e.message}`);
                 }
 
                 // 3. Request Microphone
                 try {
-                    // Ask for 16k, but don't force it hard if browser refuses
                     micStream = await navigator.mediaDevices.getUserMedia({ 
                         audio: {
                             channelCount: 1,
                             echoCancellation: true,
-                            noiseSuppression: true
+                            noiseSuppression: true,
+                            autoGainControl: true
                         }
                     });
                 } catch (micErr) {
-                    throw new Error("Microphone Denied. Please check browser permissions.");
+                    throw new Error("Microphone access denied. Please allow permissions.");
                 }
 
-                // 4. Connect WebSocket
+                // 4. WebSocket Handshake
                 socket = new WebSocket(WS_URL);
+
                 socket.onopen = onWsOpen;
                 socket.onmessage = onWsMessage;
                 socket.onclose = onWsClose;
                 socket.onerror = (e) => {
-                    ui.transcript.innerText = "Connection Blocked. Verify API Key settings & Referrer Policy.";
+                    // Actual error details usually come in onclose, but we log here
+                    console.error("WS Error Event:", e);
                 };
 
+                // 5. Start Mic Processing (but don't send yet until Open)
                 setupMicProcessing();
 
             } catch (err) {
-                console.error("Connection failed:", err);
-                ui.transcript.innerText = err.message;
-                disconnect();
+                console.error("Connection Flow Failed:", err);
+                disconnect(false); // Clean disconnect internal logic
+                updateState(STATE.ERROR);
+                showDiagnostics("CONNECTING", "CLIENT_ERR", "Exception", err.message);
             }
         }
 
-        function disconnect() {
-            isConnected = false;
-            if (socket) socket.close();
-            if (micStream) micStream.getTracks().forEach(t => t.stop());
-            if (audioContext && audioContext.state !== 'closed') audioContext.close();
-            
-            ui.statusDot.className = "w-2 h-2 rounded-full bg-red-500";
-            ui.statusText.innerText = "DISCONNECTED";
-            ui.icon.innerText = "power_settings_new";
-            ui.icon.classList.remove('text-blue-400');
-            ui.btn.classList.remove('thinking-active');
-            ui.interactionText.innerText = "Tap Power to Connect";
-            ui.pulse.className = "absolute inset-0 rounded-full";
+        function disconnect(isClean = true) {
+            // Cleanup Logic
+            if (socket) {
+                socket.close(1000, "User Disconnect");
+                socket = null;
+            }
+            if (micStream) {
+                micStream.getTracks().forEach(t => t.stop());
+                micStream = null;
+            }
+            if (processor) {
+                processor.disconnect();
+                processor = null;
+            }
+            if (audioContext && audioContext.state !== 'closed') {
+                audioContext.close();
+                audioContext = null;
+            }
             stopAllAudio();
+
+            if (isClean) {
+                updateState(STATE.DISCONNECTED);
+            }
         }
 
         // --- WebSocket Handlers ---
 
         function onWsOpen() {
-            isConnected = true;
-            ui.statusDot.className = "w-2 h-2 rounded-full bg-green-500 animate-pulse";
-            ui.statusText.innerText = "LIVE";
-            ui.icon.innerText = "mic";
-            ui.icon.classList.add('text-blue-400');
-            ui.btn.classList.remove('thinking-active');
-            ui.interactionText.innerText = "Dr. H is Listening";
-            ui.transcript.innerText = "System Live. You can speak now.";
-            ui.pulse.className = "absolute inset-0 rounded-full pulse-active";
+            console.log("WebSocket Opened");
+            updateState(STATE.CONFIGURING);
 
-            // 1. Send Setup Frame
+            // 1. Send Setup
             const setup = {
                 setup: {
                     model: `models/${MODEL_ID}`,
-                    systemInstruction: { parts: [{ text: SYSTEM_INSTRUCTION }] },
                     generationConfig: {
                         responseModalities: ["AUDIO"],
                         speechConfig: {
                             voiceConfig: { prebuiltVoiceConfig: { voiceName: "Fenrir" } }
                         }
-                    }
+                    },
+                    systemInstruction: { parts: [{ text: SYSTEM_INSTRUCTION }] },
                 }
             };
             socket.send(JSON.stringify(setup));
 
-            // 2. Send Initial Greeting Trigger
-            // We instruct the model to say one of our greetings to start the conversation naturally.
+            // 2. Send Initial Trigger (Start Conversation)
             const randomGreeting = GREETINGS[Math.floor(Math.random() * GREETINGS.length)];
-            const triggerMessage = {
+            const trigger = {
                 clientContent: {
-                    turns: [
-                        {
-                            role: "user",
-                            parts: [{ text: `The user has joined. Start the conversation immediately by saying exactly this phrase: "${randomGreeting}"` }]
-                        }
-                    ],
+                    turns: [{
+                        role: "user",
+                        parts: [{ text: `The user has joined. Start immediately by saying: "${randomGreeting}"` }]
+                    }],
                     turnComplete: true
                 }
             };
-            socket.send(JSON.stringify(triggerMessage));
+            socket.send(JSON.stringify(trigger));
         }
 
         function onWsMessage(event) {
             if (typeof event.data === 'string') {
                 const response = JSON.parse(event.data);
                 
-                // Handle Audio Output
+                // A. Check for Setup Complete (optional depending on API version, but good to note)
+                // Some versions send a setupComplete frame.
+
+                // B. Check for Audio
                 if (response.serverContent?.modelTurn?.parts) {
                     const parts = response.serverContent.modelTurn.parts;
+                    let hasAudio = false;
+
                     parts.forEach(part => {
                         if (part.inlineData && part.inlineData.mimeType.includes('audio')) {
+                            hasAudio = true;
+                            // Convert Base64 -> Float32 -> Play
                             const raw = atob(part.inlineData.data);
                             const buffer = new Uint8Array(raw.length);
                             for(let i=0; i<raw.length; i++) buffer[i] = raw.charCodeAt(i);
                             queueAudioChunk(buffer.buffer);
                         }
                     });
+
+                    // CRITICAL: Only transition to LIVE if we actually get audio
+                    if (hasAudio && currentState !== STATE.LIVE) {
+                        updateState(STATE.LIVE);
+                    }
                 }
 
-                // Handle Turn Interruption (Barge-in)
+                // C. Check for Interruption
                 if (response.serverContent?.interrupted) {
+                    console.log("Model Interrupted by User");
                     stopAllAudio();
+                }
+
+                // D. Check for Errors (e.g. Invalid Setup)
+                // Sometimes errors come as regular messages if setup fails
+                if (response.error) {
+                    console.error("API Error Payload:", response.error);
+                    disconnect(false); // abnormal
+                    updateState(STATE.ERROR);
+                    showDiagnostics("API_RESPONSE", response.error.code, response.error.status, response.error.message);
                 }
             }
         }
 
         function onWsClose(event) {
-            console.log("WebSocket Closed", event.code, event.reason);
-            disconnect();
+            console.log(`WebSocket Closed: ${event.code} - ${event.reason}`);
+
+            if (event.code === 1000 || event.code === 1005) {
+                // Normal closure
+                if(currentState !== STATE.DISCONNECTED) {
+                    updateState(STATE.DISCONNECTED);
+                }
+            } else {
+                // Abnormal closure
+                // Capture the state BEFORE updating to ERROR so we know where we failed
+                const failedState = currentState;
+                updateState(STATE.ERROR);
+                showDiagnostics(
+                    failedState,
+                    event.code,
+                    event.reason || "Connection dropped unexpectedly",
+                    "WebSocket connection closed abnormally."
+                );
+            }
         }
 
         // --- Audio Processing (Input) ---
 
         function setupMicProcessing() {
+            if (!audioContext || !micStream) return;
+
             const source = audioContext.createMediaStreamSource(micStream);
             const workletNode = new AudioWorkletNode(audioContext, 'pcm-processor');
 
             workletNode.port.onmessage = (event) => {
-                if (!isConnected || socket.readyState !== WebSocket.OPEN) return;
-                
-                const float32Data = event.data; // Raw Float32 from processor
+                if (socket && socket.readyState === WebSocket.OPEN) {
+                    const float32Data = event.data;
 
-                // Visualization (RMS)
-                let sum = 0;
-                for (let i = 0; i < float32Data.length; i++) sum += float32Data[i] * float32Data[i];
-                const rms = Math.sqrt(sum / float32Data.length);
-                updateBars(rms);
+                    // 1. Viz
+                    let sum = 0;
+                    for (let i = 0; i < float32Data.length; i++) sum += float32Data[i] * float32Data[i];
+                    const rms = Math.sqrt(sum / float32Data.length);
+                    updateBars(rms);
 
-                // DOWNSAMPLE & CONVERT (Fix for "Connect then Drop")
-                // We must send 16kHz audio to match the JSON declaration
-                const downsampled = downsampleTo16k(float32Data, audioContext.sampleRate);
+                    // 2. Downsample (Native -> 16000)
+                    const downsampled = downsampleTo16k(float32Data, audioContext.sampleRate);
 
-                const pcmData = new Int16Array(downsampled.length);
-                for (let i = 0; i < downsampled.length; i++) {
-                    pcmData[i] = Math.max(-1, Math.min(1, downsampled[i])) * 0x7FFF;
-                }
-
-                // Base64 Encode
-                const base64 = btoa(String.fromCharCode(...new Uint8Array(pcmData.buffer)));
-
-                // Send to Gemini
-                const frame = {
-                    realtimeInput: {
-                        mediaChunks: [{
-                            data: base64,
-                            mimeType: "audio/pcm;rate=16000"
-                        }]
+                    // 3. Float32 -> Int16
+                    const pcmData = new Int16Array(downsampled.length);
+                    for (let i = 0; i < downsampled.length; i++) {
+                        pcmData[i] = Math.max(-1, Math.min(1, downsampled[i])) * 0x7FFF;
                     }
-                };
-                socket.send(JSON.stringify(frame));
+
+                    // 4. Safe Base64 Encode
+                    const base64 = arrayBufferToBase64(pcmData.buffer);
+
+                    // 5. Send
+                    const frame = {
+                        realtimeInput: {
+                            mediaChunks: [{
+                                data: base64,
+                                mimeType: "audio/pcm;rate=16000"
+                            }]
+                        }
+                    };
+                    socket.send(JSON.stringify(frame));
+                }
             };
 
             source.connect(workletNode);
-            workletNode.connect(audioContext.destination); // Keep graph alive
-            processor = workletNode; // Store for cleanup in disconnect()
+            workletNode.connect(audioContext.destination);
+            processor = workletNode;
+        }
+
+        // Safer Base64 helper (prevents stack overflow on large buffers)
+        function arrayBufferToBase64(buffer) {
+            let binary = '';
+            const bytes = new Uint8Array(buffer);
+            const len = bytes.byteLength;
+            for (let i = 0; i < len; i++) {
+                binary += String.fromCharCode(bytes[i]);
+            }
+            return btoa(binary);
         }
 
         function downsampleTo16k(inputBuffer, inputRate) {
             if (inputRate === 16000) return inputBuffer;
-
             const ratio = inputRate / 16000;
             const newLength = Math.round(inputBuffer.length / ratio);
             const result = new Float32Array(newLength);
-
             for (let i = 0; i < newLength; i++) {
                 const index = i * ratio;
                 const lower = Math.floor(index);
                 const upper = Math.ceil(index);
                 const weight = index - lower;
-
                 if (upper < inputBuffer.length) {
                     result[i] = inputBuffer[lower] * (1 - weight) + inputBuffer[upper] * weight;
                 } else {
@@ -421,7 +606,7 @@
         // --- Audio Playback (Output) ---
 
         async function queueAudioChunk(arrayBuffer) {
-            // Convert Int16 PCM to Float32 for Web Audio API
+            // Int16 -> Float32
             const int16Array = new Int16Array(arrayBuffer);
             const float32Array = new Float32Array(int16Array.length);
             for (let i = 0; i < int16Array.length; i++) {
@@ -447,14 +632,12 @@
                 try { src.stop(); } catch(e) {}
             });
             playbackQueue = [];
-            scheduledTime = audioContext.currentTime;
+            if (audioContext) scheduledTime = audioContext.currentTime;
         }
 
         function updateBars(rms) {
-            // Increased sensitivity for better visual feedback
             ui.bars.forEach((bar, i) => {
                 const scale = (i + 1) * 2;
-                // Boost RMS significantly for visualization (rms is usually very small)
                 const h = Math.min(48, 4 + (rms * 400 * scale));
                 bar.style.height = `${h}px`;
             });
