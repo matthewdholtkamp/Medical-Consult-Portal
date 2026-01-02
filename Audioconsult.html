@@ -89,6 +89,7 @@
         .debug-row span:last-child { color: #e2e8f0; font-weight: 600; }
         .debug-section { margin-bottom: 8px; }
         .debug-title { font-size: 10px; font-weight: bold; color: #64748b; text-transform: uppercase; margin-bottom: 2px; }
+        .debug-log { font-family: monospace; font-size: 9px; color: #a5f3fc; background: #164e63; padding: 2px 4px; border-radius: 2px; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     </style>
 </head>
 
@@ -130,7 +131,7 @@
     <main class="flex-1 flex flex-col items-center justify-center relative z-10 p-6">
         
         <!-- Unified Debug Overlay -->
-        <div id="debug-panel" class="absolute top-2 right-2 w-72 bg-slate-900/90 border border-slate-700 backdrop-blur-md rounded-xl p-3 z-50 shadow-2xl transition-all duration-300 transform translate-x-0 hidden md:block">
+        <div id="debug-panel" class="absolute top-2 right-2 w-80 bg-slate-900/95 border border-slate-700 backdrop-blur-md rounded-xl p-3 z-50 shadow-2xl transition-all duration-300 transform translate-x-0 hidden md:block">
             <div class="flex items-center justify-between mb-2 border-b border-slate-700 pb-2">
                 <div class="flex items-center gap-2 text-blue-400">
                     <span class="material-symbols-outlined text-sm">terminal</span>
@@ -159,7 +160,7 @@
                 </div>
             </div>
 
-            <div class="space-y-3 max-h-[60vh] overflow-y-auto custom-scroll pr-1">
+            <div class="space-y-3 max-h-[70vh] overflow-y-auto custom-scroll pr-1">
                 <!-- State Section -->
                 <div class="debug-section">
                     <div class="debug-title">Connection State</div>
@@ -176,7 +177,7 @@
                     <div class="debug-row"><span>Trigger Sent</span><span id="cnt-trigger">0</span></div>
                     <div class="debug-row"><span>Audio Sent (Chunks)</span><span id="cnt-audio-tx">0</span></div>
                     <div class="debug-row"><span>Audio Rx (Chunks)</span><span id="cnt-audio-rx">0</span></div>
-                    <div class="debug-row"><span>Msgs Rx</span><span id="cnt-msgs-rx">0</span></div>
+                    <div class="debug-row"><span>Text Rx (Chunks)</span><span id="cnt-text-rx">0</span></div>
                 </div>
 
                 <!-- Timing Section -->
@@ -184,12 +185,22 @@
                     <div class="debug-title">Timestamps (Rel.)</div>
                     <div class="debug-row"><span>Last Msg</span><span id="time-last-msg">--</span></div>
                     <div class="debug-row"><span>Last Audio Rx</span><span id="time-last-audio">--</span></div>
+                    <div class="debug-row"><span>Last Text Rx</span><span id="time-last-text">--</span></div>
+                </div>
+
+                <!-- Last Server Response (Debug) -->
+                <div class="debug-section">
+                    <div class="debug-title">Last Server Output</div>
+                    <div id="debug-last-output" class="debug-log">--</div>
                 </div>
 
                 <!-- Actions -->
-                <div class="pt-2 border-t border-slate-700">
+                <div class="pt-2 border-t border-slate-700 flex flex-col gap-2">
                     <button onclick="sendTestKick()" id="btn-kick" class="w-full py-1 bg-blue-600/20 hover:bg-blue-600/40 text-blue-400 border border-blue-500/30 rounded text-xs font-mono transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>
                         [TEST] SEND TEXT KICK
+                    </button>
+                    <button onclick="sendForceSpeak()" id="btn-force-speak" class="w-full py-1 bg-purple-600/20 hover:bg-purple-600/40 text-purple-400 border border-purple-500/30 rounded text-xs font-mono transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                        [TEST] FORCE SPEAK & TEXT
                     </button>
                 </div>
             </div>
@@ -285,9 +296,11 @@
             triggerSent: 0,
             audioChunksSent: 0,
             audioChunksReceived: 0,
+            textChunksReceived: 0,
             msgsReceived: 0,
             lastMsgAt: null,
             lastAudioAt: null,
+            lastTextAt: null,
             firstFrames: [], // Store first 3 frames for debugging
             lastError: null
         };
@@ -310,7 +323,9 @@
             debugErrorMsg: document.getElementById('debug-error-msg'),
             debugErrorCode: document.getElementById('debug-error-code'),
             debugErrorPhase: document.getElementById('debug-error-phase'),
+            debugLastOutput: document.getElementById('debug-last-output'),
             btnKick: document.getElementById('btn-kick'),
+            btnForceSpeak: document.getElementById('btn-force-speak'),
 
             // Telemetry Fields
             telePhase: document.getElementById('tele-phase'),
@@ -321,9 +336,11 @@
             cntTrigger: document.getElementById('cnt-trigger'),
             cntAudioTx: document.getElementById('cnt-audio-tx'),
             cntAudioRx: document.getElementById('cnt-audio-rx'),
+            cntTextRx: document.getElementById('cnt-text-rx'),
             cntMsgsRx: document.getElementById('cnt-msgs-rx'),
             timeLastMsg: document.getElementById('time-last-msg'),
-            timeLastAudio: document.getElementById('time-last-audio')
+            timeLastAudio: document.getElementById('time-last-audio'),
+            timeLastText: document.getElementById('time-last-text')
         };
 
         // --- UI Logic ---
@@ -342,14 +359,18 @@
             ui.cntTrigger.innerText = telemetry.triggerSent;
             ui.cntAudioTx.innerText = telemetry.audioChunksSent;
             ui.cntAudioRx.innerText = telemetry.audioChunksReceived;
+            ui.cntTextRx.innerText = telemetry.textChunksReceived;
             ui.cntMsgsRx.innerText = telemetry.msgsReceived;
 
             const now = Date.now();
             ui.timeLastMsg.innerText = telemetry.lastMsgAt ? `${((now - telemetry.lastMsgAt)/1000).toFixed(1)}s ago` : '--';
             ui.timeLastAudio.innerText = telemetry.lastAudioAt ? `${((now - telemetry.lastAudioAt)/1000).toFixed(1)}s ago` : '--';
+            ui.timeLastText.innerText = telemetry.lastTextAt ? `${((now - telemetry.lastTextAt)/1000).toFixed(1)}s ago` : '--';
 
             // Enable Kick button only if we are connected (OPEN)
-            ui.btnKick.disabled = !socket || socket.readyState !== WebSocket.OPEN;
+            const isLive = socket && socket.readyState === WebSocket.OPEN;
+            ui.btnKick.disabled = !isLive;
+            ui.btnForceSpeak.disabled = !isLive;
         }
 
         // Run UI loop
@@ -444,11 +465,14 @@
             telemetry.triggerSent = 0;
             telemetry.audioChunksSent = 0;
             telemetry.audioChunksReceived = 0;
+            telemetry.textChunksReceived = 0;
             telemetry.msgsReceived = 0;
             telemetry.lastMsgAt = null;
             telemetry.lastAudioAt = null;
+            telemetry.lastTextAt = null;
             telemetry.firstFrames = [];
             telemetry.lastError = null;
+            ui.debugLastOutput.innerText = "--";
         }
 
         window.copyDebugInfo = function() {
@@ -479,6 +503,21 @@
             };
             socket.send(JSON.stringify(msg));
             console.log("Kick message sent");
+        };
+
+        window.sendForceSpeak = function() {
+            if (!socket || socket.readyState !== WebSocket.OPEN) return;
+            const msg = {
+                clientContent: {
+                    turns: [{
+                        role: "user",
+                        parts: [{ text: "Reply with BOTH: (1) the exact text 'ACK', and (2) speak it out loud." }]
+                    }],
+                    turnComplete: true
+                }
+            };
+            socket.send(JSON.stringify(msg));
+            console.log("Force Speak message sent");
         };
 
         // --- Connection Management ---
@@ -560,8 +599,19 @@
             // Watchdog 2: 10s timeout for AUDIO frames
             audioFrameTimeout = setTimeout(() => {
                 if (telemetry.audioChunksReceived === 0 && currentState !== STATE.ERROR) {
+                    let errMsg = "Connected, but received no audio frames within 10s.";
+                    let errCode = "TIMEOUT_NO_AUDIO";
+
+                    if (telemetry.textChunksReceived > 0) {
+                        errMsg = "Model responding with TEXT ONLY. Audio configuration failed.";
+                        errCode = "TIMEOUT_TEXT_ONLY";
+                    } else if (telemetry.msgsReceived > 0) {
+                         errMsg = "Server sending messages but NO MODEL OUTPUT (Text or Audio).";
+                         errCode = "TIMEOUT_EMPTY_FRAMES";
+                    }
+
                     disconnect(false);
-                    reportError("TIMEOUT_NO_AUDIO", "No Audio Output", "Connected, but received no audio frames within 10s.");
+                    reportError(errCode, "No Audio Output", errMsg);
                 }
             }, 10000);
         }
@@ -606,7 +656,8 @@
                 setup: {
                     model: `models/${MODEL_ID}`,
                     generationConfig: {
-                        responseModalities: ["AUDIO"],
+                        // Request BOTH modalities for debugging
+                        responseModalities: ["AUDIO", "TEXT"],
                         speechConfig: {
                             voiceConfig: { prebuiltVoiceConfig: { voiceName: "Fenrir" } }
                         }
@@ -651,19 +702,22 @@
                     console.log("Server Frame:", response);
                 }
 
-                // Check for Errors
+                // Check for Global Errors
                 if (response.error) {
                     disconnect(false);
                     reportError(response.error.code, response.error.status, response.error.message);
                     return;
                 }
 
-                // Check for Audio
+                // Check for Server Content (Model Turns)
                 if (response.serverContent?.modelTurn?.parts) {
                     const parts = response.serverContent.modelTurn.parts;
                     let hasAudio = false;
+                    let hasText = false;
+                    let logText = "";
 
                     parts.forEach(part => {
+                        // 1. Audio
                         if (part.inlineData && part.inlineData.mimeType.includes('audio')) {
                             hasAudio = true;
                             // Convert Base64 -> Float32 -> Play
@@ -671,17 +725,28 @@
                             const buffer = new Uint8Array(raw.length);
                             for(let i=0; i<raw.length; i++) buffer[i] = raw.charCodeAt(i);
                             queueAudioChunk(buffer.buffer);
+                            logText = "[Audio Chunk]";
+                        }
+                        // 2. Text
+                        else if (part.text) {
+                            hasText = true;
+                            logText = part.text.substring(0, 30) + (part.text.length > 30 ? "..." : "");
+                            console.log("Model Text:", part.text);
                         }
                     });
+
+                    // Update UI Log
+                    if (logText) ui.debugLastOutput.innerText = logText;
 
                     if (hasAudio) {
                         telemetry.audioChunksReceived++;
                         telemetry.lastAudioAt = Date.now();
+                        if (currentState !== STATE.LIVE) updateState(STATE.LIVE);
+                    }
 
-                        // Transition to LIVE only on first audio
-                        if (currentState !== STATE.LIVE) {
-                            updateState(STATE.LIVE);
-                        }
+                    if (hasText) {
+                        telemetry.textChunksReceived++;
+                        telemetry.lastTextAt = Date.now();
                     }
                 }
 
@@ -689,6 +754,7 @@
                 if (response.serverContent?.interrupted) {
                     console.log("Model Interrupted by User");
                     stopAllAudio();
+                    ui.debugLastOutput.innerText = "[Interrupted]";
                 }
             }
         }
