@@ -146,8 +146,10 @@
     </footer>
 
     <script type="module">
+        import { API_KEYS } from './js/config.js?v=secure';
+
         // --- Configuration ---
-        const API_KEY = "AIzaSyD3GmvOlwNBSctv8Xx_r0XcorQhugcC3hY"; 
+        const API_KEY = API_KEYS.ORTHOPEDICS;
         const MODEL_ID = "gemini-2.5-flash-native-audio-preview-12-2025";
         const WS_URL = `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent?key=${API_KEY}`;
 
