@@ -4,8 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Operational Medical Journal Club - Dr. Holtkamp Edition</title>
+    <!-- Tailwind CSS for rapid, responsive styling -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- MathJax for rendering medical formulas -->
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Marked.js for Markdown rendering -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
     <style>
@@ -42,7 +45,7 @@
         .prose-invert ul { list-style-type: disc; padding-left: 20px; margin: 10px 0; }
         .prose-invert li { margin-bottom: 5px; }
         .prose-invert p { margin-bottom: 1em; line-height: 1.7; }
-        .prose-invert a { color: #38bdf8; text-decoration: underline; }
+        .prose-invert a { color: #38bdf8; text-decoration: underline; } /* Link styling */
         
         /* Loading Animation */
         .pulse-ring {
@@ -91,26 +94,49 @@
             animation: fadein 0.5s, fadeout 0.5s 2.5s;
         }
 
-        @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
-        @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+        @-webkit-keyframes fadein {
+            from {bottom: 0; opacity: 0;}
+            to {bottom: 30px; opacity: 1;}
+        }
+
+        @keyframes fadein {
+            from {bottom: 0; opacity: 0;}
+            to {bottom: 30px; opacity: 1;}
+        }
+
+        @-webkit-keyframes fadeout {
+            from {bottom: 30px; opacity: 1;}
+            to {bottom: 0; opacity: 0;}
+        }
+
+        @keyframes fadeout {
+            from {bottom: 30px; opacity: 1;}
+            to {bottom: 0; opacity: 0;}
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center p-4 md:p-8">
 
+    <!-- Toast Notification -->
     <div id="toast">Notification Message</div>
 
+    <!-- Header -->
     <header class="w-full max-w-4xl text-center mb-10">
         <h1 class="text-4xl md:text-5xl font-extrabold text-orange-500 tracking-tight mb-3">Operational Medicine Journal Club</h1>
+        <!-- Prominent Subtitle -->
         <p class="text-blue-50 mt-2 text-2xl font-semibold leading-relaxed">JTS CPGs, Deployed Medicine, and Tactical Evidence</p>
+        <!-- Subdued Sub-subtitle -->
         <p class="text-gray-500 text-sm mt-3 italic">Deployment Readiness Starts Now - Brought to you by Dr. Matthew Holtkamp</p>
     </header>
 
     <main class="w-full max-w-4xl">
         
+        <!-- Disclaimer -->
         <div class="bg-blue-900/30 border border-blue-800 rounded-lg p-4 mb-8 text-center text-xs text-blue-200">
             <strong>Operational Use Only.</strong> Verify with current JTS Clinical Practice Guidelines (CPGs) and Theater Medical Directors.
         </div>
 
+        <!-- STEP 1: Initial Topic -->
         <div id="step1" class="glass-panel rounded-xl p-6 shadow-2xl mb-6">
             <form id="queryForm" class="space-y-4">
                 <div>
@@ -127,44 +153,79 @@
             </form>
         </div>
 
+        <!-- STEP 2: Refinement (Dynamic) -->
         <div id="step2" class="glass-panel rounded-xl p-6 shadow-2xl mb-6 hidden">
+            <!-- UPDATED HEADER -->
             <h3 class="text-xl font-bold text-orange-400 mb-4 border-b border-gray-700 pb-2">Refining Operational Context</h3>
             <form id="refinementForm" class="space-y-4">
                 <div id="dynamicInputs" class="space-y-4"></div>
+
                 <div class="flex gap-4 pt-2">
-                    <button type="button" id="btnBackToStep1" class="w-1/3 bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 px-4 rounded-lg">Back</button>
-                    <button type="submit" id="btnGenerate" class="w-2/3 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform transition hover:scale-[1.01]">Generate Analysis</button>
+                    <button type="button" id="btnBackToStep1" class="w-1/3 bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 px-4 rounded-lg">
+                        Back
+                    </button>
+                    <button type="submit" id="btnGenerate"
+                            class="w-2/3 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform transition hover:scale-[1.01]">
+                        Generate Analysis
+                    </button>
                 </div>
             </form>
         </div>
 
+        <!-- Loader -->
         <div id="loader" class="hidden text-center py-12">
             <div class="pulse-ring"></div>
             <p id="loaderText" class="mt-4 text-orange-400 font-mono text-sm animate-pulse">Analyzing JTS CPGs & Doctrine...</p>
         </div>
 
+        <!-- STEP 3: Results -->
         <div id="results" class="hidden">
             
+            <!-- UPDATED TOOLBAR (GRID LAYOUT) -->
+            <!-- 8 columns total. Listen takes 4 (50%). The other 4 take 1 each. -->
             <div class="grid grid-cols-2 md:grid-cols-8 gap-2 mb-6 bg-slate-800/50 p-3 rounded-lg border border-slate-700 items-stretch">
-                <button id="btnAudio" type="button" class="col-span-2 md:col-span-4 bg-teal-700 hover:bg-teal-600 text-white px-4 py-3 rounded-lg font-bold text-lg flex items-center justify-center gap-2 shadow-lg transition-all h-full">
+
+                <!-- Listen Button: Biggest, First, Half Width -->
+                <button id="btnAudio" class="col-span-2 md:col-span-4 bg-teal-700 hover:bg-teal-600 text-white px-4 py-3 rounded-lg font-bold text-lg flex items-center justify-center gap-2 shadow-lg transition-all h-full">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" /></svg>
                     Listen to Brief
                 </button>
-                <button id="btnNewTopic" type="button" class="md:col-span-1 bg-red-900/40 hover:bg-red-900/60 text-red-200 px-2 py-3 rounded-lg font-semibold text-xs md:text-sm border border-red-900/50 flex items-center justify-center h-full">New Topic</button>
-                <button id="btnBackToRefine" type="button" class="md:col-span-1 bg-slate-700 hover:bg-slate-600 text-gray-200 px-2 py-3 rounded-lg font-medium text-xs md:text-sm flex items-center justify-center h-full">Back</button>
-                <button id="btnCopy" type="button" class="md:col-span-1 bg-slate-700 hover:bg-slate-600 text-gray-200 px-2 py-3 rounded-lg font-medium text-xs md:text-sm flex items-center justify-center h-full">Copy Text</button>
-                <button id="btnPlan" type="button" class="md:col-span-1 bg-slate-700 hover:bg-slate-600 text-gray-200 px-2 py-3 rounded-lg font-medium text-xs md:text-sm flex items-center justify-center h-full">Copy Plan</button>
+
+                <!-- New Topic -->
+                <button id="btnNewTopic" class="md:col-span-1 bg-red-900/40 hover:bg-red-900/60 text-red-200 px-2 py-3 rounded-lg font-semibold text-xs md:text-sm border border-red-900/50 flex items-center justify-center h-full">
+                    New Topic
+                </button>
+
+                <!-- Back -->
+                <button id="btnBackToRefine" class="md:col-span-1 bg-slate-700 hover:bg-slate-600 text-gray-200 px-2 py-3 rounded-lg font-medium text-xs md:text-sm flex items-center justify-center h-full">
+                    Back
+                </button>
+
+                <!-- Copy Text -->
+                <button id="btnCopy" class="md:col-span-1 bg-slate-700 hover:bg-slate-600 text-gray-200 px-2 py-3 rounded-lg font-medium text-xs md:text-sm flex items-center justify-center h-full">
+                    Copy Text
+                </button>
+
+                <!-- Copy Plan -->
+                <button id="btnPlan" class="md:col-span-1 bg-slate-700 hover:bg-slate-600 text-gray-200 px-2 py-3 rounded-lg font-medium text-xs md:text-sm flex items-center justify-center h-full">
+                    Copy Plan
+                </button>
             </div>
             
+            <!-- Audio Player Container -->
             <div id="audioContainer" class="hidden mb-6 p-4 bg-teal-900/30 border border-teal-800 rounded-lg transition-all duration-300">
                 <p class="text-teal-200 text-sm mb-2 font-semibold">🎙️ Dr. Holtkamp's Operational Analysis</p>
+
+                <!-- Progress Bar -->
                 <div id="audioProgressContainer" class="w-full bg-gray-700 rounded-full h-2.5 mb-3 hidden">
                     <div id="audioProgressBar" class="bg-teal-500 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
                     <p id="audioProgressText" class="text-xs text-teal-400 text-center mt-1">Generating Briefing...</p>
                 </div>
+
                 <audio id="audioPlayer" controls class="w-full hidden"></audio>
             </div>
 
+            <!-- Thinking Process (New) -->
             <div id="thinkingContainer" class="hidden mb-6">
                 <details class="group bg-slate-900/40 rounded-xl border border-slate-700/30 overflow-hidden">
                     <summary class="list-none p-3 cursor-pointer flex items-center justify-between text-[10px] text-slate-500 font-bold uppercase tracking-widest hover:bg-slate-800/50 transition-colors">
@@ -180,6 +241,7 @@
                 </details>
             </div>
 
+            <!-- Follow Up (MOVED TO TOP) -->
             <div class="mb-8 p-6 bg-slate-800/30 rounded-lg border border-slate-700">
                 <h3 class="text-lg font-bold text-white mb-2">Interactive Discussion</h3>
                 <form id="followUpForm" class="flex gap-2">
@@ -189,12 +251,14 @@
                 <div id="followUpResult" class="mt-4 p-4 bg-slate-800/50 rounded-lg border-l-4 border-orange-500 hidden prose prose-invert max-w-none"></div>
             </div>
 
+            <!-- Content Tabs -->
             <div class="mb-4 border-b border-gray-700 flex gap-6 overflow-x-auto">
                 <button class="tab-btn active text-orange-500 border-b-2 border-orange-500 pb-2 px-1 font-bold" data-target="summary">Guideline Review</button>
                 <button class="tab-btn text-gray-400 hover:text-white pb-2 px-1 font-medium" data-target="plan">Operational Plan</button>
                 <button class="tab-btn text-gray-400 hover:text-white pb-2 px-1 font-medium" data-target="refs">References</button>
             </div>
 
+            <!-- Content Areas -->
             <div id="summaryContent" class="tab-content prose prose-invert max-w-none text-gray-300"></div>
             <div id="planContent" class="tab-content hidden prose prose-invert max-w-none text-gray-300"></div>
             <div id="refsContent" class="tab-content hidden font-mono text-sm bg-black/30 p-4 rounded text-gray-400 whitespace-pre-wrap"></div>
@@ -206,12 +270,15 @@
                 </button>
             </div>
         </div>
+
     </main>
 
+    <!-- PCM to WAV Library (Inlined for single file portability) -->
     <script>
     !function(e,t){"object"==typeof exports&&"object"==typeof module?module.exports=t():"function"==typeof define&&define.amd?define([],t):"object"==typeof exports?exports.pcmToWav=t():e.pcmToWav=t()}(window,function(){return function(e){var t={};function r(n){if(t[n])return t[n].exports;var o=t[n]={i:n,l:!1,exports:{}};return e[n].call(o.exports,o,o.exports,r),o.l=!0,o.exports}return r.m=e,r.c=t,r.d=function(e,t,n){r.o(e,t)||Object.defineProperty(e,t,{enumerable:!0,get:n})},r.r=function(e){"undefined"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(e,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(e,"__esModule",{value:!0})},r.t=function(e,t){if(1&t&&(e=r(e)),8&t)return e;if(4&t&&"object"==typeof e&&e&&e.__esModule)return e;var n=Object.create(null);if(r.r(n),Object.defineProperty(n,"default",{enumerable:!0,value:e}),2&t&&"string"!=typeof e)for(var o in e)r.d(n,o,function(t){return e[t]}.bind(null,o));return n},r.n=function(e){var t=e&&e.__esModule?function(){return e.default}:function(){return e};return r.d(t,"a",t),t},r.o=function(e,t){return Object.prototype.hasOwnProperty.call(e,t)},r.p="",r(r.s=0)}([function(e,t,r){"use strict";Object.defineProperty(t,"__esModule",{value:!0}),t.default=function(e,t,r){var n,o,a,i,f,c,u,d=new DataView(new ArrayBuffer(44+e.length*t*2));return d.setUint32(0,1380533830,!1),d.setUint32(4,36+e.length*t*2,!0),d.setUint32(8,1463899717,!1),d.setUint32(12,1718449184,!1),d.setUint32(16,16,!0),d.setUint16(20,1,!0),n=t,d.setUint16(22,n,!0),o=r,d.setUint32(24,o,!0),a=r*t*2,d.setUint32(28,a,!0),i=2*t,d.setUint16(32,i,!0),f=16,d.setUint16(34,f,!0),d.setUint32(36,1684108385,!1),c=e.length*t*2,d.setUint32(40,c,!0),u=new Uint8Array(d.buffer,44),e.forEach(function(e,t){var r=44+2*t;d.setInt16(r,e,!0)}),new Blob([d.buffer],{type:"audio/wav"})},e.exports=t.default}])});
     </script>
 
+    <!-- Main Logic -->
     <script type="module">
         import { setupSharing } from './js/sharing.js';
         import { API_KEYS } from './js/config.js?v=secure';
@@ -220,202 +287,697 @@
         const apiKey = API_KEYS.JOURNAL_CLUB;
         const jsonBinKey = "$2a$10$J/Gr0x7KT4o8YHMdHtRgV.MokfRSRnPPdXBI5jJidEiqrvJfbH5Py";
         
-        // --- 2026 MODEL CONFIGURATION ---
-        const MODELS = {
-            STEP1: "gemini-2.5-flash-lite", // High RPD for questions
-            STEP2: "gemini-3-flash",        // High reasoning for analysis
-            STEP2_FAILOVER: "gemini-2.5-flash-lite", // Backup (Must NOT use thinking config)
-            STEP3: "gemini-2.5-flash-native-audio-dialog" // Unlimited Audio
-        };
+        // Consistent Gemini 2.5 Flash for Text & TTS
+        const FAST_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+        const GENERATE_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+        // TTS Endpoint (Variable used in Audio Handler)
 
+        // DOM Elements
         const el = id => document.getElementById(id);
+        const queryForm = el('queryForm');
+        const refineForm = el('refinementForm');
+        const loader = el('loader');
+        const results = el('results');
         const dynamicInputs = el('dynamicInputs');
+        const followUpForm = el('followUpForm');
+        const progressBar = el('audioProgressBar');
+        const progressContainer = el('audioProgressContainer');
+        const progressText = el('audioProgressText');
         const toast = el('toast');
-        let storedSummary = "", storedContext = "";
 
-        // Safety Settings
-        const SAFETY_SETTINGS = [
-            { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
-            { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
-            { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
-            { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
-        ];
+        let storedSummary = "";
+        let storedContext = "";
 
-        // Toast & Utils
+        // Toast Notification Function
         function showToast(message) {
-            toast.innerText = message; toast.className = "show";
-            setTimeout(() => { toast.className = ""; }, 3000);
+            toast.innerText = message;
+            toast.className = "show";
+            setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 3000);
         }
-        function stripLatex(t) { return t ? t.replace(/\$([^$]+)\$/g, '$1').replace(/\\text\s*\{([^}]+)\}/g, '$1').replace(/\\([a-zA-Z]+)/g, ' $1 ').trim() : ""; }
-        function showLoader(t) { el('loaderText').innerText = t; el('loader').classList.remove('hidden'); }
-        function hideLoader() { el('loader').classList.add('hidden'); }
 
-        // Robust Fetcher
-        async function fetchWithModel(modelId, payload) {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${apiKey}`;
-            // Add safety settings to every call
-            payload.safetySettings = SAFETY_SETTINGS;
-            
-            const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-            
-            if (res.status === 429) throw new Error("429"); // Trigger failover
-            if (!res.ok) {
-                const errText = await res.text();
-                console.error("API Error:", errText);
-                throw new Error(res.status);
+        function b64ToBytes(b64) {
+          const fixed = b64.replace(/-/g, "+").replace(/_/g, "/");
+          const pad = fixed.length % 4 ? "=".repeat(4 - (fixed.length % 4)) : "";
+          const bin = atob(fixed + pad);
+          const bytes = new Uint8Array(bin.length);
+          for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+          return bytes;
+        }
+
+        // Improved Retry Logic with Error Parsing
+        async function fetchWithRetry(url, payload, maxRetries = 5) {
+            for (let i = 0; i < maxRetries; i++) {
+                try {
+                    const res = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    // Handle Service Unavailable / Rate Limits by throwing to catch block
+                    if (res.status === 429 || res.status === 503) {
+                         throw new Error(`Transient Error: ${res.status}`);
+                    }
+
+                    if (!res.ok) {
+                        let errorMsg = res.statusText || `Error ${res.status}`;
+                        // Try to parse detailed JSON error from API safely
+                        try {
+                            const text = await res.text();
+                            // Attempt to parse JSON
+                            try {
+                                const errorBody = JSON.parse(text);
+                                if (errorBody.error && errorBody.error.message) {
+                                    errorMsg = `${res.status} - ${errorBody.error.message}`;
+                                } else {
+                                    errorMsg = `${res.status} - ${JSON.stringify(errorBody)}`;
+                                }
+                            } catch (jsonErr) {
+                                // If not JSON, use truncated text if short, or just status
+                                if (text.length < 500) {
+                                    errorMsg = `${res.status} - ${text}`;
+                                }
+                            }
+                        } catch (readError) {
+                            // Failed to read response body, keep default statusText
+                        }
+                        throw new Error(errorMsg);
+                    }
+                    return await res.json();
+
+                } catch (e) {
+                    // Stop retrying if max retries reached
+                    if (i === maxRetries - 1) throw e;
+
+                    // Exponential backoff: 1s, 2s, 4s, 8s, 16s
+                    await new Promise(r => setTimeout(r, 1000 * Math.pow(2, i)));
+                }
             }
-            return await res.json();
         }
 
-        // STEP 1: Questions via 2.5 Flash Lite
-        el('queryForm').addEventListener('submit', async (e) => {
+        // --- Robust Cleaner for LaTeX Artifacts ---
+        function stripLatex(text) {
+            if (!text) return "";
+            return text
+                // 1. Remove wrapping $ delimiters for inline math
+                .replace(/\$([^$]+)\$/g, '$1')
+                // 2. Remove \text{content} wrappers
+                .replace(/\\text\s*\{([^}]+)\}/g, '$1')
+                // 3. Replace common math symbols
+                .replace(/\\geq/g, '≥')
+                .replace(/\\leq/g, '≤')
+                .replace(/\\approx/g, '≈')
+                .replace(/\\pm/g, '±')
+                .replace(/\\rightarrow/g, '→')
+                .replace(/\\times/g, 'x')
+                .replace(/\\cdot/g, '·')
+                .replace(/\\%/g, '%')
+                // 4. Remove generic backslashes before words
+                .replace(/\\([a-zA-Z]+)/g, ' $1 ')
+                .trim();
+        }
+
+        // --- Navigation Logic ---
+
+        // Back to Step 1 (From Refinement)
+        el('btnBackToStep1').addEventListener('click', () => {
+            el('step2').classList.add('hidden');
+            el('step1').classList.remove('hidden');
+        });
+
+        // Back to Step 2 (From Results)
+        const goBackToRefine = () => {
+            el('results').classList.add('hidden');
+            el('step2').classList.remove('hidden');
+        };
+        el('btnBackToRefine').addEventListener('click', goBackToRefine);
+        el('btnBackToRefineBottom').addEventListener('click', goBackToRefine);
+
+        // New Topic (Reset)
+        el('btnNewTopic').addEventListener('click', () => {
+             if(confirm("Start a new topic? This will clear current results.")) {
+                 location.reload();
+             }
+        });
+
+
+        // STEP 1: Handle Initial Query (Get Refinement Questions)
+        queryForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const topic = el('initialQuestion').value;
+
             showLoader("Consulting JTS Guidelines (Flash Lite)...");
             el('step1').classList.add('hidden');
 
+            const prompt = `
+                Topic: "${topic}"
+                Role: Medical Research Librarian for Deployed Operations.
+                Task: Generate 5 specific *operational clarifying* questions to help the user narrow their search scope (Deployment Context).
+
+                CRITICAL INSTRUCTION: Do NOT ask basic knowledge questions.
+                Instead, ask questions that force the user to choose a tactical direction (e.g., "Is this Role 1, Role 2, or PFC?", "What are the evacuation constraints?", "Available resources/blood products?").
+
+                Output: A simple list of questions, one per line. No bullets, no numbering, just the text.
+            `;
+
             try {
-                const data = await fetchWithModel(MODELS.STEP1, {
-                    contents: [{ parts: [{ text: `Topic: "${topic}". Generate 5 operational clarifying questions for a deployed medical scope. Output one per line.` }] }]
+                const data = await fetchWithRetry(FAST_URL, {
+                    contents: [{ parts: [{ text: prompt }] }],
+                    safetySettings: [
+                        { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
+                    ]
                 });
-                const questions = data.candidates[0].content.parts[0].text.split('\n').filter(l => l.trim().length > 5).slice(0, 5);
-                dynamicInputs.innerHTML = questions.map((q, i) => `<div><label class="block text-sm text-gray-400 mb-1">${q}</label><input type="text" name="q${i}" class="w-full bg-slate-800 border border-slate-600 rounded p-3 text-white focus:border-orange-500 outline-none"></div>`).join('');
-                hideLoader(); el('step2').classList.remove('hidden');
-            } catch (err) { showToast("API Error. Check Console."); el('step1').classList.remove('hidden'); hideLoader(); }
+
+                const text = data.candidates[0].content.parts[0].text;
+                const questions = text.split('\n').filter(line => line.trim().length > 5).slice(0, 5);
+
+                dynamicInputs.innerHTML = '';
+                questions.forEach((q, idx) => {
+                    dynamicInputs.innerHTML += `
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-1">${q.replace(/^[Q\-*0-9: ]+/, '')}</label>
+                            <input type="text" name="q${idx}" class="w-full bg-slate-800 border border-slate-600 rounded p-3 text-white focus:border-orange-500" placeholder="Enter details...">
+                        </div>
+                    `;
+                });
+
+                hideLoader();
+                el('step2').classList.remove('hidden');
+            } catch (err) {
+                showToast("Error generating questions. Please try again. " + err.message);
+                el('step1').classList.remove('hidden');
+                hideLoader();
+            }
         });
 
-        // STEP 2: Analysis via Gemini 3 Flash (with CORRECT Failover)
-        el('refinementForm').addEventListener('submit', async (e) => {
+        // STEP 2: Generate Journal Club Content
+        refineForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            const topic = el('initialQuestion').value;
             const details = Array.from(dynamicInputs.querySelectorAll('input')).map(i => `${i.previousElementSibling.innerText}: ${i.value}`).join('\n');
-            const prompt = `Analyze "${el('initialQuestion').value}" with Context: ${details}. Use JTS CPGs. Separators: |||SECTION_PLAN||| and |||SECTION_REFS|||. No LaTeX.`;
-            
-            showLoader("Synthesizing Doctrine (Gemini 3 Flash)...");
+
+            showLoader("Synthesizing Doctrine (Gemini 2.5 Flash)...");
             el('step2').classList.add('hidden');
 
+            const mainPrompt = `
+                Role: Dr. Matthew Holtkamp (Expert Operational Medical Educator).
+                Task: Create an Operational Journal Club analysis for: "${topic}".
+                Context: ${details}
+
+                MANDATORY STRUCTURE:
+                1. Identify EXACTLY 4 Key References:
+                   - **Key CPG/Doctrine 1 & 2:** Two relevant Joint Trauma System (JTS) CPGs or Doctrine publications.
+                   - **Recent Evidence 3 & 4:** Two recent articles from *Journal of Special Operations Medicine (JSOM)* or major Trauma Journals (last 5 years).
+
+                2. Use Google Search to find real citations and DATES.
+
+                OUTPUT FORMAT (Use Markdown). You MUST use the separators |||SECTION_PLAN||| and |||SECTION_REFS||| exactly as written below to separate sections.
+
+                # Operational Journal Club Summary
+
+                ## Introduction
+                Brief tactical/clinical context.
+
+                ## Key CPG/Doctrine 1: [CPG Name/Number]
+                * **Publication Date:** [YYYY]
+                * **Key Recommendation:**
+                * **Relevance:**
+                * **Link:** [Click to Search](https://www.google.com/search?q=JTS+CPG+[Topic])
+
+                ## Key CPG/Doctrine 2: [CPG Name/Number]
+                * **Publication Date:** [YYYY]
+                * **Key Recommendation:**
+                * **Relevance:**
+                * **Link:** [Click to Search](https://www.google.com/search?q=JTS+CPG+[Topic])
+
+                ## Recent Evidence 1: [Article Title - JSOM/Trauma]
+                * **Year:** [YYYY]
+                * **Why it matters:**
+                * **Key Findings:**
+                * **Link:** [Click to Search](https://www.google.com/search?q=[Title]+[Year])
+
+                ## Recent Evidence 2: [Article Title - JSOM/Trauma]
+                * **Year:** [YYYY]
+                * **Why it matters:**
+                * **Key Findings:**
+                * **Link:** [Click to Search](https://www.google.com/search?q=[Title]+[Year])
+
+                ## Dr. Holtkamp's Operational Pearls
+                * [Pearl 1]
+                * [Pearl 2]
+                * [Pearl 3]
+
+                |||SECTION_PLAN|||
+
+                # Operational Plan
+                Based on the evidence above, provide a stepwise operational plan.
+                1. **Role 1 / PFC Considerations:**
+                2. **Evacuation & En-route Care:**
+                3. **Role 2/3 Escalation:**
+
+                |||SECTION_REFS|||
+
+                [Full APA Citations List]
+
+                CLEANLINESS INSTRUCTION: DO NOT use LaTeX syntax (like \\geq, \\text{}, or $...$). Use simple UTF-8 symbols (e.g., ≥, mg/kg) or plain text. Use separate paragraphs for clarity.
+            `;
+
             try {
-                // ATTEMPT 1: Primary (Gemini 3) WITH Thinking
-                const res = await fetchWithModel(MODELS.STEP2, {
-                    contents: [{ parts: [{ text: prompt }] }],
-                    generationConfig: { thinking_config: { include_thoughts: true } }
+                const data = await fetchWithRetry(GENERATE_URL, {
+                    contents: [{ parts: [{ text: mainPrompt }] }],
+                    tools: [{ google_search: {} }],
+                    safetySettings: [
+                        { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
+                    ]
                 });
-                processResponse(res);
-            } catch (err) {
-                console.warn("Primary Model Failed:", err);
-                showLoader("Gemini 3 Busy. Switching to Lite (No Thinking)...");
+
+                const candidate = data.candidates[0];
+                const parts = candidate.content.parts;
+
+                // Extract Text (No thinking model support in 2.5 Flash)
+                const rawText = parts.map(p => p.text).join("");
+
+                // Hide thinking container
+                el('thinkingContainer').classList.add('hidden');
+
+                storedContext = rawText; // Save for follow up
+
+                // DEFENSIVE SPLIT LOGIC
+                let split1 = rawText.split('|||SECTION_PLAN|||');
+                let remaining = "";
                 
-                try {
-                    // ATTEMPT 2: Failover (Lite) WITHOUT Thinking Config
-                    // Removing thinking_config is critical here, otherwise Lite returns 400 Bad Request
-                    const resBackup = await fetchWithModel(MODELS.STEP2_FAILOVER, { 
-                        contents: [{ parts: [{ text: prompt }] }] 
-                    });
-                    processResponse(resBackup);
-                } catch (e) { 
-                    console.error("Failover Failed:", e);
-                    showToast("Analysis Failed. Quota Exhausted."); 
-                    hideLoader(); 
-                    el('step2').classList.remove('hidden'); 
+                if (split1.length > 1) {
+                    storedSummary = split1[0];
+                    remaining = split1[1];
+                } else {
+                    // Fallback: Try regex for Header
+                    const planMatch = rawText.match(/\n#\s*(Operational Plan|Plan|Management)/i);
+                    if (planMatch) {
+                        storedSummary = rawText.substring(0, planMatch.index);
+                        remaining = rawText.substring(planMatch.index + planMatch[0].length);
+                    } else {
+                        // Failed to find plan separator, put everything in summary
+                        storedSummary = rawText;
+                        remaining = "";
+                    }
+                }
+
+                let planText = "";
+                let refsText = "";
+
+                if (remaining) {
+                    let split2 = remaining.split('|||SECTION_REFS|||');
+                    if (split2.length > 1) {
+                        planText = split2[0];
+                        refsText = split2[1];
+                    } else {
+                         // Fallback: Try regex for Refs
+                         const refMatch = remaining.match(/\n(?:\|\|\|SECTION_REFS\|\|\||#\s*References)/i);
+                         if (refMatch) {
+                             planText = remaining.substring(0, refMatch.index);
+                             refsText = remaining.substring(refMatch.index + refMatch[0].length);
+                         } else {
+                             planText = remaining;
+                             refsText = "No explicit references found.";
+                         }
+                    }
+                } else {
+                    planText = "No plan section generated.";
+                    refsText = "No references section generated.";
+                }
+
+                // APPLY CLEANER
+                const cleanSummary = stripLatex(storedSummary);
+                const cleanPlan = stripLatex(planText);
+                const cleanRefs = stripLatex(refsText);
+
+                el('summaryContent').innerHTML = marked.parse(cleanSummary);
+                el('planContent').innerHTML = marked.parse(cleanPlan);
+                el('refsContent').innerText = cleanRefs.trim();
+
+                // Typeset Math
+                MathJax.typesetPromise();
+
+                hideLoader();
+                el('results').classList.remove('hidden');
+
+            } catch (err) {
+                console.error(err);
+                showToast("Error synthesizing data. Check API key/Quota. " + err.message);
+                el('step2').classList.remove('hidden');
+                hideLoader();
+            }
+        });
+
+        // TABS Logic
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => {
+                    b.classList.remove('text-orange-500', 'border-b-2', 'border-orange-500', 'active');
+                    b.classList.add('text-gray-400');
+                });
+                btn.classList.add('text-orange-500', 'border-b-2', 'border-orange-500', 'active');
+                btn.classList.remove('text-gray-400');
+
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+                const target = btn.dataset.target;
+                if(target === 'summary') el('summaryContent').classList.remove('hidden');
+                if(target === 'plan') el('planContent').classList.remove('hidden');
+                if(target === 'refs') el('refsContent').classList.remove('hidden');
+            });
+        });
+
+        // AUDIO GENERATION (The Holtkamp Persona)
+        el('btnAudio').addEventListener('click', async () => {
+            const btn = el('btnAudio');
+            btn.disabled = true;
+
+            // Declare intervals outside try block so they can be cleared in catch
+            let scriptInterval, audioInterval;
+
+            // Show Container & Progress
+            el('audioContainer').classList.remove('hidden');
+            progressContainer.classList.remove('hidden');
+            progressBar.style.width = '2%';
+            progressText.innerText = "Step 1: Scripting Briefing (Dr. Holtkamp Style)...";
+
+            // Simulated Progress: Step 1 (Scripting) - Fast
+            let progress = 2;
+            scriptInterval = setInterval(() => {
+                if (progress < 20) {
+                    progress += 2;
+                    progressBar.style.width = `${progress}%`;
+                }
+            }, 300);
+
+            try {
+                // Step 1: Generate the Persona Script (Requested shorter length)
+                const scriptPrompt = `
+                    You are Dr. Matthew Holtkamp giving a Military Medical Briefing (SITREP). Convert the following operational summary into a professional, authoritative audio transcript.
+
+                    Tone: **Direct, Command-Presence, Efficient, "Bottom Line Up Front" (BLUF).**
+                    Style:
+                    - Use military precision.
+                    - Say things like "Listen up," "Here is the bottom line," "Tactical significance," or "Down range application."
+                    - Avoid fluff. Focus on survivability and mission impact.
+
+                    Structure:
+                    1. Intro (Sitrep overview).
+                    2. Discuss the 2 Key CPGs/Doctrine (The Standard).
+                    3. Discuss the 2 Recent Evidence items (The Update/Challenge).
+                    4. The "Bottom Line" advice (Actionable, life-saving).
+
+                    Length: Detailed but efficient. Aim for roughly 4000 words.
+
+                    TEXT TO ADAPT:
+                    ${storedSummary.substring(0, 6000)}
+                `;
+
+                const scriptRes = await fetchWithRetry(GENERATE_URL, {
+                    contents: [{ parts: [{ text: scriptPrompt }] }],
+                    safetySettings: [
+                        { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
+                    ]
+                });
+                let script = scriptRes.candidates[0].content.parts[0].text;
+
+                // Stop script interval
+                clearInterval(scriptInterval);
+                progress = 25;
+                progressBar.style.width = '25%';
+
+                // --- TRUNCATE FOR SAFETY ---
+                if (script.length > 7000) {
+                    script = script.substring(0, 7000);
+                    const lastPeriod = script.lastIndexOf('.');
+                    if (lastPeriod > 0) script = script.substring(0, lastPeriod + 1);
+                }
+
+                // Step 2: TTS - Robust Implementation
+                progressText.innerText = "Step 2: Synthesizing Audio (Est. wait: ~5-7 mins)...";
+
+                // Use specific TTS model and endpoint as requested
+                const TTS_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-tts:generateContent?key=${apiKey}`;
+
+                const ttsPrompt = `
+Style: You are a senior medical officer delivering a briefing. Use a professional, steady pace with clear pronunciation of medical terminology. Sound authoritative yet accessible.
+
+TEXT TO SPEAK:
+${script}
+                `;
+
+                const ttsPayload = {
+                    contents: [{ parts: [{ text: ttsPrompt }] }],
+                    generationConfig: {
+                        responseModalities: ["AUDIO"],
+                        speechConfig: {
+                            voiceConfig: {
+                                prebuiltVoiceConfig: {
+                                    voiceName: "Aoede"
+                                }
+                            }
+                        }
+                    }
+                };
+
+                // Custom Fetch with Backoff for 503 and explicit 429 handling
+                let res;
+                let attempt = 0;
+                const delays = [500, 1000, 2000]; // 3 retries (0.5s, 1s, 2s)
+
+                while (true) {
+                    try {
+                        res = await fetch(TTS_ENDPOINT, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(ttsPayload)
+                        });
+
+                        if (res.status === 503 && attempt < delays.length) {
+                             await new Promise(r => setTimeout(r, delays[attempt]));
+                             attempt++;
+                             continue;
+                        }
+
+                        break; // Exit loop if not 503 or retries exhausted
+
+                    } catch (netErr) {
+                         // Network error (offline?), distinct from HTTP error
+                         throw new Error("Network error during TTS fetch: " + netErr.message);
+                    }
+                }
+
+                // Handle HTTP Errors
+                if (!res.ok) {
+                     if (res.status === 429) {
+                         // Specific UI for Rate Limit
+                         progressContainer.classList.add('hidden');
+                         el('audioContainer').innerHTML += `<div class="p-4 bg-red-900/50 border border-red-700 text-red-200 rounded mt-2">Rate limit hit (free tier is 3 RPM). Wait ~60s or enable billing.</div>`;
+                         throw new Error("TTS Rate Limit Exceeded (429).");
+                     }
+
+                     const txt = await res.text().catch(()=> "");
+                     throw new Error(`TTS HTTP ${res.status} ${res.statusText} :: ${txt}`);
+                }
+
+                const ttsRes = await res.json();
+
+                // Find Audio Part
+                const cand = ttsRes?.candidates?.[0];
+                const part = cand?.content?.parts?.find(p => p?.inlineData?.data);
+                if (!part) throw new Error("No AUDIO inlineData returned (no audio part in response).");
+
+                const b64  = part.inlineData.data;
+                const mime = part.inlineData.mimeType || "audio/pcm";
+                console.log("TTS mime:", mime);
+
+                // Decode Safe Base64
+                const bytes = b64ToBytes(b64);
+
+                // Convert/Blob
+                let blob;
+                if (mime.includes("pcm") || mime.includes("L16")) {
+                  if (typeof window.pcmToWav !== "function") throw new Error("pcmToWav missing on globalThis");
+                  // Int16Array view of the bytes
+                  const pcm16 = new Int16Array(bytes.buffer);
+                  blob = window.pcmToWav(pcm16, 1, 24000);
+                } else {
+                  blob = new Blob([bytes], { type: mime });
+                }
+
+                const audioUrl = URL.createObjectURL(blob);
+                const player = el('audioPlayer');
+                player.src = audioUrl;
+                player.playbackRate = 1.25;
+
+                // Clear progress UI
+                if (scriptInterval) clearInterval(scriptInterval);
+                
+                progressBar.style.width = '100%';
+                progressText.innerText = "Audio Ready!";
+
+                setTimeout(async () => {
+                    progressContainer.classList.add('hidden');
+                    player.classList.remove('hidden');
+                    try {
+                        await player.play();
+                    } catch (e) {
+                        console.warn("Playback blocked:", e);
+                        showToast("Click play to start audio");
+                    }
+                }, 500);
+
+            } catch (err) {
+                // Clear intervals on error
+                if (scriptInterval) clearInterval(scriptInterval);
+                if (audioInterval) clearInterval(audioInterval);
+
+                if (!err.message.includes("429")) {
+                     progressContainer.classList.add('hidden');
+                     alert("Audio generation failed: " + err.message);
+                }
+                console.error(err);
+            } finally {
+                btn.disabled = false;
+            }
+        });
+
+        // FOLLOW UP
+        followUpForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const q = el('followUpInput').value;
+            const container = el('followUpResult');
+
+            container.innerHTML = '<span class="animate-pulse">Dr. Holtkamp is thinking...</span>';
+            container.classList.remove('hidden');
+
+            const prompt = `
+                Context: ${storedContext}
+                User Question: "${q}"
+                Role: Dr. Holtkamp (Operational Medical Expert).
+                Task: Answer the question comparing the CPGs and trials mentioned above if relevant. Be concise and tactical.
+            `;
+
+            try {
+                const data = await fetchWithRetry(GENERATE_URL, {
+                    contents: [{ parts: [{ text: prompt }] }],
+                    tools: [{ google_search: {} }],
+                    safetySettings: [
+                        { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
+                    ]
+                });
+                const rawFollowUp = data.candidates[0].content.parts[0].text;
+                container.innerHTML = marked.parse(stripLatex(rawFollowUp)); // Apply cleaner here too
+            } catch (err) {
+                container.innerText = "Error getting response.";
+            }
+        });
+
+        // Utilities
+        function showLoader(text) {
+            el('loaderText').innerText = text;
+            el('loader').classList.remove('hidden');
+        }
+        function hideLoader() {
+            el('loader').classList.add('hidden');
+        }
+
+        el('btnCopy').onclick = () => {
+            navigator.clipboard.writeText(storedSummary);
+            showToast("Summary copied!");
+        };
+        el('btnPlan').onclick = () => {
+            navigator.clipboard.writeText(el('planContent').innerText);
+            showToast("Plan copied!");
+        };
+
+        // --- Sharing Logic ---
+        function getDynamicInputValues() {
+            const inputs = [];
+            if(dynamicInputs.innerHTML.trim() !== "") {
+                const labels = dynamicInputs.querySelectorAll('label');
+                const textInputs = dynamicInputs.querySelectorAll('input');
+                labels.forEach((label, i) => {
+                     inputs.push({
+                         label: label.innerText,
+                         value: textInputs[i] ? textInputs[i].value : ""
+                     });
+                });
+            }
+            return inputs;
+        }
+
+        function restoreDynamicInputs(savedInputs) {
+            dynamicInputs.innerHTML = '';
+            if(savedInputs && savedInputs.length) {
+                savedInputs.forEach((item, idx) => {
+                    dynamicInputs.innerHTML += `
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-1">${item.label}</label>
+                            <input type="text" name="q${idx}" value="${item.value}" class="w-full bg-slate-800 border border-slate-600 rounded p-3 text-white focus:border-orange-500" placeholder="Enter details...">
+                        </div>
+                    `;
+                });
+            }
+        }
+
+        setupSharing({
+            apiKey: jsonBinKey,
+            getState: () => {
+                return {
+                    initialQuestion: el('initialQuestion').value,
+                    dynamicInputs: getDynamicInputValues(),
+                    summaryContent: storedSummary,
+                    planContent: el('planContent').innerHTML,
+                    refsContent: el('refsContent').innerText,
+                    context: storedContext,
+                    currentStep: !el('results').classList.contains('hidden') ? 3
+                               : !el('step2').classList.contains('hidden') ? 2 : 1
+                };
+            },
+            restoreState: (state) => {
+                el('initialQuestion').value = state.initialQuestion || "";
+
+                if (state.dynamicInputs) {
+                    restoreDynamicInputs(state.dynamicInputs);
+                }
+
+                if (state.summaryContent) {
+                    storedSummary = state.summaryContent;
+                    storedContext = state.context || "";
+                    el('summaryContent').innerHTML = marked.parse(stripLatex(state.summaryContent));
+                    el('planContent').innerHTML = state.planContent || "";
+                    el('refsContent').innerText = state.refsContent || "";
+
+                    if(window.MathJax) MathJax.typesetPromise();
+                }
+
+                el('step1').classList.add('hidden');
+                el('step2').classList.add('hidden');
+                el('results').classList.add('hidden');
+
+                if (state.currentStep === 3) {
+                    el('results').classList.remove('hidden');
+                } else if (state.currentStep === 2) {
+                    el('step2').classList.remove('hidden');
+                } else {
+                    el('step1').classList.remove('hidden');
                 }
             }
         });
 
-        function processResponse(data) {
-            const cand = data.candidates[0];
-            
-            // Thoughts (Only exists if Gemini 3 succeeded)
-            const thought = cand.content.parts.find(p => p.thought);
-            if (thought) { 
-                el('thinkingContent').innerText = thought.thought; 
-                el('thinkingContainer').classList.remove('hidden'); 
-            } else {
-                // Hide thinking if we used Lite
-                el('thinkingContainer').classList.add('hidden');
-            }
-
-            const rawText = cand.content.parts.find(p => p.text).text;
-            storedContext = rawText;
-            const splits = rawText.split('|||SECTION_PLAN|||');
-            storedSummary = stripLatex(splits[0]);
-            const remaining = (splits[1] || "").split('|||SECTION_REFS|||');
-            
-            el('summaryContent').innerHTML = marked.parse(storedSummary);
-            el('planContent').innerHTML = marked.parse(stripLatex(remaining[0] || ""));
-            el('refsContent').innerText = stripLatex(remaining[1] || "");
-            
-            hideLoader(); el('results').classList.remove('hidden');
-            MathJax.typesetPromise();
-        }
-
-        // STEP 3: Audio via Native Audio Dialog
-        el('btnAudio').addEventListener('click', async () => {
-            const btn = el('btnAudio'); btn.disabled = true;
-            el('audioContainer').classList.remove('hidden');
-            el('audioProgressContainer').classList.remove('hidden');
-            const pBar = el('audioProgressBar');
-            const pText = el('audioProgressText');
-
-            try {
-                pBar.style.width = '20%';
-                pText.innerText = "Scripting Brief...";
-                // Use Lite for script to save reasoning quota
-                const scriptRes = await fetchWithModel(MODELS.STEP1, { 
-                    contents: [{ parts: [{ text: `You are Dr. Matthew Holtkamp. Brief this as a 4-minute military update: ${storedSummary.substring(0, 3000)}` }] }] 
-                });
-                const script = scriptRes.candidates[0].content.parts[0].text;
-
-                pBar.style.width = '60%';
-                pText.innerText = "Synthesizing Native Audio...";
-                await new Promise(r => setTimeout(r, 2000));
-
-                const ttsRes = await fetchWithModel(MODELS.STEP3, {
-                    contents: [{ parts: [{ text: script }] }],
-                    generationConfig: { responseModalities: ["AUDIO"] }
-                });
-
-                const audioPart = ttsRes.candidates[0].content.parts.find(p => p.inlineData);
-                const bytes = new Uint8Array(atob(audioPart.inlineData.data).split("").map(c => c.charCodeAt(0)));
-                el('audioPlayer').src = URL.createObjectURL(pcmToWav(new Int16Array(bytes.buffer), 1, 24000));
-                
-                pBar.style.width = '100%';
-                pText.innerText = "Ready!";
-                setTimeout(() => { el('audioProgressContainer').classList.add('hidden'); el('audioPlayer').classList.remove('hidden'); el('audioPlayer').play(); }, 500);
-            } catch (err) { showToast("Audio quota reached."); } finally { btn.disabled = false; }
-        });
-
-        // Interactive & Utils
-        el('followUpForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const input = el('followUpInput');
-            const resBox = el('followUpResult');
-            resBox.innerHTML = '<span class="animate-pulse">Consulting CPGs...</span>';
-            resBox.classList.remove('hidden');
-            try {
-                const data = await fetchWithModel(MODELS.STEP1, { contents: [{ parts: [{ text: `Context: ${storedContext}\nQuestion: ${input.value}. Answer as Dr. Holtkamp.` }] }] });
-                resBox.innerHTML = marked.parse(stripLatex(data.candidates[0].content.parts[0].text));
-            } catch (err) { resBox.innerText = "Error."; }
-        });
-
-        el('btnNewTopic').onclick = () => location.reload();
-        el('btnBackToRefine').onclick = () => { el('results').classList.add('hidden'); el('step2').classList.remove('hidden'); };
-        el('btnBackToStep1').onclick = () => { el('step2').classList.add('hidden'); el('step1').classList.remove('hidden'); };
-        el('btnCopy').onclick = () => { navigator.clipboard.writeText(storedSummary); showToast("Summary Copied"); };
-        el('btnPlan').onclick = () => { navigator.clipboard.writeText(el('planContent').innerText); showToast("Plan Copied"); };
-
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.onclick = () => {
-                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active', 'text-orange-500', 'border-orange-500'));
-                btn.classList.add('active', 'text-orange-500', 'border-orange-500');
-                document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
-                el(btn.dataset.target + 'Content').classList.remove('hidden');
-            };
-        });
-
-        setupSharing({
-            apiKey: jsonBinKey,
-            getState: () => ({ initialQuestion: el('initialQuestion').value, summaryContent: storedSummary, context: storedContext }),
-            restoreState: (s) => { el('initialQuestion').value = s.initialQuestion; storedSummary = s.summaryContent; storedContext = s.context; }
-        });
     </script>
 </body>
 </html>
