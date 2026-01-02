@@ -84,9 +84,11 @@
             transition: height 0.1s ease;
         }
 
-        /* Error/Diagnostics Panel */
-        .diag-row { display: flex; justify-content: space-between; font-family: monospace; font-size: 11px; color: #94a3b8; border-bottom: 1px solid #334155; padding: 2px 0; }
-        .diag-row span:last-child { color: #e2e8f0; }
+        /* Debug Panel Styles */
+        .debug-row { display: flex; justify-content: space-between; font-family: monospace; font-size: 10px; color: #94a3b8; border-bottom: 1px solid #334155; padding: 2px 0; }
+        .debug-row span:last-child { color: #e2e8f0; font-weight: 600; }
+        .debug-section { margin-bottom: 8px; }
+        .debug-title { font-size: 10px; font-weight: bold; color: #64748b; text-transform: uppercase; margin-bottom: 2px; }
     </style>
 </head>
 
@@ -117,31 +119,80 @@
                 <p class="text-[10px] text-slate-500 uppercase tracking-wider font-medium">Native Audio Dialog</p>
             </div>
         </div>
-        <div id="connection-status-badge" class="flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800 border border-slate-700 transition-colors">
+        <div id="connection-status-badge" class="flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800 border border-slate-700 transition-colors cursor-pointer" onclick="toggleDebugPanel()">
             <div id="status-dot" class="w-2 h-2 rounded-full bg-slate-500"></div>
             <span id="status-text" class="text-xs text-slate-400 font-mono font-bold">DISCONNECTED</span>
+            <span class="material-symbols-outlined text-[10px] text-slate-500 ml-1">expand_more</span>
         </div>
     </header>
 
     <!-- Main Content -->
     <main class="flex-1 flex flex-col items-center justify-center relative z-10 p-6">
         
-        <!-- Error/Diagnostics Container (Hidden by default) -->
-        <div id="diagnostics-panel" class="hidden absolute top-4 left-1/2 -translate-x-1/2 w-full max-w-md bg-red-900/20 border border-red-500/30 backdrop-blur-md rounded-xl p-4 z-50 animate-fade-in shadow-2xl">
-            <div class="flex items-center gap-2 mb-2 text-red-400 border-b border-red-500/30 pb-2">
-                <span class="material-symbols-outlined text-sm">warning</span>
-                <h3 class="text-xs font-bold uppercase tracking-wider">Connection Failure</h3>
+        <!-- Unified Debug Overlay -->
+        <div id="debug-panel" class="absolute top-2 right-2 w-72 bg-slate-900/90 border border-slate-700 backdrop-blur-md rounded-xl p-3 z-50 shadow-2xl transition-all duration-300 transform translate-x-0 hidden md:block">
+            <div class="flex items-center justify-between mb-2 border-b border-slate-700 pb-2">
+                <div class="flex items-center gap-2 text-blue-400">
+                    <span class="material-symbols-outlined text-sm">terminal</span>
+                    <h3 class="text-xs font-bold uppercase tracking-wider">System Telemetry</h3>
+                </div>
+                <div class="flex gap-2">
+                     <button onclick="copyDebugInfo()" title="Copy Debug Info" class="text-slate-400 hover:text-white">
+                        <span class="material-symbols-outlined text-sm">content_copy</span>
+                    </button>
+                    <button onclick="toggleDebugPanel()" class="text-slate-400 hover:text-white">
+                        <span class="material-symbols-outlined text-sm">expand_less</span>
+                    </button>
+                </div>
             </div>
-            <div class="space-y-1">
-                <div class="diag-row"><span>Phase</span><span id="diag-phase">--</span></div>
-                <div class="diag-row"><span>Code</span><span id="diag-code">--</span></div>
-                <div class="diag-row"><span>Reason</span><span id="diag-reason">--</span></div>
-                <div class="diag-row"><span>Model</span><span id="diag-model">--</span></div>
-                <p id="diag-message" class="text-xs text-red-300 mt-2 font-mono break-words"></p>
+
+            <!-- Error Region (Only shown on error) -->
+            <div id="debug-error-box" class="hidden bg-red-900/20 border border-red-500/30 rounded p-2 mb-3">
+                <div class="flex items-center gap-1 text-red-400 mb-1">
+                    <span class="material-symbols-outlined text-xs">warning</span>
+                    <span class="text-[10px] font-bold uppercase">Critical Failure</span>
+                </div>
+                <p id="debug-error-msg" class="text-[10px] text-red-300 font-mono break-words leading-tight"></p>
+                <div class="flex justify-between mt-1 text-[9px] text-red-400/70 font-mono">
+                    <span id="debug-error-code">Code: --</span>
+                    <span id="debug-error-phase">Phase: --</span>
+                </div>
             </div>
-            <button onclick="hideDiagnostics()" class="absolute top-2 right-2 text-red-400 hover:text-white">
-                <span class="material-symbols-outlined text-sm">close</span>
-            </button>
+
+            <div class="space-y-3 max-h-[60vh] overflow-y-auto custom-scroll pr-1">
+                <!-- State Section -->
+                <div class="debug-section">
+                    <div class="debug-title">Connection State</div>
+                    <div class="debug-row"><span>Phase</span><span id="tele-phase">DISCONNECTED</span></div>
+                    <div class="debug-row"><span>WS ReadyState</span><span id="tele-ws-state">--</span></div>
+                    <div class="debug-row"><span>AudioCtx</span><span id="tele-audio-state">--</span></div>
+                    <div class="debug-row"><span>Model</span><span class="truncate max-w-[120px]" id="tele-model">--</span></div>
+                </div>
+
+                <!-- Counters Section -->
+                <div class="debug-section">
+                    <div class="debug-title">Traffic Counters</div>
+                    <div class="debug-row"><span>Setup Sent</span><span id="cnt-setup">0</span></div>
+                    <div class="debug-row"><span>Trigger Sent</span><span id="cnt-trigger">0</span></div>
+                    <div class="debug-row"><span>Audio Sent (Chunks)</span><span id="cnt-audio-tx">0</span></div>
+                    <div class="debug-row"><span>Audio Rx (Chunks)</span><span id="cnt-audio-rx">0</span></div>
+                    <div class="debug-row"><span>Msgs Rx</span><span id="cnt-msgs-rx">0</span></div>
+                </div>
+
+                <!-- Timing Section -->
+                <div class="debug-section">
+                    <div class="debug-title">Timestamps (Rel.)</div>
+                    <div class="debug-row"><span>Last Msg</span><span id="time-last-msg">--</span></div>
+                    <div class="debug-row"><span>Last Audio Rx</span><span id="time-last-audio">--</span></div>
+                </div>
+
+                <!-- Actions -->
+                <div class="pt-2 border-t border-slate-700">
+                    <button onclick="sendTestKick()" id="btn-kick" class="w-full py-1 bg-blue-600/20 hover:bg-blue-600/40 text-blue-400 border border-blue-500/30 rounded text-xs font-mono transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                        [TEST] SEND TEXT KICK
+                    </button>
+                </div>
+            </div>
         </div>
 
         <div id="visualizer-container" class="relative w-64 h-64 mb-16 flex items-center justify-center">
@@ -178,8 +229,6 @@
     </footer>
 
     <script type="module">
-        // TODO: Replace this client-side key with a server-minted ephemeral token for production security.
-        // GitHub Pages Deployment: Hardcoded import path as requested for reliability
         import { API_KEYS } from '/Medical-Consult-Portal/js/config.js';
 
         // --- Configuration ---
@@ -226,6 +275,23 @@
         let playbackQueue = [];
         let scheduledTime = 0;
 
+        // Watchdogs
+        let serverFrameTimeout = null;
+        let audioFrameTimeout = null;
+
+        // Telemetry Data
+        const telemetry = {
+            setupSent: 0,
+            triggerSent: 0,
+            audioChunksSent: 0,
+            audioChunksReceived: 0,
+            msgsReceived: 0,
+            lastMsgAt: null,
+            lastAudioAt: null,
+            firstFrames: [], // Store first 3 frames for debugging
+            lastError: null
+        };
+
         const ui = {
             btn: document.getElementById('main-mic-btn'),
             icon: document.getElementById('mic-icon'),
@@ -237,15 +303,57 @@
             transcript: document.getElementById('transcript-log'),
             barsContainer: document.getElementById('audio-bars-container'),
             bars: document.querySelectorAll('.audio-bar'),
-            diagPanel: document.getElementById('diagnostics-panel'),
-            diagPhase: document.getElementById('diag-phase'),
-            diagCode: document.getElementById('diag-code'),
-            diagReason: document.getElementById('diag-reason'),
-            diagModel: document.getElementById('diag-model'),
-            diagMessage: document.getElementById('diag-message')
+
+            // Debug Panel
+            debugPanel: document.getElementById('debug-panel'),
+            debugErrorBox: document.getElementById('debug-error-box'),
+            debugErrorMsg: document.getElementById('debug-error-msg'),
+            debugErrorCode: document.getElementById('debug-error-code'),
+            debugErrorPhase: document.getElementById('debug-error-phase'),
+            btnKick: document.getElementById('btn-kick'),
+
+            // Telemetry Fields
+            telePhase: document.getElementById('tele-phase'),
+            teleWsState: document.getElementById('tele-ws-state'),
+            teleAudioState: document.getElementById('tele-audio-state'),
+            teleModel: document.getElementById('tele-model'),
+            cntSetup: document.getElementById('cnt-setup'),
+            cntTrigger: document.getElementById('cnt-trigger'),
+            cntAudioTx: document.getElementById('cnt-audio-tx'),
+            cntAudioRx: document.getElementById('cnt-audio-rx'),
+            cntMsgsRx: document.getElementById('cnt-msgs-rx'),
+            timeLastMsg: document.getElementById('time-last-msg'),
+            timeLastAudio: document.getElementById('time-last-audio')
         };
 
         // --- UI Logic ---
+
+        window.toggleDebugPanel = function() {
+            ui.debugPanel.classList.toggle('hidden');
+        };
+
+        function updateTelemetryUI() {
+            ui.telePhase.innerText = currentState;
+            ui.teleWsState.innerText = socket ? socket.readyState : 'CLOSED';
+            ui.teleAudioState.innerText = audioContext ? audioContext.state : 'N/A';
+            ui.teleModel.innerText = MODEL_ID.split('-')[2] || 'flash'; // Shorten
+
+            ui.cntSetup.innerText = telemetry.setupSent;
+            ui.cntTrigger.innerText = telemetry.triggerSent;
+            ui.cntAudioTx.innerText = telemetry.audioChunksSent;
+            ui.cntAudioRx.innerText = telemetry.audioChunksReceived;
+            ui.cntMsgsRx.innerText = telemetry.msgsReceived;
+
+            const now = Date.now();
+            ui.timeLastMsg.innerText = telemetry.lastMsgAt ? `${((now - telemetry.lastMsgAt)/1000).toFixed(1)}s ago` : '--';
+            ui.timeLastAudio.innerText = telemetry.lastAudioAt ? `${((now - telemetry.lastAudioAt)/1000).toFixed(1)}s ago` : '--';
+
+            // Enable Kick button only if we are connected (OPEN)
+            ui.btnKick.disabled = !socket || socket.readyState !== WebSocket.OPEN;
+        }
+
+        // Run UI loop
+        setInterval(updateTelemetryUI, 500);
 
         function updateState(newState) {
             console.log(`State Transition: ${currentState} -> ${newState}`);
@@ -254,7 +362,7 @@
 
             // Reset Classes
             ui.statusDot.className = "w-2 h-2 rounded-full";
-            ui.badge.className = "flex items-center gap-2 px-3 py-1 rounded-full border transition-colors";
+            ui.badge.className = "flex items-center gap-2 px-3 py-1 rounded-full border transition-colors cursor-pointer";
             ui.icon.classList.remove('text-blue-400', 'text-amber-400', 'text-red-400');
             ui.btn.classList.remove('thinking-active', 'border-red-500', 'border-slate-700', 'border-blue-500');
             ui.pulse.className = "absolute inset-0 rounded-full";
@@ -275,15 +383,17 @@
                     ui.badge.classList.add('bg-amber-900/20', 'border-amber-500/30');
                     ui.icon.innerText = "settings_input_antenna";
                     ui.icon.classList.add('text-amber-400');
-                    ui.btn.classList.add('border-slate-700', 'thinking-active'); // Thinking animation used for connecting
+                    ui.btn.classList.add('border-slate-700', 'thinking-active');
                     ui.interactionText.innerText = "Establishing Secure Link...";
                     ui.transcript.innerText = "Handshaking with Gemini Live...";
+                    ui.debugErrorBox.classList.add('hidden'); // Clear errors on retry
+                    resetTelemetry();
                     break;
 
                 case STATE.CONFIGURING:
                     ui.statusDot.classList.add('bg-blue-500', 'animate-pulse');
                     ui.badge.classList.add('bg-blue-900/20', 'border-blue-500/30');
-                    ui.icon.innerText = "downloading"; // Or similar
+                    ui.icon.innerText = "downloading";
                     ui.icon.classList.add('text-blue-400');
                     ui.btn.classList.add('border-blue-500', 'thinking-active');
                     ui.interactionText.innerText = "Configuring Audio Stream...";
@@ -293,15 +403,13 @@
                     ui.statusDot.classList.add('bg-green-500', 'animate-pulse');
                     ui.badge.classList.add('bg-green-900/20', 'border-green-500/30', 'shadow-lg', 'shadow-green-500/10');
                     ui.icon.innerText = "mic";
-                    ui.icon.classList.add('text-blue-400'); // Keep blue theme for mic
-                    ui.btn.classList.add('border-slate-700'); // Standard border
+                    ui.icon.classList.add('text-blue-400');
+                    ui.btn.classList.add('border-slate-700');
                     ui.pulse.className = "absolute inset-0 rounded-full pulse-active";
                     ui.interactionText.innerText = "Dr. H is Listening";
                     ui.interactionText.classList.add('text-blue-400');
                     ui.transcript.innerText = "System Live. Audio channel open.";
                     ui.barsContainer.classList.remove('opacity-50');
-                    // Hide errors if we succeed
-                    hideDiagnostics();
                     break;
 
                 case STATE.ERROR:
@@ -314,20 +422,64 @@
                     ui.interactionText.classList.add('text-red-400');
                     break;
             }
+            updateTelemetryUI();
         }
 
-        window.hideDiagnostics = function() {
-            ui.diagPanel.classList.add('hidden');
+        function reportError(code, reason, msg) {
+            console.error(`[ERROR] ${code}: ${msg}`);
+            telemetry.lastError = { code, reason, msg, phase: currentState };
+
+            ui.debugErrorMsg.innerText = msg;
+            ui.debugErrorCode.innerText = `Code: ${code}`;
+            ui.debugErrorPhase.innerText = `Phase: ${telemetry.lastError.phase}`;
+            ui.debugErrorBox.classList.remove('hidden');
+
+            // Auto-open panel on error
+            ui.debugPanel.classList.remove('hidden');
+            updateState(STATE.ERROR);
         }
 
-        function showDiagnostics(phase, code, reason, msg) {
-            ui.diagPhase.innerText = phase;
-            ui.diagCode.innerText = code || "N/A";
-            ui.diagReason.innerText = reason || "Unknown";
-            ui.diagModel.innerText = MODEL_ID;
-            ui.diagMessage.innerText = msg || "An unexpected error occurred.";
-            ui.diagPanel.classList.remove('hidden');
+        function resetTelemetry() {
+            telemetry.setupSent = 0;
+            telemetry.triggerSent = 0;
+            telemetry.audioChunksSent = 0;
+            telemetry.audioChunksReceived = 0;
+            telemetry.msgsReceived = 0;
+            telemetry.lastMsgAt = null;
+            telemetry.lastAudioAt = null;
+            telemetry.firstFrames = [];
+            telemetry.lastError = null;
         }
+
+        window.copyDebugInfo = function() {
+            const info = {
+                state: currentState,
+                wsState: socket ? socket.readyState : 'NULL',
+                audioCtxState: audioContext ? audioContext.state : 'NULL',
+                telemetry: telemetry,
+                userAgent: navigator.userAgent
+            };
+            navigator.clipboard.writeText(JSON.stringify(info, null, 2)).then(() => {
+                const btn = document.querySelector('button[title="Copy Debug Info"]');
+                btn.classList.add('text-green-400');
+                setTimeout(() => btn.classList.remove('text-green-400'), 1000);
+            });
+        };
+
+        window.sendTestKick = function() {
+            if (!socket || socket.readyState !== WebSocket.OPEN) return;
+            const msg = {
+                clientContent: {
+                    turns: [{
+                        role: "user",
+                        parts: [{ text: "System check. Confirm audio link established." }]
+                    }],
+                    turnComplete: true
+                }
+            };
+            socket.send(JSON.stringify(msg));
+            console.log("Kick message sent");
+        };
 
         // --- Connection Management ---
 
@@ -341,8 +493,7 @@
 
         async function connect() {
             if (API_KEY === "PASTE_YOUR_KEY_HERE" || !API_KEY) {
-                updateState(STATE.ERROR);
-                showDiagnostics("INIT", "AUTH_FAIL", "Missing Key", "API Key not found in config.");
+                reportError("AUTH_FAIL", "Missing Key", "API Key not found in config.");
                 return;
             }
 
@@ -351,13 +502,15 @@
             try {
                 // 1. Setup Audio Context (Native Rate)
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+                // Explicit Resume (Browser Autoplay Policy)
+                await audioContext.resume();
                 scheduledTime = audioContext.currentTime;
 
                 // 2. Load Worklet
                 try {
                     await audioContext.audioWorklet.addModule('js/audio-processor.js');
                 } catch (e) {
-                    console.error("Worklet load failed:", e);
                     throw new Error(`Audio Worklet failed to load: ${e.message}`);
                 }
 
@@ -381,23 +534,43 @@
                 socket.onopen = onWsOpen;
                 socket.onmessage = onWsMessage;
                 socket.onclose = onWsClose;
-                socket.onerror = (e) => {
-                    // Actual error details usually come in onclose, but we log here
-                    console.error("WS Error Event:", e);
-                };
+                socket.onerror = (e) => console.error("WS Error Event:", e);
 
                 // 5. Start Mic Processing (but don't send yet until Open)
                 setupMicProcessing();
 
+                // 6. Start Watchdogs
+                startWatchdogs();
+
             } catch (err) {
-                console.error("Connection Flow Failed:", err);
-                disconnect(false); // Clean disconnect internal logic
-                updateState(STATE.ERROR);
-                showDiagnostics("CONNECTING", "CLIENT_ERR", "Exception", err.message);
+                disconnect(false);
+                reportError("CLIENT_ERR", "Exception", err.message);
             }
         }
 
+        function startWatchdogs() {
+            // Watchdog 1: 5s timeout for ANY server frame
+            serverFrameTimeout = setTimeout(() => {
+                if (telemetry.msgsReceived === 0 && currentState !== STATE.ERROR) {
+                    disconnect(false);
+                    reportError("TIMEOUT_NO_RESP", "No Server Frames", "Server did not respond within 5s of connection.");
+                }
+            }, 5000);
+
+            // Watchdog 2: 10s timeout for AUDIO frames
+            audioFrameTimeout = setTimeout(() => {
+                if (telemetry.audioChunksReceived === 0 && currentState !== STATE.ERROR) {
+                    disconnect(false);
+                    reportError("TIMEOUT_NO_AUDIO", "No Audio Output", "Connected, but received no audio frames within 10s.");
+                }
+            }, 10000);
+        }
+
         function disconnect(isClean = true) {
+            // Clear Watchdogs
+            clearTimeout(serverFrameTimeout);
+            clearTimeout(audioFrameTimeout);
+
             // Cleanup Logic
             if (socket) {
                 socket.close(1000, "User Disconnect");
@@ -442,6 +615,7 @@
                 }
             };
             socket.send(JSON.stringify(setup));
+            telemetry.setupSent++;
 
             // 2. Send Initial Trigger (Start Conversation)
             const randomGreeting = GREETINGS[Math.floor(Math.random() * GREETINGS.length)];
@@ -455,16 +629,36 @@
                 }
             };
             socket.send(JSON.stringify(trigger));
+            telemetry.triggerSent++;
         }
 
         function onWsMessage(event) {
-            if (typeof event.data === 'string') {
-                const response = JSON.parse(event.data);
-                
-                // A. Check for Setup Complete (optional depending on API version, but good to note)
-                // Some versions send a setupComplete frame.
+            telemetry.msgsReceived++;
+            telemetry.lastMsgAt = Date.now();
 
-                // B. Check for Audio
+            if (typeof event.data === 'string') {
+                let response;
+                try {
+                    response = JSON.parse(event.data);
+                } catch (e) {
+                    console.error("Non-JSON frame received");
+                    return;
+                }
+
+                // Log first 3 frames
+                if (telemetry.firstFrames.length < 3) {
+                    telemetry.firstFrames.push(response);
+                    console.log("Server Frame:", response);
+                }
+
+                // Check for Errors
+                if (response.error) {
+                    disconnect(false);
+                    reportError(response.error.code, response.error.status, response.error.message);
+                    return;
+                }
+
+                // Check for Audio
                 if (response.serverContent?.modelTurn?.parts) {
                     const parts = response.serverContent.modelTurn.parts;
                     let hasAudio = false;
@@ -480,25 +674,21 @@
                         }
                     });
 
-                    // CRITICAL: Only transition to LIVE if we actually get audio
-                    if (hasAudio && currentState !== STATE.LIVE) {
-                        updateState(STATE.LIVE);
+                    if (hasAudio) {
+                        telemetry.audioChunksReceived++;
+                        telemetry.lastAudioAt = Date.now();
+
+                        // Transition to LIVE only on first audio
+                        if (currentState !== STATE.LIVE) {
+                            updateState(STATE.LIVE);
+                        }
                     }
                 }
 
-                // C. Check for Interruption
+                // Check for Interruption
                 if (response.serverContent?.interrupted) {
                     console.log("Model Interrupted by User");
                     stopAllAudio();
-                }
-
-                // D. Check for Errors (e.g. Invalid Setup)
-                // Sometimes errors come as regular messages if setup fails
-                if (response.error) {
-                    console.error("API Error Payload:", response.error);
-                    disconnect(false); // abnormal
-                    updateState(STATE.ERROR);
-                    showDiagnostics("API_RESPONSE", response.error.code, response.error.status, response.error.message);
                 }
             }
         }
@@ -507,21 +697,16 @@
             console.log(`WebSocket Closed: ${event.code} - ${event.reason}`);
 
             if (event.code === 1000 || event.code === 1005) {
-                // Normal closure
                 if(currentState !== STATE.DISCONNECTED) {
                     updateState(STATE.DISCONNECTED);
                 }
             } else {
                 // Abnormal closure
-                // Capture the state BEFORE updating to ERROR so we know where we failed
-                const failedState = currentState;
-                updateState(STATE.ERROR);
-                showDiagnostics(
-                    failedState,
-                    event.code,
-                    event.reason || "Connection dropped unexpectedly",
-                    "WebSocket connection closed abnormally."
-                );
+                const failedPhase = currentState;
+                // Don't report if we already reported a more specific error (e.g. timeout)
+                if (currentState !== STATE.ERROR) {
+                    reportError(event.code, event.reason || "Unknown", `WS Closed during ${failedPhase}`);
+                }
             }
         }
 
@@ -564,7 +749,13 @@
                             }]
                         }
                     };
-                    socket.send(JSON.stringify(frame));
+
+                    try {
+                        socket.send(JSON.stringify(frame));
+                        telemetry.audioChunksSent++;
+                    } catch (e) {
+                        console.error("Socket Send Failed", e);
+                    }
                 }
             };
 
