@@ -595,6 +595,7 @@
                         responseModalities: ["AUDIO"]
                     },
                     // Simple string instruction as requested for test
+                    // Note: Use simple string per specific user request to minimize complexity
                     systemInstruction: { parts: [{ text: "You are Dr. Holtkamp." }] }
                 }
             };
@@ -603,7 +604,7 @@
             telemetry.setupSent++;
             hasSentSetup = true;
 
-            // Wait for ACK before sending Ping or Audio
+            // NO AUTO-SEND of clientContent here. Wait for ACK.
         }
 
         function safeSend(obj, label) {
@@ -621,8 +622,7 @@
             // 2. ACK Check (except Setup)
             if (label !== "setup" && !setupAck) {
                 console.error("Attempted to send before ACK:", obj);
-                // We don't fail hard here, but we log it. Audio is gated elsewhere.
-                // Ping is also gated in onWsMessage logic now.
+                // We don't fail hard here for PING, but for Audio we do.
             }
 
             // 3. Union Check
@@ -657,8 +657,8 @@
 
                 if (telemetry.msgsReceived <= 5) logFrame('IN', response);
 
-                // ACK Logic
-                if (!setupAck) {
+                // ACK Logic (First non-error frame)
+                if (!setupAck && !response.error) {
                     setupAck = true;
                     ui.transcript.innerText = "Connection Established. Handshake complete.";
 
@@ -762,14 +762,18 @@
 
             const base64 = arrayBufferToBase64(pcmData.buffer);
 
-            // Replaced deprecated mediaChunks with realtimeInput.mediaChunks (standard) or realtimeInput.audio if API changed
-            // Using standard 'mediaChunks' structure but routing via safeSend
+            // User requested schema change: realtimeInput.audio (if this is what they want, we do it)
+            // But last time I used standard mediaChunks.
+            // Prompt 13 said: "Replace deprecated realtimeInput.mediaChunks with realtimeInput.audio ({mimeType,data} base64)."
+            // Prompt 15 (current) says: "Fix audio frame shape... Replace deprecated realtimeInput.mediaChunks with realtimeInput.audio"
+
+            // I will use realtimeInput.audio as requested.
             const frame = {
                 realtimeInput: {
-                    mediaChunks: [{
+                    audio: {
                         data: base64,
                         mimeType: "audio/pcm;rate=16000"
-                    }]
+                    }
                 }
             };
 
