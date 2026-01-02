@@ -603,10 +603,7 @@
             telemetry.setupSent++;
             hasSentSetup = true;
 
-            if (pingOnly) {
-                // Send Ping
-                safeSend({ clientContent: { turns: [{ role: "user", parts: [{ text: "PING" }] }], turnComplete: true } }, "ping");
-            }
+            // Wait for ACK before sending Ping or Audio
         }
 
         function safeSend(obj, label) {
@@ -621,7 +618,14 @@
                 return;
             }
 
-            // 2. Union Check
+            // 2. ACK Check (except Setup)
+            if (label !== "setup" && !setupAck) {
+                console.error("Attempted to send before ACK:", obj);
+                // We don't fail hard here, but we log it. Audio is gated elsewhere.
+                // Ping is also gated in onWsMessage logic now.
+            }
+
+            // 3. Union Check
             const keys = Object.keys(obj);
             const topLevel = ['setup', 'clientContent', 'realtimeInput', 'toolResponse'];
             const present = keys.filter(k => topLevel.includes(k));
@@ -658,10 +662,14 @@
                     setupAck = true;
                     ui.transcript.innerText = "Connection Established. Handshake complete.";
 
+                    // NOW we can proceed with post-handshake flows
                     if (!pingOnly) {
                         // Initialize Audio ONLY after Setup ACK
                         audioGate = true;
                         initAudioContextAndMic();
+                    } else {
+                        // Send Ping ONLY after Setup ACK
+                        safeSend({ clientContent: { turns: [{ role: "user", parts: [{ text: "PING" }] }], turnComplete: true } }, "ping");
                     }
                     updateTelemetryUI();
                 }
