@@ -216,19 +216,33 @@
 
             try {
                 // 1. Setup Audio Context First (User gesture required)
-                audioContext = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 16000 });
+                // Use native sample rate (often 44.1k/48k) to avoid hardware conflicts
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 scheduledTime = audioContext.currentTime;
 
-                // 2. Request Microphone
+                // 2. Load AudioWorklet Processor
                 try {
+                    await audioContext.audioWorklet.addModule('js/audio-processor.js');
+                } catch (e) {
+                    console.error("Worklet load failed:", e);
+                    throw new Error("Audio Processor Failed to Load");
+                }
+
+                // 3. Request Microphone
+                try {
+                    // Ask for 16k, but don't force it hard if browser refuses
                     micStream = await navigator.mediaDevices.getUserMedia({ 
-                        audio: { channelCount: 1, sampleRate: 16000, echoCancellation: true, noiseSuppression: true } 
+                        audio: {
+                            channelCount: 1,
+                            echoCancellation: true,
+                            noiseSuppression: true
+                        }
                     });
                 } catch (micErr) {
                     throw new Error("Microphone Denied. Please check browser permissions.");
                 }
 
-                // 3. Connect WebSocket
+                // 4. Connect WebSocket
                 socket = new WebSocket(WS_URL);
                 socket.onopen = onWsOpen;
                 socket.onmessage = onWsMessage;
@@ -331,8 +345,8 @@
             }
         }
 
-        function onWsClose() {
-            console.log("WebSocket Closed");
+        function onWsClose(event) {
+            console.log("WebSocket Closed", event.code, event.reason);
             disconnect();
         }
 
@@ -340,29 +354,32 @@
 
         function setupMicProcessing() {
             const source = audioContext.createMediaStreamSource(micStream);
-            processor = audioContext.createScriptProcessor(2048, 1, 1);
+            const workletNode = new AudioWorkletNode(audioContext, 'pcm-processor');
 
-            processor.onaudioprocess = (e) => {
+            workletNode.port.onmessage = (event) => {
                 if (!isConnected || socket.readyState !== WebSocket.OPEN) return;
-
-                const inputData = e.inputBuffer.getChannelData(0);
                 
-                // Visualization logic
+                const float32Data = event.data; // Raw Float32 from processor
+
+                // Visualization (RMS)
                 let sum = 0;
-                for(let i=0; i<inputData.length; i++) sum += inputData[i] * inputData[i];
-                const rms = Math.sqrt(sum / inputData.length);
+                for (let i = 0; i < float32Data.length; i++) sum += float32Data[i] * float32Data[i];
+                const rms = Math.sqrt(sum / float32Data.length);
                 updateBars(rms);
 
-                // Convert to 16-bit PCM
-                const pcmData = new Int16Array(inputData.length);
-                for (let i = 0; i < inputData.length; i++) {
-                    pcmData[i] = Math.max(-1, Math.min(1, inputData[i])) * 0x7FFF;
+                // DOWNSAMPLE & CONVERT (Fix for "Connect then Drop")
+                // We must send 16kHz audio to match the JSON declaration
+                const downsampled = downsampleTo16k(float32Data, audioContext.sampleRate);
+
+                const pcmData = new Int16Array(downsampled.length);
+                for (let i = 0; i < downsampled.length; i++) {
+                    pcmData[i] = Math.max(-1, Math.min(1, downsampled[i])) * 0x7FFF;
                 }
 
-                // Send to Gemini
+                // Base64 Encode
                 const base64 = btoa(String.fromCharCode(...new Uint8Array(pcmData.buffer)));
 
-                // Note: Using camelCase for Proto3 JSON mapping compatibility
+                // Send to Gemini
                 const frame = {
                     realtimeInput: {
                         mediaChunks: [{
@@ -374,8 +391,31 @@
                 socket.send(JSON.stringify(frame));
             };
 
-            source.connect(processor);
-            processor.connect(audioContext.destination);
+            source.connect(workletNode);
+            workletNode.connect(audioContext.destination); // Keep graph alive
+            processor = workletNode; // Store for cleanup in disconnect()
+        }
+
+        function downsampleTo16k(inputBuffer, inputRate) {
+            if (inputRate === 16000) return inputBuffer;
+
+            const ratio = inputRate / 16000;
+            const newLength = Math.round(inputBuffer.length / ratio);
+            const result = new Float32Array(newLength);
+
+            for (let i = 0; i < newLength; i++) {
+                const index = i * ratio;
+                const lower = Math.floor(index);
+                const upper = Math.ceil(index);
+                const weight = index - lower;
+
+                if (upper < inputBuffer.length) {
+                    result[i] = inputBuffer[lower] * (1 - weight) + inputBuffer[upper] * weight;
+                } else {
+                    result[i] = inputBuffer[lower];
+                }
+            }
+            return result;
         }
 
         // --- Audio Playback (Output) ---
