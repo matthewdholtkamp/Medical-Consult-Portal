@@ -89,7 +89,10 @@
         .debug-row span:last-child { color: #e2e8f0; font-weight: 600; }
         .debug-section { margin-bottom: 8px; }
         .debug-title { font-size: 10px; font-weight: bold; color: #64748b; text-transform: uppercase; margin-bottom: 2px; }
-        .debug-log { font-family: monospace; font-size: 9px; color: #a5f3fc; background: #164e63; padding: 2px 4px; border-radius: 2px; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .debug-log { font-family: monospace; font-size: 9px; color: #a5f3fc; background: #164e63; padding: 2px 4px; border-radius: 2px; margin-top: 2px; white-space: pre-wrap; word-break: break-all; max-height: 80px; overflow-y: auto; }
+        .frame-log-entry { border-bottom: 1px solid #334155; padding: 2px 0; font-size: 9px; }
+        .frame-out { color: #86efac; } /* Green */
+        .frame-in { color: #93c5fd; } /* Blue */
     </style>
 </head>
 
@@ -166,36 +169,38 @@
                     <div class="debug-title">Connection State</div>
                     <div class="debug-row"><span>Phase</span><span id="tele-phase">DISCONNECTED</span></div>
                     <div class="debug-row"><span>WS ReadyState</span><span id="tele-ws-state">--</span></div>
-                    <div class="debug-row"><span>AudioCtx</span><span id="tele-audio-state">--</span></div>
-                    <div class="debug-row"><span>Model</span><span class="truncate max-w-[120px]" id="tele-model">--</span></div>
+                    <div class="debug-row"><span>Conn ID</span><span id="tele-conn-id" class="truncate w-16 text-right">--</span></div>
+                    <div class="debug-row"><span>Attempts</span><span id="tele-attempts">0</span></div>
+                </div>
+
+                <!-- Last Close Info -->
+                <div class="debug-section">
+                    <div class="debug-title">Last Close</div>
+                    <div class="debug-row"><span>Code</span><span id="tele-close-code">--</span></div>
+                    <div class="debug-row"><span>Reason</span><span id="tele-close-reason" class="truncate w-24 text-right">--</span></div>
                 </div>
 
                 <!-- Counters Section -->
                 <div class="debug-section">
                     <div class="debug-title">Traffic Counters</div>
                     <div class="debug-row"><span>Setup Sent</span><span id="cnt-setup">0</span></div>
-                    <div class="debug-row"><span>Trigger Sent</span><span id="cnt-trigger">0</span></div>
                     <div class="debug-row"><span>Audio Sent (Chunks)</span><span id="cnt-audio-tx">0</span></div>
-                    <div class="debug-row"><span>Audio Rx (Chunks)</span><span id="cnt-audio-rx">0</span></div>
-                    <div class="debug-row"><span>Text Rx (Chunks)</span><span id="cnt-text-rx">0</span></div>
+                    <div class="debug-row"><span>Msgs Rx</span><span id="cnt-msgs-rx">0</span></div>
                 </div>
 
-                <!-- Timing Section -->
+                <!-- Frame Log (Ring Buffer) -->
                 <div class="debug-section">
-                    <div class="debug-title">Timestamps (Rel.)</div>
-                    <div class="debug-row"><span>Last Msg</span><span id="time-last-msg">--</span></div>
-                    <div class="debug-row"><span>Last Audio Rx</span><span id="time-last-audio">--</span></div>
-                    <div class="debug-row"><span>Last Text Rx</span><span id="time-last-text">--</span></div>
-                </div>
-
-                <!-- Last Server Response (Debug) -->
-                <div class="debug-section">
-                    <div class="debug-title">Last Server Output</div>
-                    <div id="debug-last-output" class="debug-log">--</div>
+                    <div class="debug-title">Recent Frames (Max 5)</div>
+                    <div id="frame-log-container" class="font-mono text-[9px] text-slate-400 bg-slate-950 p-1 rounded border border-slate-800 h-24 overflow-y-auto">
+                        <!-- Injected via JS -->
+                    </div>
                 </div>
 
                 <!-- Actions -->
                 <div class="pt-2 border-t border-slate-700 flex flex-col gap-2">
+                    <button onclick="testPingOnly()" id="btn-ping" class="w-full py-1 bg-slate-700 hover:bg-slate-600 text-slate-300 border border-slate-600 rounded text-xs font-mono transition-colors">
+                        [TEST] WS PING (NO AUDIO)
+                    </button>
                     <button onclick="sendTestKick()" id="btn-kick" class="w-full py-1 bg-blue-600/20 hover:bg-blue-600/40 text-blue-400 border border-blue-500/30 rounded text-xs font-mono transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>
                         [TEST] SEND TEXT KICK
                     </button>
@@ -243,9 +248,15 @@
         import { API_KEYS } from '/Medical-Consult-Portal/js/config.js';
 
         // --- Configuration ---
+        // Toggle this to true if you are using the relay-server.js
+        const USE_RELAY = false;
+        const RELAY_URL = "ws://localhost:3000";
+
         const API_KEY = API_KEYS.ORTHOPEDICS;
         const MODEL_ID = "gemini-2.5-flash-native-audio-preview-12-2025";
-        const WS_URL = `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent?key=${API_KEY}`;
+
+        const DIRECT_URL = `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent?key=${API_KEY}`;
+        const WS_URL = USE_RELAY ? RELAY_URL : DIRECT_URL;
 
         // --- Connection State Machine ---
         const STATE = {
@@ -256,39 +267,30 @@
             ERROR: 'ERROR'
         };
 
-        // --- Dr. Holtkamp System Instruction ---
-        const SYSTEM_INSTRUCTION = `Respond as Dr. Holtkamp, Expert Medical Educator. 
-        Context: You are speaking via high-fidelity real-time audio.
-        Tone: Professional, authoritative, analytically rigorous. 
-        Style: Oral consult format. Be concise.
-        Evidence: Use current medical guidelines (AHA, ACC, IDSA, etc.).
-        Barge-in: You expect to be interrupted. If the doctor speaks, stop your current thought and listen.`;
-
         const GREETINGS = [
-            "Hey Doc, what's up?",
             "Dr. Holtkamp here. How can I help?",
-            "Good to see you, Doctor. Ready for rounds?",
             "Hello Doctor. I'm listening.",
-            "Hi Doc. What's the situation?",
-            "Dr. Holtkamp online. What are we working on?",
-            "Greetings, Doctor. Ready to consult.",
-            "Hey there, Doc. What's on your mind?",
-            "Doctor, I'm ready. Go ahead.",
-            "Hello. Let's solve this case."
+            "Dr. Holtkamp online. Ready."
         ];
 
         // --- Global Variables ---
         let audioContext;
         let micStream;
-        let processor; // Worklet Node
+        let processor;
         let socket;
         let currentState = STATE.DISCONNECTED;
+
         let playbackQueue = [];
         let scheduledTime = 0;
 
-        // Watchdogs
+        // Watchdogs & Backoff
         let serverFrameTimeout = null;
         let audioFrameTimeout = null;
+        let reconnectTimeout = null;
+        let reconnectAttempts = 0;
+        const MAX_RECONNECT_ATTEMPTS = 8;
+        let isConnecting = false;
+        let currentConnectionId = null;
 
         // Telemetry Data
         const telemetry = {
@@ -301,8 +303,9 @@
             lastMsgAt: null,
             lastAudioAt: null,
             lastTextAt: null,
-            firstFrames: [], // Store first 3 frames for debugging
-            lastError: null
+            frameBuffer: [], // Ring buffer
+            lastError: null,
+            lastClose: { code: null, reason: null, wasClean: false }
         };
 
         const ui = {
@@ -323,24 +326,20 @@
             debugErrorMsg: document.getElementById('debug-error-msg'),
             debugErrorCode: document.getElementById('debug-error-code'),
             debugErrorPhase: document.getElementById('debug-error-phase'),
-            debugLastOutput: document.getElementById('debug-last-output'),
+            frameLogContainer: document.getElementById('frame-log-container'),
             btnKick: document.getElementById('btn-kick'),
             btnForceSpeak: document.getElementById('btn-force-speak'),
 
             // Telemetry Fields
             telePhase: document.getElementById('tele-phase'),
             teleWsState: document.getElementById('tele-ws-state'),
-            teleAudioState: document.getElementById('tele-audio-state'),
-            teleModel: document.getElementById('tele-model'),
+            teleConnId: document.getElementById('tele-conn-id'),
+            teleAttempts: document.getElementById('tele-attempts'),
+            teleCloseCode: document.getElementById('tele-close-code'),
+            teleCloseReason: document.getElementById('tele-close-reason'),
             cntSetup: document.getElementById('cnt-setup'),
-            cntTrigger: document.getElementById('cnt-trigger'),
             cntAudioTx: document.getElementById('cnt-audio-tx'),
-            cntAudioRx: document.getElementById('cnt-audio-rx'),
-            cntTextRx: document.getElementById('cnt-text-rx'),
-            cntMsgsRx: document.getElementById('cnt-msgs-rx'),
-            timeLastMsg: document.getElementById('time-last-msg'),
-            timeLastAudio: document.getElementById('time-last-audio'),
-            timeLastText: document.getElementById('time-last-text')
+            cntMsgsRx: document.getElementById('cnt-msgs-rx')
         };
 
         // --- UI Logic ---
@@ -352,28 +351,36 @@
         function updateTelemetryUI() {
             ui.telePhase.innerText = currentState;
             ui.teleWsState.innerText = socket ? socket.readyState : 'CLOSED';
-            ui.teleAudioState.innerText = audioContext ? audioContext.state : 'N/A';
-            ui.teleModel.innerText = MODEL_ID.split('-')[2] || 'flash'; // Shorten
+            ui.teleConnId.innerText = currentConnectionId ? currentConnectionId.slice(-6) : '--';
+            ui.teleAttempts.innerText = `${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS}`;
+
+            ui.teleCloseCode.innerText = telemetry.lastClose.code || '--';
+            ui.teleCloseReason.innerText = telemetry.lastClose.reason || '--';
 
             ui.cntSetup.innerText = telemetry.setupSent;
-            ui.cntTrigger.innerText = telemetry.triggerSent;
             ui.cntAudioTx.innerText = telemetry.audioChunksSent;
-            ui.cntAudioRx.innerText = telemetry.audioChunksReceived;
-            ui.cntTextRx.innerText = telemetry.textChunksReceived;
             ui.cntMsgsRx.innerText = telemetry.msgsReceived;
 
-            const now = Date.now();
-            ui.timeLastMsg.innerText = telemetry.lastMsgAt ? `${((now - telemetry.lastMsgAt)/1000).toFixed(1)}s ago` : '--';
-            ui.timeLastAudio.innerText = telemetry.lastAudioAt ? `${((now - telemetry.lastAudioAt)/1000).toFixed(1)}s ago` : '--';
-            ui.timeLastText.innerText = telemetry.lastTextAt ? `${((now - telemetry.lastTextAt)/1000).toFixed(1)}s ago` : '--';
-
-            // Enable Kick button only if we are connected (OPEN)
             const isLive = socket && socket.readyState === WebSocket.OPEN;
             ui.btnKick.disabled = !isLive;
             ui.btnForceSpeak.disabled = !isLive;
         }
 
-        // Run UI loop
+        function logFrame(type, data) {
+            const entry = { type, time: new Date().toISOString(), data };
+            telemetry.frameBuffer.unshift(entry);
+            if (telemetry.frameBuffer.length > 5) telemetry.frameBuffer.pop();
+            renderFrameLog();
+        }
+
+        function renderFrameLog() {
+            ui.frameLogContainer.innerHTML = telemetry.frameBuffer.map(f => {
+                const typeClass = f.type === 'OUT' ? 'frame-out' : 'frame-in';
+                const snippet = JSON.stringify(f.data).slice(0, 50);
+                return `<div class="frame-log-entry ${typeClass}">[${f.type}] ${snippet}...</div>`;
+            }).join('');
+        }
+
         setInterval(updateTelemetryUI, 500);
 
         function updateState(newState) {
@@ -381,7 +388,6 @@
             currentState = newState;
             ui.statusText.innerText = newState;
 
-            // Reset Classes
             ui.statusDot.className = "w-2 h-2 rounded-full";
             ui.badge.className = "flex items-center gap-2 px-3 py-1 rounded-full border transition-colors cursor-pointer";
             ui.icon.classList.remove('text-blue-400', 'text-amber-400', 'text-red-400');
@@ -405,10 +411,8 @@
                     ui.icon.innerText = "settings_input_antenna";
                     ui.icon.classList.add('text-amber-400');
                     ui.btn.classList.add('border-slate-700', 'thinking-active');
-                    ui.interactionText.innerText = "Establishing Secure Link...";
-                    ui.transcript.innerText = "Handshaking with Gemini Live...";
-                    ui.debugErrorBox.classList.add('hidden'); // Clear errors on retry
-                    resetTelemetry();
+                    ui.interactionText.innerText = `Connecting (Try ${reconnectAttempts + 1})...`;
+                    ui.debugErrorBox.classList.add('hidden');
                     break;
 
                 case STATE.CONFIGURING:
@@ -454,8 +458,6 @@
             ui.debugErrorCode.innerText = `Code: ${code}`;
             ui.debugErrorPhase.innerText = `Phase: ${telemetry.lastError.phase}`;
             ui.debugErrorBox.classList.remove('hidden');
-
-            // Auto-open panel on error
             ui.debugPanel.classList.remove('hidden');
             updateState(STATE.ERROR);
         }
@@ -470,159 +472,148 @@
             telemetry.lastMsgAt = null;
             telemetry.lastAudioAt = null;
             telemetry.lastTextAt = null;
-            telemetry.firstFrames = [];
+            telemetry.frameBuffer = [];
             telemetry.lastError = null;
-            ui.debugLastOutput.innerText = "--";
+            ui.frameLogContainer.innerHTML = '';
         }
-
-        window.copyDebugInfo = function() {
-            const info = {
-                state: currentState,
-                wsState: socket ? socket.readyState : 'NULL',
-                audioCtxState: audioContext ? audioContext.state : 'NULL',
-                telemetry: telemetry,
-                userAgent: navigator.userAgent
-            };
-            navigator.clipboard.writeText(JSON.stringify(info, null, 2)).then(() => {
-                const btn = document.querySelector('button[title="Copy Debug Info"]');
-                btn.classList.add('text-green-400');
-                setTimeout(() => btn.classList.remove('text-green-400'), 1000);
-            });
-        };
-
-        window.sendTestKick = function() {
-            if (!socket || socket.readyState !== WebSocket.OPEN) return;
-            const msg = {
-                clientContent: {
-                    turns: [{
-                        role: "user",
-                        parts: [{ text: "System check. Confirm audio link established." }]
-                    }],
-                    turnComplete: true
-                }
-            };
-            socket.send(JSON.stringify(msg));
-            console.log("Kick message sent");
-        };
-
-        window.sendForceSpeak = function() {
-            if (!socket || socket.readyState !== WebSocket.OPEN) return;
-            const msg = {
-                clientContent: {
-                    turns: [{
-                        role: "user",
-                        parts: [{ text: "Reply with BOTH: (1) the exact text 'ACK', and (2) speak it out loud." }]
-                    }],
-                    turnComplete: true
-                }
-            };
-            socket.send(JSON.stringify(msg));
-            console.log("Force Speak message sent");
-        };
 
         // --- Connection Management ---
 
         window.toggleConnection = async function() {
             if (currentState === STATE.DISCONNECTED || currentState === STATE.ERROR) {
+                // Reset attempts on manual start
+                reconnectAttempts = 0;
                 connect();
             } else {
                 disconnect();
             }
         };
 
-        async function connect() {
+        window.testPingOnly = function() {
+            // Transport check only, no audio
+            reconnectAttempts = 0;
+            connect(true);
+        }
+
+        async function connect(pingOnly = false) {
+            if (isConnecting) return;
             if (API_KEY === "PASTE_YOUR_KEY_HERE" || !API_KEY) {
                 reportError("AUTH_FAIL", "Missing Key", "API Key not found in config.");
                 return;
             }
 
+            isConnecting = true;
+            resetTelemetry();
             updateState(STATE.CONNECTING);
+            currentConnectionId = crypto.randomUUID();
 
             try {
-                // 1. Setup Audio Context (Native Rate)
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-
-                // Explicit Resume (Browser Autoplay Policy)
-                await audioContext.resume();
-                scheduledTime = audioContext.currentTime;
-
-                // 2. Load Worklet
-                try {
-                    await audioContext.audioWorklet.addModule('js/audio-processor.js');
-                } catch (e) {
-                    throw new Error(`Audio Worklet failed to load: ${e.message}`);
+                // Audio Context Init (Deferred for Ping)
+                if (!pingOnly) {
+                    try {
+                        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                        await audioContext.resume();
+                        scheduledTime = audioContext.currentTime;
+                    } catch (e) {
+                        throw new Error(`Audio Context blocked: ${e.message}`);
+                    }
                 }
 
-                // 3. Request Microphone
-                try {
-                    micStream = await navigator.mediaDevices.getUserMedia({ 
-                        audio: {
-                            channelCount: 1,
-                            echoCancellation: true,
-                            noiseSuppression: true,
-                            autoGainControl: true
-                        }
-                    });
-                } catch (micErr) {
-                    throw new Error("Microphone access denied. Please allow permissions.");
-                }
-
-                // 4. WebSocket Handshake
+                // WebSocket
+                console.log(`Connecting to: ${WS_URL} [ID: ${currentConnectionId}]`);
                 socket = new WebSocket(WS_URL);
 
-                socket.onopen = onWsOpen;
+                socket.onopen = () => onWsOpen(pingOnly);
                 socket.onmessage = onWsMessage;
                 socket.onclose = onWsClose;
-                socket.onerror = (e) => console.error("WS Error Event:", e);
+                socket.onerror = (e) => console.error("WS Error Event", e);
 
-                // 5. Start Mic Processing (but don't send yet until Open)
-                setupMicProcessing();
+                if (!pingOnly) {
+                    // Load Worklet & Mic (Deferred to after socket creation to avoid blocking)
+                    await setupAudioInput();
+                    // Audio processing starts, but `onaudioprocess` checks socket state
+                }
 
-                // 6. Start Watchdogs
                 startWatchdogs();
 
             } catch (err) {
-                disconnect(false);
-                reportError("CLIENT_ERR", "Exception", err.message);
+                handleConnectionFailure(err);
+            } finally {
+                isConnecting = false;
+            }
+        }
+
+        async function setupAudioInput() {
+            try {
+                await audioContext.audioWorklet.addModule('js/audio-processor.js');
+                micStream = await navigator.mediaDevices.getUserMedia({
+                    audio: {
+                        channelCount: 1,
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        autoGainControl: true
+                    }
+                });
+
+                const source = audioContext.createMediaStreamSource(micStream);
+                const workletNode = new AudioWorkletNode(audioContext, 'pcm-processor');
+                workletNode.port.onmessage = handleMicData;
+                source.connect(workletNode);
+                workletNode.connect(audioContext.destination);
+                processor = workletNode;
+            } catch (e) {
+                throw new Error(`Audio Input Setup Failed: ${e.message}`);
+            }
+        }
+
+        function handleConnectionFailure(err) {
+            disconnect(false);
+
+            // Retry Logic for Transport Errors
+            if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+                const backoff = Math.min(250 * Math.pow(2, reconnectAttempts), 5000);
+                reconnectAttempts++;
+                console.log(`Retrying in ${backoff}ms...`);
+                ui.interactionText.innerText = `Retry ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS} in ${backoff}ms...`;
+
+                reconnectTimeout = setTimeout(() => {
+                    connect();
+                }, backoff);
+            } else {
+                reportError("MAX_RETRIES", "Connection Limit", `Failed after ${MAX_RECONNECT_ATTEMPTS} attempts. Last error: ${err.message}`);
             }
         }
 
         function startWatchdogs() {
-            // Watchdog 1: 5s timeout for ANY server frame
+            clearTimeout(serverFrameTimeout);
+            clearTimeout(audioFrameTimeout);
+
             serverFrameTimeout = setTimeout(() => {
                 if (telemetry.msgsReceived === 0 && currentState !== STATE.ERROR) {
                     disconnect(false);
-                    reportError("TIMEOUT_NO_RESP", "No Server Frames", "Server did not respond within 5s of connection.");
+                    reportError("TIMEOUT_NO_RESP", "No Server Frames", "Server did not respond within 5s.");
                 }
             }, 5000);
 
-            // Watchdog 2: 10s timeout for AUDIO frames
             audioFrameTimeout = setTimeout(() => {
-                if (telemetry.audioChunksReceived === 0 && currentState !== STATE.ERROR) {
-                    let errMsg = "Connected, but received no audio frames within 10s.";
-                    let errCode = "TIMEOUT_NO_AUDIO";
+                if (telemetry.audioChunksReceived === 0 && currentState !== STATE.ERROR && currentState === STATE.LIVE) {
+                     // Check if we have text-only response
+                     if (telemetry.textChunksReceived > 0) return;
 
-                    if (telemetry.textChunksReceived > 0) {
-                        errMsg = "Model responding with TEXT ONLY. Audio configuration failed.";
-                        errCode = "TIMEOUT_TEXT_ONLY";
-                    } else if (telemetry.msgsReceived > 0) {
-                         errMsg = "Server sending messages but NO MODEL OUTPUT (Text or Audio).";
-                         errCode = "TIMEOUT_EMPTY_FRAMES";
-                    }
-
-                    disconnect(false);
-                    reportError(errCode, "No Audio Output", errMsg);
+                     disconnect(false);
+                     reportError("TIMEOUT_NO_AUDIO", "No Audio", "Connected but no audio received in 10s.");
                 }
             }, 10000);
         }
 
         function disconnect(isClean = true) {
-            // Clear Watchdogs
             clearTimeout(serverFrameTimeout);
             clearTimeout(audioFrameTimeout);
+            clearTimeout(reconnectTimeout);
+            isConnecting = false;
 
-            // Cleanup Logic
             if (socket) {
+                socket.onclose = null; // Prevent loop
                 socket.close(1000, "User Disconnect");
                 socket = null;
             }
@@ -642,12 +633,13 @@
 
             if (isClean) {
                 updateState(STATE.DISCONNECTED);
+                reconnectAttempts = 0;
             }
         }
 
         // --- WebSocket Handlers ---
 
-        function onWsOpen() {
+        function onWsOpen(pingOnly) {
             console.log("WebSocket Opened");
             updateState(STATE.CONFIGURING);
 
@@ -656,181 +648,123 @@
                 setup: {
                     model: `models/${MODEL_ID}`,
                     generationConfig: {
-                        // Request BOTH modalities for debugging
                         responseModalities: ["AUDIO", "TEXT"],
                         speechConfig: {
                             voiceConfig: { prebuiltVoiceConfig: { voiceName: "Fenrir" } }
                         }
                     },
-                    systemInstruction: { parts: [{ text: SYSTEM_INSTRUCTION }] },
+                    systemInstruction: { parts: [{ text: "System Test." }] }, // Minimal
                 }
             };
+            logFrame('OUT', setup);
             socket.send(JSON.stringify(setup));
             telemetry.setupSent++;
 
-            // 2. Send Initial Trigger (Start Conversation)
-            const randomGreeting = GREETINGS[Math.floor(Math.random() * GREETINGS.length)];
-            const trigger = {
+            // 2. Send Trigger
+            const msg = {
                 clientContent: {
                     turns: [{
                         role: "user",
-                        parts: [{ text: `The user has joined. Start immediately by saying: "${randomGreeting}"` }]
+                        parts: [{ text: pingOnly ? "PING. Reply with 'PONG'." : "Hello Doctor." }]
                     }],
                     turnComplete: true
                 }
             };
-            socket.send(JSON.stringify(trigger));
-            telemetry.triggerSent++;
+            logFrame('OUT', msg);
+            socket.send(JSON.stringify(msg));
         }
 
         function onWsMessage(event) {
             telemetry.msgsReceived++;
-            telemetry.lastMsgAt = Date.now();
-
             if (typeof event.data === 'string') {
                 let response;
                 try {
                     response = JSON.parse(event.data);
-                } catch (e) {
-                    console.error("Non-JSON frame received");
-                    return;
-                }
+                } catch (e) { return; }
 
-                // Log first 3 frames
-                if (telemetry.firstFrames.length < 3) {
-                    telemetry.firstFrames.push(response);
-                    console.log("Server Frame:", response);
-                }
+                // Log first 5 frames
+                if (telemetry.msgsReceived <= 5) logFrame('IN', response);
 
-                // Check for Global Errors
                 if (response.error) {
+                    const code = response.error.code;
+                    let hint = "";
+                    // Interpret Errors
+                    if (code === 409 || response.error.status === 'ABORTED') {
+                         hint = " [Hint: Active session exists?]";
+                    }
                     disconnect(false);
-                    reportError(response.error.code, response.error.status, response.error.message);
+                    reportError(code, response.error.status, response.error.message + hint);
                     return;
                 }
 
-                // Check for Server Content (Model Turns)
                 if (response.serverContent?.modelTurn?.parts) {
-                    const parts = response.serverContent.modelTurn.parts;
-                    let hasAudio = false;
-                    let hasText = false;
-                    let logText = "";
+                    if (currentState !== STATE.LIVE) updateState(STATE.LIVE);
 
+                    const parts = response.serverContent.modelTurn.parts;
                     parts.forEach(part => {
-                        // 1. Audio
                         if (part.inlineData && part.inlineData.mimeType.includes('audio')) {
-                            hasAudio = true;
-                            // Convert Base64 -> Float32 -> Play
                             const raw = atob(part.inlineData.data);
                             const buffer = new Uint8Array(raw.length);
                             for(let i=0; i<raw.length; i++) buffer[i] = raw.charCodeAt(i);
                             queueAudioChunk(buffer.buffer);
-                            logText = "[Audio Chunk]";
-                        }
-                        // 2. Text
-                        else if (part.text) {
-                            hasText = true;
-                            logText = part.text.substring(0, 30) + (part.text.length > 30 ? "..." : "");
-                            console.log("Model Text:", part.text);
+                            telemetry.audioChunksReceived++;
+                        } else if (part.text) {
+                            telemetry.textChunksReceived++;
                         }
                     });
-
-                    // Update UI Log
-                    if (logText) ui.debugLastOutput.innerText = logText;
-
-                    if (hasAudio) {
-                        telemetry.audioChunksReceived++;
-                        telemetry.lastAudioAt = Date.now();
-                        if (currentState !== STATE.LIVE) updateState(STATE.LIVE);
-                    }
-
-                    if (hasText) {
-                        telemetry.textChunksReceived++;
-                        telemetry.lastTextAt = Date.now();
-                    }
-                }
-
-                // Check for Interruption
-                if (response.serverContent?.interrupted) {
-                    console.log("Model Interrupted by User");
-                    stopAllAudio();
-                    ui.debugLastOutput.innerText = "[Interrupted]";
                 }
             }
         }
 
         function onWsClose(event) {
-            console.log(`WebSocket Closed: ${event.code} - ${event.reason}`);
+            telemetry.lastClose = {
+                code: event.code,
+                reason: event.reason,
+                wasClean: event.wasClean
+            };
+            console.log(`WS Close: ${event.code}`);
 
             if (event.code === 1000 || event.code === 1005) {
-                if(currentState !== STATE.DISCONNECTED) {
-                    updateState(STATE.DISCONNECTED);
-                }
+                updateState(STATE.DISCONNECTED);
             } else {
-                // Abnormal closure
-                const failedPhase = currentState;
-                // Don't report if we already reported a more specific error (e.g. timeout)
-                if (currentState !== STATE.ERROR) {
-                    reportError(event.code, event.reason || "Unknown", `WS Closed during ${failedPhase}`);
-                }
+                // Retry Logic
+                let errorMsg = `WS Closed: ${event.code}`;
+                if (event.code === 1006) errorMsg += " (Abnormal)";
+                handleConnectionFailure(new Error(errorMsg));
             }
         }
 
-        // --- Audio Processing (Input) ---
+        // --- Mic Data Handler ---
+        function handleMicData(event) {
+            if (!socket || socket.readyState !== WebSocket.OPEN) return;
 
-        function setupMicProcessing() {
-            if (!audioContext || !micStream) return;
+            const float32Data = event.data;
+            let sum = 0;
+            for (let i = 0; i < float32Data.length; i++) sum += float32Data[i] * float32Data[i];
+            const rms = Math.sqrt(sum / float32Data.length);
+            updateBars(rms);
 
-            const source = audioContext.createMediaStreamSource(micStream);
-            const workletNode = new AudioWorkletNode(audioContext, 'pcm-processor');
-
-            workletNode.port.onmessage = (event) => {
-                if (socket && socket.readyState === WebSocket.OPEN) {
-                    const float32Data = event.data;
-
-                    // 1. Viz
-                    let sum = 0;
-                    for (let i = 0; i < float32Data.length; i++) sum += float32Data[i] * float32Data[i];
-                    const rms = Math.sqrt(sum / float32Data.length);
-                    updateBars(rms);
-
-                    // 2. Downsample (Native -> 16000)
-                    const downsampled = downsampleTo16k(float32Data, audioContext.sampleRate);
-
-                    // 3. Float32 -> Int16
-                    const pcmData = new Int16Array(downsampled.length);
-                    for (let i = 0; i < downsampled.length; i++) {
-                        pcmData[i] = Math.max(-1, Math.min(1, downsampled[i])) * 0x7FFF;
-                    }
-
-                    // 4. Safe Base64 Encode
-                    const base64 = arrayBufferToBase64(pcmData.buffer);
-
-                    // 5. Send
-                    const frame = {
-                        realtimeInput: {
-                            mediaChunks: [{
-                                data: base64,
-                                mimeType: "audio/pcm;rate=16000"
-                            }]
-                        }
-                    };
-
-                    try {
-                        socket.send(JSON.stringify(frame));
-                        telemetry.audioChunksSent++;
-                    } catch (e) {
-                        console.error("Socket Send Failed", e);
-                    }
+            const downsampled = downsampleTo16k(float32Data, audioContext.sampleRate);
+            const pcmData = new Int16Array(downsampled.length);
+            for (let i = 0; i < downsampled.length; i++) {
+                pcmData[i] = Math.max(-1, Math.min(1, downsampled[i])) * 0x7FFF;
+            }
+            const base64 = arrayBufferToBase64(pcmData.buffer);
+            const frame = {
+                realtimeInput: {
+                    mediaChunks: [{
+                        data: base64,
+                        mimeType: "audio/pcm;rate=16000"
+                    }]
                 }
             };
-
-            source.connect(workletNode);
-            workletNode.connect(audioContext.destination);
-            processor = workletNode;
+            try {
+                socket.send(JSON.stringify(frame));
+                telemetry.audioChunksSent++;
+            } catch (e) {}
         }
 
-        // Safer Base64 helper (prevents stack overflow on large buffers)
+        // --- Helpers ---
         function arrayBufferToBase64(buffer) {
             let binary = '';
             const bytes = new Uint8Array(buffer);
@@ -860,34 +794,25 @@
             return result;
         }
 
-        // --- Audio Playback (Output) ---
-
         async function queueAudioChunk(arrayBuffer) {
-            // Int16 -> Float32
             const int16Array = new Int16Array(arrayBuffer);
             const float32Array = new Float32Array(int16Array.length);
             for (let i = 0; i < int16Array.length; i++) {
                 float32Array[i] = int16Array[i] / 32768.0;
             }
-
             const audioBuffer = audioContext.createBuffer(1, float32Array.length, 16000);
             audioBuffer.getChannelData(0).set(float32Array);
-
             const source = audioContext.createBufferSource();
             source.buffer = audioBuffer;
             source.connect(audioContext.destination);
-
             const startTime = Math.max(scheduledTime, audioContext.currentTime);
             source.start(startTime);
             scheduledTime = startTime + audioBuffer.duration;
-            
             playbackQueue.push(source);
         }
 
         function stopAllAudio() {
-            playbackQueue.forEach(src => {
-                try { src.stop(); } catch(e) {}
-            });
+            playbackQueue.forEach(src => { try { src.stop(); } catch(e) {} });
             playbackQueue = [];
             if (audioContext) scheduledTime = audioContext.currentTime;
         }
@@ -900,6 +825,28 @@
             });
         }
 
+        window.sendTestKick = function() {
+            if (!socket || socket.readyState !== WebSocket.OPEN) return;
+            const msg = { clientContent: { turns: [{ role: "user", parts: [{ text: "System check." }] }], turnComplete: true } };
+            logFrame('OUT', msg);
+            socket.send(JSON.stringify(msg));
+        };
+
+        window.sendForceSpeak = function() {
+            if (!socket || socket.readyState !== WebSocket.OPEN) return;
+            const msg = { clientContent: { turns: [{ role: "user", parts: [{ text: "Speak 'ACK' and write it." }] }], turnComplete: true } };
+            logFrame('OUT', msg);
+            socket.send(JSON.stringify(msg));
+        };
+
+        window.copyDebugInfo = function() {
+            const info = {
+                state: currentState,
+                wsState: socket ? socket.readyState : 'NULL',
+                telemetry: telemetry
+            };
+            navigator.clipboard.writeText(JSON.stringify(info, null, 2));
+        };
     </script>
 </body>
 </html>
