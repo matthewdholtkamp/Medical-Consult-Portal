@@ -161,6 +161,19 @@
         Evidence: Use current medical guidelines (AHA, ACC, IDSA, etc.).
         Barge-in: You expect to be interrupted. If the doctor speaks, stop your current thought and listen.`;
 
+        const GREETINGS = [
+            "Hey Doc, what's up?",
+            "Dr. Holtkamp here. How can I help?",
+            "Good to see you, Doctor. Ready for rounds?",
+            "Hello Doctor. I'm listening.",
+            "Hi Doc. What's the situation?",
+            "Dr. Holtkamp online. What are we working on?",
+            "Greetings, Doctor. Ready to consult.",
+            "Hey there, Doc. What's on your mind?",
+            "Doctor, I'm ready. Go ahead.",
+            "Hello. Let's solve this case."
+        ];
+
         // --- Audio Variables ---
         let audioContext;
         let micStream;
@@ -262,7 +275,7 @@
             ui.transcript.innerText = "System Live. You can speak now.";
             ui.pulse.className = "absolute inset-0 rounded-full pulse-active";
 
-            // Send Setup Frame
+            // 1. Send Setup Frame
             const setup = {
                 setup: {
                     model: `models/${MODEL_ID}`,
@@ -276,6 +289,22 @@
                 }
             };
             socket.send(JSON.stringify(setup));
+
+            // 2. Send Initial Greeting Trigger
+            // We instruct the model to say one of our greetings to start the conversation naturally.
+            const randomGreeting = GREETINGS[Math.floor(Math.random() * GREETINGS.length)];
+            const triggerMessage = {
+                clientContent: {
+                    turns: [
+                        {
+                            role: "user",
+                            parts: [{ text: `The user has joined. Start the conversation immediately by saying exactly this phrase: "${randomGreeting}"` }]
+                        }
+                    ],
+                    turnComplete: true
+                }
+            };
+            socket.send(JSON.stringify(triggerMessage));
         }
 
         function onWsMessage(event) {
@@ -332,11 +361,13 @@
 
                 // Send to Gemini
                 const base64 = btoa(String.fromCharCode(...new Uint8Array(pcmData.buffer)));
+
+                // Note: Using camelCase for Proto3 JSON mapping compatibility
                 const frame = {
-                    realtime_input: {
-                        media_chunks: [{
+                    realtimeInput: {
+                        mediaChunks: [{
                             data: base64,
-                            mime_type: "audio/pcm;rate=16000"
+                            mimeType: "audio/pcm;rate=16000"
                         }]
                     }
                 };
@@ -380,9 +411,11 @@
         }
 
         function updateBars(rms) {
+            // Increased sensitivity for better visual feedback
             ui.bars.forEach((bar, i) => {
                 const scale = (i + 1) * 2;
-                const h = Math.min(32, 4 + (rms * 100 * scale));
+                // Boost RMS significantly for visualization (rms is usually very small)
+                const h = Math.min(48, 4 + (rms * 400 * scale));
                 bar.style.height = `${h}px`;
             });
         }
