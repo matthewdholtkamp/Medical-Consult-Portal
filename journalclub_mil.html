@@ -246,6 +246,14 @@
             toast.innerText = message; toast.className = "show";
             setTimeout(() => { toast.className = ""; }, 3000);
         }
+        function b64ToBytes(b64) {
+          const fixed = b64.replace(/-/g, "+").replace(/_/g, "/");
+          const pad = fixed.length % 4 ? "=".repeat(4 - (fixed.length % 4)) : "";
+          const bin = atob(fixed + pad);
+          const bytes = new Uint8Array(bin.length);
+          for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+          return bytes;
+        }
         function stripLatex(t) { return t ? t.replace(/\$([^$]+)\$/g, '$1').replace(/\\text\s*\{([^}]+)\}/g, '$1').replace(/\\([a-zA-Z]+)/g, ' $1 ').trim() : ""; }
         function showLoader(t) { el('loaderText').innerText = t; el('loader').classList.remove('hidden'); }
         function hideLoader() { el('loader').classList.add('hidden'); }
@@ -366,21 +374,110 @@
 
                 pBar.style.width = '60%';
                 pText.innerText = "Synthesizing Native Audio...";
-                await new Promise(r => setTimeout(r, 2000));
+                await new Promise(r => setTimeout(r, 1000));
 
-                const ttsRes = await fetchWithModel(MODELS.STEP3, {
+                // NEW: Use specific TTS model
+                const TTS_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-tts:generateContent?key=${apiKey}`;
+
+                const ttsPayload = {
                     contents: [{ parts: [{ text: script }] }],
-                    generationConfig: { responseModalities: ["AUDIO"] }
-                });
+                    generationConfig: {
+                        responseModalities: ["AUDIO"],
+                        speechConfig: {
+                            voiceConfig: {
+                                prebuiltVoiceConfig: {
+                                    voiceName: "Aoede"
+                                }
+                            }
+                        }
+                    }
+                };
 
-                const audioPart = ttsRes.candidates[0].content.parts.find(p => p.inlineData);
-                const bytes = new Uint8Array(atob(audioPart.inlineData.data).split("").map(c => c.charCodeAt(0)));
-                el('audioPlayer').src = URL.createObjectURL(pcmToWav(new Int16Array(bytes.buffer), 1, 24000));
+                // Custom Fetch with Backoff for 503 and explicit 429 handling
+                let res;
+                let attempt = 0;
+                const delays = [500, 1000, 2000]; // 3 retries
+
+                while (true) {
+                    try {
+                        res = await fetch(TTS_ENDPOINT, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(ttsPayload)
+                        });
+
+                        if (res.status === 503 && attempt < delays.length) {
+                             await new Promise(r => setTimeout(r, delays[attempt]));
+                             attempt++;
+                             continue;
+                        }
+
+                        break; // Exit loop if not 503 or retries exhausted
+
+                    } catch (netErr) {
+                         throw new Error("Network error during TTS fetch: " + netErr.message);
+                    }
+                }
+
+                // Handle HTTP Errors
+                if (!res.ok) {
+                     if (res.status === 429) {
+                         el('audioProgressContainer').classList.add('hidden');
+                         el('audioContainer').innerHTML += `<div class="p-4 bg-red-900/50 border border-red-700 text-red-200 rounded mt-2">Rate limit hit (free tier is 3 RPM). Wait ~60s or enable billing.</div>`;
+                         throw new Error("TTS Rate Limit Exceeded (429).");
+                     }
+
+                     const txt = await res.text().catch(()=> "");
+                     throw new Error(`TTS HTTP ${res.status} ${res.statusText} :: ${txt}`);
+                }
+
+                const ttsRes = await res.json();
+
+                // Find Audio Part
+                const cand = ttsRes?.candidates?.[0];
+                const part = cand?.content?.parts?.find(p => p?.inlineData?.data);
+                if (!part) throw new Error("No AUDIO inlineData returned (no audio part in response).");
+
+                const b64  = part.inlineData.data;
+                const mime = part.inlineData.mimeType || "audio/pcm";
+                console.log("TTS mime:", mime);
+
+                // Decode
+                const bytes = b64ToBytes(b64);
+
+                // Convert/Blob
+                let blob;
+                if (mime.includes("pcm") || mime.includes("L16")) {
+                  if (typeof window.pcmToWav !== "function") throw new Error("pcmToWav missing on globalThis");
+                  // Int16Array view of the bytes
+                  const pcm16 = new Int16Array(bytes.buffer);
+                  blob = window.pcmToWav(pcm16, 1, 24000);
+                } else {
+                  blob = new Blob([bytes], { type: mime });
+                }
+
+                const audioUrl = URL.createObjectURL(blob);
+                const player = el('audioPlayer');
+                player.src = audioUrl;
                 
                 pBar.style.width = '100%';
                 pText.innerText = "Ready!";
-                setTimeout(() => { el('audioProgressContainer').classList.add('hidden'); el('audioPlayer').classList.remove('hidden'); el('audioPlayer').play(); }, 500);
-            } catch (err) { showToast("Audio quota reached."); } finally { btn.disabled = false; }
+                setTimeout(async () => {
+                    el('audioProgressContainer').classList.add('hidden');
+                    el('audioPlayer').classList.remove('hidden');
+                    try {
+                        await el('audioPlayer').play();
+                    } catch(e) {
+                         console.warn("Playback blocked:", e);
+                         showToast("Click play to start audio");
+                    }
+                }, 500);
+
+            } catch (err) {
+                 if (!err.message.includes("429")) {
+                     showToast("Audio quota reached or error: " + err.message);
+                 }
+            } finally { btn.disabled = false; }
         });
 
         // Interactive & Utils

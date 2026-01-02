@@ -315,6 +315,15 @@
             setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 3000);
         }
 
+        function b64ToBytes(b64) {
+          const fixed = b64.replace(/-/g, "+").replace(/_/g, "/");
+          const pad = fixed.length % 4 ? "=".repeat(4 - (fixed.length % 4)) : "";
+          const bin = atob(fixed + pad);
+          const bytes = new Uint8Array(bin.length);
+          for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+          return bytes;
+        }
+
         // Improved Retry Logic with Error Parsing
         async function fetchWithRetry(url, payload, maxRetries = 5) {
             for (let i = 0; i < maxRetries; i++) {
@@ -718,19 +727,12 @@
                     if (lastPeriod > 0) script = script.substring(0, lastPeriod + 1);
                 }
 
-                // Step 2: TTS - Slow Progress simulation
+                // Step 2: TTS - Robust Implementation
                 progressText.innerText = "Step 2: Synthesizing Audio (Est. wait: ~5-7 mins)...";
                 
-                // Create a slow crawl for the heavy lifting
-                audioInterval = setInterval(() => {
-                    if (progress < 90) {
-                        // Slower increment
-                        progress += 0.5; 
-                        progressBar.style.width = `${progress}%`;
-                    }
-                }, 500); // Update every half second
+                // Use specific TTS model and endpoint as requested
+                const TTS_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-tts:generateContent?key=${apiKey}`;
                 
-                // NOTE: Safety Settings REMOVED for TTS call to prevent 400 Bad Request
                 const ttsPrompt = `
 Style: You are a senior medical officer delivering a briefing. Use a professional, steady pace with clear pronunciation of medical terminology. Sound authoritative yet accessible.
 
@@ -738,7 +740,7 @@ TEXT TO SPEAK:
 ${script}
                 `;
 
-                const ttsRes = await fetchWithRetry(TTS_URL, {
+                const ttsPayload = {
                     contents: [{ parts: [{ text: ttsPrompt }] }],
                     generationConfig: {
                         responseModalities: ["AUDIO"],
@@ -750,46 +752,108 @@ ${script}
                             }
                         }
                     }
-                });
-                
-                if (!ttsRes.candidates || !ttsRes.candidates[0]) {
-                     throw new Error("TTS API returned no candidates. Text might be too long.");
+                };
+
+                // Custom Fetch with Backoff for 503 and explicit 429 handling
+                let res;
+                let attempt = 0;
+                const delays = [500, 1000, 2000]; // 3 retries (0.5s, 1s, 2s)
+
+                while (true) {
+                    try {
+                        res = await fetch(TTS_ENDPOINT, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(ttsPayload)
+                        });
+
+                        if (res.status === 503 && attempt < delays.length) {
+                             await new Promise(r => setTimeout(r, delays[attempt]));
+                             attempt++;
+                             continue;
+                        }
+
+                        break; // Exit loop if not 503 or retries exhausted
+
+                    } catch (netErr) {
+                         // Network error (offline?), distinct from HTTP error
+                         throw new Error("Network error during TTS fetch: " + netErr.message);
+                    }
                 }
 
-                const audioData = ttsRes.candidates[0].content.parts[0].inlineData.data;
-                const binary = atob(audioData);
-                const bytes = new Uint8Array(binary.length);
-                for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-                
-                // Convert PCM to WAV
-                const pcm16 = new Int16Array(bytes.buffer);
-                const wavBlob = pcmToWav(pcm16, 1, 24000);
-                const audioUrl = URL.createObjectURL(wavBlob);
+                // Handle HTTP Errors
+                if (!res.ok) {
+                     if (res.status === 429) {
+                         // Specific UI for Rate Limit
+                         progressContainer.classList.add('hidden');
+                         el('audioContainer').innerHTML += `<div class="p-4 bg-red-900/50 border border-red-700 text-red-200 rounded mt-2">Rate limit hit (free tier is 3 RPM). Wait ~60s or enable billing.</div>`;
+                         throw new Error("TTS Rate Limit Exceeded (429).");
+                     }
 
+                     const txt = await res.text().catch(()=> "");
+                     throw new Error(`TTS HTTP ${res.status} ${res.statusText} :: ${txt}`);
+                }
+
+                const ttsRes = await res.json();
+                
+                // Find Audio Part
+                const cand = ttsRes?.candidates?.[0];
+                const part = cand?.content?.parts?.find(p => p?.inlineData?.data);
+                if (!part) throw new Error("No AUDIO inlineData returned (no audio part in response).");
+
+                const b64  = part.inlineData.data;
+                const mime = part.inlineData.mimeType || "audio/pcm";
+                console.log("TTS mime:", mime);
+
+                // Decode Safe Base64
+                const bytes = b64ToBytes(b64);
+
+                // Convert/Blob
+                let blob;
+                if (mime.includes("pcm") || mime.includes("L16")) {
+                  if (typeof window.pcmToWav !== "function") throw new Error("pcmToWav missing on globalThis");
+                  // Int16Array view of the bytes
+                  const pcm16 = new Int16Array(bytes.buffer);
+                  blob = window.pcmToWav(pcm16, 1, 24000);
+                } else {
+                  blob = new Blob([bytes], { type: mime });
+                }
+
+                const audioUrl = URL.createObjectURL(blob);
                 const player = el('audioPlayer');
                 player.src = audioUrl;
-                player.playbackRate = 1.25; // Speed up playback
+                player.playbackRate = 1.25;
+
+                // Clear progress UI
+                if (scriptInterval) clearInterval(scriptInterval);
                 
-                // Finish Progress
-                clearInterval(audioInterval);
                 progressBar.style.width = '100%';
-                progressText.innerText = "Audio Ready! (Duration: ~6 mins)";
+                progressText.innerText = "Audio Ready!";
                 
-                // Slight delay before showing player
-                setTimeout(() => {
+                setTimeout(async () => {
                     progressContainer.classList.add('hidden');
                     player.classList.remove('hidden');
-                    player.play();
-                }, 1000);
+                    try {
+                        await player.play();
+                    } catch (e) {
+                        console.warn("Playback blocked:", e);
+                        showToast("Click play to start audio");
+                    }
+                }, 500);
 
             } catch (err) {
                 // Clear intervals on error
                 if (scriptInterval) clearInterval(scriptInterval);
                 if (audioInterval) clearInterval(audioInterval);
                 
-                progressContainer.classList.add('hidden');
+                // Don't hide progress container if we showed the 429 error inside audioContainer,
+                // but usually we want to reset or show error.
+                // The 429 block above already appended error UI.
+                if (!err.message.includes("429")) {
+                     progressContainer.classList.add('hidden');
+                     alert("Audio generation failed: " + err.message);
+                }
                 console.error(err);
-                alert("Audio generation failed: " + err.message);
             } finally {
                 btn.disabled = false;
             }
