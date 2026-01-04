@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dr. H - Native Audio Dialog</title>
+    <title>Dr. H - Clinical Consultant</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -16,6 +16,9 @@
                             800: '#1e293b',
                             900: '#0f172a',
                         }
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
                     }
                 }
             }
@@ -25,7 +28,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Google Icons -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
     <style>
@@ -80,6 +82,28 @@
             border-radius: 2px;
             transition: height 0.1s ease;
         }
+
+        .chat-message {
+            opacity: 0;
+            animation: fadeIn 0.3s forwards;
+        }
+        @keyframes fadeIn { to { opacity: 1; } }
+        
+        /* Custom scrollbar for chat */
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 2px; }
+        
+        /* Dictation Pulse */
+        @keyframes dictation-pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .dictating {
+            animation: dictation-pulse 1.5s infinite;
+            color: #f87171 !important; /* Red */
+        }
     </style>
 </head>
 
@@ -87,337 +111,514 @@
 
     <div class="background-overlay"></div>
 
-    <!-- Ambient Glow -->
-    <div class="absolute inset-0 pointer-events-none overflow-hidden">
-        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-3xl"></div>
+    <!-- API Key Modal -->
+    <div id="api-key-modal" class="fixed inset-0 z-[100] bg-slate-950/90 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl">
+            <div class="flex items-center gap-3 mb-4 text-blue-400">
+                <span class="material-symbols-outlined">key</span>
+                <h2 class="text-lg font-bold">Configuration Required</h2>
+            </div>
+            <p class="text-sm text-slate-400 mb-4">Please enter your Gemini API Key.</p>
+            <input type="password" id="api-key-input" placeholder="Paste API Key here..." class="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors font-mono mb-4">
+            <button onclick="saveApiKey()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-2 rounded-lg transition-colors">
+                Initialize System
+            </button>
+        </div>
     </div>
 
     <!-- Header -->
-    <header class="h-16 flex items-center justify-between px-6 z-20 border-b border-white/5 bg-gemini-900/50 backdrop-blur-sm">
+    <header class="h-16 flex items-center justify-between px-6 z-20 border-b border-white/5 bg-gemini-900/50 backdrop-blur-sm flex-shrink-0">
         <div class="flex items-center gap-3">
             <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
                 <span class="material-symbols-outlined text-white text-[20px]">medical_services</span>
             </div>
             <div>
                 <h1 class="font-bold text-slate-100 text-sm tracking-wide">Dr. Holtkamp</h1>
-                <p class="text-[10px] text-slate-500 uppercase tracking-wider font-medium">Native Audio Dialog</p>
+                <p class="text-[10px] text-slate-500 uppercase tracking-wider font-medium">Expert Clinical Consultant</p>
             </div>
         </div>
-        <div id="connection-status" class="flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800 border border-slate-700">
-            <div id="status-dot" class="w-2 h-2 rounded-full bg-red-500"></div>
-            <span id="status-text" class="text-xs text-slate-400 font-mono">DISCONNECTED</span>
+        <div id="status-badge" class="flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800 border border-slate-700">
+            <div id="status-dot" class="w-2 h-2 rounded-full bg-slate-500"></div>
+            <span id="status-text" class="text-xs text-slate-400 font-mono font-bold">STANDBY</span>
         </div>
     </header>
 
-    <!-- Main Content -->
-    <main class="flex-1 flex flex-col items-center justify-center relative z-10 p-6">
+    <!-- Main Content: Flex Column Layout for Stability -->
+    <main class="flex-1 flex flex-col overflow-hidden relative z-10">
         
-        <div id="visualizer-container" class="relative w-64 h-64 mb-16 flex items-center justify-center">
-            <div id="pulse-layer" class="absolute inset-0 rounded-full"></div>
-            
-            <button onclick="toggleConnection()" id="main-mic-btn" class="relative w-40 h-40 bg-slate-800 rounded-full border-2 border-slate-700 shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-105 group z-20 focus:outline-none focus:ring-4 focus:ring-blue-500/30">
-                <span class="material-symbols-outlined text-6xl text-slate-400 group-hover:text-blue-400" id="mic-icon">power_settings_new</span>
-            </button>
-
-            <div class="absolute -bottom-12 w-full text-center">
-                <span id="interaction-status" class="text-sm font-bold tracking-widest text-slate-500 uppercase">Tap Power to Connect</span>
-            </div>
+        <!-- Conversation Log: Flex Grow to Fill Space -->
+        <div id="conversation-container" class="flex-1 overflow-y-auto px-4 py-6 space-y-4 custom-scroll">
+            <div class="text-center text-slate-500 text-xs mt-4">Session Started. Evidence-based medicine (OpenEvidence/UpToDate).</div>
+            <!-- Messages injected here -->
         </div>
 
-        <!-- Transcript Logs -->
-        <div class="w-full max-w-2xl text-center space-y-4">
-            <div id="transcript-log" class="text-slate-400 text-sm italic font-medium h-12 flex items-center justify-center px-4 overflow-hidden text-center">
-                Click the power icon and allow microphone access to begin.
+        <!-- Input Area: Stays at Bottom Naturally -->
+        <div class="bg-slate-900/90 backdrop-blur-md border-t border-slate-800 p-4 pb-4 flex-shrink-0 flex flex-col gap-3">
+            
+            <!-- Visualizer Bars (Small) -->
+            <div class="flex items-center justify-center gap-1 h-4 opacity-50 transition-opacity duration-300" id="audio-bars-container">
+                <div class="audio-bar h-1"></div>
+                <div class="audio-bar h-2"></div>
+                <div class="audio-bar h-1"></div>
+                <div class="audio-bar h-3"></div>
+                <div class="audio-bar h-1"></div>
+            </div>
+
+            <!-- Input Bar -->
+            <div class="max-w-3xl mx-auto w-full flex items-end gap-2 bg-slate-800 p-2 rounded-3xl border border-slate-700 shadow-lg focus-within:ring-2 focus-within:ring-blue-500/50 transition-all">
+                
+                <!-- Main Voice Mode Button (Conversation) -->
+                <button onclick="handleMicToggle()" id="main-mic-btn" class="w-10 h-10 mb-0.5 rounded-full bg-slate-700 hover:bg-slate-600 flex items-center justify-center transition-colors flex-shrink-0 group" title="Hold Conversation">
+                    <span class="material-symbols-outlined text-slate-300 group-hover:text-white transition-colors" id="mic-icon">record_voice_over</span>
+                </button>
+
+                <!-- Expanding Text Input -->
+                <textarea id="text-input" rows="1" placeholder="Type query or tap mic to speak..." class="flex-1 bg-transparent border-none outline-none text-sm text-white px-2 py-2.5 font-medium placeholder:text-slate-500 resize-none overflow-hidden max-h-32" onkeydown="handleInputKey(event)"></textarea>
+
+                <!-- Send Button -->
+                <button onclick="handleTextSubmit()" class="w-10 h-10 mb-0.5 rounded-full bg-blue-600 hover:bg-blue-500 flex items-center justify-center transition-colors flex-shrink-0">
+                    <span class="material-symbols-outlined text-white text-lg">arrow_upward</span>
+                </button>
             </div>
             
-            <div class="flex items-center justify-center gap-1 h-8">
-                <div class="audio-bar h-2"></div>
-                <div class="audio-bar h-4"></div>
-                <div class="audio-bar h-3"></div>
-                <div class="audio-bar h-6"></div>
-                <div class="audio-bar h-2"></div>
+            <div class="text-center h-4">
+                <span id="interaction-status" class="text-[10px] font-bold tracking-widest text-slate-500 uppercase transition-colors">Ready</span>
             </div>
         </div>
 
     </main>
 
-    <footer class="p-4 text-center text-slate-600 text-xs z-10 relative">
-        <p>Expert Medical AI Consult. Strictly Evidence-Based. No PHI.</p>
-    </footer>
-
-    <script type="module">
-        import { API_KEYS } from './js/config.js?v=secure';
-
+    <script>
         // --- Configuration ---
-        const API_KEY = API_KEYS.ORTHOPEDICS;
-        const MODEL_ID = "gemini-2.5-flash-native-audio-preview-12-2025";
-        const WS_URL = `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent?key=${API_KEY}`;
+        let API_KEY = "";
+        const MODEL_ID = "gemini-2.5-flash"; // Main chat model
+        const TTS_MODEL_ID = "gemini-2.5-flash"; // Model for Audio Generation (Aoede)
+        
+        // --- State Machine ---
+        const STATE = {
+            IDLE: 'IDLE',
+            LISTENING: 'LISTENING',
+            THINKING: 'THINKING',
+            SPEAKING: 'SPEAKING',
+            ERROR: 'ERROR'
+        };
+        let currentState = STATE.IDLE;
 
-        // --- Dr. Holtkamp System Instruction ---
-        const SYSTEM_INSTRUCTION = `Respond as Dr. Holtkamp, Expert Medical Educator. 
-        Context: You are speaking via high-fidelity real-time audio.
-        Tone: Professional, authoritative, analytically rigorous. 
-        Style: Oral consult format. Be concise.
-        Evidence: Use current medical guidelines (AHA, ACC, IDSA, etc.).
-        Barge-in: You expect to be interrupted. If the doctor speaks, stop your current thought and listen.`;
+        // --- Globals ---
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let audioContext = null; // Visualizer
+        let analyser = null;
+        let microphoneStream = null;
+        let dataArray = null;
+        let animationFrame = null;
+        let currentAudio = null; // For native TTS playback
+        let conversationHistory = []; 
 
-        const GREETINGS = [
-            "Hey Doc, what's up?",
-            "Dr. Holtkamp here. How can I help?",
-            "Good to see you, Doctor. Ready for rounds?",
-            "Hello Doctor. I'm listening.",
-            "Hi Doc. What's the situation?",
-            "Dr. Holtkamp online. What are we working on?",
-            "Greetings, Doctor. Ready to consult.",
-            "Hey there, Doc. What's on your mind?",
-            "Doctor, I'm ready. Go ahead.",
-            "Hello. Let's solve this case."
-        ];
-
-        // --- Audio Variables ---
-        let audioContext;
-        let micStream;
-        let processor;
-        let socket;
-        let isConnected = false;
-        let playbackQueue = [];
-        let scheduledTime = 0;
-
+        // --- UI References ---
         const ui = {
             btn: document.getElementById('main-mic-btn'),
             icon: document.getElementById('mic-icon'),
-            pulse: document.getElementById('pulse-layer'),
             statusText: document.getElementById('status-text'),
             statusDot: document.getElementById('status-dot'),
             interactionText: document.getElementById('interaction-status'),
-            transcript: document.getElementById('transcript-log'),
-            bars: document.querySelectorAll('.audio-bar')
+            bars: document.querySelectorAll('.audio-bar'),
+            barsContainer: document.getElementById('audio-bars-container'),
+            conversation: document.getElementById('conversation-container'),
+            modal: document.getElementById('api-key-modal'),
+            keyInput: document.getElementById('api-key-input'),
+            textInput: document.getElementById('text-input')
         };
 
-        // --- Connection Management ---
+        // --- Auto-Resize Textarea ---
+        ui.textInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+            if(this.value === '') this.style.height = 'auto'; // Reset
+        });
 
-        window.toggleConnection = async function() {
-            if (isConnected) {
-                disconnect();
-            } else {
-                connect();
+        // --- Core Logic ---
+
+        window.saveApiKey = function() {
+            const key = ui.keyInput.value.trim();
+            if(!key) { alert("Key required"); return; }
+            API_KEY = key;
+            ui.modal.classList.add('hidden');
+            updateState(STATE.IDLE);
+        };
+
+        window.handleMicToggle = function() {
+            if (!API_KEY) { ui.modal.classList.remove('hidden'); return; }
+
+            if (currentState === STATE.IDLE) {
+                startRecording();
+            } else if (currentState === STATE.LISTENING) {
+                stopRecording();
+            } else if (currentState === STATE.SPEAKING) {
+                if (currentAudio) {
+                    currentAudio.pause();
+                    currentAudio = null;
+                }
+                updateState(STATE.IDLE);
             }
         };
 
-        async function connect() {
-            if (API_KEY === "PASTE_YOUR_KEY_HERE" || API_KEY === "") {
-                ui.transcript.innerText = "Error: API Key missing in code.";
+        async function startRecording() {
+            try {
+                if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioContext.state === 'suspended') await audioContext.resume();
+
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                
+                microphoneStream = audioContext.createMediaStreamSource(stream);
+                analyser = audioContext.createAnalyser();
+                analyser.fftSize = 32;
+                microphoneStream.connect(analyser);
+                dataArray = new Uint8Array(analyser.frequencyBinCount);
+                drawVisualizer();
+
+                mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' }); 
+                audioChunks = [];
+
+                mediaRecorder.ondataavailable = event => {
+                    if (event.data.size > 0) audioChunks.push(event.data);
+                };
+
+                mediaRecorder.onstop = async () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                    stream.getTracks().forEach(track => track.stop());
+                    
+                    const base64Audio = await blobToBase64(audioBlob);
+                    handleUserTurn({ audio: base64Audio });
+                };
+
+                mediaRecorder.start();
+                updateState(STATE.LISTENING);
+
+            } catch (err) {
+                console.error("Recording failed", err);
+                alert("Microphone access denied or error starting recording.");
+                updateState(STATE.IDLE);
+            }
+        }
+
+        function stopRecording() {
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+                ui.interactionText.innerText = "Transcribing...";
+            }
+        }
+
+        function blobToBase64(blob) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(blob);
+                reader.onloadend = () => {
+                    const base64String = reader.result.split(',')[1];
+                    resolve(base64String);
+                };
+                reader.onerror = reject;
+            });
+        }
+
+        window.handleInputKey = function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault(); // Prevent new line
+                handleTextSubmit();
+            }
+        }
+
+        window.handleTextSubmit = function() {
+            const text = ui.textInput.value.trim();
+            if (!text) return;
+            if (!API_KEY) { ui.modal.classList.remove('hidden'); return; }
+            
+            ui.textInput.value = '';
+            ui.textInput.style.height = 'auto'; // Reset height
+            handleUserTurn({ text: text });
+        }
+
+        // Shared function for converting speech to text via Gemini
+        async function transcribeWithGemini(audioBase64) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_ID}:generateContent?key=${API_KEY}`;
+            const payload = {
+                contents: [{
+                    parts: [
+                        { text: "Transcribe the following audio exactly as spoken. Output only the text." },
+                        { inlineData: { mimeType: "audio/webm", data: audioBase64 } }
+                    ]
+                }]
+            };
+            
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            
+            if (!response.ok) throw new Error("Transcription failed");
+            
+            const data = await response.json();
+            const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+            return text.trim();
+        }
+
+        // Handles Conversation Turn (Audio or Text)
+        async function handleUserTurn(input) {
+            updateState(STATE.THINKING);
+            let userText = "";
+            let messageElem = null;
+            
+            // 1. Display User Input
+            if (input.text) {
+                userText = input.text;
+                addMessageToLog("You", userText);
+            } else if (input.audio) {
+                // Show placeholder while transcribing
+                messageElem = addMessageToLog("You", "🎤 Processing speech...");
+                try {
+                    // Transcribe audio to text FIRST
+                    userText = await transcribeWithGemini(input.audio);
+                    if (messageElem) messageElem.innerText = userText;
+                } catch (e) {
+                    console.error("Transcription error", e);
+                    if (messageElem) messageElem.innerText = "🎤 Error processing speech.";
+                    updateState(STATE.IDLE);
+                    return;
+                }
+            }
+
+            // 2. Send TEXT to Dr. H (Gemini) for response
+            try {
+                const responseText = await callGeminiAPI({ text: userText });
+                addMessageToLog("Dr. H", responseText);
+                await speakResponseWithGemini(responseText); // New Native Audio Function
+            } catch (err) {
+                console.error(err);
+                updateState(STATE.IDLE);
+                
+                if (err.message.includes("429")) {
+                    addMessageToLog("System", "Quota Limit Reached. Please wait ~1 minute before trying again.");
+                } else {
+                    addMessageToLog("System", "Error: " + err.message);
+                }
+            }
+        }
+
+        async function callGeminiAPI(input) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_ID}:generateContent?key=${API_KEY}`;
+            
+            let userPart = { text: input.text };
+
+            // Add user turn to history
+            conversationHistory.push({
+                role: "user",
+                parts: [userPart]
+            });
+
+            const payload = {
+                contents: conversationHistory,
+                // UPDATED: Dr. H Persona - Senior Military Medical SME
+                systemInstruction: {
+                    parts: [{ text: "You are Dr. H, a Senior Medical Physician and Subject Matter Expert (SME) consulting for a military healthcare provider. Your goal is to provide clear, high-level clinical guidance based on reliable medical sources and journals. For every clinical query, proactively structure your response to include: 1) A brief background on Pathophysiology. 2) A clear Plan of Action (Workup and Treatment). 3) Military Relevance: Explicitly discuss how this condition impacts deployability and the service member's military career, referencing AR 40-501 and DOD Instruction 6130.03 (Vol 1 & 2). 4) Prognosis. Maintain a professional yet collegial tone. Always end your response with a specific follow-up question, such as asking if they need assistance with specific medication dosing, lab panels, or radiology orders." }]
+                }
+            };
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                let details = "";
+                try {
+                    const j = await response.json();
+                    details = j?.error?.message || JSON.stringify(j);
+                } catch {
+                    details = await response.text();
+                }
+                // Remove failed turn so retry works
+                conversationHistory.pop();
+                throw new Error(`API Error ${response.status}: ${details}`);
+            }
+
+            const data = await response.json();
+            const text = data?.candidates?.[0]?.content?.parts
+                ?.map(p => p.text)
+                ?.filter(Boolean)
+                ?.join("") || "";
+            
+            if (!text) {
+                conversationHistory.pop();
+                throw new Error("No response text found.");
+            }
+            
+            // Add model response to history
+            conversationHistory.push({
+                role: "model",
+                parts: [{ text: text }]
+            });
+            
+            if (conversationHistory.length > 20) {
+                conversationHistory = conversationHistory.slice(conversationHistory.length - 20);
+            }
+            
+            return text;
+        }
+
+        // NEW: Generate Audio using Gemini's Aoede Voice
+        async function speakResponseWithGemini(textToSpeak) {
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio = null;
+            }
+            updateState(STATE.SPEAKING);
+
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${TTS_MODEL_ID}:generateContent?key=${API_KEY}`;
+            
+            const ttsPayload = {
+                contents: [{ parts: [{ text: textToSpeak }] }],
+                generationConfig: {
+                    responseModalities: ["AUDIO"],
+                    speechConfig: {
+                        voiceConfig: {
+                            prebuiltVoiceConfig: {
+                                voiceName: "Aoede"
+                            }
+                        }
+                    }
+                }
+            };
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(ttsPayload)
+                });
+
+                if (!response.ok) throw new Error("TTS Generation Failed");
+
+                const data = await response.json();
+                
+                // Extract audio data (Base64)
+                const audioData = data.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+                
+                if (!audioData) throw new Error("No audio returned");
+
+                const audioSrc = "data:audio/wav;base64," + audioData;
+                currentAudio = new Audio(audioSrc);
+                
+                currentAudio.onended = () => {
+                    updateState(STATE.IDLE);
+                    currentAudio = null;
+                };
+                
+                currentAudio.play();
+
+            } catch (err) {
+                console.error("Gemini TTS Failed, using fallback browser TTS", err);
+                // Fallback to browser TTS if Gemini audio fails (e.g. quota)
+                speakResponseBrowserFallback(textToSpeak); 
+            }
+        }
+
+        function speakResponseBrowserFallback(text) {
+            if (synthesis.speaking) synthesis.cancel();
+            
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = 1.0;
+            utterance.onend = () => updateState(STATE.IDLE);
+            synthesis.speak(utterance);
+        }
+
+        function addMessageToLog(sender, text) {
+            const div = document.createElement('div');
+            div.className = "chat-message flex flex-col gap-1 p-3 rounded-lg max-w-[90%] shadow-sm " + 
+                (sender === "You" ? "bg-slate-800 border border-slate-700 self-end ml-auto" : "bg-blue-900/20 border border-blue-500/30 self-start mr-auto");
+            
+            const header = document.createElement('span');
+            header.className = "text-[10px] font-bold uppercase tracking-wider " + 
+                (sender === "You" ? "text-slate-400" : "text-blue-400");
+            header.innerText = sender;
+
+            const content = document.createElement('p');
+            content.className = "text-sm text-slate-200 leading-relaxed whitespace-pre-wrap";
+            content.innerText = text;
+
+            div.appendChild(header);
+            div.appendChild(content);
+            ui.conversation.appendChild(div);
+            ui.conversation.scrollTop = ui.conversation.scrollHeight;
+            return content; 
+        }
+
+        function drawVisualizer() {
+            if (currentState !== STATE.LISTENING) {
+                ui.bars.forEach(bar => bar.style.height = '4px');
+                ui.barsContainer.style.opacity = '0.3';
+                animationFrame = requestAnimationFrame(drawVisualizer);
                 return;
             }
 
-            ui.transcript.innerText = "Requesting System Access...";
-            ui.interactionText.innerText = "Connecting...";
-            ui.btn.classList.add('thinking-active');
+            ui.barsContainer.style.opacity = '1';
 
-            try {
-                // 1. Setup Audio Context First (User gesture required)
-                audioContext = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 16000 });
-                scheduledTime = audioContext.currentTime;
-
-                // 2. Request Microphone
-                try {
-                    micStream = await navigator.mediaDevices.getUserMedia({ 
-                        audio: { channelCount: 1, sampleRate: 16000, echoCancellation: true, noiseSuppression: true } 
-                    });
-                } catch (micErr) {
-                    throw new Error("Microphone Denied. Please check browser permissions.");
-                }
-
-                // 3. Connect WebSocket
-                socket = new WebSocket(WS_URL);
-                socket.onopen = onWsOpen;
-                socket.onmessage = onWsMessage;
-                socket.onclose = onWsClose;
-                socket.onerror = (e) => {
-                    ui.transcript.innerText = "Connection Blocked. Verify API Key settings & Referrer Policy.";
-                };
-
-                setupMicProcessing();
-
-            } catch (err) {
-                console.error("Connection failed:", err);
-                ui.transcript.innerText = err.message;
-                disconnect();
+            if (analyser) {
+                analyser.getByteFrequencyData(dataArray);
+                ui.bars.forEach((bar, i) => {
+                    const val = Math.max(4, (dataArray[i] / 255) * 32); 
+                    bar.style.height = `${val}px`;
+                });
             }
+            animationFrame = requestAnimationFrame(drawVisualizer);
         }
 
-        function disconnect() {
-            isConnected = false;
-            if (socket) socket.close();
-            if (micStream) micStream.getTracks().forEach(t => t.stop());
-            if (audioContext && audioContext.state !== 'closed') audioContext.close();
+        // Start visualizer loop immediately
+        drawVisualizer();
+
+        // --- State Management ---
+
+        function updateState(newState) {
+            currentState = newState;
+            ui.statusText.innerText = newState;
             
-            ui.statusDot.className = "w-2 h-2 rounded-full bg-red-500";
-            ui.statusText.innerText = "DISCONNECTED";
-            ui.icon.innerText = "power_settings_new";
-            ui.icon.classList.remove('text-blue-400');
-            ui.btn.classList.remove('thinking-active');
-            ui.interactionText.innerText = "Tap Power to Connect";
-            ui.pulse.className = "absolute inset-0 rounded-full";
-            stopAllAudio();
-        }
+            ui.btn.className = "w-10 h-10 rounded-full bg-slate-700 hover:bg-slate-600 flex items-center justify-center transition-colors flex-shrink-0 group";
+            ui.icon.className = "material-symbols-outlined text-slate-300 group-hover:text-white transition-colors";
+            ui.icon.innerText = "record_voice_over"; // Default icon
 
-        // --- WebSocket Handlers ---
-
-        function onWsOpen() {
-            isConnected = true;
-            ui.statusDot.className = "w-2 h-2 rounded-full bg-green-500 animate-pulse";
-            ui.statusText.innerText = "LIVE";
-            ui.icon.innerText = "mic";
-            ui.icon.classList.add('text-blue-400');
-            ui.btn.classList.remove('thinking-active');
-            ui.interactionText.innerText = "Dr. H is Listening";
-            ui.transcript.innerText = "System Live. You can speak now.";
-            ui.pulse.className = "absolute inset-0 rounded-full pulse-active";
-
-            // 1. Send Setup Frame
-            const setup = {
-                setup: {
-                    model: `models/${MODEL_ID}`,
-                    systemInstruction: { parts: [{ text: SYSTEM_INSTRUCTION }] },
-                    generationConfig: {
-                        responseModalities: ["AUDIO"],
-                        speechConfig: {
-                            voiceConfig: { prebuiltVoiceConfig: { voiceName: "Fenrir" } }
-                        }
-                    }
-                }
-            };
-            socket.send(JSON.stringify(setup));
-
-            // 2. Send Initial Greeting Trigger
-            // We instruct the model to say one of our greetings to start the conversation naturally.
-            const randomGreeting = GREETINGS[Math.floor(Math.random() * GREETINGS.length)];
-            const triggerMessage = {
-                clientContent: {
-                    turns: [
-                        {
-                            role: "user",
-                            parts: [{ text: `The user has joined. Start the conversation immediately by saying exactly this phrase: "${randomGreeting}"` }]
-                        }
-                    ],
-                    turnComplete: true
-                }
-            };
-            socket.send(JSON.stringify(triggerMessage));
-        }
-
-        function onWsMessage(event) {
-            if (typeof event.data === 'string') {
-                const response = JSON.parse(event.data);
-                
-                // Handle Audio Output
-                if (response.serverContent?.modelTurn?.parts) {
-                    const parts = response.serverContent.modelTurn.parts;
-                    parts.forEach(part => {
-                        if (part.inlineData && part.inlineData.mimeType.includes('audio')) {
-                            const raw = atob(part.inlineData.data);
-                            const buffer = new Uint8Array(raw.length);
-                            for(let i=0; i<raw.length; i++) buffer[i] = raw.charCodeAt(i);
-                            queueAudioChunk(buffer.buffer);
-                        }
-                    });
-                }
-
-                // Handle Turn Interruption (Barge-in)
-                if (response.serverContent?.interrupted) {
-                    stopAllAudio();
-                }
-            }
-        }
-
-        function onWsClose() {
-            console.log("WebSocket Closed");
-            disconnect();
-        }
-
-        // --- Audio Processing (Input) ---
-
-        function setupMicProcessing() {
-            const source = audioContext.createMediaStreamSource(micStream);
-            processor = audioContext.createScriptProcessor(2048, 1, 1);
-
-            processor.onaudioprocess = (e) => {
-                if (!isConnected || socket.readyState !== WebSocket.OPEN) return;
-
-                const inputData = e.inputBuffer.getChannelData(0);
-                
-                // Visualization logic
-                let sum = 0;
-                for(let i=0; i<inputData.length; i++) sum += inputData[i] * inputData[i];
-                const rms = Math.sqrt(sum / inputData.length);
-                updateBars(rms);
-
-                // Convert to 16-bit PCM
-                const pcmData = new Int16Array(inputData.length);
-                for (let i = 0; i < inputData.length; i++) {
-                    pcmData[i] = Math.max(-1, Math.min(1, inputData[i])) * 0x7FFF;
-                }
-
-                // Send to Gemini
-                const base64 = btoa(String.fromCharCode(...new Uint8Array(pcmData.buffer)));
-
-                // Note: Using camelCase for Proto3 JSON mapping compatibility
-                const frame = {
-                    realtimeInput: {
-                        mediaChunks: [{
-                            data: base64,
-                            mimeType: "audio/pcm;rate=16000"
-                        }]
-                    }
-                };
-                socket.send(JSON.stringify(frame));
-            };
-
-            source.connect(processor);
-            processor.connect(audioContext.destination);
-        }
-
-        // --- Audio Playback (Output) ---
-
-        async function queueAudioChunk(arrayBuffer) {
-            // Convert Int16 PCM to Float32 for Web Audio API
-            const int16Array = new Int16Array(arrayBuffer);
-            const float32Array = new Float32Array(int16Array.length);
-            for (let i = 0; i < int16Array.length; i++) {
-                float32Array[i] = int16Array[i] / 32768.0;
+            if (newState === STATE.THINKING || newState === STATE.SPEAKING) {
+                ui.interactionText.classList.remove('text-red-500', 'text-amber-500');
+                ui.interactionText.classList.add('text-slate-500');
             }
 
-            const audioBuffer = audioContext.createBuffer(1, float32Array.length, 16000);
-            audioBuffer.getChannelData(0).set(float32Array);
-
-            const source = audioContext.createBufferSource();
-            source.buffer = audioBuffer;
-            source.connect(audioContext.destination);
-
-            const startTime = Math.max(scheduledTime, audioContext.currentTime);
-            source.start(startTime);
-            scheduledTime = startTime + audioBuffer.duration;
-            
-            playbackQueue.push(source);
-        }
-
-        function stopAllAudio() {
-            playbackQueue.forEach(src => {
-                try { src.stop(); } catch(e) {}
-            });
-            playbackQueue = [];
-            scheduledTime = audioContext.currentTime;
-        }
-
-        function updateBars(rms) {
-            // Increased sensitivity for better visual feedback
-            ui.bars.forEach((bar, i) => {
-                const scale = (i + 1) * 2;
-                // Boost RMS significantly for visualization (rms is usually very small)
-                const h = Math.min(48, 4 + (rms * 400 * scale));
-                bar.style.height = `${h}px`;
-            });
+            switch (newState) {
+                case STATE.IDLE:
+                    ui.statusDot.className = "w-2 h-2 rounded-full bg-slate-500";
+                    if (!ui.interactionText.classList.contains('text-amber-500')) {
+                        ui.interactionText.innerText = "Ready";
+                    }
+                    break;
+                    
+                case STATE.LISTENING:
+                    // startVisualizer handled in startRecording
+                    ui.statusDot.className = "w-2 h-2 rounded-full bg-red-500 animate-pulse";
+                    ui.interactionText.innerText = "Listening...";
+                    ui.icon.innerText = "stop"; 
+                    ui.btn.className = "w-10 h-10 rounded-full bg-red-500 flex items-center justify-center transition-colors flex-shrink-0 animate-pulse shadow-lg shadow-red-900/50";
+                    ui.icon.className = "material-symbols-outlined text-white";
+                    break;
+                    
+                case STATE.THINKING:
+                    ui.statusDot.className = "w-2 h-2 rounded-full bg-blue-500 animate-bounce";
+                    ui.interactionText.innerText = "Consulting...";
+                    break;
+                    
+                case STATE.SPEAKING:
+                    ui.statusDot.className = "w-2 h-2 rounded-full bg-green-500 animate-pulse";
+                    ui.interactionText.innerText = "Speaking...";
+                    break;
+            }
         }
 
     </script>
