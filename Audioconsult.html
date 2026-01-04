@@ -111,21 +111,6 @@
 
     <div class="background-overlay"></div>
 
-    <!-- API Key Modal -->
-    <div id="api-key-modal" class="fixed inset-0 z-[100] bg-slate-950/90 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl">
-            <div class="flex items-center gap-3 mb-4 text-blue-400">
-                <span class="material-symbols-outlined">key</span>
-                <h2 class="text-lg font-bold">Configuration Required</h2>
-            </div>
-            <p class="text-sm text-slate-400 mb-4">Please enter your Gemini API Key.</p>
-            <input type="password" id="api-key-input" placeholder="Paste API Key here..." class="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors font-mono mb-4">
-            <button onclick="saveApiKey()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-2 rounded-lg transition-colors">
-                Initialize System
-            </button>
-        </div>
-    </div>
-
     <!-- Header -->
     <header class="h-16 flex items-center justify-between px-6 z-20 border-b border-white/5 bg-gemini-900/50 backdrop-blur-sm flex-shrink-0">
         <div class="flex items-center gap-3">
@@ -155,6 +140,16 @@
         <!-- Input Area: Stays at Bottom Naturally -->
         <div class="bg-slate-900/90 backdrop-blur-md border-t border-slate-800 p-4 pb-4 flex-shrink-0 flex flex-col gap-3">
             
+            <!-- Audio Controls (Independent) -->
+            <div id="audio-controls" class="hidden flex items-center justify-center gap-4 mb-2 p-2 bg-slate-800/50 rounded-full border border-slate-700/50 backdrop-blur-sm transition-all mx-auto w-fit">
+                <button onclick="window.playAudio()" class="p-2 rounded-full hover:bg-slate-700 text-green-400 transition-colors" title="Play Audio">
+                    <span class="material-symbols-outlined text-2xl">play_circle</span>
+                </button>
+                <button onclick="window.pauseAudio()" class="p-2 rounded-full hover:bg-slate-700 text-amber-400 transition-colors" title="Pause Audio">
+                    <span class="material-symbols-outlined text-2xl">pause_circle</span>
+                </button>
+            </div>
+
             <!-- Visualizer Bars (Small) -->
             <div class="flex items-center justify-center gap-1 h-4 opacity-50 transition-opacity duration-300" id="audio-bars-container">
                 <div class="audio-bar h-1"></div>
@@ -188,25 +183,32 @@
 
     </main>
 
+    <!-- PCM to WAV Library (Inlined for single file portability) -->
     <script>
+    !function(e,t){"object"==typeof exports&&"object"==typeof module?module.exports=t():"function"==typeof define&&define.amd?define([],t):"object"==typeof exports?exports.pcmToWav=t():e.pcmToWav=t()}(window,function(){return function(e){var t={};function r(n){if(t[n])return t[n].exports;var o=t[n]={i:n,l:!1,exports:{}};return e[n].call(o.exports,o,o.exports,r),o.l=!0,o.exports}return r.m=e,r.c=t,r.d=function(e,t,n){r.o(e,t)||Object.defineProperty(e,t,{enumerable:!0,get:n})},r.r=function(e){"undefined"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(e,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(e,"__esModule",{value:!0})},r.t=function(e,t){if(1&t&&(e=r(e)),8&t)return e;if(4&t&&"object"==typeof e&&e&&e.__esModule)return e;var n=Object.create(null);if(r.r(n),Object.defineProperty(n,"default",{enumerable:!0,value:e}),2&t&&"string"!=typeof e)for(var o in e)r.d(n,o,function(t){return e[t]}.bind(null,o));return n},r.n=function(e){var t=e&&e.__esModule?function(){return e.default}:function(){return e};return r.d(t,"a",t),t},r.o=function(e,t){return Object.prototype.hasOwnProperty.call(e,t)},r.p="",r(r.s=0)}([function(e,t,r){"use strict";Object.defineProperty(t,"__esModule",{value:!0}),t.default=function(e,t,r){var n,o,a,i,f,c,u,d=new DataView(new ArrayBuffer(44+e.length*t*2));return d.setUint32(0,1380533830,!1),d.setUint32(4,36+e.length*t*2,!0),d.setUint32(8,1463899717,!1),d.setUint32(12,1718449184,!1),d.setUint32(16,16,!0),d.setUint16(20,1,!0),n=t,d.setUint16(22,n,!0),o=r,d.setUint32(24,o,!0),a=r*t*2,d.setUint32(28,a,!0),i=2*t,d.setUint16(32,i,!0),f=16,d.setUint16(34,f,!0),d.setUint32(36,1684108385,!1),c=e.length*t*2,d.setUint32(40,c,!0),u=new Uint8Array(d.buffer,44),e.forEach(function(e,t){var r=44+2*t;d.setInt16(r,e,!0)}),new Blob([d.buffer],{type:"audio/wav"})},e.exports=t.default}])});
+    </script>
+
+    <script type="module">
+        import { API_KEYS } from './js/config.js?v=secure';
+
         // --- Configuration ---
-        let API_KEY = "";
+        let API_KEY = API_KEYS.PSYCHIATRY;
         const MODEL_ID = "gemini-2.5-flash"; // Main chat model
-        const TTS_MODEL_ID = "gemini-2.5-flash"; // Model for Audio Generation (Aoede)
+        const TTS_MODEL_ID = "gemini-2.5-flash-preview-tts"; // Model for Audio Generation (Aoede)
         
         // --- State Machine ---
         const STATE = {
             IDLE: 'IDLE',
             LISTENING: 'LISTENING',
             THINKING: 'THINKING',
+            GENERATING_VOICE: 'GENERATING_VOICE',
             SPEAKING: 'SPEAKING',
             ERROR: 'ERROR'
         };
         let currentState = STATE.IDLE;
 
         // --- Globals ---
-        let mediaRecorder = null;
-        let audioChunks = [];
+        let recognition = null; // Web Speech API
         let audioContext = null; // Visualizer
         let analyser = null;
         let microphoneStream = null;
@@ -214,6 +216,7 @@
         let animationFrame = null;
         let currentAudio = null; // For native TTS playback
         let conversationHistory = []; 
+        let isDictating = false; // Flag to keep mic alive
 
         // --- UI References ---
         const ui = {
@@ -225,9 +228,8 @@
             bars: document.querySelectorAll('.audio-bar'),
             barsContainer: document.getElementById('audio-bars-container'),
             conversation: document.getElementById('conversation-container'),
-            modal: document.getElementById('api-key-modal'),
-            keyInput: document.getElementById('api-key-input'),
-            textInput: document.getElementById('text-input')
+            textInput: document.getElementById('text-input'),
+            audioControls: document.getElementById('audio-controls')
         };
 
         // --- Auto-Resize Textarea ---
@@ -239,35 +241,46 @@
 
         // --- Core Logic ---
 
-        window.saveApiKey = function() {
-            const key = ui.keyInput.value.trim();
-            if(!key) { alert("Key required"); return; }
-            API_KEY = key;
-            ui.modal.classList.add('hidden');
-            updateState(STATE.IDLE);
+        // --- Audio Control Logic ---
+        window.playAudio = function() {
+            if(currentAudio) {
+                currentAudio.play();
+                updateState(STATE.SPEAKING);
+            }
         };
 
-        window.handleMicToggle = function() {
-            if (!API_KEY) { ui.modal.classList.remove('hidden'); return; }
+        window.pauseAudio = function() {
+            if(currentAudio) {
+                currentAudio.pause();
+                ui.statusText.innerText = "PAUSED";
+                ui.statusDot.className = "w-2 h-2 rounded-full bg-amber-500";
+            }
+        };
 
+        // --- Mic Logic (Live Transcription) ---
+        window.handleMicToggle = function() {
             if (currentState === STATE.IDLE) {
-                startRecording();
+                startDictation();
             } else if (currentState === STATE.LISTENING) {
-                stopRecording();
-            } else if (currentState === STATE.SPEAKING) {
+                stopDictation();
+            } else if (currentState === STATE.SPEAKING || currentState === STATE.GENERATING_VOICE) {
+                // If speaking, button stops playback (legacy behavior + new stop button behavior)
                 if (currentAudio) {
                     currentAudio.pause();
-                    currentAudio = null;
+                    currentAudio = null; // "Stop" resets it
                 }
                 updateState(STATE.IDLE);
             }
         };
 
-        async function startRecording() {
+        async function startDictation() {
+            isDictating = true;
+            updateState(STATE.LISTENING); // Immediate UI feedback
+
+            // 1. Start Visualizer (User Media)
             try {
                 if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 if (audioContext.state === 'suspended') await audioContext.resume();
-
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 
                 microphoneStream = audioContext.createMediaStreamSource(stream);
@@ -276,49 +289,107 @@
                 microphoneStream.connect(analyser);
                 dataArray = new Uint8Array(analyser.frequencyBinCount);
                 drawVisualizer();
+            } catch(e) {
+                console.warn("Visualizer failed init", e);
+            }
 
-                mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' }); 
-                audioChunks = [];
+            // 2. Start Speech Recognition
+            if (!('webkitSpeechRecognition' in window)) {
+                alert("Speech Recognition not supported in this browser. Use Chrome/Edge.");
+                return;
+            }
 
-                mediaRecorder.ondataavailable = event => {
-                    if (event.data.size > 0) audioChunks.push(event.data);
-                };
+            // If we already have a recognition instance, stopping might trigger onend
+            if (recognition) {
+                recognition.stop();
+            }
 
-                mediaRecorder.onstop = async () => {
-                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                    stream.getTracks().forEach(track => track.stop());
-                    
-                    const base64Audio = await blobToBase64(audioBlob);
-                    handleUserTurn({ audio: base64Audio });
-                };
+            const initialText = ui.textInput.value;
+            recognition = new webkitSpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = 'en-US';
 
-                mediaRecorder.start();
-                updateState(STATE.LISTENING);
+            recognition.onresult = function(event) {
+                let transcript = "";
+                // Iterate over ALL results to rebuild the full transcript
+                for (let i = 0; i < event.results.length; ++i) {
+                    transcript += event.results[i][0].transcript;
+                }
 
-            } catch (err) {
-                console.error("Recording failed", err);
-                alert("Microphone access denied or error starting recording.");
+                // Append current session transcript to what was there before start
+                let spacer = "";
+                if (initialText && !initialText.endsWith(" ") && transcript && !transcript.startsWith(" ")) {
+                    spacer = " ";
+                }
+
+                ui.textInput.value = initialText + spacer + transcript;
+
+                // Auto-resize
+                ui.textInput.style.height = 'auto';
+                ui.textInput.style.height = (ui.textInput.scrollHeight) + 'px';
+            };
+
+            recognition.onerror = function(event) {
+                console.warn("Speech warning", event.error);
+                // Don't stop for 'no-speech' or 'aborted', just let onend restart if needed
+                if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+                     isDictating = false;
+                     updateState(STATE.IDLE);
+                }
+            };
+
+            recognition.onend = function() {
+                // Auto-restart logic
+                if (isDictating) {
+                    console.log("Recognition ended, restarting...");
+                    try {
+                        recognition.start();
+                    } catch (e) {
+                        console.error("Restart failed", e);
+                        isDictating = false;
+                        updateState(STATE.IDLE);
+                    }
+                }
+            };
+
+            try {
+                recognition.start();
+            } catch (e) {
+                console.error("Start failed", e);
+                isDictating = false;
                 updateState(STATE.IDLE);
             }
         }
 
-        function stopRecording() {
-            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-                mediaRecorder.stop();
-                ui.interactionText.innerText = "Transcribing...";
+        function stopDictation() {
+            isDictating = false; // Kill the auto-restart loop
+
+            if (recognition) {
+                recognition.stop();
+                // recognition = null; // Keep instance for onend cleanup?
             }
+            // Stop Visualizer
+            if (microphoneStream) {
+                microphoneStream.mediaStream.getTracks().forEach(track => track.stop());
+                microphoneStream.disconnect();
+                microphoneStream = null;
+            }
+
+            // Submit the text
+            // Small delay to let final result process
+            setTimeout(() => {
+                handleTextSubmit();
+            }, 500);
         }
 
-        function blobToBase64(blob) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(blob);
-                reader.onloadend = () => {
-                    const base64String = reader.result.split(',')[1];
-                    resolve(base64String);
-                };
-                reader.onerror = reject;
-            });
+        function b64ToBytes(b64) {
+          const fixed = b64.replace(/-/g, "+").replace(/_/g, "/");
+          const pad = fixed.length % 4 ? "=".repeat(4 - (fixed.length % 4)) : "";
+          const bin = atob(fixed + pad);
+          const bytes = new Uint8Array(bin.length);
+          for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+          return bytes;
         }
 
         window.handleInputKey = function(e) {
@@ -331,7 +402,6 @@
         window.handleTextSubmit = function() {
             const text = ui.textInput.value.trim();
             if (!text) return;
-            if (!API_KEY) { ui.modal.classList.remove('hidden'); return; }
             
             ui.textInput.value = '';
             ui.textInput.style.height = 'auto'; // Reset height
@@ -366,27 +436,10 @@
         // Handles Conversation Turn (Audio or Text)
         async function handleUserTurn(input) {
             updateState(STATE.THINKING);
-            let userText = "";
-            let messageElem = null;
+            let userText = input.text;
             
             // 1. Display User Input
-            if (input.text) {
-                userText = input.text;
-                addMessageToLog("You", userText);
-            } else if (input.audio) {
-                // Show placeholder while transcribing
-                messageElem = addMessageToLog("You", "🎤 Processing speech...");
-                try {
-                    // Transcribe audio to text FIRST
-                    userText = await transcribeWithGemini(input.audio);
-                    if (messageElem) messageElem.innerText = userText;
-                } catch (e) {
-                    console.error("Transcription error", e);
-                    if (messageElem) messageElem.innerText = "🎤 Error processing speech.";
-                    updateState(STATE.IDLE);
-                    return;
-                }
-            }
+            addMessageToLog("You", userText);
 
             // 2. Send TEXT to Dr. H (Gemini) for response
             try {
@@ -418,9 +471,9 @@
 
             const payload = {
                 contents: conversationHistory,
-                // UPDATED: Dr. H Persona - Senior Military Medical SME
+                // UPDATED: Dr. H Persona - Conversational Military Medical SME
                 systemInstruction: {
-                    parts: [{ text: "You are Dr. H, a Senior Medical Physician and Subject Matter Expert (SME) consulting for a military healthcare provider. Your goal is to provide clear, high-level clinical guidance based on reliable medical sources and journals. For every clinical query, proactively structure your response to include: 1) A brief background on Pathophysiology. 2) A clear Plan of Action (Workup and Treatment). 3) Military Relevance: Explicitly discuss how this condition impacts deployability and the service member's military career, referencing AR 40-501 and DOD Instruction 6130.03 (Vol 1 & 2). 4) Prognosis. Maintain a professional yet collegial tone. Always end your response with a specific follow-up question, such as asking if they need assistance with specific medication dosing, lab panels, or radiology orders." }]
+                    parts: [{ text: "You are Dr. H, a Senior Military Medical Physician and Subject Matter Expert. Your goal is to help the provider efficiently diagnose and treat patients in a busy clinic or deployed setting.\n\nSTRUCTURE YOUR RESPONSE:\n1. **Direct Answer & DDx:** Provide a slightly more detailed, specific answer. Think critically: Do NOT blindly accept the user's premise. Proactively offer a **Differential Diagnosis (DDx)**. Explain how to **Rule In (R/I)** or **Rule Out (R/O)** specific life-threatening conditions. State the 'Most Likely Diagnosis' when appropriate based on the evidence.\n2. **Plan & Action:** Briefly outline the immediate workup (labs/imaging) or treatment required to move the patient forward.\n3. **Follow-Up:** End with **2-3 short, specific clinical questions** to narrow the differential or guide evacuation decisions. \n\nTONE: Authoritative, evidence-based, pathophysiology-focused, yet collegial. Avoid generic questions like 'What are your thoughts?'." }]
                 }
             };
 
@@ -473,7 +526,7 @@
                 currentAudio.pause();
                 currentAudio = null;
             }
-            updateState(STATE.SPEAKING);
+            updateState(STATE.GENERATING_VOICE);
 
             const url = `https://generativelanguage.googleapis.com/v1beta/models/${TTS_MODEL_ID}:generateContent?key=${API_KEY}`;
             
@@ -504,17 +557,35 @@
                 
                 // Extract audio data (Base64)
                 const audioData = data.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+                const mimeType = data.candidates?.[0]?.content?.parts?.[0]?.inlineData?.mimeType || "audio/pcm";
                 
                 if (!audioData) throw new Error("No audio returned");
 
-                const audioSrc = "data:audio/wav;base64," + audioData;
-                currentAudio = new Audio(audioSrc);
+                // Decode Safe Base64
+                const bytes = b64ToBytes(audioData);
+
+                // Convert/Blob
+                let blob;
+                if (mimeType.includes("pcm") || mimeType.includes("L16")) {
+                  if (typeof window.pcmToWav !== "function") throw new Error("pcmToWav missing on globalThis");
+                  // Int16Array view of the bytes
+                  const pcm16 = new Int16Array(bytes.buffer);
+                  blob = window.pcmToWav(pcm16, 1, 24000);
+                } else {
+                  blob = new Blob([bytes], { type: mimeType });
+                }
+
+                const audioUrl = URL.createObjectURL(blob);
+                currentAudio = new Audio(audioUrl);
+                currentAudio.playbackRate = 1.25;
                 
                 currentAudio.onended = () => {
                     updateState(STATE.IDLE);
-                    currentAudio = null;
+                    // Don't null currentAudio so user can replay
                 };
                 
+                ui.audioControls.classList.remove('hidden');
+                updateState(STATE.SPEAKING);
                 currentAudio.play();
 
             } catch (err) {
@@ -587,7 +658,7 @@
             ui.icon.className = "material-symbols-outlined text-slate-300 group-hover:text-white transition-colors";
             ui.icon.innerText = "record_voice_over"; // Default icon
 
-            if (newState === STATE.THINKING || newState === STATE.SPEAKING) {
+            if (newState === STATE.THINKING || newState === STATE.SPEAKING || newState === STATE.GENERATING_VOICE) {
                 ui.interactionText.classList.remove('text-red-500', 'text-amber-500');
                 ui.interactionText.classList.add('text-slate-500');
             }
@@ -613,10 +684,18 @@
                     ui.statusDot.className = "w-2 h-2 rounded-full bg-blue-500 animate-bounce";
                     ui.interactionText.innerText = "Consulting...";
                     break;
+
+                case STATE.GENERATING_VOICE:
+                    ui.statusDot.className = "w-2 h-2 rounded-full bg-indigo-500 animate-pulse";
+                    ui.interactionText.innerText = "Generating Voice...";
+                    break;
                     
                 case STATE.SPEAKING:
                     ui.statusDot.className = "w-2 h-2 rounded-full bg-green-500 animate-pulse";
                     ui.interactionText.innerText = "Speaking...";
+                    // Change button to stop/pause
+                    ui.icon.innerText = "stop_circle";
+                    ui.btn.className = "w-10 h-10 rounded-full bg-slate-700 hover:bg-slate-600 flex items-center justify-center transition-colors flex-shrink-0 group border border-slate-500";
                     break;
             }
         }
