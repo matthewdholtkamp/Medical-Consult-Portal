@@ -357,7 +357,10 @@
                 });
                 if (!response.ok) throw new Error(`API Error: ${response.status}`);
                 const data = await response.json();
-                return JSON.parse(data.candidates[0].content.parts[0].text);
+                let text = data.candidates[0].content.parts[0].text;
+                // Robust parsing
+                text = text.replace(/^```json\s*/, '').replace(/^```\s*/, '').replace(/```$/, '').trim();
+                return JSON.parse(text);
             } catch (error) {
                 if (retries > 0) {
                     await new Promise(r => setTimeout(r, 1000));
@@ -647,7 +650,13 @@
             if(selProf.length) selProf.forEach(i => note += `- ${i}\n`);
             
             note += `\nPatient Instructions:\n`;
-            soap.plan.profile.instructions.forEach(i => note += `- ${i}\n`);
+            if (soap.plan.profile.instructions) {
+                if (Array.isArray(soap.plan.profile.instructions)) {
+                    soap.plan.profile.instructions.forEach(i => note += `- ${i}\n`);
+                } else {
+                    note += `- ${soap.plan.profile.instructions}\n`;
+                }
+            }
 
             document.getElementById('final-note-content').textContent = note;
 

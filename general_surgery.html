@@ -628,7 +628,7 @@
             if(selProf.length) selProf.forEach(i => note += `- ${i}\n`);
             
             note += `\nPatient Instructions / Return Precautions:\n`;
-            soap.plan.profile.instructions.forEach(i => note += `- ${i}\n`);
+            if (soap.plan.profile.instructions) { if (Array.isArray(soap.plan.profile.instructions)) { soap.plan.profile.instructions.forEach(i => note += `- ${i}\n`); } else { note += `- ${soap.plan.profile.instructions}\n`; } }
 
             document.getElementById('final-note-content').textContent = note;
 
