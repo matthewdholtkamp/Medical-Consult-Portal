@@ -216,6 +216,7 @@
         let animationFrame = null;
         let currentAudio = null; // For native TTS playback
         let conversationHistory = []; 
+        let isDictating = false; // Flag to keep mic alive
 
         // --- UI References ---
         const ui = {
@@ -273,6 +274,9 @@
         };
 
         async function startDictation() {
+            isDictating = true;
+            updateState(STATE.LISTENING); // Immediate UI feedback
+
             // 1. Start Visualizer (User Media)
             try {
                 if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -295,6 +299,11 @@
                 return;
             }
 
+            // If we already have a recognition instance, stopping might trigger onend
+            if (recognition) {
+                recognition.stop();
+            }
+
             const initialText = ui.textInput.value;
             recognition = new webkitSpeechRecognition();
             recognition.continuous = true;
@@ -309,7 +318,6 @@
                 }
 
                 // Append current session transcript to what was there before start
-                // Add a space if there was text and the transcript doesn't start with one
                 let spacer = "";
                 if (initialText && !initialText.endsWith(" ") && transcript && !transcript.startsWith(" ")) {
                     spacer = " ";
@@ -323,18 +331,43 @@
             };
 
             recognition.onerror = function(event) {
-                console.error("Speech error", event.error);
-                updateState(STATE.IDLE);
+                console.warn("Speech warning", event.error);
+                // Don't stop for 'no-speech' or 'aborted', just let onend restart if needed
+                if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+                     isDictating = false;
+                     updateState(STATE.IDLE);
+                }
             };
 
-            recognition.start();
-            updateState(STATE.LISTENING);
+            recognition.onend = function() {
+                // Auto-restart logic
+                if (isDictating) {
+                    console.log("Recognition ended, restarting...");
+                    try {
+                        recognition.start();
+                    } catch (e) {
+                        console.error("Restart failed", e);
+                        isDictating = false;
+                        updateState(STATE.IDLE);
+                    }
+                }
+            };
+
+            try {
+                recognition.start();
+            } catch (e) {
+                console.error("Start failed", e);
+                isDictating = false;
+                updateState(STATE.IDLE);
+            }
         }
 
         function stopDictation() {
+            isDictating = false; // Kill the auto-restart loop
+
             if (recognition) {
                 recognition.stop();
-                recognition = null;
+                // recognition = null; // Keep instance for onend cleanup?
             }
             // Stop Visualizer
             if (microphoneStream) {
@@ -440,7 +473,7 @@
                 contents: conversationHistory,
                 // UPDATED: Dr. H Persona - Conversational Military Medical SME
                 systemInstruction: {
-                    parts: [{ text: "You are Dr. H, a Senior Military Medical Physician. Engage in a natural, back-and-forth professional dialogue. Do NOT give a long lecture. \n\n1. ANSWER FIRST: Provide a direct, concise answer to the user's immediate question.\n2. FOLLOW-UP: After your answer, ask **2-3 short, relevant clinical follow-up questions** to guide the decision making (e.g. asking about specific vitals, labs, or evacuation criteria). VARY your closing questions. Do NOT use generic phrases like 'What are your thoughts?' or 'Does this align with your assessment?'. \n\nKeep the tone professional, collegial, and efficient." }]
+                    parts: [{ text: "You are Dr. H, a Senior Military Medical Physician and Subject Matter Expert. Your goal is to help the provider efficiently diagnose and treat patients in a busy clinic or deployed setting.\n\nSTRUCTURE YOUR RESPONSE:\n1. **Direct Answer & DDx:** Provide a slightly more detailed, specific answer. Think critically: Do NOT blindly accept the user's premise. Proactively offer a **Differential Diagnosis (DDx)**. Explain how to **Rule In (R/I)** or **Rule Out (R/O)** specific life-threatening conditions. State the 'Most Likely Diagnosis' when appropriate based on the evidence.\n2. **Plan & Action:** Briefly outline the immediate workup (labs/imaging) or treatment required to move the patient forward.\n3. **Follow-Up:** End with **2-3 short, specific clinical questions** to narrow the differential or guide evacuation decisions. \n\nTONE: Authoritative, evidence-based, pathophysiology-focused, yet collegial. Avoid generic questions like 'What are your thoughts?'." }]
                 }
             };
 
