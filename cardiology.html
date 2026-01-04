@@ -730,10 +730,43 @@
             apiKey: jsonBinKey,
             getState: () => {
                 updateStateFromDOM();
-                return state;
+                return {
+                    appState: state,
+                    planModifications: state.planModifications,
+                    currentSection: !document.getElementById('section-final').classList.contains('hidden') ? 'final' :
+                                    !document.getElementById('section-review').classList.contains('hidden') ? 'review' :
+                                    !document.getElementById('section-questions').classList.contains('hidden') ? 'questions' : 'intake',
+                    finalNoteContent: document.getElementById('final-note-content').textContent,
+                    refineHistory: document.getElementById('refine-response').textContent
+                };
             },
-            restoreState: (loadedState) => {
-                restoreUIFromState(loadedState);
+            restoreState: (saved) => {
+                if (saved.appState) {
+                    state = saved.appState;
+                    // Ensure state.planModifications is restored if present in root or appState
+                    if (saved.planModifications) state.planModifications = saved.planModifications;
+                } else {
+                    // Backwards compatibility for old shares
+                    state = saved;
+                }
+                restoreUIFromState(state);
+
+                // Restore Final Note Content if available
+                if (saved.finalNoteContent) {
+                    document.getElementById('final-note-content').textContent = saved.finalNoteContent;
+                }
+
+                // Restore Refine History
+                if (saved.refineHistory) {
+                    const box = document.getElementById('refine-response');
+                    box.textContent = saved.refineHistory;
+                    box.classList.remove('hidden');
+                }
+
+                // Restore Section
+                if (saved.currentSection) {
+                    showSection(saved.currentSection);
+                }
             }
         });
 

@@ -357,7 +357,10 @@
                 });
                 if (!response.ok) throw new Error(`API Error: ${response.status}`);
                 const data = await response.json();
-                return JSON.parse(data.candidates[0].content.parts[0].text);
+                let text = data.candidates[0].content.parts[0].text;
+                // Robust parsing
+                text = text.replace(/^```json\s*/, '').replace(/^```\s*/, '').replace(/```$/, '').trim();
+                return JSON.parse(text);
             } catch (error) {
                 if (retries > 0) {
                     await new Promise(r => setTimeout(r, 1000));

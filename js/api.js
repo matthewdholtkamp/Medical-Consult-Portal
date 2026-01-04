@@ -39,9 +39,12 @@ export async function callGeminiApi(apiKey, systemPrompt, userQuery, retries = 3
         }
 
         const data = await response.json();
-        const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        let text = data.candidates?.[0]?.content?.parts?.[0]?.text;
 
         if (!text) throw new Error("No content generated");
+
+        // Clean Markdown code blocks if present (e.g., ```json ... ```)
+        text = text.replace(/^```json\s*/, '').replace(/^```\s*/, '').replace(/```$/, '').trim();
 
         return JSON.parse(text);
     } catch (error) {
