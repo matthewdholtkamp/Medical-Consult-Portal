@@ -140,6 +140,16 @@
         <!-- Input Area: Stays at Bottom Naturally -->
         <div class="bg-slate-900/90 backdrop-blur-md border-t border-slate-800 p-4 pb-4 flex-shrink-0 flex flex-col gap-3">
             
+            <!-- Audio Controls (Independent) -->
+            <div id="audio-controls" class="hidden flex items-center justify-center gap-4 mb-2 p-2 bg-slate-800/50 rounded-full border border-slate-700/50 backdrop-blur-sm transition-all mx-auto w-fit">
+                <button onclick="window.playAudio()" class="p-2 rounded-full hover:bg-slate-700 text-green-400 transition-colors" title="Play Audio">
+                    <span class="material-symbols-outlined text-2xl">play_circle</span>
+                </button>
+                <button onclick="window.pauseAudio()" class="p-2 rounded-full hover:bg-slate-700 text-amber-400 transition-colors" title="Pause Audio">
+                    <span class="material-symbols-outlined text-2xl">pause_circle</span>
+                </button>
+            </div>
+
             <!-- Visualizer Bars (Small) -->
             <div class="flex items-center justify-center gap-1 h-4 opacity-50 transition-opacity duration-300" id="audio-bars-container">
                 <div class="audio-bar h-1"></div>
@@ -198,8 +208,7 @@
         let currentState = STATE.IDLE;
 
         // --- Globals ---
-        let mediaRecorder = null;
-        let audioChunks = [];
+        let recognition = null; // Web Speech API
         let audioContext = null; // Visualizer
         let analyser = null;
         let microphoneStream = null;
@@ -218,7 +227,8 @@
             bars: document.querySelectorAll('.audio-bar'),
             barsContainer: document.getElementById('audio-bars-container'),
             conversation: document.getElementById('conversation-container'),
-            textInput: document.getElementById('text-input')
+            textInput: document.getElementById('text-input'),
+            audioControls: document.getElementById('audio-controls')
         };
 
         // --- Auto-Resize Textarea ---
@@ -230,25 +240,43 @@
 
         // --- Core Logic ---
 
+        // --- Audio Control Logic ---
+        window.playAudio = function() {
+            if(currentAudio) {
+                currentAudio.play();
+                updateState(STATE.SPEAKING);
+            }
+        };
+
+        window.pauseAudio = function() {
+            if(currentAudio) {
+                currentAudio.pause();
+                ui.statusText.innerText = "PAUSED";
+                ui.statusDot.className = "w-2 h-2 rounded-full bg-amber-500";
+            }
+        };
+
+        // --- Mic Logic (Live Transcription) ---
         window.handleMicToggle = function() {
             if (currentState === STATE.IDLE) {
-                startRecording();
+                startDictation();
             } else if (currentState === STATE.LISTENING) {
-                stopRecording();
-            } else if (currentState === STATE.SPEAKING) {
+                stopDictation();
+            } else if (currentState === STATE.SPEAKING || currentState === STATE.GENERATING_VOICE) {
+                // If speaking, button stops playback (legacy behavior + new stop button behavior)
                 if (currentAudio) {
                     currentAudio.pause();
-                    currentAudio = null;
+                    currentAudio = null; // "Stop" resets it
                 }
                 updateState(STATE.IDLE);
             }
         };
 
-        async function startRecording() {
+        async function startDictation() {
+            // 1. Start Visualizer (User Media)
             try {
                 if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 if (audioContext.state === 'suspended') await audioContext.resume();
-
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 
                 microphoneStream = audioContext.createMediaStreamSource(stream);
@@ -257,49 +285,69 @@
                 microphoneStream.connect(analyser);
                 dataArray = new Uint8Array(analyser.frequencyBinCount);
                 drawVisualizer();
+            } catch(e) {
+                console.warn("Visualizer failed init", e);
+            }
 
-                mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' }); 
-                audioChunks = [];
+            // 2. Start Speech Recognition
+            if (!('webkitSpeechRecognition' in window)) {
+                alert("Speech Recognition not supported in this browser. Use Chrome/Edge.");
+                return;
+            }
 
-                mediaRecorder.ondataavailable = event => {
-                    if (event.data.size > 0) audioChunks.push(event.data);
-                };
+            const initialText = ui.textInput.value;
+            recognition = new webkitSpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = 'en-US';
 
-                mediaRecorder.onstop = async () => {
-                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                    stream.getTracks().forEach(track => track.stop());
-                    
-                    const base64Audio = await blobToBase64(audioBlob);
-                    handleUserTurn({ audio: base64Audio });
-                };
+            recognition.onresult = function(event) {
+                let transcript = "";
+                // Iterate over ALL results to rebuild the full transcript
+                for (let i = 0; i < event.results.length; ++i) {
+                    transcript += event.results[i][0].transcript;
+                }
 
-                mediaRecorder.start();
-                updateState(STATE.LISTENING);
+                // Append current session transcript to what was there before start
+                // Add a space if there was text and the transcript doesn't start with one
+                let spacer = "";
+                if (initialText && !initialText.endsWith(" ") && transcript && !transcript.startsWith(" ")) {
+                    spacer = " ";
+                }
 
-            } catch (err) {
-                console.error("Recording failed", err);
-                alert("Microphone access denied or error starting recording.");
+                ui.textInput.value = initialText + spacer + transcript;
+
+                // Auto-resize
+                ui.textInput.style.height = 'auto';
+                ui.textInput.style.height = (ui.textInput.scrollHeight) + 'px';
+            };
+
+            recognition.onerror = function(event) {
+                console.error("Speech error", event.error);
                 updateState(STATE.IDLE);
-            }
+            };
+
+            recognition.start();
+            updateState(STATE.LISTENING);
         }
 
-        function stopRecording() {
-            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-                mediaRecorder.stop();
-                ui.interactionText.innerText = "Transcribing...";
+        function stopDictation() {
+            if (recognition) {
+                recognition.stop();
+                recognition = null;
             }
-        }
+            // Stop Visualizer
+            if (microphoneStream) {
+                microphoneStream.mediaStream.getTracks().forEach(track => track.stop());
+                microphoneStream.disconnect();
+                microphoneStream = null;
+            }
 
-        function blobToBase64(blob) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(blob);
-                reader.onloadend = () => {
-                    const base64String = reader.result.split(',')[1];
-                    resolve(base64String);
-                };
-                reader.onerror = reject;
-            });
+            // Submit the text
+            // Small delay to let final result process
+            setTimeout(() => {
+                handleTextSubmit();
+            }, 500);
         }
 
         function b64ToBytes(b64) {
@@ -355,27 +403,10 @@
         // Handles Conversation Turn (Audio or Text)
         async function handleUserTurn(input) {
             updateState(STATE.THINKING);
-            let userText = "";
-            let messageElem = null;
+            let userText = input.text;
             
             // 1. Display User Input
-            if (input.text) {
-                userText = input.text;
-                addMessageToLog("You", userText);
-            } else if (input.audio) {
-                // Show placeholder while transcribing
-                messageElem = addMessageToLog("You", "🎤 Processing speech...");
-                try {
-                    // Transcribe audio to text FIRST
-                    userText = await transcribeWithGemini(input.audio);
-                    if (messageElem) messageElem.innerText = userText;
-                } catch (e) {
-                    console.error("Transcription error", e);
-                    if (messageElem) messageElem.innerText = "🎤 Error processing speech.";
-                    updateState(STATE.IDLE);
-                    return;
-                }
-            }
+            addMessageToLog("You", userText);
 
             // 2. Send TEXT to Dr. H (Gemini) for response
             try {
@@ -409,7 +440,7 @@
                 contents: conversationHistory,
                 // UPDATED: Dr. H Persona - Conversational Military Medical SME
                 systemInstruction: {
-                    parts: [{ text: "You are Dr. H, a Senior Military Medical Physician. Engage in a natural, back-and-forth professional dialogue. Do NOT give a long lecture. \n\n1. ANSWER FIRST: Provide a direct, concise answer to the user's immediate question.\n2. PROACTIVE FOLLOW-UP: After your answer, briefly raise *ONE* critical follow-up point to drive the conversation (e.g., 'Have you considered the workup for X?', 'We should discuss the evacuation plan.', 'What is the service member's specific MOS?', or 'Watch out for this life-threatening red flag...').\n3. COLLABORATION: End with a quick check-in like 'What do you think?' or 'Does that align with your assessment?'\n\nKeep the tone professional, collegial, and efficient." }]
+                    parts: [{ text: "You are Dr. H, a Senior Military Medical Physician. Engage in a natural, back-and-forth professional dialogue. Do NOT give a long lecture. \n\n1. ANSWER FIRST: Provide a direct, concise answer to the user's immediate question.\n2. FOLLOW-UP: After your answer, ask **2-3 short, relevant clinical follow-up questions** to guide the decision making (e.g. asking about specific vitals, labs, or evacuation criteria). VARY your closing questions. Do NOT use generic phrases like 'What are your thoughts?' or 'Does this align with your assessment?'. \n\nKeep the tone professional, collegial, and efficient." }]
                 }
             };
 
@@ -517,9 +548,10 @@
                 
                 currentAudio.onended = () => {
                     updateState(STATE.IDLE);
-                    currentAudio = null;
+                    // Don't null currentAudio so user can replay
                 };
                 
+                ui.audioControls.classList.remove('hidden');
                 updateState(STATE.SPEAKING);
                 currentAudio.play();
 
