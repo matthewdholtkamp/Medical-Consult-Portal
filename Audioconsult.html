@@ -111,21 +111,6 @@
 
     <div class="background-overlay"></div>
 
-    <!-- API Key Modal -->
-    <div id="api-key-modal" class="fixed inset-0 z-[100] bg-slate-950/90 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl">
-            <div class="flex items-center gap-3 mb-4 text-blue-400">
-                <span class="material-symbols-outlined">key</span>
-                <h2 class="text-lg font-bold">Configuration Required</h2>
-            </div>
-            <p class="text-sm text-slate-400 mb-4">Please enter your Gemini API Key.</p>
-            <input type="password" id="api-key-input" placeholder="Paste API Key here..." class="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors font-mono mb-4">
-            <button onclick="saveApiKey()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-2 rounded-lg transition-colors">
-                Initialize System
-            </button>
-        </div>
-    </div>
-
     <!-- Header -->
     <header class="h-16 flex items-center justify-between px-6 z-20 border-b border-white/5 bg-gemini-900/50 backdrop-blur-sm flex-shrink-0">
         <div class="flex items-center gap-3">
@@ -188,11 +173,18 @@
 
     </main>
 
+    <!-- PCM to WAV Library (Inlined for single file portability) -->
     <script>
+    !function(e,t){"object"==typeof exports&&"object"==typeof module?module.exports=t():"function"==typeof define&&define.amd?define([],t):"object"==typeof exports?exports.pcmToWav=t():e.pcmToWav=t()}(window,function(){return function(e){var t={};function r(n){if(t[n])return t[n].exports;var o=t[n]={i:n,l:!1,exports:{}};return e[n].call(o.exports,o,o.exports,r),o.l=!0,o.exports}return r.m=e,r.c=t,r.d=function(e,t,n){r.o(e,t)||Object.defineProperty(e,t,{enumerable:!0,get:n})},r.r=function(e){"undefined"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(e,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(e,"__esModule",{value:!0})},r.t=function(e,t){if(1&t&&(e=r(e)),8&t)return e;if(4&t&&"object"==typeof e&&e&&e.__esModule)return e;var n=Object.create(null);if(r.r(n),Object.defineProperty(n,"default",{enumerable:!0,value:e}),2&t&&"string"!=typeof e)for(var o in e)r.d(n,o,function(t){return e[t]}.bind(null,o));return n},r.n=function(e){var t=e&&e.__esModule?function(){return e.default}:function(){return e};return r.d(t,"a",t),t},r.o=function(e,t){return Object.prototype.hasOwnProperty.call(e,t)},r.p="",r(r.s=0)}([function(e,t,r){"use strict";Object.defineProperty(t,"__esModule",{value:!0}),t.default=function(e,t,r){var n,o,a,i,f,c,u,d=new DataView(new ArrayBuffer(44+e.length*t*2));return d.setUint32(0,1380533830,!1),d.setUint32(4,36+e.length*t*2,!0),d.setUint32(8,1463899717,!1),d.setUint32(12,1718449184,!1),d.setUint32(16,16,!0),d.setUint16(20,1,!0),n=t,d.setUint16(22,n,!0),o=r,d.setUint32(24,o,!0),a=r*t*2,d.setUint32(28,a,!0),i=2*t,d.setUint16(32,i,!0),f=16,d.setUint16(34,f,!0),d.setUint32(36,1684108385,!1),c=e.length*t*2,d.setUint32(40,c,!0),u=new Uint8Array(d.buffer,44),e.forEach(function(e,t){var r=44+2*t;d.setInt16(r,e,!0)}),new Blob([d.buffer],{type:"audio/wav"})},e.exports=t.default}])});
+    </script>
+
+    <script type="module">
+        import { API_KEYS } from './js/config.js?v=secure';
+
         // --- Configuration ---
-        let API_KEY = "";
+        let API_KEY = API_KEYS.PSYCHIATRY;
         const MODEL_ID = "gemini-2.5-flash"; // Main chat model
-        const TTS_MODEL_ID = "gemini-2.5-flash"; // Model for Audio Generation (Aoede)
+        const TTS_MODEL_ID = "gemini-2.5-flash-preview-tts"; // Model for Audio Generation (Aoede)
         
         // --- State Machine ---
         const STATE = {
@@ -225,8 +217,6 @@
             bars: document.querySelectorAll('.audio-bar'),
             barsContainer: document.getElementById('audio-bars-container'),
             conversation: document.getElementById('conversation-container'),
-            modal: document.getElementById('api-key-modal'),
-            keyInput: document.getElementById('api-key-input'),
             textInput: document.getElementById('text-input')
         };
 
@@ -239,17 +229,7 @@
 
         // --- Core Logic ---
 
-        window.saveApiKey = function() {
-            const key = ui.keyInput.value.trim();
-            if(!key) { alert("Key required"); return; }
-            API_KEY = key;
-            ui.modal.classList.add('hidden');
-            updateState(STATE.IDLE);
-        };
-
         window.handleMicToggle = function() {
-            if (!API_KEY) { ui.modal.classList.remove('hidden'); return; }
-
             if (currentState === STATE.IDLE) {
                 startRecording();
             } else if (currentState === STATE.LISTENING) {
@@ -321,6 +301,15 @@
             });
         }
 
+        function b64ToBytes(b64) {
+          const fixed = b64.replace(/-/g, "+").replace(/_/g, "/");
+          const pad = fixed.length % 4 ? "=".repeat(4 - (fixed.length % 4)) : "";
+          const bin = atob(fixed + pad);
+          const bytes = new Uint8Array(bin.length);
+          for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+          return bytes;
+        }
+
         window.handleInputKey = function(e) {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault(); // Prevent new line
@@ -331,7 +320,6 @@
         window.handleTextSubmit = function() {
             const text = ui.textInput.value.trim();
             if (!text) return;
-            if (!API_KEY) { ui.modal.classList.remove('hidden'); return; }
             
             ui.textInput.value = '';
             ui.textInput.style.height = 'auto'; // Reset height
@@ -504,11 +492,27 @@
                 
                 // Extract audio data (Base64)
                 const audioData = data.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+                const mimeType = data.candidates?.[0]?.content?.parts?.[0]?.inlineData?.mimeType || "audio/pcm";
                 
                 if (!audioData) throw new Error("No audio returned");
 
-                const audioSrc = "data:audio/wav;base64," + audioData;
-                currentAudio = new Audio(audioSrc);
+                // Decode Safe Base64
+                const bytes = b64ToBytes(audioData);
+
+                // Convert/Blob
+                let blob;
+                if (mimeType.includes("pcm") || mimeType.includes("L16")) {
+                  if (typeof window.pcmToWav !== "function") throw new Error("pcmToWav missing on globalThis");
+                  // Int16Array view of the bytes
+                  const pcm16 = new Int16Array(bytes.buffer);
+                  blob = window.pcmToWav(pcm16, 1, 24000);
+                } else {
+                  blob = new Blob([bytes], { type: mimeType });
+                }
+
+                const audioUrl = URL.createObjectURL(blob);
+                currentAudio = new Audio(audioUrl);
+                currentAudio.playbackRate = 1.25;
                 
                 currentAudio.onended = () => {
                     updateState(STATE.IDLE);
