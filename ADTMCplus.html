@@ -643,7 +643,13 @@
             else note += `- No specific limitations.\n`;
             
             note += `Soldier Instructions:\n`;
-            soap.plan.profile.soldier_instructions.forEach(i => note += `- ${i}\n`);
+            if (soap.plan.profile.soldier_instructions) {
+                if (Array.isArray(soap.plan.profile.soldier_instructions)) {
+                    soap.plan.profile.soldier_instructions.forEach(i => note += `- ${i}\n`);
+                } else {
+                    note += `- ${soap.plan.profile.soldier_instructions}\n`;
+                }
+            }
 
             document.getElementById('final-note-content').textContent = note;
 
