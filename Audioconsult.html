@@ -191,6 +191,7 @@
             IDLE: 'IDLE',
             LISTENING: 'LISTENING',
             THINKING: 'THINKING',
+            GENERATING_VOICE: 'GENERATING_VOICE',
             SPEAKING: 'SPEAKING',
             ERROR: 'ERROR'
         };
@@ -406,9 +407,9 @@
 
             const payload = {
                 contents: conversationHistory,
-                // UPDATED: Dr. H Persona - Senior Military Medical SME
+                // UPDATED: Dr. H Persona - Conversational Military Medical SME
                 systemInstruction: {
-                    parts: [{ text: "You are Dr. H, a Senior Medical Physician and Subject Matter Expert (SME) consulting for a military healthcare provider. Your goal is to provide clear, high-level clinical guidance based on reliable medical sources and journals. For every clinical query, proactively structure your response to include: 1) A brief background on Pathophysiology. 2) A clear Plan of Action (Workup and Treatment). 3) Military Relevance: Explicitly discuss how this condition impacts deployability and the service member's military career, referencing AR 40-501 and DOD Instruction 6130.03 (Vol 1 & 2). 4) Prognosis. Maintain a professional yet collegial tone. Always end your response with a specific follow-up question, such as asking if they need assistance with specific medication dosing, lab panels, or radiology orders." }]
+                    parts: [{ text: "You are Dr. H, a Senior Military Medical Physician. Engage in a natural, back-and-forth professional dialogue. Do NOT give a long lecture. \n\n1. ANSWER FIRST: Provide a direct, concise answer to the user's immediate question.\n2. PROACTIVE FOLLOW-UP: After your answer, briefly raise *ONE* critical follow-up point to drive the conversation (e.g., 'Have you considered the workup for X?', 'We should discuss the evacuation plan.', 'What is the service member's specific MOS?', or 'Watch out for this life-threatening red flag...').\n3. COLLABORATION: End with a quick check-in like 'What do you think?' or 'Does that align with your assessment?'\n\nKeep the tone professional, collegial, and efficient." }]
                 }
             };
 
@@ -461,7 +462,7 @@
                 currentAudio.pause();
                 currentAudio = null;
             }
-            updateState(STATE.SPEAKING);
+            updateState(STATE.GENERATING_VOICE);
 
             const url = `https://generativelanguage.googleapis.com/v1beta/models/${TTS_MODEL_ID}:generateContent?key=${API_KEY}`;
             
@@ -519,6 +520,7 @@
                     currentAudio = null;
                 };
                 
+                updateState(STATE.SPEAKING);
                 currentAudio.play();
 
             } catch (err) {
@@ -591,7 +593,7 @@
             ui.icon.className = "material-symbols-outlined text-slate-300 group-hover:text-white transition-colors";
             ui.icon.innerText = "record_voice_over"; // Default icon
 
-            if (newState === STATE.THINKING || newState === STATE.SPEAKING) {
+            if (newState === STATE.THINKING || newState === STATE.SPEAKING || newState === STATE.GENERATING_VOICE) {
                 ui.interactionText.classList.remove('text-red-500', 'text-amber-500');
                 ui.interactionText.classList.add('text-slate-500');
             }
@@ -617,10 +619,18 @@
                     ui.statusDot.className = "w-2 h-2 rounded-full bg-blue-500 animate-bounce";
                     ui.interactionText.innerText = "Consulting...";
                     break;
+
+                case STATE.GENERATING_VOICE:
+                    ui.statusDot.className = "w-2 h-2 rounded-full bg-indigo-500 animate-pulse";
+                    ui.interactionText.innerText = "Generating Voice...";
+                    break;
                     
                 case STATE.SPEAKING:
                     ui.statusDot.className = "w-2 h-2 rounded-full bg-green-500 animate-pulse";
                     ui.interactionText.innerText = "Speaking...";
+                    // Change button to stop/pause
+                    ui.icon.innerText = "stop_circle";
+                    ui.btn.className = "w-10 h-10 rounded-full bg-slate-700 hover:bg-slate-600 flex items-center justify-center transition-colors flex-shrink-0 group border border-slate-500";
                     break;
             }
         }
