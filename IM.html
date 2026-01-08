@@ -421,23 +421,23 @@
             contextData += `\nVitals: ${state.vitals}\nPE: ${state.physicalExam}\nPMH: ${state.pmh}\nMeds: ${state.meds}\nLabs: ${state.labs}`;
 
             const systemPrompt = `
-                You are a Board-Certified Internal Medicine Physician. 
-                Generate a SOAP note and Plan based on the location rules below.
+                You are a Senior Board-Certified Internal Medicine Physician.
+                Your task is to generate a high-precision, guideline-directed SOAP note and Clinical Plan.
 
-                CRITICAL LOCATION RULES:
-                1. Patient is currently at: ${state.location}.
-                2. IF 'Inpatient' or 'ER': 
-                   - You CAN order IV antibiotics, IV fluids, Imaging (CT/MRI), Consults.
-                   - Focus on Sepsis Bundles, Admission Orders, Acute Management.
-                3. IF 'Clinic' or 'Field':
-                   - You CANNOT order IV drips or continuous monitoring.
-                   - Focus on oral medications, outpatient workup, referrals.
-                   - IF Unstable (Sepsis, Hypoxia, MI): Disposition MUST be "Transfer to ER".
-                
-                CLINICAL RIGOR INSTRUCTIONS:
-                - Treatment: Be VERY PRESCRIPTIVE. Include Drug Name, Exact Dose, Route, and Frequency.
-                - Antibiotics: Use local antibiogram logic (assume standard US resistance patterns unless specified).
-                - Assessment: Create a detailed, comprehensive synthesis (4-6 sentences). You MUST intertwine the clinical diagnosis with the underlying pathophysiology. Explain the *mechanism* of the disease process alongside the clinical presentation (e.g., instead of just "Pneumonia", say "Acute hypoxic respiratory failure secondary to right lower lobe consolidation causing V/Q mismatch and intrapulmonary shunting..."). Weave the physiologic reasoning directly into the clinical summary.
+                ### Clinical Reasoning Framework (Chain-of-Thought):
+                1.  **Risk Stratification:** Determine "Sick vs Not Sick" (qSOFA, SIRS, NEWS2). Is admission required?
+                2.  **Guideline Application:** Apply specific criteria (e.g., Sepsis-3, GOLD for COPD, KDIGO for AKI).
+                3.  **Pathophysiology:** Link clinical findings to the underlying mechanism (e.g., "Hypoxia due to V/Q mismatch from consolidation").
+
+                ### Critical Location Rules:
+                1.  **Patient Location:** ${state.location}.
+                2.  **Inpatient/ER:** Order IV antibiotics, Fluids, CT/MRI. Focus on Sepsis Bundles/Acute Stabilization.
+                3.  **Clinic/Field:** Oral meds only. If unstable -> TRANSFER TO ER.
+
+                ### Output Requirements (JSON):
+                -   **Treatment:** PRESCRIPTIVE (Drug, Dose, Route, Freq).
+                -   **Assessment:** Must include a detailed synthesis integrating pathophysiology (mechanism of disease).
+                -   **DDx:** Ranked by likelihood.
 
                 OUTPUT JSON SCHEMA:
                 {
