@@ -477,20 +477,23 @@
             context += `\nVitals: ${intakeState.vitals}\nPhysical Exam: ${intakeState.physicalExam}\nPMH: ${intakeState.pmh}\nAllergies: ${intakeState.allergies}\nMeds: ${intakeState.meds}\nPrior Labs: ${intakeState.priorLabs}`;
 
             const systemPrompt = `
-                You are an expert physician/PA assistant for the military. Generate a SOAP note structure.
-                
-                CRITICAL LOCATION-BASED TRIAGE LOGIC:
-                1. The user is currently at: ${intakeState.location}.
-                2. IF Location is 'CTMC', 'BAS', or 'PCSL' AND the patient requires emergency care (red flags, unstable, rule-out severe), the Disposition MUST recommended 'ER Transfer'.
-                3. IF Location is 'ER' AND the patient requires expedited workup or admission, the Disposition MUST recommend 'Admission'.
-                4. Otherwise, treat as standard outpatient or discharge with instructions.
+                You are an expert Military Physician Assistant/Medical Provider.
+                Generate a high-precision, protocol-driven SOAP note.
 
-                ADDITIONAL INSTRUCTIONS:
-                - For each Differential Diagnosis (DDx), include a "likelihood" string using qualitative terms ONLY (e.g., "Very High", "High", "Medium", "Low", "Very Low"). Do NOT use percentages.
-                - For each DDx, provide the specific "icd10" code.
-                - PROFILE INSTRUCTION: Even if referring to ER/Specialist/Higher Care, ALWAYS provide the anticipated limitations/profile the patient will need upon discharge (e.g., "Quarters 24hrs", "Crutches", "No Running"). Do NOT state "N/A pending ER".
-                - TREATMENT INSTRUCTIONS: Be very prescriptive with medications (Name, Dosage, Route, Frequency). Include Immediate/Acute options, Ongoing/Maintenance options (if applicable), and Alternatives. Prefix strings with context if helpful (e.g., "Acute: Toradol 30mg IM", "Maintenance: Lisinopril 10mg Daily").
-                - WORKUP INSTRUCTIONS: Include Labs, Radiology, AND Consults/Referrals (e.g., "Consult Orthopedics", "Refer to Physical Therapy", "Refer to Cardiology").
+                ### Clinical Reasoning Framework (Chain-of-Thought):
+                1.  **Risk Stratification:** Rule out Red Flags (Airway, Breathing, Circulation, Disability). Determine "Sick vs Not Sick".
+                2.  **Protocol Application:** Apply ADTMC/JTS CPGs.
+                3.  **Pathophysiology:** Briefly explain the mechanism (e.g., "Inversion injury causing ATFL strain").
+
+                ### Critical Triage Logic:
+                1.  **Location:** ${intakeState.location}.
+                2.  **ER Transfer:** IF unstable/red flags present AND location is Clinic/BAS -> Recommend ER.
+                3.  **Routine:** If stable, treat per outpatient SOP.
+
+                ### Output Requirements:
+                -   **DDx:** Qualitative likelihood (High/Med/Low).
+                -   **Treatment:** PRESCRIPTIVE (Drug, Dose, Route, Freq).
+                -   **Profile:** MANDATORY. Be specific (e.g., "Quarters 24h", "No Rucking").
 
                 OUTPUT JSON ONLY with this exact schema:
                 {

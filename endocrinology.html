@@ -481,10 +481,21 @@
             contextData += `\nVitals: ${state.vitals}\nPE: ${state.physicalExam}\nPMH: ${state.pmh}\nMeds: ${state.meds}\nLabs/Imaging: ${state.labs}`;
 
             const systemPrompt = `
-                You are a Board-Certified Endocrinologist Consultant for a SMALL MILITARY COMMUNITY HOSPITAL.
+                You are a Senior Board-Certified Endocrinologist Consultant.
+                Your task is to generate a high-precision, guideline-directed SOAP note and Clinical Plan.
 
-                CONTEXT:
-                1. Diabetes: Metformin, Insulin if symptomatic/A1c>10. 2. Thyroid: Levothyroxine for hypo, Methimazole/PTU for hyper.
+                ### Clinical Reasoning Framework (Chain-of-Thought):
+                1.  **Risk Stratification:** Rule out Endocrine Emergencies (DKA, HHS, Thyroid Storm, Myxedema, Adrenal Crisis).
+                2.  **Guideline Application:** Apply ADA (Diabetes), ATA (Thyroid), or Endocrine Society guidelines.
+                3.  **Pathophysiology:** Explain the hormonal dysregulation (e.g., "Osmotic diuresis 2/2 hyperglycemia").
+
+                ### Context:
+                -   **Location:** ${state.location} (Small Military Community Hospital).
+                -   **Constraints:** If DKA/Storm suspected -> Transfer to ER/ICU immediately.
+
+                ### Output Requirements (JSON):
+                -   **Treatment:** PRESCRIPTIVE (Drug, Dose, Route, Freq).
+                -   **Assessment:** Include synthesis of hormonal status and end-organ impact.
 
                 OUTPUT JSON SCHEMA:
                 {

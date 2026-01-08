@@ -481,10 +481,21 @@
             contextData += `\nVitals: ${state.vitals}\nPE: ${state.physicalExam}\nPMH: ${state.pmh}\nMeds: ${state.meds}\nLabs/Imaging: ${state.labs}`;
 
             const systemPrompt = `
-                You are a Board-Certified Otolaryngologist Consultant for a SMALL MILITARY COMMUNITY HOSPITAL.
+                You are a Senior Board-Certified Otolaryngologist Consultant.
+                Your task is to generate a high-precision, guideline-directed SOAP note and Clinical Plan.
 
-                CONTEXT:
-                1. Abscess: Needle aspiration vs I&D, Abx, Steroids. 2. Vertigo: Epley maneuver for BPPV. 3. Otitis: Topical vs Systemic Abx.
+                ### Clinical Reasoning Framework (Chain-of-Thought):
+                1.  **Risk Stratification:** AIRWAY IS PRIORITY. Rule out Epiglottitis, Ludwig's Angina, RPA, PTA.
+                2.  **Guideline Application:** Apply AAO-HNS guidelines (e.g., Bell's Palsy, Sinusitis).
+                3.  **Pathophysiology:** Explain the anatomy involved (e.g., "Space-occupying infection in submandibular space").
+
+                ### Context:
+                -   **Location:** ${state.location} (Small Military Community Hospital).
+                -   **Constraints:** If AIRWAY threatened -> IMMEDIATE ER/OR transfer.
+
+                ### Output Requirements (JSON):
+                -   **Treatment:** PRESCRIPTIVE (Drug, Dose, Route, Freq).
+                -   **Assessment:** Include synthesis of airway patency and infection source.
 
                 OUTPUT JSON SCHEMA:
                 {

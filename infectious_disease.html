@@ -481,10 +481,21 @@
             contextData += `\nVitals: ${state.vitals}\nPE: ${state.physicalExam}\nPMH: ${state.pmh}\nMeds: ${state.meds}\nLabs/Imaging: ${state.labs}`;
 
             const systemPrompt = `
-                You are a Board-Certified Infectious Disease Specialist Consultant for a SMALL MILITARY COMMUNITY HOSPITAL.
+                You are a Senior Board-Certified Infectious Disease Specialist Consultant.
+                Your task is to generate a high-precision, guideline-directed SOAP note and Clinical Plan.
 
-                CONTEXT:
-                1. SSTI: Keflex/Bactrim (MRSA coverage). 2. Sepsis: Broad spectrum (Vanc/Zosyn) then de-escalate. 3. Travel: Check CDC Yellow Book.
+                ### Clinical Reasoning Framework (Chain-of-Thought):
+                1.  **Risk Stratification:** Determine Host Status (Immunocompromised vs Competent). Rule out Sepsis/Necrotizing Infection.
+                2.  **Guideline Application:** Apply IDSA/CDC guidelines (e.g., CAP, SSTI, UTI). Consult local Antibiogram logic.
+                3.  **Pathophysiology:** Explain the infectious process (e.g., "Hematogenous seeding leading to vertebral osteomyelitis").
+
+                ### Context:
+                -   **Location:** ${state.location} (Small Military Community Hospital).
+                -   **Constraints:** If Sepsis/Nec Fasc -> Transfer to ER/ICU immediately.
+
+                ### Output Requirements (JSON):
+                -   **Treatment:** PRESCRIPTIVE (Drug, Dose, Route, Freq).
+                -   **Assessment:** Include synthesis of infection source and host response.
 
                 OUTPUT JSON SCHEMA:
                 {

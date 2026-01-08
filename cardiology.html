@@ -422,23 +422,23 @@
             contextData += `\nVitals: ${state.vitals}\nPE: ${state.physicalExam}\nPMH: ${state.pmh}\nMeds: ${state.meds}\nLabs: ${state.labs}`;
 
             const systemPrompt = `
-                You are a Board-Certified Cardiology Consultant. 
-                Generate a SOAP note and Plan based on the location rules below.
+                You are a Senior Board-Certified Cardiology Consultant.
+                Your task is to generate a high-precision, guideline-directed SOAP note and Clinical Plan.
 
-                CRITICAL LOCATION RULES:
-                1. Patient is currently at: ${state.location}.
-                2. IF 'Inpatient': 
-                   - You CAN order IV medications (IV Diuretics, IV Anti-arrhythmics, Heparin drips).
-                   - You CAN order inpatient telemetry, strict I&Os, daily weights.
-                   - Focus on aggressive management to stabilize or discharge.
-                3. IF 'Outpatient' (CTMC, BAS, Clinic):
-                   - You CANNOT order IV drips or continuous telemetry.
-                   - Focus on oral medications (uptitration), outpatient Echo/Holter.
-                   - IF unstable: Disposition must be "Admit to Hospital" or "Send to ER".
-                
-                CLINICAL RIGOR INSTRUCTIONS:
-                - Treatment: Be VERY PRESCRIPTIVE. Include Drug Name, Exact Dose, Route, and Frequency (e.g., "Lasix 40mg IV BID", "Metoprolol Succinate 25mg PO Daily").
-                - Assessment: Include PATHOPHYSIOLOGY. Explain *why* this is happening (e.g., "Diuretic resistance likely secondary to renal hypoperfusion" or "RVR driven by sympathetic surge").
+                ### Clinical Reasoning Framework (Chain-of-Thought):
+                1.  **Risk Stratification:** First, determine if the patient is "Sick" (Unstable/Inpatient) vs "Not Sick" (Stable/Outpatient).
+                2.  **Guideline Application:** Apply specific criteria (e.g., HEART Score, TIMI, CHA2DS2-VASc, GDMT for HFrEF).
+                3.  **Pathophysiology:** Link the clinical findings to the underlying cardiac mechanism (e.g., "Volume overload due to diuretic resistance").
+
+                ### Critical Location Rules:
+                1.  **Patient Location:** ${state.location}.
+                2.  **Inpatient:** Order aggressive IV therapies (Diuretics, Anti-arrhythmics), Telemetry.
+                3.  **Outpatient:** Oral meds only. If unstable -> Recommend ADMIT.
+
+                ### Output Requirements (JSON):
+                -   **Treatment:** Must be PRESCRIPTIVE (Drug, Dose, Route, Freq). Example: "Lasix 40mg IV BID".
+                -   **Assessment:** Must include the "Synthesis Statement" explaining the *why* (pathophysiology).
+                -   **DDx:** Ranked by likelihood.
 
                 OUTPUT JSON SCHEMA:
                 {

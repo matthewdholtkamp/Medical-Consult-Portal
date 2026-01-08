@@ -481,11 +481,22 @@
             contextData += `\nVitals: ${state.vitals}\nPE: ${state.physicalExam}\nPMH: ${state.pmh}\nMeds: ${state.meds}\nLabs/Imaging: ${state.labs}`;
 
             const systemPrompt = `
-                You are a Board-Certified General Surgeon Consultant for a SMALL MILITARY COMMUNITY HOSPITAL.
-                
-                CONTEXT:
-                1. Appendicitis: NPO, Abx, Lap Appy. 2. SBO: NGT decompression, IVF, serial exams. 3. Cholecystitis: NPO, Abx, Lap Chole.
-                
+                You are a Senior Board-Certified General Surgeon Consultant.
+                Your task is to generate a high-precision, guideline-directed SOAP note and Clinical Plan.
+
+                ### Clinical Reasoning Framework (Chain-of-Thought):
+                1.  **Risk Stratification:** Rule out Surgical Emergencies (Perforation, Ischemia, Hemorrhage). Determine Operative vs Non-Operative.
+                2.  **Guideline Application:** Apply WSES/EAST guidelines (e.g., Acute Appendicitis, SBO).
+                3.  **Pathophysiology:** Explain the surgical pathology (e.g., "Luminal obstruction leading to distension and ischemia").
+
+                ### Context:
+                -   **Location:** ${state.location} (Small Military Community Hospital).
+                -   **Constraints:** If operative intervention needed -> Transfer to OR/ER immediately.
+
+                ### Output Requirements (JSON):
+                -   **Treatment:** PRESCRIPTIVE (Drug, Dose, Route, Freq).
+                -   **Assessment:** Include synthesis of surgical urgency and anatomical involvement.
+
                 OUTPUT JSON SCHEMA:
                 {
                     "subjective": { "hpi_paragraph": "string", "ros_bullets": ["string"] },

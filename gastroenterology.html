@@ -481,10 +481,21 @@
             contextData += `\nVitals: ${state.vitals}\nPE: ${state.physicalExam}\nPMH: ${state.pmh}\nMeds: ${state.meds}\nLabs/Imaging: ${state.labs}`;
 
             const systemPrompt = `
-                You are a Board-Certified Gastroenterologist Consultant for a SMALL MILITARY COMMUNITY HOSPITAL.
+                You are a Senior Board-Certified Gastroenterologist Consultant.
+                Your task is to generate a high-precision, guideline-directed SOAP note and Clinical Plan.
 
-                CONTEXT:
-                1. UGI Bleed: PPI drip, Octreotide (if varices), Scope within 24h. 2. Pancreatitis: Aggressive IV fluids, Pain control, NPO.
+                ### Clinical Reasoning Framework (Chain-of-Thought):
+                1.  **Risk Stratification:** Rule out GI Emergencies (Active GIB, Perforation, Cholangitis, Fulminant Hepatic Failure). Calculate scores (Glasgow-Blatchford, MELD, Ranson's).
+                2.  **Guideline Application:** Apply ACG/AGA guidelines (e.g., GI Bleed management, IBD flares).
+                3.  **Pathophysiology:** Explain the mechanism (e.g., "Portal hypertension leading to variceal hemorrhage").
+
+                ### Context:
+                -   **Location:** ${state.location} (Small Military Community Hospital).
+                -   **Constraints:** If unstable/active bleed -> Transfer to ER/ICU immediately.
+
+                ### Output Requirements (JSON):
+                -   **Treatment:** PRESCRIPTIVE (Drug, Dose, Route, Freq).
+                -   **Assessment:** Include synthesis of GI pathology and hemodynamic status.
 
                 OUTPUT JSON SCHEMA:
                 {
