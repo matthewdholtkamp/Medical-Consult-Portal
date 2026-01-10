@@ -172,6 +172,11 @@
 
         <!-- SECTION 3: PLAN REVIEW -->
         <div id="section-review" class="hidden bg-slate-800 p-6 rounded-lg shadow-xl border border-slate-700">
+             <!-- Critical Safety Banner -->
+             <div id="safety-banner-container" class="hidden mb-6">
+                <!-- Populated via JS -->
+             </div>
+
              <!-- Logic Alert Banner -->
              <div id="location-alert-banner" class="mb-6 p-4 rounded-md flex items-start">
                 <!-- Populated via JS -->
@@ -430,6 +435,10 @@
                 2.  **Guideline Application:** Apply specific criteria (e.g., HEART Score, TIMI, CHA2DS2-VASc, GDMT for HFrEF).
                 3.  **Pathophysiology:** Link the clinical findings to the underlying cardiac mechanism (e.g., "Volume overload due to diuretic resistance").
 
+                ### Safety Protocol:
+                - **RED FLAGS:** Explicitly check for life-threatening conditions (e.g., STEMI, Vtach, Dissection, Tamponade, Severe Hyperkalemia).
+                - If any are present, YOU MUST populate the "red_flags" array.
+
                 ### Critical Location Rules:
                 1.  **Patient Location:** ${state.location}.
                 2.  **Inpatient:** Order aggressive IV therapies (Diuretics, Anti-arrhythmics), Telemetry.
@@ -443,6 +452,7 @@
                 OUTPUT JSON SCHEMA:
                 {
                     "subjective": { "hpi_paragraph": "string", "ros_bullets": ["string"] },
+                    "red_flags": ["string"],
                     "assessment": { 
                         "synthesis_statement": "Summary of cardiac status INCLUDING brief pathophysiology explaining the 'why' behind the plan.", 
                         "ddx": [ {"name": "string", "icd10": "string", "desc": "string", "likelihood": "High/Med/Low"} ] 
@@ -477,6 +487,27 @@
 
         // --- Step 3: Review & Render ---
         function renderReview(soap) {
+            // Safety Banner
+            const safetyContainer = document.getElementById('safety-banner-container');
+            if (soap.red_flags && soap.red_flags.length > 0) {
+                safetyContainer.innerHTML = `
+                    <div class="bg-red-900/50 border-l-4 border-red-500 p-4 rounded shadow-lg animate-pulse">
+                        <div class="flex items-center">
+                            <i class="fa-solid fa-triangle-exclamation text-red-500 text-2xl mr-4"></i>
+                            <div>
+                                <h3 class="font-bold text-red-200 uppercase tracking-wider text-sm">Critical Safety Alerts</h3>
+                                <ul class="list-disc ml-5 text-red-100 text-sm font-semibold mt-1">
+                                    ${soap.red_flags.map(f => `<li>${f}</li>`).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>`;
+                safetyContainer.classList.remove('hidden');
+            } else {
+                safetyContainer.classList.add('hidden');
+                safetyContainer.innerHTML = '';
+            }
+
             // Dynamic Location Alert
             const alertBanner = document.getElementById('location-alert-banner');
             const workupTag = document.getElementById('workup-tag');
