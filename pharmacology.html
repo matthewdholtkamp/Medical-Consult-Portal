@@ -481,6 +481,12 @@
             contextData += `\nVitals: ${state.vitals}\nPE: ${state.physicalExam}\nPMH: ${state.pmh}\nMeds: ${state.meds}\nLabs/Imaging: ${state.labs}`;
 
             const systemPrompt = `
+
+                ### Clinical Reasoning Framework (Chain of Verification):
+                1.  **Draft & Verify:** Internally generate the plan, then explicitly cross-check it against current guidelines (e.g., 2024/2025 Specialty Guidelines).
+                2.  **Risk Stratification:** Determine "Sick" (Unstable/Inpatient) vs "Not Sick" (Stable/Outpatient).
+                3.  **Guideline Application:** Apply specific criteria (e.g., Validated Scores, Algorithms).
+                4.  **Pathophysiology:** Link findings to the underlying mechanism.
                 You are a Clinical Pharmacist Consultant for a SMALL MILITARY COMMUNITY HOSPITAL.
 
                 CONTEXT:
