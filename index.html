@@ -816,6 +816,10 @@ Your mission is to provide authoritative, evidence-based clinical decision suppo
 2.  **Apply Evidence:** Map the patient's specific data points to the guideline criteria (e.g., "CHA2DS2-VASc score is 4 due to Age > 75 and HTN").
 3.  **Synthesize Plan:** Formulate a precision-based plan (Drugs, Doses, Timing) derived *strictly* from those guidelines.
 
+### Safety Protocol:
+-   **Red Flags:** Immediately identify any life-threatening conditions or contraindications.
+-   **Uncertainty:** If data is missing, state it clearly. Do not hallucinate values.
+
 ### Response Format:
 1.  **Guideline Framework:** Briefly list the authoritative sources being applied.
 2.  **Clinical Synthesis & Risk Stratification:** Summary of the problem and "Sick vs Not Sick" assessment.
@@ -960,6 +964,7 @@ Your mission is to provide authoritative, evidence-based clinical decision suppo
             try {
                 const result = await callGeminiDrHoltkamp(apiKey, DR_HOLTKAMP_SYSTEM_INSTRUCTION, query);
                 const cleanedText = cleanMedicalResponse(result.text);
+                const contentId = 'response-content-' + Date.now();
 
                 responseArea.innerHTML = `
                     <div class="space-y-4 animate-fade-in">
@@ -970,9 +975,14 @@ Your mission is to provide authoritative, evidence-based clinical decision suppo
                             <div class="flex-1 min-w-0">
                                 <div class="flex items-center justify-between mb-2">
                                     <h3 class="font-bold text-white text-sm uppercase tracking-wider">Dr. Holtkamp Analysis</h3>
-                                    <span class="text-[10px] text-slate-500 bg-slate-800 px-2 py-0.5 rounded border border-slate-700">AI Reasoning Enabled</span>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-[10px] text-slate-500 bg-slate-800 px-2 py-0.5 rounded border border-slate-700">AI Reasoning Enabled</span>
+                                        <button onclick="copyResponse('${contentId}')" class="text-slate-500 hover:text-white transition-colors p-1 rounded hover:bg-slate-700" title="Copy to Clipboard">
+                                            <span class="material-symbols-outlined text-[16px]">content_copy</span>
+                                        </button>
+                                    </div>
                                 </div>
-                                <div class="prose-content text-slate-300 text-sm leading-relaxed">
+                                <div id="${contentId}" class="prose-content text-slate-300 text-sm leading-relaxed">
                                     ${marked.parse(cleanedText)}
                                 </div>
                             </div>
@@ -1006,6 +1016,19 @@ Your mission is to provide authoritative, evidence-based clinical decision suppo
                 askBtn.textContent = "Ask Dr. H";
                 newQuestionBtn.classList.remove('hidden');
             }
+        };
+
+        window.copyResponse = function(elementId) {
+            const el = document.getElementById(elementId);
+            if (!el) return;
+            // Use innerText to get clean text without HTML tags, but marked formatting might need consideration.
+            // Actually, copying the text content is usually what users want from a consult note.
+            // If they want markdown, they'd want the source. But here they likely want to paste into an EMR.
+            // innerText preserves newlines which is good.
+            const text = el.innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                // Visual feedback could be added here
+            }).catch(err => console.error('Failed to copy', err));
         };
 
         // --- SPEECH-TO-TEXT LOGIC ---
