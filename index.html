@@ -109,15 +109,19 @@
             pointer-events: none; 
         }
 
-        /* Simple Prose for Markdown Content */
-        .prose-content ul { list-style-type: disc; padding-left: 1.5rem; margin-top: 0.5rem; margin-bottom: 0.5rem; }
-        .prose-content ol { list-style-type: decimal; padding-left: 1.5rem; margin-top: 0.5rem; margin-bottom: 0.5rem; }
-        .prose-content p { margin-bottom: 0.75rem; line-height: 1.6; }
-        .prose-content strong { color: #e2e8f0; font-weight: 700; }
-        .prose-content h1, .prose-content h2, .prose-content h3 { color: #f8fafc; font-weight: 700; margin-top: 1.5rem; margin-bottom: 0.75rem; }
-        .prose-content li { margin-bottom: 0.25rem; }
+        /* Simple Prose for Markdown Content - Modernized for Readability */
+        .prose-content { font-size: 0.95rem; }
+        .prose-content ul { list-style-type: disc; padding-left: 1.5rem; margin-top: 0.75rem; margin-bottom: 0.75rem; color: #cbd5e1; }
+        .prose-content ol { list-style-type: decimal; padding-left: 1.5rem; margin-top: 0.75rem; margin-bottom: 0.75rem; color: #cbd5e1; }
+        .prose-content p { margin-bottom: 1rem; line-height: 1.75; color: #e2e8f0; }
+        .prose-content strong { color: #60a5fa; font-weight: 700; }
+        .prose-content h1 { color: #f8fafc; font-weight: 700; font-size: 1.25rem; margin-top: 1.75rem; margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem; }
+        .prose-content h2 { color: #f1f5f9; font-weight: 600; font-size: 1.1rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+        .prose-content h3 { color: #e2e8f0; font-weight: 600; font-size: 1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.85rem; }
+        .prose-content li { margin-bottom: 0.35rem; line-height: 1.6; }
+        .prose-content blockquote { border-left: 4px solid #ef4444; background: rgba(239, 68, 68, 0.1); padding: 0.75rem 1rem; margin: 1rem 0; border-radius: 0 0.5rem 0.5rem 0; color: #fecaca; font-style: italic; }
         /* Fix for superscripts in prose */
-        .prose-content sup { color: #3b82f6; font-weight: 600; font-size: 0.75em; margin-left: 1px; }
+        .prose-content sup { color: #3b82f6; font-weight: 600; font-size: 0.75em; margin-left: 1px; vertical-align: super; }
 
         /* Toggle Switch CSS */
         .toggle-checkbox:checked {
@@ -804,22 +808,24 @@
 
     // System Instruction Configuration for Dr. Holtkamp (Gemini Persona)
     const DR_HOLTKAMP_SYSTEM_INSTRUCTION = `Respond as Dr. Holtkamp, a Senior Medical Physician and Expert Educator.
-Your mission is to provide authoritative, evidence-based clinical decision support using Generated Knowledge Prompting.
+Your mission is to provide authoritative, evidence-based clinical decision support using **Chain of Verification (CoV)** prompting to ensure zero hallucinations.
 
-### Core Directive:
-1.  **Retrieve Knowledge:** First, explicitly identify the specific clinical guidelines (e.g., "2024 ESC Guidelines for Atrial Fibrillation") relevant to the query.
-2.  **Apply Evidence:** Map the patient's specific data points to the guideline criteria (e.g., "CHA2DS2-VASc score is 4 due to Age > 75 and HTN").
-3.  **Synthesize Plan:** Formulate a precision-based plan (Drugs, Doses, Timing) derived *strictly* from those guidelines.
+### Core Directive (Chain of Verification):
+1.  **Draft Initial Plan:** Internally generate a preliminary plan based on the user query.
+2.  **Verify Against Guidelines:** Explicitly cross-check your draft against specific, cited clinical guidelines (e.g., "2024 ESC Guidelines", "JTS CPGs").
+    *   *Self-Correction:* If the draft conflicts with the guideline (e.g., wrong dose, missed contraindication), YOU MUST CORRECT IT.
+3.  **Final Synthesis:** Output ONLY the verified, evidence-based plan.
 
 ### Safety Protocol:
 -   **Red Flags:** Immediately identify any life-threatening conditions or contraindications.
 -   **Uncertainty:** If data is missing, state it clearly. Do not hallucinate values.
 
 ### Response Format:
-1.  **Guideline Framework:** Briefly list the authoritative sources being applied.
+1.  **Guideline Framework:** Briefly list the authoritative sources verified against.
 2.  **Clinical Synthesis & Risk Stratification:** Summary of the problem and "Sick vs Not Sick" assessment.
 3.  **Evidence Application:** Step-by-step connection of data to guideline criteria.
 4.  **Actionable Recommendations:** Bulleted list of specific next steps (Meds with doses, Imaging, Disposition).
+    *   *Note:* Use blockquotes (> Warning) for critical safety alerts.
 
 ### Constraints:
 -   Use standard Markdown. **NO LaTeX** (avoid $ or \).
@@ -934,24 +940,9 @@ Your mission is to provide authoritative, evidence-based clinical decision suppo
             return cleaned;
         }
 
-        window.askDrHoltkamp = async function() {
-            const queryInput = document.getElementById('chatInput');
-            const query = queryInput.value.trim();
-            if (!query) return;
-
-            // Clear input immediately and reset height
-            queryInput.value = '';
-            queryInput.style.height = '';
-
+        // Refactored Helper: Append User Message
+        function appendUserMessage(text) {
             const conversationHistory = document.getElementById('conversationHistory');
-            const askBtn = document.getElementById('askBtn');
-            const newQuestionBtn = document.getElementById('newQuestionBtn');
-
-            askBtn.disabled = true;
-            askBtn.textContent = "Consulting...";
-            newQuestionBtn.classList.add('hidden');
-
-            // 1. Append User Message (Safe DOM Creation)
             const userMsgId = 'user-msg-' + Date.now();
             const userDiv = document.createElement('div');
             userDiv.id = userMsgId;
@@ -961,10 +952,13 @@ Your mission is to provide authoritative, evidence-based clinical decision suppo
                     <p class="text-sm leading-relaxed"></p>
                 </div>
             `;
-            userDiv.querySelector('p').textContent = query;
+            userDiv.querySelector('p').textContent = text;
             conversationHistory.appendChild(userDiv);
+        }
 
-            // 2. Append Loading Indicator
+        // Refactored Helper: Show Loading
+        function showLoadingIndicator() {
+            const conversationHistory = document.getElementById('conversationHistory');
             const loadingId = 'loading-' + Date.now();
             conversationHistory.insertAdjacentHTML('beforeend', `
                 <div id="${loadingId}" class="flex items-center gap-3 text-slate-400 animate-fade-in pl-2">
@@ -972,68 +966,95 @@ Your mission is to provide authoritative, evidence-based clinical decision suppo
                     <span class="font-medium text-sm tracking-wide">Dr. Holtkamp is reviewing clinical guidelines...</span>
                 </div>
             `);
+            return loadingId;
+        }
+
+        // Refactored Helper: Remove Loading
+        function removeLoadingIndicator(loadingId) {
+            const loadingEl = document.getElementById(loadingId);
+            if (loadingEl) loadingEl.remove();
+        }
+
+        // Refactored Helper: Render AI Response
+        function renderAIResponse(text, thoughts) {
+            const conversationHistory = document.getElementById('conversationHistory');
+            const cleanedText = cleanMedicalResponse(text);
+            const contentId = 'response-content-' + Date.now();
+
+            conversationHistory.insertAdjacentHTML('beforeend', `
+                <div class="bg-gemini-800/90 backdrop-blur-sm p-6 rounded-2xl border border-blue-500/30 shadow-2xl animate-fade-in relative overflow-hidden">
+                    <div class="space-y-4">
+                        <div class="flex items-start gap-4">
+                            <div class="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center flex-shrink-0">
+                                <span class="material-symbols-outlined text-blue-400">smart_toy</span>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center justify-between mb-2">
+                                    <h3 class="font-bold text-white text-sm uppercase tracking-wider">Dr. Holtkamp Analysis</h3>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-[10px] text-slate-500 bg-slate-800 px-2 py-0.5 rounded border border-slate-700">AI Reasoning Enabled</span>
+                                        <button onclick="copyResponse('${contentId}')" class="text-slate-500 hover:text-white transition-colors p-1 rounded hover:bg-slate-700" title="Copy to Clipboard">
+                                            <span class="material-symbols-outlined text-[16px]">content_copy</span>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div id="${contentId}" class="prose-content text-slate-300 text-sm leading-relaxed">
+                                    ${marked.parse(cleanedText)}
+                                </div>
+                            </div>
+                        </div>
+
+                        ${thoughts ? `
+                            <div class="mt-4 pt-4 border-t border-slate-800">
+                                <details class="group bg-slate-900/40 rounded-xl border border-slate-700/30 overflow-hidden">
+                                    <summary class="list-none p-3 cursor-pointer flex items-center justify-between text-[10px] text-slate-500 font-bold uppercase tracking-widest hover:bg-slate-800/50 transition-colors">
+                                        <div class="flex items-center gap-2">
+                                            <span class="material-symbols-outlined text-sm text-blue-500/50">neurology</span>
+                                            <span>View Internal Reasoning Process</span>
+                                        </div>
+                                        <span class="material-symbols-outlined text-sm group-open:rotate-180 transition-transform">expand_more</span>
+                                    </summary>
+                                    <div class="px-4 pb-4 text-xs text-slate-500 italic font-mono leading-relaxed bg-black/10">
+                                        <div class="pt-2 whitespace-pre-line">
+                                            ${thoughts}
+                                        </div>
+                                    </div>
+                                </details>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `);
+        }
+
+        // Main Function
+        window.askDrHoltkamp = async function() {
+            const queryInput = document.getElementById('chatInput');
+            const query = queryInput.value.trim();
+            if (!query) return;
+
+            // UI Reset
+            queryInput.value = '';
+            queryInput.style.height = '';
+
+            const askBtn = document.getElementById('askBtn');
+            const newQuestionBtn = document.getElementById('newQuestionBtn');
+
+            askBtn.disabled = true;
+            askBtn.textContent = "Consulting...";
+            newQuestionBtn.classList.add('hidden');
+
+            appendUserMessage(query);
+            const loadingId = showLoadingIndicator();
 
             try {
                 const result = await callGeminiDrHoltkamp(apiKey, DR_HOLTKAMP_SYSTEM_INSTRUCTION, query);
-                const cleanedText = cleanMedicalResponse(result.text);
-                const contentId = 'response-content-' + Date.now();
-
-                // Remove Loading
-                const loadingEl = document.getElementById(loadingId);
-                if (loadingEl) loadingEl.remove();
-
-                // 3. Append AI Response
-                conversationHistory.insertAdjacentHTML('beforeend', `
-                    <div class="bg-gemini-800/90 backdrop-blur-sm p-6 rounded-2xl border border-blue-500/30 shadow-2xl animate-fade-in relative overflow-hidden">
-                        <div class="space-y-4">
-                            <div class="flex items-start gap-4">
-                                <div class="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center flex-shrink-0">
-                                    <span class="material-symbols-outlined text-blue-400">smart_toy</span>
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                    <div class="flex items-center justify-between mb-2">
-                                        <h3 class="font-bold text-white text-sm uppercase tracking-wider">Dr. Holtkamp Analysis</h3>
-                                        <div class="flex items-center gap-2">
-                                            <span class="text-[10px] text-slate-500 bg-slate-800 px-2 py-0.5 rounded border border-slate-700">AI Reasoning Enabled</span>
-                                            <button onclick="copyResponse('${contentId}')" class="text-slate-500 hover:text-white transition-colors p-1 rounded hover:bg-slate-700" title="Copy to Clipboard">
-                                                <span class="material-symbols-outlined text-[16px]">content_copy</span>
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div id="${contentId}" class="prose-content text-slate-300 text-sm leading-relaxed">
-                                        ${marked.parse(cleanedText)}
-                                    </div>
-                                </div>
-                            </div>
-
-                            ${result.thoughts ? `
-                                <div class="mt-4 pt-4 border-t border-slate-800">
-                                    <details class="group bg-slate-900/40 rounded-xl border border-slate-700/30 overflow-hidden">
-                                        <summary class="list-none p-3 cursor-pointer flex items-center justify-between text-[10px] text-slate-500 font-bold uppercase tracking-widest hover:bg-slate-800/50 transition-colors">
-                                            <div class="flex items-center gap-2">
-                                                <span class="material-symbols-outlined text-sm text-blue-500/50">neurology</span>
-                                                <span>View Internal Reasoning Process</span>
-                                            </div>
-                                            <span class="material-symbols-outlined text-sm group-open:rotate-180 transition-transform">expand_more</span>
-                                        </summary>
-                                        <div class="px-4 pb-4 text-xs text-slate-500 italic font-mono leading-relaxed bg-black/10">
-                                            <div class="pt-2 whitespace-pre-line">
-                                                ${result.thoughts}
-                                            </div>
-                                        </div>
-                                    </details>
-                                </div>
-                            ` : ''}
-                        </div>
-                    </div>
-                `);
-
+                removeLoadingIndicator(loadingId);
+                renderAIResponse(result.text, result.thoughts);
             } catch (error) {
                 console.error(error);
-                // Remove Loading
-                const loadingEl = document.getElementById(loadingId);
-                if (loadingEl) loadingEl.remove();
-
+                removeLoadingIndicator(loadingId);
+                const conversationHistory = document.getElementById('conversationHistory');
                 conversationHistory.insertAdjacentHTML('beforeend', `
                     <div class="p-4 bg-red-900/20 text-red-200 text-xs rounded-xl border border-red-500/30 animate-fade-in">
                         <strong>Error:</strong> ${error.message}
