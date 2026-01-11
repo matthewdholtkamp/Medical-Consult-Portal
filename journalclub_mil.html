@@ -33,19 +33,60 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        /* Markdown Styles within the content area */
+        /* Markdown Styles within the content area - Modernized Typography 2025 */
         .prose-invert h1, .prose-invert h2, .prose-invert h3 {
             color: #F39C12;
-            margin-top: 1.5em;
-            margin-bottom: 0.5em;
+            margin-top: 2em;
+            margin-bottom: 0.75em;
             font-weight: 700;
+            letter-spacing: -0.025em;
         }
-        .prose-invert h2 { border-bottom: 1px solid #333; padding-bottom: 5px; }
-        .prose-invert strong { color: var(--accent); }
-        .prose-invert ul { list-style-type: disc; padding-left: 20px; margin: 10px 0; }
-        .prose-invert li { margin-bottom: 5px; }
-        .prose-invert p { margin-bottom: 1em; line-height: 1.7; }
-        .prose-invert a { color: #38bdf8; text-decoration: underline; } /* Link styling */
+        .prose-invert h2 {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 8px;
+            font-size: 1.5rem;
+        }
+        .prose-invert h3 {
+            font-size: 1.25rem;
+            color: #ffb74d; /* Softer orange for subheads */
+        }
+        .prose-invert strong {
+            color: var(--accent);
+            font-weight: 600;
+        }
+        .prose-invert ul {
+            list-style-type: none;
+            padding-left: 0;
+            margin: 16px 0;
+        }
+        .prose-invert li {
+            margin-bottom: 8px;
+            padding-left: 24px;
+            position: relative;
+        }
+        .prose-invert li::before {
+            content: "•";
+            color: var(--accent);
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+        .prose-invert p {
+            margin-bottom: 1.25em;
+            line-height: 1.8;
+            color: #d1d5db; /* Gray-300 for better eye comfort */
+            font-size: 1.05rem;
+        }
+        .prose-invert a {
+            color: #38bdf8;
+            text-decoration: none;
+            border-bottom: 1px dotted #38bdf8;
+            transition: all 0.2s;
+        }
+        .prose-invert a:hover {
+            color: #7dd3fc;
+            border-bottom-style: solid;
+        }
         
         /* Loading Animation */
         .pulse-ring {
@@ -486,6 +527,10 @@
                 Role: Dr. Matthew Holtkamp (Expert Operational Medical Educator).
                 Task: Create an Operational Journal Club analysis for: "${topic}".
                 Context: ${details}
+
+                STRATEGY: Generated Knowledge Prompting (GKP).
+                1. **Retrieve Doctrine:** First, internally identify the specific JTS Clinical Practice Guidelines (CPGs), TCCC Protocols, and DoD Instructions relevant to this scenario.
+                2. **Synthesize:** Use this retrieved doctrine to construct the report below, ensuring strict adherence to current operational standards.
 
                 MANDATORY STRUCTURE:
                 1. Identify EXACTLY 4 Key References:
