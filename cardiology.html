@@ -284,6 +284,7 @@
         import { callGeminiApi, callGeminiText } from './js/api.js';
         import { setupSharing } from './js/sharing.js';
         import { API_KEYS } from './js/config.js?v=secure';
+        import { COV_INSTRUCTIONS } from './js/prompts.js';
 
         // --- Global State ---
         const apiKey = API_KEYS.CARDIOLOGY;
@@ -449,6 +450,8 @@
                 -   **Treatment:** Must be PRESCRIPTIVE (Drug, Dose, Route, Freq). Example: "Lasix 40mg IV BID".
                 -   **Assessment:** Must include the "Synthesis Statement" explaining the *why* (pathophysiology).
                 -   **DDx:** Ranked by likelihood.
+
+                ${COV_INSTRUCTIONS}
 
                 OUTPUT JSON SCHEMA:
                 {

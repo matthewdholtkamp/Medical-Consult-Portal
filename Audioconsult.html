@@ -15,6 +15,13 @@
                         gemini: {
                             800: '#1e293b',
                             900: '#0f172a',
+                        },
+                        bloomberg: {
+                            white: '#ffffff',
+                            gray: '#f3f4f6',
+                            text: '#111827',
+                            border: '#e5e7eb',
+                            accent: '#0057b7' // Classic Blue
                         }
                     },
                     animation: {
@@ -27,11 +34,11 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #0f172a; }
+        body { font-family: 'Inter', sans-serif; }
 
         /* Audio Pulse Animation */
         @keyframes pulse-ring {
@@ -70,17 +77,13 @@
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             z-index: -1;
-            background-image: radial-gradient(circle at 2px 2px, rgba(255,255,255,0.05) 1px, transparent 0);
+            background-image: radial-gradient(circle at 2px 2px, rgba(148, 163, 184, 0.15) 1px, transparent 0); /* Visible in Light */
             background-size: 32px 32px;
             opacity: 0.5; 
             pointer-events: none; 
         }
-
-        .audio-bar {
-            width: 4px;
-            background: #60a5fa;
-            border-radius: 2px;
-            transition: height 0.1s ease;
+        .dark .background-overlay {
+             background-image: radial-gradient(circle at 2px 2px, rgba(255,255,255,0.05) 1px, transparent 0);
         }
 
         .chat-message {
@@ -90,9 +93,10 @@
         @keyframes fadeIn { to { opacity: 1; } }
         
         /* Custom scrollbar for chat */
-        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar { width: 6px; }
         .custom-scroll::-webkit-scrollbar-track { background: transparent; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 2px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        .dark .custom-scroll::-webkit-scrollbar-thumb { background: #334155; }
         
         /* Dictation Pulse */
         @keyframes dictation-pulse {
@@ -102,29 +106,37 @@
         }
         .dictating {
             animation: dictation-pulse 1.5s infinite;
-            color: #f87171 !important; /* Red */
+            color: #ef4444 !important; /* Red */
         }
     </style>
 </head>
 
-<body class="text-gray-200 h-screen overflow-hidden flex flex-col relative selection:bg-blue-500 selection:text-white">
+<body class="bg-bloomberg-gray dark:bg-gemini-900 text-bloomberg-text dark:text-gray-200 h-screen overflow-hidden flex flex-col relative selection:bg-blue-500 selection:text-white transition-colors duration-300">
 
     <div class="background-overlay"></div>
 
     <!-- Header -->
-    <header class="h-16 flex items-center justify-between px-6 z-20 border-b border-white/5 bg-gemini-900/50 backdrop-blur-sm flex-shrink-0">
+    <header class="h-16 flex items-center justify-between px-6 z-20 border-b border-bloomberg-border dark:border-white/5 bg-white/80 dark:bg-gemini-900/50 backdrop-blur-sm flex-shrink-0 transition-colors duration-300">
         <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
+            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center shadow-lg shadow-blue-500/20">
                 <span class="material-symbols-outlined text-white text-[20px]">medical_services</span>
             </div>
             <div>
-                <h1 class="font-bold text-slate-100 text-sm tracking-wide">Dr. Holtkamp</h1>
+                <h1 class="font-bold text-slate-800 dark:text-slate-100 text-sm tracking-wide">Dr. Holtkamp</h1>
                 <p class="text-[10px] text-slate-500 uppercase tracking-wider font-medium">Expert Clinical Consultant</p>
             </div>
         </div>
-        <div id="status-badge" class="flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800 border border-slate-700">
-            <div id="status-dot" class="w-2 h-2 rounded-full bg-slate-500"></div>
-            <span id="status-text" class="text-xs text-slate-400 font-mono font-bold">STANDBY</span>
+
+        <div class="flex items-center gap-4">
+             <!-- Theme Toggle -->
+            <button id="theme-toggle" onclick="toggleTheme()" class="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors text-slate-600 dark:text-slate-400">
+                <span class="material-symbols-outlined" id="theme-icon">light_mode</span>
+            </button>
+
+            <div id="status-badge" class="flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                <div id="status-dot" class="w-2 h-2 rounded-full bg-slate-400 dark:bg-slate-500"></div>
+                <span id="status-text" class="text-xs text-slate-500 dark:text-slate-400 font-mono font-bold">STANDBY</span>
+            </div>
         </div>
     </header>
 
@@ -133,51 +145,47 @@
         
         <!-- Conversation Log: Flex Grow to Fill Space -->
         <div id="conversation-container" class="flex-1 overflow-y-auto px-4 py-6 space-y-4 custom-scroll">
-            <div class="text-center text-slate-500 text-xs mt-4">Session Started. Evidence-based medicine (OpenEvidence/UpToDate).</div>
+            <div class="text-center text-slate-400 dark:text-slate-500 text-xs mt-4 uppercase tracking-widest font-semibold">Session Started</div>
             <!-- Messages injected here -->
         </div>
 
         <!-- Input Area: Stays at Bottom Naturally -->
-        <div class="bg-slate-900/90 backdrop-blur-md border-t border-slate-800 p-4 pb-4 flex-shrink-0 flex flex-col gap-3">
+        <div class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 p-4 pb-4 flex-shrink-0 flex flex-col gap-3 transition-colors duration-300">
             
             <!-- Audio Controls (Independent) -->
-            <div id="audio-controls" class="hidden flex items-center justify-center gap-4 mb-2 p-2 bg-slate-800/50 rounded-full border border-slate-700/50 backdrop-blur-sm transition-all mx-auto w-fit">
-                <button onclick="window.playAudio()" class="p-2 rounded-full hover:bg-slate-700 text-green-400 transition-colors" title="Play Audio">
+            <div id="audio-controls" class="hidden flex items-center justify-center gap-4 mb-2 p-2 bg-slate-100 dark:bg-slate-800/50 rounded-full border border-slate-200 dark:border-slate-700/50 backdrop-blur-sm transition-all mx-auto w-fit">
+                <button onclick="window.playAudio()" class="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-green-600 dark:text-green-400 transition-colors" title="Play Audio">
                     <span class="material-symbols-outlined text-2xl">play_circle</span>
                 </button>
-                <button onclick="window.pauseAudio()" class="p-2 rounded-full hover:bg-slate-700 text-amber-400 transition-colors" title="Pause Audio">
+                <button onclick="window.pauseAudio()" class="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-amber-600 dark:text-amber-400 transition-colors" title="Pause Audio">
                     <span class="material-symbols-outlined text-2xl">pause_circle</span>
                 </button>
             </div>
 
-            <!-- Visualizer Bars (Small) -->
-            <div class="flex items-center justify-center gap-1 h-4 opacity-50 transition-opacity duration-300" id="audio-bars-container">
-                <div class="audio-bar h-1"></div>
-                <div class="audio-bar h-2"></div>
-                <div class="audio-bar h-1"></div>
-                <div class="audio-bar h-3"></div>
-                <div class="audio-bar h-1"></div>
+            <!-- Canvas Visualizer -->
+            <div class="flex items-center justify-center h-12 w-full max-w-lg mx-auto opacity-50 transition-opacity duration-300" id="visualizer-container">
+                <canvas id="audio-visualizer" width="400" height="48" class="w-full h-full"></canvas>
             </div>
 
             <!-- Input Bar -->
-            <div class="max-w-3xl mx-auto w-full flex items-end gap-2 bg-slate-800 p-2 rounded-3xl border border-slate-700 shadow-lg focus-within:ring-2 focus-within:ring-blue-500/50 transition-all">
+            <div class="max-w-3xl mx-auto w-full flex items-end gap-2 bg-slate-100 dark:bg-slate-800 p-2 rounded-3xl border border-slate-300 dark:border-slate-700 shadow-sm dark:shadow-lg focus-within:ring-2 focus-within:ring-blue-500/50 transition-all">
                 
                 <!-- Main Voice Mode Button (Conversation) -->
-                <button onclick="handleMicToggle()" id="main-mic-btn" class="w-10 h-10 mb-0.5 rounded-full bg-slate-700 hover:bg-slate-600 flex items-center justify-center transition-colors flex-shrink-0 group" title="Hold Conversation">
-                    <span class="material-symbols-outlined text-slate-300 group-hover:text-white transition-colors" id="mic-icon">record_voice_over</span>
+                <button onclick="handleMicToggle()" id="main-mic-btn" class="w-10 h-10 mb-0.5 rounded-full bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 flex items-center justify-center transition-colors flex-shrink-0 group" title="Hold Conversation">
+                    <span class="material-symbols-outlined text-slate-600 dark:text-slate-300 group-hover:text-black dark:group-hover:text-white transition-colors" id="mic-icon">record_voice_over</span>
                 </button>
 
                 <!-- Expanding Text Input -->
-                <textarea id="text-input" rows="1" placeholder="Type query or tap mic to speak..." class="flex-1 bg-transparent border-none outline-none text-sm text-white px-2 py-2.5 font-medium placeholder:text-slate-500 resize-none overflow-hidden max-h-32" onkeydown="handleInputKey(event)"></textarea>
+                <textarea id="text-input" rows="1" placeholder="Type query or tap mic to speak..." class="flex-1 bg-transparent border-none outline-none text-sm text-slate-900 dark:text-white px-2 py-2.5 font-medium placeholder:text-slate-400 resize-none overflow-hidden max-h-32" onkeydown="handleInputKey(event)"></textarea>
 
                 <!-- Send Button -->
-                <button onclick="handleTextSubmit()" class="w-10 h-10 mb-0.5 rounded-full bg-blue-600 hover:bg-blue-500 flex items-center justify-center transition-colors flex-shrink-0">
+                <button onclick="handleTextSubmit()" class="w-10 h-10 mb-0.5 rounded-full bg-blue-600 hover:bg-blue-500 flex items-center justify-center transition-colors flex-shrink-0 shadow-md">
                     <span class="material-symbols-outlined text-white text-lg">arrow_upward</span>
                 </button>
             </div>
             
             <div class="text-center h-4">
-                <span id="interaction-status" class="text-[10px] font-bold tracking-widest text-slate-500 uppercase transition-colors">Ready</span>
+                <span id="interaction-status" class="text-[10px] font-bold tracking-widest text-slate-400 dark:text-slate-500 uppercase transition-colors">Ready</span>
             </div>
         </div>
 
@@ -190,6 +198,7 @@
 
     <script type="module">
         import { API_KEYS } from './js/config.js?v=secure';
+        import { COV_INSTRUCTIONS } from './js/prompts.js';
 
         // --- Configuration ---
         let API_KEY = API_KEYS.PSYCHIATRY;
@@ -218,6 +227,10 @@
         let conversationHistory = []; 
         let isDictating = false; // Flag to keep mic alive
 
+        // Visualizer Canvas
+        const canvas = document.getElementById('audio-visualizer');
+        const canvasCtx = canvas.getContext('2d');
+
         // --- UI References ---
         const ui = {
             btn: document.getElementById('main-mic-btn'),
@@ -225,12 +238,32 @@
             statusText: document.getElementById('status-text'),
             statusDot: document.getElementById('status-dot'),
             interactionText: document.getElementById('interaction-status'),
-            bars: document.querySelectorAll('.audio-bar'),
-            barsContainer: document.getElementById('audio-bars-container'),
+            visualizerContainer: document.getElementById('visualizer-container'),
             conversation: document.getElementById('conversation-container'),
             textInput: document.getElementById('text-input'),
-            audioControls: document.getElementById('audio-controls')
+            audioControls: document.getElementById('audio-controls'),
+            themeIcon: document.getElementById('theme-icon')
         };
+
+        // --- Theme Toggle ---
+        window.toggleTheme = function() {
+            const html = document.documentElement;
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                ui.themeIcon.innerText = "dark_mode";
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.classList.add('dark');
+                ui.themeIcon.innerText = "light_mode";
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        // Init Theme
+        if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.remove('dark');
+            ui.themeIcon.innerText = "dark_mode";
+        }
 
         // --- Auto-Resize Textarea ---
         ui.textInput.addEventListener('input', function() {
@@ -285,7 +318,7 @@
                 
                 microphoneStream = audioContext.createMediaStreamSource(stream);
                 analyser = audioContext.createAnalyser();
-                analyser.fftSize = 32;
+                analyser.fftSize = 256; // Higher res for canvas
                 microphoneStream.connect(analyser);
                 dataArray = new Uint8Array(analyser.frequencyBinCount);
                 drawVisualizer();
@@ -469,11 +502,13 @@
                 parts: [userPart]
             });
 
+            const BASE_INSTRUCTION = "You are Dr. H, a Senior Military Medical Physician and Subject Matter Expert. Your goal is to help the provider efficiently diagnose and treat patients in a busy clinic or deployed setting.\n\nSTRUCTURE YOUR RESPONSE:\n1. **Direct Answer & DDx:** Provide a slightly more detailed, specific answer. Think critically: Do NOT blindly accept the user's premise. Proactively offer a **Differential Diagnosis (DDx)**. Explain how to **Rule In (R/I)** or **Rule Out (R/O)** specific life-threatening conditions. State the 'Most Likely Diagnosis' when appropriate based on the evidence.\n2. **Plan & Action:** Briefly outline the immediate workup (labs/imaging) or treatment required to move the patient forward.\n3. **Follow-Up:** End with **2-3 short, specific clinical questions** to narrow the differential or guide evacuation decisions. \n\nTONE: Authoritative, evidence-based, pathophysiology-focused, yet collegial. Avoid generic questions like 'What are your thoughts?'.";
+
             const payload = {
                 contents: conversationHistory,
-                // UPDATED: Dr. H Persona - Conversational Military Medical SME
+                // UPDATED: Injected Chain of Verification (CoV) from js/prompts.js
                 systemInstruction: {
-                    parts: [{ text: "You are Dr. H, a Senior Military Medical Physician and Subject Matter Expert. Your goal is to help the provider efficiently diagnose and treat patients in a busy clinic or deployed setting.\n\nSTRUCTURE YOUR RESPONSE:\n1. **Direct Answer & DDx:** Provide a slightly more detailed, specific answer. Think critically: Do NOT blindly accept the user's premise. Proactively offer a **Differential Diagnosis (DDx)**. Explain how to **Rule In (R/I)** or **Rule Out (R/O)** specific life-threatening conditions. State the 'Most Likely Diagnosis' when appropriate based on the evidence.\n2. **Plan & Action:** Briefly outline the immediate workup (labs/imaging) or treatment required to move the patient forward.\n3. **Follow-Up:** End with **2-3 short, specific clinical questions** to narrow the differential or guide evacuation decisions. \n\nTONE: Authoritative, evidence-based, pathophysiology-focused, yet collegial. Avoid generic questions like 'What are your thoughts?'." }]
+                    parts: [{ text: BASE_INSTRUCTION + "\n\n" + COV_INSTRUCTIONS }]
                 }
             };
 
@@ -606,16 +641,19 @@
 
         function addMessageToLog(sender, text) {
             const div = document.createElement('div');
-            div.className = "chat-message flex flex-col gap-1 p-3 rounded-lg max-w-[90%] shadow-sm " + 
-                (sender === "You" ? "bg-slate-800 border border-slate-700 self-end ml-auto" : "bg-blue-900/20 border border-blue-500/30 self-start mr-auto");
+            // Theme-aware bubbles
+            div.className = "chat-message flex flex-col gap-1 p-3 rounded-lg max-w-[90%] shadow-sm transition-colors duration-300 " +
+                (sender === "You" ?
+                    "bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 self-end ml-auto" :
+                    "bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-500/30 self-start mr-auto");
             
             const header = document.createElement('span');
             header.className = "text-[10px] font-bold uppercase tracking-wider " + 
-                (sender === "You" ? "text-slate-400" : "text-blue-400");
+                (sender === "You" ? "text-slate-500 dark:text-slate-400" : "text-blue-600 dark:text-blue-400");
             header.innerText = sender;
 
             const content = document.createElement('p');
-            content.className = "text-sm text-slate-200 leading-relaxed whitespace-pre-wrap";
+            content.className = "text-sm text-slate-800 dark:text-slate-200 leading-relaxed whitespace-pre-wrap font-mono"; // Mono for data-dense feel
             content.innerText = text;
 
             div.appendChild(header);
@@ -627,20 +665,36 @@
 
         function drawVisualizer() {
             if (currentState !== STATE.LISTENING) {
-                ui.bars.forEach(bar => bar.style.height = '4px');
-                ui.barsContainer.style.opacity = '0.3';
+                // Clear canvas or show static line
+                canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+                ui.visualizerContainer.style.opacity = '0.3';
                 animationFrame = requestAnimationFrame(drawVisualizer);
                 return;
             }
 
-            ui.barsContainer.style.opacity = '1';
+            ui.visualizerContainer.style.opacity = '1';
 
             if (analyser) {
                 analyser.getByteFrequencyData(dataArray);
-                ui.bars.forEach((bar, i) => {
-                    const val = Math.max(4, (dataArray[i] / 255) * 32); 
-                    bar.style.height = `${val}px`;
-                });
+
+                canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+                const barWidth = (canvas.width / dataArray.length) * 2.5;
+                let barHeight;
+                let x = 0;
+
+                for(let i = 0; i < dataArray.length; i++) {
+                    barHeight = dataArray[i] / 2;
+
+                    // Gradient for Bloomberg Feel (Blue/Teal)
+                    const gradient = canvasCtx.createLinearGradient(0, canvas.height - barHeight, 0, canvas.height);
+                    gradient.addColorStop(0, '#3b82f6'); // Blue 500
+                    gradient.addColorStop(1, '#6366f1'); // Indigo 500
+
+                    canvasCtx.fillStyle = gradient;
+                    canvasCtx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+
+                    x += barWidth + 1;
+                }
             }
             animationFrame = requestAnimationFrame(drawVisualizer);
         }
@@ -654,8 +708,8 @@
             currentState = newState;
             ui.statusText.innerText = newState;
             
-            ui.btn.className = "w-10 h-10 rounded-full bg-slate-700 hover:bg-slate-600 flex items-center justify-center transition-colors flex-shrink-0 group";
-            ui.icon.className = "material-symbols-outlined text-slate-300 group-hover:text-white transition-colors";
+            ui.btn.className = "w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 flex items-center justify-center transition-colors flex-shrink-0 group";
+            ui.icon.className = "material-symbols-outlined text-slate-600 dark:text-slate-300 group-hover:text-black dark:group-hover:text-white transition-colors";
             ui.icon.innerText = "record_voice_over"; // Default icon
 
             if (newState === STATE.THINKING || newState === STATE.SPEAKING || newState === STATE.GENERATING_VOICE) {
@@ -695,7 +749,7 @@
                     ui.interactionText.innerText = "Speaking...";
                     // Change button to stop/pause
                     ui.icon.innerText = "stop_circle";
-                    ui.btn.className = "w-10 h-10 rounded-full bg-slate-700 hover:bg-slate-600 flex items-center justify-center transition-colors flex-shrink-0 group border border-slate-500";
+                    ui.btn.className = "w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 flex items-center justify-center transition-colors flex-shrink-0 group border border-slate-300 dark:border-slate-500";
                     break;
             }
         }
