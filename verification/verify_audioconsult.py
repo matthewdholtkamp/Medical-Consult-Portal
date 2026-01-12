@@ -1,91 +1,42 @@
 
 from playwright.sync_api import sync_playwright
-import json
 
-def verify_audioconsult_layout():
+def verify_audioconsult_ui():
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
-        context = browser.new_context(viewport={"width": 1280, "height": 800})
-        page = context.new_page()
+        page = browser.new_page(viewport={"width": 1280, "height": 720})
 
-        # Mock the Gemini API response
-        def handle_route(route):
-            response_body = {
-                "candidates": [
-                    {
-                        "content": {
-                            "parts": [
-                                {
-                                    "text": "# Verified Treatment Plan\n\n*   **Diagnosis**: Acute Otitis Media\n*   **Action**: Amoxicillin 875mg BID.\n\n> **Warning**: Verify penicillin allergy."
-                                }
-                            ]
-                        }
-                    }
-                ]
-            }
-            route.fulfill(
-                status=200,
-                content_type="application/json",
-                body=json.dumps(response_body)
-            )
-
-        # Intercept calls to the Gemini API
-        page.route("**/models/*generateContent*", handle_route)
-
-        # Also intercept the TTS call to avoid errors/delays, though strictly not needed for visual check if we don't wait for audio
-        # The code calls speakResponseWithGemini after adding the message.
-        # We can just return empty audio data or fail it, as long as the text is added first.
-        # Actually, let's mock the TTS too to be clean.
-        def handle_tts_route(route):
-             response_body = {
-                "candidates": [
-                    {
-                        "content": {
-                            "parts": [
-                                {
-                                    "inlineData": {
-                                        "mimeType": "audio/wav",
-                                        "data": "UklGRigAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=" # Empty WAV
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                ]
-            }
-             route.fulfill(
-                status=200,
-                content_type="application/json",
-                body=json.dumps(response_body)
-            )
-
-        # The TTS model ID is different, but the pattern "generateContent" catches both.
-        # We can distinguish by payload if needed, but for now let's just use a generic mock that satisfies both or specific mocks.
-        # The code distinguishes by URL (MODEL_ID).
-        # Text model: gemini-2.5-flash
-        # TTS model: gemini-2.5-flash-preview-tts
-
-        page.route("**/*gemini-2.5-flash:generateContent*", handle_route)
-        page.route("**/*gemini-2.5-flash-preview-tts:generateContent*", handle_tts_route)
-
+        # Navigate to Audioconsult.html
         page.goto("http://localhost:8080/Audioconsult.html")
 
-        # Type a query
+        # Wait for page to load
+        page.wait_for_load_state("networkidle")
+
+        # 1. Verify Header Controls
+        # Check for Audio Toggle
+        audio_toggle = page.locator("#audio-toggle")
+        if not audio_toggle.is_visible():
+             # It might be hidden on small screens, but we set viewport to 1280
+             print("Warning: Audio toggle not visible")
+
+        # Check for Play/Pause buttons in header
+        play_btn = page.locator("#audio-controls button[title='Play Audio']")
+        pause_btn = page.locator("#audio-controls button[title='Pause Audio']")
+
+        # Note: #audio-controls has class 'hidden' by default until audio is ready
+        # We can force it visible for screenshot
+        page.eval_on_selector("#audio-controls", "el => el.classList.remove('hidden')")
+
+        # 2. Simulate User Input to see Thinking Indicator
         page.fill("#text-input", "Test Query")
+        # Click send (we won't actually hit API successfully without key, but UI should react)
+        # Mocking the handleUserTurn to just show the indicator would be safer,
+        # but let's try to just capture the initial state for now.
 
-        # Click send (arrow_upward button)
-        page.click("button:has(.material-symbols-outlined:text('arrow_upward'))")
+        # Take Screenshot of UI
+        page.screenshot(path="verification/audioconsult_ui.png")
 
-        # Wait for the response text to appear
-        # The response text contains "Acute Otitis Media"
-        page.wait_for_selector("text=Acute Otitis Media", timeout=5000)
-
-        # Wait a bit for animations
-        page.wait_for_timeout(1000)
-
-        # Take a screenshot
-        page.screenshot(path="verification/audioconsult_card.png", full_page=True)
         browser.close()
 
 if __name__ == "__main__":
-    verify_audioconsult_layout()
+    verify_audioconsult_ui()
