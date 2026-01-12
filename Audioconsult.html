@@ -6,6 +6,8 @@
     <title>Dr. H - Clinical Consultant</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Marked.js for Markdown Parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -108,6 +110,20 @@
             animation: dictation-pulse 1.5s infinite;
             color: #ef4444 !important; /* Red */
         }
+
+        /* Simple Prose for Markdown Content - Modernized for Readability */
+        .prose-content { font-size: 0.95rem; }
+        .prose-content ul { list-style-type: disc; padding-left: 1.5rem; margin-top: 0.75rem; margin-bottom: 0.75rem; color: #cbd5e1; }
+        .prose-content ol { list-style-type: decimal; padding-left: 1.5rem; margin-top: 0.75rem; margin-bottom: 0.75rem; color: #cbd5e1; }
+        .prose-content p { margin-bottom: 1rem; line-height: 1.75; color: #e2e8f0; }
+        .prose-content strong { color: #60a5fa; font-weight: 700; }
+        .prose-content h1 { color: #f8fafc; font-weight: 700; font-size: 1.25rem; margin-top: 1.75rem; margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem; }
+        .prose-content h2 { color: #f1f5f9; font-weight: 600; font-size: 1.1rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+        .prose-content h3 { color: #e2e8f0; font-weight: 600; font-size: 1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.85rem; }
+        .prose-content li { margin-bottom: 0.35rem; line-height: 1.6; }
+        .prose-content blockquote { border-left: 4px solid #ef4444; background: rgba(239, 68, 68, 0.1); padding: 0.75rem 1rem; margin: 1rem 0; border-radius: 0 0.5rem 0.5rem 0; color: #fecaca; font-style: italic; }
+        /* Fix for superscripts in prose */
+        .prose-content sup { color: #3b82f6; font-weight: 600; font-size: 0.75em; margin-left: 1px; vertical-align: super; }
     </style>
 </head>
 
@@ -639,28 +655,90 @@
             synthesis.speak(utterance);
         }
 
+        // Function to clean "amateur" characters and LaTeX artifacts
+        function cleanMedicalResponse(text) {
+            if (!text) return "";
+            let cleaned = text;
+
+            // 1. Handle the specific complex pattern: ${}^{1}$ or similar
+            // Matches literal: $ { } ^ { number } $
+            cleaned = cleaned.replace(/\$\{\}\^\{(\d+)\}\$/g, "<sup>$1</sup>");
+
+            // 2. Handle sloppy variants: ${}^{1} without closing, or spacing
+            cleaned = cleaned.replace(/\$\{\}\^(\d+)/g, "<sup>$1</sup>");
+
+            // 3. Handle standard LaTeX: $^{1}$ or $^1$ or ${^1}$
+            cleaned = cleaned.replace(/\$\^\{?(\d+)\}?\$?/g, "<sup>$1</sup>");
+            cleaned = cleaned.replace(/\$\{\^(\d+)\}\$/g, "<sup>$1</sup>");
+
+            // 4. Remove $_ and other common artifacts
+            cleaned = cleaned.replace(/\$\_/g, "");
+
+            return cleaned;
+        }
+
+        window.copyResponse = function(elementId) {
+            const el = document.getElementById(elementId);
+            if (!el) return;
+            const text = el.innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                // Visual feedback could be added here
+            }).catch(err => console.error('Failed to copy', err));
+        };
+
         function addMessageToLog(sender, text) {
-            const div = document.createElement('div');
-            // Theme-aware bubbles
-            div.className = "chat-message flex flex-col gap-1 p-3 rounded-lg max-w-[90%] shadow-sm transition-colors duration-300 " +
-                (sender === "You" ?
-                    "bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 self-end ml-auto" :
-                    "bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-500/30 self-start mr-auto");
-            
-            const header = document.createElement('span');
-            header.className = "text-[10px] font-bold uppercase tracking-wider " + 
-                (sender === "You" ? "text-slate-500 dark:text-slate-400" : "text-blue-600 dark:text-blue-400");
-            header.innerText = sender;
+            if (sender === "Dr. H") {
+                const cleanedText = cleanMedicalResponse(text);
+                const contentId = 'response-content-' + Date.now();
 
-            const content = document.createElement('p');
-            content.className = "text-sm text-slate-800 dark:text-slate-200 leading-relaxed whitespace-pre-wrap font-mono"; // Mono for data-dense feel
-            content.innerText = text;
+                const div = document.createElement('div');
+                div.className = "bg-white/90 dark:bg-gemini-800/90 backdrop-blur-sm p-6 rounded-2xl border border-slate-200 dark:border-blue-500/30 shadow-lg dark:shadow-2xl animate-fade-in relative overflow-hidden mb-4 max-w-4xl mr-auto";
 
-            div.appendChild(header);
-            div.appendChild(content);
-            ui.conversation.appendChild(div);
-            ui.conversation.scrollTop = ui.conversation.scrollHeight;
-            return content; 
+                div.innerHTML = `
+                    <div class="space-y-4">
+                        <div class="flex items-start gap-4">
+                            <div class="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center flex-shrink-0">
+                                <span class="material-symbols-outlined text-blue-600 dark:text-blue-400">smart_toy</span>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center justify-between mb-2">
+                                    <h3 class="font-bold text-slate-800 dark:text-white text-sm uppercase tracking-wider">Dr. Holtkamp Analysis</h3>
+                                    <div class="flex items-center gap-2">
+                                        <button onclick="copyResponse('${contentId}')" class="text-slate-500 hover:text-black dark:hover:text-white transition-colors p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-700" title="Copy to Clipboard">
+                                            <span class="material-symbols-outlined text-[16px]">content_copy</span>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div id="${contentId}" class="prose-content text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+                                    ${marked.parse(cleanedText)}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                ui.conversation.appendChild(div);
+                ui.conversation.scrollTop = ui.conversation.scrollHeight;
+                return div;
+
+            } else {
+                // User Message (Styled to match general look)
+                const div = document.createElement('div');
+                div.className = "flex justify-end animate-fade-in mb-4";
+
+                const bubble = document.createElement('div');
+                bubble.className = "bg-slate-200 dark:bg-slate-700/50 text-slate-800 dark:text-slate-200 px-5 py-3 rounded-2xl rounded-tr-sm max-w-[85%] border border-slate-300 dark:border-slate-600/50 shadow-sm";
+
+                const p = document.createElement('p');
+                p.className = "text-sm leading-relaxed whitespace-pre-wrap font-medium";
+                p.textContent = text; // Safe injection
+
+                bubble.appendChild(p);
+                div.appendChild(bubble);
+                ui.conversation.appendChild(div);
+                ui.conversation.scrollTop = ui.conversation.scrollHeight;
+                return div;
+            }
         }
 
         function drawVisualizer() {
