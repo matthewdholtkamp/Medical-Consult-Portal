@@ -72,10 +72,10 @@
             left: 0;
         }
         .prose-invert p {
-            margin-bottom: 1.25em;
-            line-height: 1.8;
-            color: #d1d5db; /* Gray-300 for better eye comfort */
-            font-size: 1.05rem;
+            margin-bottom: 1.5em; /* Increased breathing room */
+            line-height: 1.9; /* Enhanced readability */
+            color: #d1d5db;
+            font-size: 1.1rem; /* Slightly larger base text */
         }
         .prose-invert a {
             color: #38bdf8;
@@ -529,14 +529,15 @@
                 Task: Create a Journal Club analysis for: "${topic}".
                 Context: ${details}
 
-                STRATEGY: Generated Knowledge Prompting (GKP).
-                1. **Retrieve Knowledge:** First, internally identify the key clinical guidelines (e.g., AHA, ACC, IDSA, ADA) and the specific "Landmark Trials" that defined the standard of care.
-                2. **Synthesize:** Use this retrieved knowledge to construct the report below.
+                STRATEGY: Chain of Verification (CoV) for Evidence-Based Medicine.
+                1. **Draft & Retrieve:** Internally identify key clinical guidelines (e.g., AHA, ACC, IDSA) and define the "Landmark Trials".
+                2. **Verify Dates & Findings:** Explicitly check that "Recent Trials" are from the last 5 years (2020-2025). If a trial is older, discard it and find a newer one.
+                3. **Synthesize:** Construct the final report using the verified evidence.
                 
                 MANDATORY STRUCTURE:
                 1. Identify EXACTLY 4 Key Trials:
                    - Trial 1 & 2: The Two Historical Landmark Trials (The foundation of current practice).
-                   - Trial 3 & 4: The Two Most Important Recent/Emerging Trials (Last 5 years preferrable).
+                   - Trial 3 & 4: The Two Most Important Recent/Emerging Trials (Strictly 2020-2025).
                 
                 2. Use Google Search to find real citations and DATES.
                 

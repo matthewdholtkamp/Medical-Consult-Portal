@@ -72,10 +72,10 @@
             left: 0;
         }
         .prose-invert p {
-            margin-bottom: 1.25em;
-            line-height: 1.8;
-            color: #d1d5db; /* Gray-300 for better eye comfort */
-            font-size: 1.05rem;
+            margin-bottom: 1.5em; /* Increased breathing room */
+            line-height: 1.9; /* Enhanced readability */
+            color: #d1d5db;
+            font-size: 1.1rem; /* Slightly larger base text */
         }
         .prose-invert a {
             color: #38bdf8;
@@ -528,14 +528,15 @@
                 Task: Create an Operational Journal Club analysis for: "${topic}".
                 Context: ${details}
 
-                STRATEGY: Generated Knowledge Prompting (GKP).
-                1. **Retrieve Doctrine:** First, internally identify the specific JTS Clinical Practice Guidelines (CPGs), TCCC Protocols, and DoD Instructions relevant to this scenario.
-                2. **Synthesize:** Use this retrieved doctrine to construct the report below, ensuring strict adherence to current operational standards.
+                STRATEGY: Chain of Verification (CoV) for Operational Medicine.
+                1. **Draft & Retrieve:** Internally identify JTS Clinical Practice Guidelines (CPGs) and TCCC Protocols.
+                2. **Verify Relevance:** Ensure "Recent Evidence" is from JSOM or relevant trauma journals (2020-2025) and applies to the specific operational context (Role 1/PFC).
+                3. **Synthesize:** Construct the final report ensuring doctrine adherence.
 
                 MANDATORY STRUCTURE:
                 1. Identify EXACTLY 4 Key References:
                    - **Key CPG/Doctrine 1 & 2:** Two relevant Joint Trauma System (JTS) CPGs or Doctrine publications.
-                   - **Recent Evidence 3 & 4:** Two recent articles from *Journal of Special Operations Medicine (JSOM)* or major Trauma Journals (last 5 years).
+                   - **Recent Evidence 3 & 4:** Two recent articles from *Journal of Special Operations Medicine (JSOM)* or major Trauma Journals (Strictly 2020-2025).
 
                 2. Use Google Search to find real citations and DATES.
 
