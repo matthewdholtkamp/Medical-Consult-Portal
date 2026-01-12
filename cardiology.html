@@ -281,7 +281,6 @@
     </div>
 
     <script type="module">
-        import { callGeminiApi, callGeminiText } from './js/api.js';
         import { setupSharing } from './js/sharing.js';
         import { API_KEYS } from './js/config.js?v=secure';
         import { COV_INSTRUCTIONS } from './js/prompts.js';
@@ -345,6 +344,47 @@
             });
         }
 
+        // --- API Logic ---
+        async function callGeminiApi(systemPrompt, userQuery, retries = 3) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+            const payload = {
+                contents: [{ parts: [{ text: userQuery }] }],
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+                generationConfig: { responseMimeType: "application/json" }
+            };
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (!response.ok) throw new Error(`API Error: ${response.status}`);
+                const data = await response.json();
+                let text = data.candidates[0].content.parts[0].text;
+                // Robust parsing
+                text = text.replace(/^```json\s*/, '').replace(/^```\s*/, '').replace(/```$/, '').trim();
+                return JSON.parse(text);
+            } catch (error) {
+                if (retries > 0) {
+                    await new Promise(r => setTimeout(r, 1000));
+                    return callGeminiApi(systemPrompt, userQuery, retries - 1);
+                }
+                throw error;
+            }
+        }
+
+        async function callGeminiText(systemPrompt, userQuery) {
+             const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+             const payload = {
+                contents: [{ parts: [{ text: userQuery }] }],
+                systemInstruction: { parts: [{ text: systemPrompt }] }
+            };
+            const response = await fetch(url, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload)});
+            const data = await response.json();
+            return data.candidates[0].content.parts[0].text;
+        }
+
 
         // --- Step 1: Intake Logic ---
         document.getElementById('example-complaint-btn').addEventListener('click', () => {
@@ -391,7 +431,7 @@
             `;
 
             try {
-                const result = await callGeminiApi(apiKey, prompt, context);
+                const result = await callGeminiApi(prompt, context);
                 state.questions = result.questions; // Save to state
                 const container = document.getElementById('questions-container');
                 container.innerHTML = '';
@@ -476,7 +516,7 @@
             `;
 
             try {
-                const result = await callGeminiApi(apiKey, systemPrompt, contextData);
+                const result = await callGeminiApi(systemPrompt, contextData);
                 state.generatedPlan = result;
                 renderReview(result);
                 showSection('review');
@@ -642,7 +682,7 @@
             const ctx = `Patient Context: ${state.chiefComplaint}. Plan: ${JSON.stringify(state.generatedPlan.plan)}. Question: ${q}`;
             
             try {
-                const ans = await callGeminiText(apiKey, sys, ctx);
+                const ans = await callGeminiText(sys, ctx);
                 box.textContent = `Consultant: ${ans}`;
             } catch(e) {
                 box.textContent = "Connection error.";
