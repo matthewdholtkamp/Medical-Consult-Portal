@@ -98,6 +98,23 @@
             font-style: italic;
             color: #ffdadf;
         }
+
+        /* Tiered Alert System */
+        .prose-invert blockquote.quote-red {
+            border-left-color: #ef4444;
+            background: rgba(239, 68, 68, 0.15);
+            color: #fca5a5;
+        }
+        .prose-invert blockquote.quote-amber {
+            border-left-color: #f59e0b;
+            background: rgba(245, 158, 11, 0.15);
+            color: #fcd34d;
+        }
+        .prose-invert blockquote.quote-blue {
+            border-left-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.15);
+            color: #93c5fd;
+        }
         
         /* Loading Animation */
         .pulse-ring {
@@ -376,6 +393,22 @@
           return bytes;
         }
 
+        // Tiered Alert Logic
+        function colorCodeBlockquotes() {
+            // Target all blockquotes in the results area
+            const blockquotes = document.querySelectorAll('#results blockquote');
+            blockquotes.forEach(bq => {
+                const text = bq.textContent;
+                if (text.includes('🚨')) {
+                    bq.classList.add('quote-red');
+                } else if (text.includes('⚖️')) {
+                    bq.classList.add('quote-amber');
+                } else if (text.includes('💡')) {
+                    bq.classList.add('quote-blue');
+                }
+            });
+        }
+
         // Improved Retry Logic with Error Parsing
         async function fetchWithRetry(url, payload, maxRetries = 5) {
             for (let i = 0; i < maxRetries; i++) {
@@ -590,9 +623,11 @@
                 * **Link:** [Click to Search](https://www.google.com/search?q=[Trial Name]+[Year])
                 
                 ## Dr. Holtkamp's Clinical Pearls
-                * [Pearl 1]
-                * [Pearl 2]
-                * [Pearl 3]
+                > 🚨 **CRITICAL ALERT:** [Severe Safety Risk or Contraindication]
+
+                > ⚖️ **EVIDENCE:** [Nuanced/Conflicting Data]
+
+                > 💡 **CLINICAL PEARL:** [Key Takeaway]
 
                 |||SECTION_PLAN|||
                 
@@ -687,6 +722,9 @@
 
                 // Typeset Math
                 MathJax.typesetPromise();
+
+                // Color Code Alerts
+                colorCodeBlockquotes();
 
                 hideLoader();
                 el('results').classList.remove('hidden');
