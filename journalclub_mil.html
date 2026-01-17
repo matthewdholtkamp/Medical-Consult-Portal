@@ -6,6 +6,11 @@
     <title>Operational Medical Journal Club - Dr. Holtkamp Edition</title>
     <!-- Tailwind CSS for rapid, responsive styling -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter for high legibility -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
     <!-- MathJax for rendering medical formulas -->
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <!-- Marked.js for Markdown rendering -->
@@ -24,7 +29,12 @@
         body {
             background-color: var(--bg-primary);
             color: var(--text-main);
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        /* Tabular Numbers for Data Tables */
+        .tabular-nums {
+            font-variant-numeric: tabular-nums;
         }
 
         .glass-panel {
@@ -568,14 +578,16 @@
             el('step2').classList.add('hidden');
 
             const mainPrompt = `
-                Role: Dr. Matthew Holtkamp (Expert Operational Medical Educator).
+                Role: Dr. Matthew Holtkamp (Senior Operational Medical Officer).
                 Task: Create an Operational Journal Club analysis for: "${topic}".
+                Target Audience: Theater Medical Commanders & JTS Leadership (High Authority).
                 Context: ${details}
 
                 STRATEGY: Chain of Verification (CoV) for Operational Medicine.
                 1. **Draft & Retrieve:** Internally identify JTS Clinical Practice Guidelines (CPGs) and TCCC Protocols.
-                2. **Verify Relevance:** Ensure "Recent Evidence" is from JSOM or relevant trauma journals (2020-2025) and applies to the specific operational context (Role 1/PFC).
-                3. **Synthesize:** Construct the final report ensuring doctrine adherence.
+                2. **Negative Verification (Self-Correction):** Explicitly check if the referenced CPG has been superseded by a 2024/2025 update or if TCCC-MP guidelines have changed. Avoid outdated doctrine.
+                3. **Verify Relevance:** Ensure "Recent Evidence" is from JSOM or relevant trauma journals (2020-2025) and applies to the specific operational context (Role 1/PFC).
+                4. **Synthesize:** Construct the final report ensuring doctrine adherence.
 
                 MANDATORY STRUCTURE:
                 1. Identify EXACTLY 4 Key References:
@@ -994,11 +1006,32 @@ ${script}
         });
 
         // Utilities
+        let loaderInterval;
+        const LOADING_TIPS = [
+            "Reviewing 2024 JTS CPG Updates...",
+            "Checking TCCC-MP Guidelines...",
+            "Analyzing Role 1 Resource Constraints...",
+            "Scanning JSOM for Recent Trauma Data...",
+            "Verifying Prolonged Field Care Protocols...",
+            "Consulting Deployed Medicine Resources..."
+        ];
+
         function showLoader(text) {
             el('loaderText').innerText = text;
             el('loader').classList.remove('hidden');
+
+            // Cycle tips every 2.5 seconds to reduce perceived latency
+            let i = 0;
+            if (loaderInterval) clearInterval(loaderInterval);
+            loaderInterval = setInterval(() => {
+                const tip = LOADING_TIPS[i % LOADING_TIPS.length];
+                el('loaderText').innerText = `${text}\n\n(Step: ${tip})`;
+                i++;
+            }, 2500);
         }
+
         function hideLoader() {
+            if (loaderInterval) clearInterval(loaderInterval);
             el('loader').classList.add('hidden');
         }
 
