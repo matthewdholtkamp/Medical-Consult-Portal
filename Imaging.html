@@ -27,6 +27,21 @@
         .prose-content h1 { font-size: 1.5rem; }
         .prose-content h2 { font-size: 1.25rem; }
         .prose-content h3 { font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.05em; color: #a5b4fc; }
+
+        /* Lightbox */
+        .lightbox-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 100; display: none; justify-content: center; align-items: center; backdrop-filter: blur(5px); opacity: 0; transition: opacity 0.3s ease; }
+        .lightbox-overlay.active { opacity: 1; }
+        .lightbox-content { max-width: 95%; max-height: 95%; object-fit: contain; box-shadow: 0 0 50px rgba(0,0,0,0.5); border: 1px solid #333; transform: scale(0.9); transition: transform 0.3s ease; }
+        .lightbox-overlay.active .lightbox-content { transform: scale(1); }
+        .lightbox-close { position: absolute; top: 20px; right: 30px; color: #fff; font-size: 3rem; cursor: pointer; z-index: 101; opacity: 0.7; transition: opacity 0.2s; }
+        .lightbox-close:hover { opacity: 1; }
+
+        /* Acuity Badges */
+        .acuity-badge { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.35rem 1rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 1.5rem; }
+        .acuity-routine { background: rgba(34, 197, 94, 0.1); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3); box-shadow: 0 0 15px rgba(34, 197, 94, 0.1); }
+        .acuity-urgent { background: rgba(234, 179, 8, 0.1); color: #facc15; border: 1px solid rgba(234, 179, 8, 0.3); box-shadow: 0 0 15px rgba(234, 179, 8, 0.1); }
+        .acuity-critical { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); box-shadow: 0 0 20px rgba(239, 68, 68, 0.2); animation: pulse-red 2s infinite; }
+        @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
     </style>
 </head>
 <body class="bg-gemini-900 text-slate-200 min-h-screen pb-12">
@@ -157,6 +172,12 @@
     <!-- Hidden Canvas for processing -->
     <canvas id="pCanvas" class="hidden"></canvas>
 
+    <!-- Lightbox Overlay -->
+    <div id="lightboxOverlay" class="lightbox-overlay" onclick="closeLightbox()">
+        <span class="lightbox-close" onclick="closeLightbox()">&times;</span>
+        <img id="lightboxImg" class="lightbox-content">
+    </div>
+
     <script type="module">
         import { API_KEYS } from './js/config.js?v=secure';
 
@@ -245,10 +266,10 @@
             }
             emptyState.style.display = 'none';
             gallery.innerHTML = mediaStack.map(m => `
-                <div class="relative bg-slate-900 p-1 rounded-xl shadow-inner border border-slate-700 aspect-square group overflow-hidden">
+                <div class="relative bg-slate-900 p-1 rounded-xl shadow-inner border border-slate-700 aspect-square group overflow-hidden cursor-zoom-in" onclick="openLightboxId(${m.id})">
                     <img src="${m.b64}" class="w-full h-full object-cover rounded-lg opacity-80 group-hover:opacity-100 transition-opacity">
-                    <button onclick="removeItem(${m.id})" class="absolute top-1 right-1 bg-red-500/90 hover:bg-red-600 text-white rounded-full h-5 w-5 flex items-center justify-center text-[10px] font-bold shadow-sm transition-colors z-10">×</button>
-                    <div class="absolute bottom-0 left-0 right-0 bg-black/60 backdrop-blur-sm p-1">
+                    <button onclick="event.stopPropagation(); removeItem(${m.id})" class="absolute top-1 right-1 bg-red-500/90 hover:bg-red-600 text-white rounded-full h-5 w-5 flex items-center justify-center text-[10px] font-bold shadow-sm transition-colors z-10">×</button>
+                    <div class="absolute bottom-0 left-0 right-0 bg-black/60 backdrop-blur-sm p-1 pointer-events-none">
                         <p class="text-[8px] text-white text-center font-mono font-bold truncate">${m.label}</p>
                     </div>
                 </div>
@@ -257,6 +278,32 @@
 
         window.removeItem = (id) => { mediaStack = mediaStack.filter(m => m.id !== id); renderGallery(); };
         window.clearScans = () => { mediaStack = []; renderGallery(); };
+
+        // --- Lightbox Logic ---
+        window.openLightboxId = (id) => {
+            const media = mediaStack.find(m => m.id === id);
+            if(media) {
+                const lb = document.getElementById('lightboxOverlay');
+                const img = document.getElementById('lightboxImg');
+                img.src = media.b64;
+                lb.style.display = 'flex';
+                // Small timeout to allow display:flex to apply before adding active class for transition
+                setTimeout(() => lb.classList.add('active'), 10);
+            }
+        };
+
+        window.closeLightbox = () => {
+            const lb = document.getElementById('lightboxOverlay');
+            lb.classList.remove('active');
+            setTimeout(() => {
+                lb.style.display = 'none';
+                document.getElementById('lightboxImg').src = '';
+            }, 300); // Match transition duration
+        };
+
+        document.addEventListener('keydown', (e) => {
+            if(e.key === 'Escape') window.closeLightbox();
+        });
 
         window.copyReport = () => {
              const text = document.getElementById('result').innerText;
@@ -327,40 +374,61 @@
             modelNameDisplay.innerText = "Model: " + selectedModel;
 
             const systemPrompt = `
-                You are a Board-Certified Radiologist.
-                Your task is to provide a comprehensive, professional radiological interpretation of the provided image(s).
+                You are a Board-Certified Radiologist and Clinical Educator.
+                Your task is to provide a comprehensive, professional radiological interpretation using the **Chain of Verification (CoV)** protocol.
                 
                 CLINICAL CONTEXT: ${promptContext}
                 
-                MANDATORY OUTPUT STRUCTURE (Markdown):
-                
-                # Preliminary Radiological Report
-                
-                **Exam:** [Infer modality, e.g., "Frontal Chest Radiograph", "CT Abdomen"]
-                **Clinical Indication:** ${promptContext}
+                ### CHAIN OF VERIFICATION (Internal Processing):
+                1.  **Quality Check:** Assess exposure, positioning, and technique.
+                2.  **Anatomical Inventory:** Systematically identify all visible structures.
+                3.  **Observation:** Note positive and pertinent negative findings.
+                4.  **Guideline Verification:** Cross-reference findings with standard criteria (e.g., Fleischner, ACR, Ottawa).
+                5.  **Acuity Assignment:** Determine if findings are Routine, Urgent, or Critical.
 
-                **Findings:**
-                *   [Detailed, systematic breakdown of findings. Mention tubes/lines, lung fields, cardiac silhouette, osseous structures, soft tissues, etc., as appropriate.]
-                *   [Note pertinent negatives.]
+                ### MANDATORY OUTPUT FORMAT (Markdown):
+                Start the response EXACTLY with this tag:
+                ACUITY_LEVEL: [ROUTINE | URGENT | CRITICAL]
 
-                **Impression:**
-                1.  [Primary Finding / Diagnosis]
-                2.  [Secondary Finding]
+                # Radiological Report
+
+                **Exam:** [Infer Modality & Region]
+                **Indication:** ${promptContext}
+                **Technique:** [e.g., PA/Lateral, Contrast Phase]
+
+                ### FINDINGS
+                *   **[Structure/System]:** [Detailed description. Be precise with measurements if applicable.]
+                *   **[Structure/System]:** [Pertinent negatives.]
+
+                ### IMPRESSION
+                1.  [Primary Diagnosis / Finding]
+                2.  [Secondary Findings]
 
                 **Recommendation:**
-                *   [Follow-up imaging if needed]
-                *   [Clinical correlation advice]
+                *   [Specific follow-up or clinical correlation]
 
                 ---
-                *Disclaimer: This is an AI-generated screening report. Verification by a radiologist is required.*
+                *Disclaimer: AI-generated screening. Verification by a licensed radiologist is mandatory.*
             `;
 
             try {
                 // Call API
-                const resultText = await callGeminiVision(selectedModel, systemPrompt, mediaStack);
+                const rawText = await callGeminiVision(selectedModel, systemPrompt, mediaStack);
+
+                // Process Acuity Badge
+                let finalMarkdown = rawText;
+                const acuityMatch = rawText.match(/ACUITY_LEVEL:\s*(ROUTINE|URGENT|CRITICAL)/i);
+                let badgeHtml = '';
+
+                if (acuityMatch) {
+                    const level = acuityMatch[1].toUpperCase();
+                    badgeHtml = `<span class="acuity-badge acuity-${level.toLowerCase()}">${level} PRIORITY</span>`;
+                    // Remove the tag from the text body to keep the report clean
+                    finalMarkdown = rawText.replace(acuityMatch[0], '').trim();
+                }
 
                 // Render Markdown
-                document.getElementById('result').innerHTML = marked.parse(resultText);
+                document.getElementById('result').innerHTML = badgeHtml + marked.parse(finalMarkdown);
                 resultModelId.innerText = "ID: " + selectedModel.toUpperCase();
 
                 statusConsole.classList.add('hidden');
