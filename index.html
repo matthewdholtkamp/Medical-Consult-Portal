@@ -271,6 +271,11 @@
                 <span class="material-symbols-outlined text-[20px] text-slate-500 group-hover:text-rose-400">mic</span>
                 <span class="text-sm font-medium">Live Ai Consults</span>
             </button>
+
+            <button onclick="openFrame('Imaging.html', 'AI Imaging Vision')" id="nav-imaging" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:bg-white/5 hover:text-white transition-all group text-left">
+                <span class="material-symbols-outlined text-[20px] text-slate-500 group-hover:text-indigo-400">imagesmode</span>
+                <span class="text-sm font-medium">AI Imaging Vision</span>
+            </button>
         </nav>
 
         <!-- Quick References -->
@@ -609,6 +614,7 @@
         { title: "General Journal Club", type: "journal", category: "Journal", desc: "Evidence summaries and audio breakdowns.", tags: "research, papers, evidence", action: "openFrame('journalclub.html', 'General Journal Club')", color: "red" },
         { title: "Military Medicine", type: "journal", category: "Journal", desc: "Operational medicine updates, TCCC guidelines.", tags: "operational, deployment, tccc", action: "openFrame('journalclub_mil.html', 'Military Medicine')", color: "emerald" },
         { title: "Live Ai Consults", type: "consult", category: "Medicine", desc: "Real-time audio consultation with Dr. Holtkamp.", tags: "audio, voice, mic, live", action: "openFrame('Audioconsult.html', 'Live Ai Consults')", color: "rose" },
+        { title: "AI Imaging Vision", type: "consult", category: "Support", desc: "Radiology decision support. X-Ray/CT/MRI Analysis.", tags: "rad, image, vision, xray, ct", action: "openFrame('Imaging.html', 'AI Imaging Vision')", color: "indigo" },
 
         { title: "Tricare Formulary", type: "tool", category: "Tool", desc: "DOD Medication Formulary.", tags: "drugs, meds, pharmacy", action: "window.open('https://www.express-scripts.com/frontend/open-enrollment/tricare/fst/#/', '_blank')", icon: "medication" },
         { title: "MedCalc", type: "tool", category: "Tool", desc: "Clinical Calculators.", tags: "calc, score, risk", action: "window.open('https://www.mdcalc.com/', '_blank')", icon: "calculate" },
