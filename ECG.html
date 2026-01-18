@@ -356,7 +356,8 @@
             const payload = {
                 contents: [{ parts: parts }],
                 generationConfig: {
-                    temperature: 0.1, // Very low temp for ECG precision
+                    temperature: 1.0,
+                    thinking_level: "high",
                     maxOutputTokens: 2048
                 }
             };
@@ -397,53 +398,33 @@
             modelNameDisplay.innerText = "Model: " + selectedModel;
 
             const systemPrompt = `
-                You are a Board-Certified Cardiologist and Electrophysiologist.
-                Your task is to provide a highly accurate, structured interpretation of the provided 12-lead ECG using the **Chain of Verification (CoV)** protocol.
-
-                CLINICAL CONTEXT: ${promptContext}
-
-                ### CHAIN OF VERIFICATION (Internal Processing):
-                1.  **Technical Check:** Assess calibration (25mm/s, 10mm/mV), noise, and lead placement.
-                2.  **Rhythm Analysis:** Identify P-waves, QRS relationships, and regularity.
-                3.  **Axis & Intervals:** Estimate axis. Check PR, QRS duration, and QTc intervals.
-                4.  **Morphology Check:** Look for hypertrophy (LVH/RVH), bundle branch blocks, and Q-waves.
-                5.  **Ischemia/Infarction:** Scrutinize ST segments (elevation/depression) and T-waves in anatomical groups.
-                6.  **Acuity Assignment:** Is this Routine, Urgent (e.g., New Afib), or Critical (e.g., STEMI, VT, CHB)?
-
-                ### MANDATORY OUTPUT FORMAT (Markdown):
-                Start the response EXACTLY with this tag:
                 ACUITY_LEVEL: [ROUTINE | URGENT | CRITICAL]
 
-                # Electrocardiogram Report
+                Role: You are a Board-Certified Cardiologist and Cardiac Electrophysiologist. Your objective is high-fidelity EKG interpretation using the Clinical Caliper Method.
 
-                **Clinical Context:** ${promptContext}
+                Task: Analyze the provided ECG image using a systematic measurement approach. You must follow this sequence:
 
-                ### Technical Quality
-                *   [Rate, Rhythm Status, Quality]
+                Phase 1: Technical Measurement (The Thinking Step)
+                Before providing a diagnosis, you must output a structured Markdown table of measurements based on the grid (1mm = 0.04s, 5mm = 0.2s), NO guessing:
 
-                ### MEASUREMENTS (Estimates)
-                *   **Rate:** [HR] bpm
-                *   **Rhythm:** [Sinus / Afib / etc]
-                *   **Axis:** [Normal / LAD / RAD]
-                *   **Intervals:** PR: [ms], QRS: [ms], QTc: [ms]
+                | Parameter | Measurement / Finding |
+                |-----------|-----------------------|
+                | Rate & Rhythm | Atrial and ventricular rates; P-wave morphology. |
+                | Axis | QRS axis in the frontal plane (Leads I and aVF). |
+                | Intervals | PR Interval (ms), QRS Duration (ms), and QT/QTc (ms). |
+                | Morphology | Record ST-segment deviations (in mm) across contiguous leads. |
 
-                ### MORPHOLOGY & ISCHEMIA
-                *   **Conduction:** [BBB, Blocks?]
-                *   **Hypertrophy:** [LVH/RVH criteria?]
-                *   **ST-T Changes:**
-                    *   *Anterior (V1-V4):* [Findings]
-                    *   *Inferior (II, III, aVF):* [Findings]
-                    *   *Lateral (I, aVL, V5-V6):* [Findings]
+                Phase 2: Clinical Interpretation
 
-                ### FINAL INTERPRETATION
-                1.  **[Primary Rhythm/Diagnosis]**
-                2.  [Secondary Findings]
+                **BLUF: Primary Diagnosis** (Bold, clear, clinical conclusion).
 
-                **Clinical Recommendation:**
-                *   [Specific management step based on acuity]
+                **Rationale:** Briefly link the Phase 1 measurements to the diagnosis.
 
-                ---
-                *Disclaimer: AI-generated screening. Artifacts may simulate pathology. Verification by a physician is mandatory.*
+                **Clinical Action:** Note critical findings or required consultations.
+
+                **Constraint:** If image resolution is too low to see the 1mm grid clearly, state "Image quality insufficient for Caliper Method."
+
+                CLINICAL CONTEXT: ${promptContext}
             `;
 
             try {
