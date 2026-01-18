@@ -64,9 +64,8 @@
                 <!-- Model Selector -->
                 <div class="relative w-full md:w-auto">
                     <select id="modelSelector" class="w-full md:w-64 bg-slate-900 border border-slate-700 px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-wider text-slate-400 outline-none cursor-pointer hover:bg-slate-800 transition-colors appearance-none focus:border-indigo-500">
-                        <option value="gemini-2.0-flash-exp">Node: Gemini 2.0 Flash (Vision Optimized)</option>
-                        <option value="gemini-3-flash-preview">Node: Gemini 3 Flash (Reasoning)</option>
-                        <option value="gemini-1.5-pro">Node: Gemini 1.5 Pro (Deep Context)</option>
+                        <option value="gemini-2.5-flash">Node: Gemini 2.5 Flash (Standard Imaging)</option>
+                        <option value="gemini-3-flash-preview">Node: Gemini 3 Flash (Advanced/Multi-Slice)</option>
                     </select>
                     <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
                         <span class="material-symbols-outlined text-slate-500 text-sm">expand_more</span>
@@ -82,14 +81,14 @@
             <div class="lg:col-span-5 space-y-6">
                 <!-- Drop Zone -->
                 <div id="dropZone" class="group relative bg-gemini-800 border-2 border-dashed border-slate-700 rounded-[2rem] p-10 text-center transition-all cursor-pointer hover:border-indigo-500 hover:bg-indigo-500/5">
-                    <input type="file" id="fileInput" class="hidden" accept="image/*" multiple>
+                    <input type="file" id="fileInput" class="hidden" accept="image/*,video/*" multiple>
                     <div class="bg-slate-900 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 transition-transform duration-300 group-hover:scale-110 group-hover:bg-indigo-500/20 border border-slate-700 group-hover:border-indigo-500/50">
                         <span class="material-symbols-outlined text-indigo-400 text-4xl">cloud_upload</span>
                     </div>
                     <h3 class="text-slate-200 font-extrabold text-lg mb-2">Upload Imaging Data</h3>
-                    <p class="text-xs text-slate-500 font-medium mb-8 max-w-[200px] mx-auto">Drag & Drop X-Rays, CT Slices, MRI, or Photos (PNG/JPG)</p>
+                    <p class="text-xs text-slate-500 font-medium mb-8 max-w-[200px] mx-auto">Drag & Drop X-Rays, CT Slices, MRI, or Videos (MP4/MOV)</p>
                     <button onclick="document.getElementById('fileInput').click()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-8 rounded-xl shadow-lg shadow-indigo-900/50 transition-all active:scale-95 uppercase tracking-wider text-[11px] w-full sm:w-auto">
-                        + Select Images
+                        + Select Media
                     </button>
                 </div>
 
@@ -176,13 +175,15 @@
     <div id="lightboxOverlay" class="lightbox-overlay" onclick="closeLightbox()">
         <span class="lightbox-close" onclick="closeLightbox()">&times;</span>
         <img id="lightboxImg" class="lightbox-content">
+        <!-- Video element for lightbox (hidden by default) -->
+        <video id="lightboxVideo" class="lightbox-content" controls style="display:none;"></video>
     </div>
 
     <script type="module">
         import { API_KEYS } from './js/config.js?v=secure';
 
         // --- CONFIG ---
-        const apiKey = API_KEYS.PSYCHIATRY; // Using Psychiatry Key for Imaging as requested (likely a shared key in this context)
+        const apiKey = API_KEYS.PSYCHIATRY;
 
         const fileInput = document.getElementById('fileInput');
         const dropZone = document.getElementById('dropZone');
@@ -214,15 +215,29 @@
             runBtn.disabled = true;
             try {
                 for(let file of files) {
-                    if (file.type.startsWith('image/')) {
+                    // Robust type detection (MIME or Extension)
+                    const isImage = file.type.startsWith('image/') || /\.(jpe?g|png|webp|gif|bmp)$/i.test(file.name);
+                    const isVideo = file.type.startsWith('video/') || /\.(mp4|mov|webm|avi|mkv)$/i.test(file.name);
+
+                    if (isImage) {
                         // Compress/Resize image before adding to stack
                         const b64 = await processImg(file);
-                        // Store the raw base64 (without prefix) for API, but keep prefix for display
                         const rawB64 = b64.split(',')[1];
-                        mediaStack.push({ id: Math.random(), b64: b64, raw: rawB64, mime: file.type, label: 'IMG' });
+                        // Use explicit mime if missing
+                        const mime = file.type || "image/jpeg";
+                        mediaStack.push({ id: Math.random(), b64: b64, raw: rawB64, mime: mime, label: 'IMG', type: 'image' });
+                    }
+                    else if (isVideo) {
+                        // Read video directly as DataURL
+                        const b64 = await readFileAsBase64(file);
+                        const rawB64 = b64.split(',')[1];
+                        // Use explicit mime if missing
+                        const mime = file.type || "video/mp4";
+                        mediaStack.push({ id: Math.random(), b64: b64, raw: rawB64, mime: mime, label: 'VID', type: 'video' });
                     }
                 }
                 renderGallery();
+                recommendModel(); // Auto-switch model based on content
             } catch (e) {
                 alert("Error: " + e.message);
             } finally {
@@ -230,6 +245,32 @@
                 runBtn.disabled = false;
                 fileInput.value = '';
             }
+        }
+
+        // --- AUTO-SWITCH MODEL LOGIC ---
+        function recommendModel() {
+            const hasVideo = mediaStack.some(m => m.type === 'video');
+            const isMultiSlice = mediaStack.length > 1;
+
+            // If complex input (video or multiple images), prefer Gemini 3
+            if (hasVideo || isMultiSlice) {
+                modelSelector.value = "gemini-3-flash-preview";
+            } else if (mediaStack.length === 1 && mediaStack[0].type === 'image') {
+                // Default simple image -> Gemini 2.5 Flash
+                // Only switch back if the current selection is 3-flash (to avoid overriding manual user choice if they picked something else in future)
+                // However, since we only have two options and want to "pick a mode", we will enforce the default logic
+                // unless the user changes it manually *after* upload. Since this runs on upload, it acts as a smart default.
+                modelSelector.value = "gemini-2.5-flash";
+            }
+        }
+
+        async function readFileAsBase64(file) {
+             return new Promise((resolve, reject) => {
+                 const reader = new FileReader();
+                 reader.onload = () => resolve(reader.result);
+                 reader.onerror = reject;
+                 reader.readAsDataURL(file);
+             });
         }
 
         // --- OPTIMIZED IMAGE PROCESSOR ---
@@ -266,8 +307,11 @@
             }
             emptyState.style.display = 'none';
             gallery.innerHTML = mediaStack.map(m => `
-                <div class="relative bg-slate-900 p-1 rounded-xl shadow-inner border border-slate-700 aspect-square group overflow-hidden cursor-zoom-in" onclick="openLightboxId(${m.id})">
-                    <img src="${m.b64}" class="w-full h-full object-cover rounded-lg opacity-80 group-hover:opacity-100 transition-opacity">
+                <div class="relative bg-slate-900 p-1 rounded-xl shadow-inner border border-slate-700 aspect-square group overflow-hidden cursor-pointer" onclick="openLightboxId(${m.id})">
+                    ${m.type === 'video'
+                        ? `<div class="w-full h-full flex items-center justify-center bg-black rounded-lg"><span class="material-symbols-outlined text-indigo-500 text-4xl">play_circle</span></div>`
+                        : `<img src="${m.b64}" class="w-full h-full object-cover rounded-lg opacity-80 group-hover:opacity-100 transition-opacity">`
+                    }
                     <button onclick="event.stopPropagation(); removeItem(${m.id})" class="absolute top-1 right-1 bg-red-500/90 hover:bg-red-600 text-white rounded-full h-5 w-5 flex items-center justify-center text-[10px] font-bold shadow-sm transition-colors z-10">×</button>
                     <div class="absolute bottom-0 left-0 right-0 bg-black/60 backdrop-blur-sm p-1 pointer-events-none">
                         <p class="text-[8px] text-white text-center font-mono font-bold truncate">${m.label}</p>
@@ -276,7 +320,11 @@
             `).join('');
         }
 
-        window.removeItem = (id) => { mediaStack = mediaStack.filter(m => m.id !== id); renderGallery(); };
+        window.removeItem = (id) => {
+            mediaStack = mediaStack.filter(m => m.id !== id);
+            renderGallery();
+            recommendModel(); // Re-evaluate model choice on delete
+        };
         window.clearScans = () => { mediaStack = []; renderGallery(); };
 
         // --- Lightbox Logic ---
@@ -285,9 +333,19 @@
             if(media) {
                 const lb = document.getElementById('lightboxOverlay');
                 const img = document.getElementById('lightboxImg');
-                img.src = media.b64;
+                const vid = document.getElementById('lightboxVideo');
+
+                if (media.type === 'video') {
+                    img.style.display = 'none';
+                    vid.style.display = 'block';
+                    vid.src = media.b64;
+                } else {
+                    vid.style.display = 'none';
+                    img.style.display = 'block';
+                    img.src = media.b64;
+                }
+
                 lb.style.display = 'flex';
-                // Small timeout to allow display:flex to apply before adding active class for transition
                 setTimeout(() => lb.classList.add('active'), 10);
             }
         };
@@ -295,10 +353,14 @@
         window.closeLightbox = () => {
             const lb = document.getElementById('lightboxOverlay');
             lb.classList.remove('active');
+            const vid = document.getElementById('lightboxVideo');
+            vid.pause(); // Stop video if playing
+
             setTimeout(() => {
                 lb.style.display = 'none';
                 document.getElementById('lightboxImg').src = '';
-            }, 300); // Match transition duration
+                vid.src = '';
+            }, 300);
         };
 
         document.addEventListener('keydown', (e) => {
@@ -319,7 +381,7 @@
         async function callGeminiVision(model, prompt, images) {
             const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
             
-            // Construct Parts: Text Prompt + Images
+            // Construct Parts: Text Prompt + Images/Videos
             const parts = [{ text: prompt }];
             images.forEach(img => {
                 parts.push({
@@ -360,7 +422,7 @@
         // --- Core Execution ---
         runBtn.onclick = async () => {
             if (!mediaStack.length) {
-                return alert("Please upload at least one image.");
+                return alert("Please upload at least one image or video.");
             }
             
             const selectedModel = modelSelector.value;
