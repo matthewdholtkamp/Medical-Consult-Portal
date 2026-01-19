@@ -61,15 +61,8 @@
             </div>
 
             <div class="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto">
-                <!-- Model Selector -->
-                <div class="relative w-full md:w-auto">
-                    <select id="modelSelector" class="w-full md:w-64 bg-slate-900 border border-slate-700 px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-wider text-slate-400 outline-none cursor-pointer hover:bg-slate-800 transition-colors appearance-none focus:border-indigo-500">
-                        <option value="gemini-2.5-flash">Node: Gemini 2.5 Flash (Standard Imaging)</option>
-                        <option value="gemini-3-flash-preview">Node: Gemini 3 Flash (Advanced/Multi-Slice)</option>
-                    </select>
-                    <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                        <span class="material-symbols-outlined text-slate-500 text-sm">expand_more</span>
-                    </div>
+                <div class="bg-indigo-500/10 border border-indigo-500/20 px-4 py-2 rounded-xl">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-400">Node: Gemini 3 Flash (Advanced)</span>
                 </div>
             </div>
         </header>
@@ -192,7 +185,6 @@
         const emptyState = document.getElementById('emptyState');
         const modelNameDisplay = document.getElementById('modelNameDisplay');
         const resultModelId = document.getElementById('resultModelId');
-        const modelSelector = document.getElementById('modelSelector');
         const errorBox = document.getElementById('errorBox');
         const errorText = document.getElementById('errorText');
         const reportBox = document.getElementById('reportBox');
@@ -237,30 +229,12 @@
                     }
                 }
                 renderGallery();
-                recommendModel(); // Auto-switch model based on content
             } catch (e) {
                 alert("Error: " + e.message);
             } finally {
                 runBtn.innerHTML = `<span>Initiate Radiological Review</span><span class="material-symbols-outlined text-sm">arrow_forward</span>`;
                 runBtn.disabled = false;
                 fileInput.value = '';
-            }
-        }
-
-        // --- AUTO-SWITCH MODEL LOGIC ---
-        function recommendModel() {
-            const hasVideo = mediaStack.some(m => m.type === 'video');
-            const isMultiSlice = mediaStack.length > 1;
-
-            // If complex input (video or multiple images), prefer Gemini 3
-            if (hasVideo || isMultiSlice) {
-                modelSelector.value = "gemini-3-flash-preview";
-            } else if (mediaStack.length === 1 && mediaStack[0].type === 'image') {
-                // Default simple image -> Gemini 2.5 Flash
-                // Only switch back if the current selection is 3-flash (to avoid overriding manual user choice if they picked something else in future)
-                // However, since we only have two options and want to "pick a mode", we will enforce the default logic
-                // unless the user changes it manually *after* upload. Since this runs on upload, it acts as a smart default.
-                modelSelector.value = "gemini-2.5-flash";
             }
         }
 
@@ -323,7 +297,6 @@
         window.removeItem = (id) => {
             mediaStack = mediaStack.filter(m => m.id !== id);
             renderGallery();
-            recommendModel(); // Re-evaluate model choice on delete
         };
         window.clearScans = () => { mediaStack = []; renderGallery(); };
 
@@ -425,7 +398,7 @@
                 return alert("Please upload at least one image or video.");
             }
             
-            const selectedModel = modelSelector.value;
+            const selectedModel = "gemini-3-flash-preview";
             const promptContext = document.getElementById('promptInput').value;
 
             // Reset UI

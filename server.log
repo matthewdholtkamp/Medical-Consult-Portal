@@ -1,3 +1,4 @@
-127.0.0.1 - - [18/Jan/2026 20:56:41] "GET /ECG.html HTTP/1.1" 200 -
-127.0.0.1 - - [18/Jan/2026 20:56:41] "GET /js/theme.js HTTP/1.1" 200 -
-127.0.0.1 - - [18/Jan/2026 20:56:42] "GET /js/config.js?v=secure HTTP/1.1" 200 -
+127.0.0.1 - - [19/Jan/2026 14:08:41] "GET /Imaging.html HTTP/1.1" 200 -
+127.0.0.1 - - [19/Jan/2026 14:08:41] "GET /js/theme.js HTTP/1.1" 200 -
+127.0.0.1 - - [19/Jan/2026 14:08:42] "GET /js/config.js?v=secure HTTP/1.1" 200 -
+127.0.0.1 - - [19/Jan/2026 14:08:43] "GET /index.html HTTP/1.1" 200 -
