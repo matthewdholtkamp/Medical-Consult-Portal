@@ -1,93 +1,111 @@
+import os
+import http.server
+import socketserver
+import threading
 import time
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import sync_playwright, expect
 
-def test_cognitive_assessment_page():
+# --- Start a local HTTP server ---
+PORT = 8000
+Handler = http.server.SimpleHTTPRequestHandler
+
+def start_server():
+    # Allow address reuse
+    socketserver.TCPServer.allow_reuse_address = True
+    with socketserver.TCPServer(("", PORT), Handler) as httpd:
+        print(f"Serving at port {PORT}")
+        httpd.serve_forever()
+
+# Start server in a background thread
+thread = threading.Thread(target=start_server, daemon=True)
+thread.start()
+time.sleep(1) # Give it a second to start
+
+def verify_cognitive_page():
     with sync_playwright() as p:
-        # Launch browser
         browser = p.chromium.launch(headless=True)
-        context = browser.new_context()
+        context = browser.new_context(viewport={'width': 1280, 'height': 800})
         page = context.new_page()
 
-        # Listen for console logs
-        page.on("console", lambda msg: print(f"BROWSER CONSOLE: {msg.text}"))
-        page.on("pageerror", lambda err: print(f"BROWSER ERROR: {err}"))
-
         try:
-            # 1. Navigate to the Cognitive Assessment page
-            print("Navigating to Cognitive.html...")
-            page.goto("http://localhost:8080/Cognitive.html")
+            # 1. Load the page
+            print("Loading page...")
+            page.goto(f"http://localhost:{PORT}/Cognitive.html")
 
-            # Wait for the start screen to appear
-            print("Waiting for start screen...")
-            page.wait_for_selector("#startScreen", state="visible")
+            # 2. Enter 'Full Exam' mode
+            print("Entering Full Exam mode...")
+            page.get_by_text("Full Comprehensive Exam").click()
+            time.sleep(1) # Animation wait
 
-            # Take a screenshot of the start screen
-            page.screenshot(path="verification/cognitive_start_screen.png")
-            print("Screenshot of Start Screen taken.")
-
-            # 2. Click "Full Comprehensive Exam"
-            print("Clicking Full Comprehensive Exam...")
-            # Use a more specific selector if text is ambiguous
-            page.locator("button", has_text="Full Comprehensive Exam").click()
-
-            # Wait for main app to be visible - increase timeout just in case
-            print("Waiting for mainApp to appear...")
-            page.wait_for_selector("#mainApp", state="visible", timeout=10000)
-
-            # 3. Verify Header and Sidebar
-            # Check Title
-            # "Behavioral Neurology Clinical Navigator"
-
-            # 4. Fill in some data
-            print("Filling in data...")
-            # We are in General Neuro tab (Tab 0) by default in Full mode
-            page.locator("textarea").first.fill("Test Patient: 70yo Male, memory loss.")
-
-            # 5. Navigate to Next Tab (MoCA)
+            # 3. Verify MoCA Tab Instructions
             print("Navigating to MoCA tab...")
-            page.get_by_text("Next Section").click()
+            # Note: In full mode, MoCA is index 1.
+            page.evaluate("window.setActiveTab(1)")
+            time.sleep(0.5)
 
-            # Wait for MoCA section title
-            page.wait_for_selector("h2", state="visible") # 'MoCA Screening'
+            # Check for specific detailed instruction text we added
+            print("Checking MoCA instructions...")
+            expect(page.get_by_text("Instruction: Please draw a line, going from a number to a letter in ascending order")).to_be_visible()
+            expect(page.get_by_text("Instruction: Draw a clock. Put in all the numbers and set the time to 10 past 11")).to_be_visible()
 
-            # 6. Verify MoCA logic (Dropdowns)
-            # Find the first select (Visuospatial / Executive -> Alt. Trail Making)
-            # It's the first select on the page usually
-            print("Selecting score...")
-            page.locator("select").first.select_option("1") # Set score to 1
+            # Screenshot MoCA tab
+            page.screenshot(path="verification/verification_moca.png")
+            print("MoCA screenshot saved.")
 
-            # Check total score update (should be 1)
-            # The total score is in #totalMocaDisplay
-            time.sleep(0.5) # Allow JS to update
-            total_score = page.locator("#totalMocaDisplay").inner_text()
-            print(f"Total Score: {total_score}")
+            # 4. Verify Localization Tab Instructions (e.g., Right Frontal)
+            print("Navigating to Right Frontal tab...")
+            # Right frontal is index 2
+            page.evaluate("window.setActiveTab(2)")
+            time.sleep(0.5)
 
-            if total_score != "1":
-                print("WARNING: Score did not update correctly!")
+            # Check for specific detailed instruction text
+            print("Checking Localization instructions...")
+            expect(page.get_by_text("Instruction: Connect the dots in this box using four straight lines")).to_be_visible()
 
-            # Take screenshot of MoCA view
-            page.screenshot(path="verification/cognitive_moca_view.png")
-            print("Screenshot of MoCA View taken.")
+            # Screenshot Localization tab
+            page.screenshot(path="verification/verification_frontal.png")
+            print("Localization screenshot saved.")
 
-            # 7. Generate Report (Mocking API would be ideal, but here we just check UI)
-            # We can't easily mock the fetch in this simple script without complex setup,
-            # so we'll just check if the button exists and clicks.
-            print("Checking Report Generation UI...")
-            page.get_by_text("Generate AI Report").click()
+            # 5. Verify Copy Report Logic
+            print("Testing copyReport logic via console...")
 
-            # Should switch to report view
-            page.wait_for_selector("#reportView", state="visible")
-            page.wait_for_selector("#loadingOverlay", state="visible") # Should show loading
+            # Force show the report view so innerText works correctly
+            page.evaluate("window.showAnalysisView()")
+            time.sleep(0.5)
 
-            page.screenshot(path="verification/cognitive_report_loading.png")
-            print("Screenshot of Report Loading taken.")
+            # Inject HTML to simulate marked.js output
+            # <p> adds block spacing (usually \n\n in innerText)
+            test_html = "<p>Paragraph 1</p><p>Paragraph 2</p><p>Paragraph 3</p>"
 
-        except Exception as e:
-            print(f"Error: {e}")
-            page.screenshot(path="verification/cognitive_error.png")
-            raise e
+            page.evaluate(f"document.getElementById('reportOutput').innerHTML = `{test_html}`")
+
+            # Check what innerText looks like natively
+            actual_inner_text = page.evaluate("document.getElementById('reportOutput').innerText")
+            print(f"DEBUG: innerText from HTML is: {repr(actual_inner_text)}")
+
+            # Override navigator.clipboard.writeText to capture the output
+            page.evaluate("""
+                window.lastCopiedText = "";
+                navigator.clipboard.writeText = (text) => { window.lastCopiedText = text; };
+            """)
+
+            # Trigger copy
+            page.evaluate("window.copyReport()")
+
+            # Check result
+            copied_text = page.evaluate("window.lastCopiedText")
+            print(f"Copied text result:   {repr(copied_text)}")
+
+            # We expect single newlines: "Paragraph 1\nParagraph 2\nParagraph 3"
+            expected = "Paragraph 1\nParagraph 2\nParagraph 3"
+
+            if copied_text == expected:
+                print("SUCCESS: Copy logic correctly reduced newlines.")
+            else:
+                print(f"FAILURE: Copy logic output mismatch.\nExpected: {repr(expected)}\nGot:      {repr(copied_text)}")
+
         finally:
             browser.close()
 
 if __name__ == "__main__":
-    test_cognitive_assessment_page()
+    verify_cognitive_page()
