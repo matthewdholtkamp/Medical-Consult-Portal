@@ -1,0 +1,808 @@
+import React, { useState, useRef, useEffect } from 'react';
+import { 
+  Brain, 
+  ChevronRight, 
+  ChevronLeft, 
+  ClipboardCheck, 
+  Activity, 
+  AlertCircle,
+  FileText,
+  RotateCcw,
+  Info,
+  MapPin,
+  Stethoscope,
+  Eye,
+  Music,
+  Fingerprint,
+  Languages,
+  CheckSquare,
+  Layout,
+  History,
+  Copy,
+  Check,
+  Image as ImageIcon,
+  Upload,
+  PenTool,
+  User,
+  FlaskConical,
+  Sparkles,
+  Loader2
+} from 'lucide-react';
+
+const APP_TITLE = "Behavioral Neurology Clinical Navigator";
+const apiKey = ""; // API Key injected by environment
+
+// --- DEFAULTS FOR NEURO EXAM ---
+const DEFAULT_CN = `II: PERRLA, No APD. VFFTC
+Fundi: Disks are sharp without papilledema. No optic atrophy. No retinal hemorrhages
+III,IV,VI: Versions full. Convergence normal. Saccades are rapid and accurate vertically and horizontally. Horizontal pursuits smooth. No nystagmus is noted in primary position or in any direction of gaze. No ptosis.
+V: intact to LT, intact in V1-3. MOMI.
+VII: Face is symmetric, MOE intact/symmetric in U and L fields
+VIII: Hearing is grossly intact.
+IX/X: Palate volitionally rises symmetrically. Speech is w/o hypophonia, dysphonia, dysarthria, or hoarseness
+XI: SCM/TPZ are 5/5 and symmetric without atrophy.
+XII: Tongue is midline with normal strength and no atrophy.`;
+
+const DEFAULT_MOTOR = `Strength R/L
+Deltoid (C5,6/Axillary) 5/5
+Biceps (C5,6/Musculocutaneous) 5/5
+Triceps (C6,7/Radial) 5/5
+Forearm pronation (C6,7/Median) 5/5
+Wrist Extension (C6,7/Radial) 5/5
+Wrist Flexion (C6,7/Median) 5/5
+Flexor digitorum (C8/Median) 5/5
+Finger abduction (T1/Ulnar) 5/5
+Thumb opposition (C8,T1/Median) 5/5
+Hip adduction (L2,3,4) 5/5
+Knee extension (L3,4/Femoral) 5/5
+Knee flexion (L5,S1/Sciatic) 5/5
+Ankle dorsiflexion (L4,5/Peroneal) 5/5
+Ankle plantarflexion (S1,S2/Tibial nerve) 5/5
+Extensor hallicus longus (L5) 5/5
+
+Tone/Bulk:
+No Matched effort, no give-way strength, no dramatic effort
+No spasticity, no clonus, no fasciculations
+No pronator drift, no posting
+No atrophy or hypertrophy
+No tremor, bradykinesia, dystonic posturing, dyskinesias, chorea, myoclonus.`;
+
+const DEFAULT_COORD = `Finger-to-nose and heel-to-shin are without dysmetria or past-pointing.`;
+
+const DEFAULT_SENSORY = `Light touch, and temperature sensation intact in all 4 limbs.
+Vibration is intact in both great toes and distal fingers.
+Romberg negative.`;
+
+const DEFAULT_REFLEXES = `REFLEXES R/L
+Biceps (C5) 2/2
+Triceps (C7) 2/2
+Brachioradialis(C6) 2/2
+Patellar (L4) 2/2
+Achilles (S1) 2/2
+Plantar (L4-5,S1-2) Downgoing/Downgoing
+Ankle clonus Absent/Absent`;
+
+const DEFAULT_GAIT = `Rises from sitting normally. Posture and stance are normal. No start hesitation. Native gait with normal stride length, height, speed and arm swing. Turns easily.`;
+
+
+// --- CLINICAL DATA CONSTANTS ---
+
+const MOCA_SECTIONS = [
+  {
+    id: 'moca-visuo',
+    title: "Visuospatial / Executive",
+    tests: [
+      { id: 'moca_trails', label: 'Alt. Trail Making', max: 1, instructions: "Administer Worksheet: 'Please draw a line going from a number to a letter in ascending order. Begin at 1 to A, then 2 to B, and so on. End at E.'" },
+      { id: 'moca_cube', label: 'Cube Copy', max: 1, instructions: "Administer Worksheet: 'Copy this drawing as accurately as you can in the space below.'" },
+      { id: 'moca_clock', label: 'Clock Drawing', max: 3, instructions: "Administer Worksheet: 'Draw a clock. Put in all the numbers and set the time to 10 past 11.'" }
+    ]
+  },
+  {
+    id: 'moca-naming',
+    title: "Naming",
+    tests: [
+      { id: 'moca_naming', label: 'Animal Naming', max: 3, instructions: "Point to each figure: 'Tell me the name of this animal'. (Lion, Rhinoceros, Camel)." }
+    ]
+  },
+  {
+    id: 'moca-attention',
+    title: "Attention",
+    tests: [
+      { id: 'moca_digits_f', label: 'Digits Forward', max: 1, instructions: "Say: 'I am going to say some numbers. Repeat them exactly as I say them.' (2-1-8-5-4)." },
+      { id: 'moca_digits_b', label: 'Digits Backward', max: 1, instructions: "Say: 'Now I will say some more numbers, but repeat them backward.' (7-4-2 -> Patient says 2-4-7)." },
+      { id: 'moca_tapping', label: 'Vigilance (Tapping A)', max: 1, instructions: "Read list of letters (F-B-A-C-M-N-A-A-J-K-L-B-A-F-A-K-D-E-A-A-A-J-A-M-O-F-A-A-B). 'Tap your hand every time I say the letter A.'" },
+      { id: 'moca_serial7', label: 'Serial 7s', max: 3, instructions: "Say: 'Subtract 7 from 100, and keep subtracting 7 from your answer until I tell you to stop.' (93, 86, 79, 72, 65)." }
+    ]
+  },
+  {
+    id: 'moca-language',
+    title: "Language",
+    tests: [
+      { id: 'moca_repeat', label: 'Sentence Repetition', max: 2, instructions: "Say: 'I am going to read a sentence. Repeat it exactly.' 1. 'The cat always hid under the couch when dogs were in the room.' 2. 'The cypress trees grew close to the old farm house.'" },
+      { id: 'moca_fluency', label: 'Verbal Fluency (F)', max: 1, instructions: "Say: 'Tell me as many words as you can starting with the letter F. No names or places.' Time for 60 seconds. (Goal > 11)." }
+    ]
+  },
+  {
+    id: 'moca-abstract',
+    title: "Abstraction",
+    tests: [
+      { id: 'moca_abstract', label: 'Similarities', max: 2, instructions: "Say: 'How are a train and a bicycle alike?' (Transportation). 'How are a watch and a ruler alike?' (Measurement)." }
+    ]
+  },
+  {
+    id: 'moca-memory',
+    title: "Delayed Recall",
+    tests: [
+      { id: 'moca_recall', label: 'Delayed Recall', max: 5, instructions: "Ask: 'I read some words to you earlier. Tell me as many as you can remember.' (Face, Velvet, Church, Daisy, Red). No cues." }
+    ]
+  },
+  {
+    id: 'moca-orient',
+    title: "Orientation",
+    tests: [
+      { id: 'moca_orient', label: 'Orientation', max: 6, instructions: "Ask: 'Tell me the Date, Month, Year, and Day of the week.' Then ask: 'What is this place and which city are we in?'" }
+    ]
+  }
+];
+
+const EXAM_SECTIONS = [
+  {
+    id: 'right-frontal',
+    lobe: "Right Dorsolateral Frontal",
+    icon: <Brain className="text-red-500" />,
+    tests: [
+      { id: 'figural_fluency', label: 'Figural Fluency', clinicalNote: "Tests non-verbal divergent thinking.", instructions: "Provide blank paper. Say: 'Draw as many different designs as you can in 1 minute using 4 lines for each. The lines must touch. Do not draw real objects like a house or sun.' Time for 60s. Pass if >8 unique designs." },
+      { id: 'novel_design', label: 'Novel Design Fluency', clinicalNote: "Requires inhibition of familiar patterns.", instructions: "Say: 'Draw designs that are NOT real shapes. Do not draw squares or triangles. Make up completely new shapes.' Time for 60s. Pass if patient avoids standard geometric shapes." },
+      { id: 'affective_prosody', label: 'Affective Motor Prosody', clinicalNote: "Deficit suggests right-hemisphere emotional expression impairment.", instructions: "Say: 'I am going to say a sentence. Repeat it back to me using the exact same emotion.' 1. Say 'The chair is made of wood' in an ANGRY voice. 2. Say it in a HAPPY voice. 3. Say it in a SAD voice." },
+      { id: 'picture_sequencing', label: 'Picture Sequencing', clinicalNote: "Tests social/contextual integration and planning.", instructions: "Present the mixed-up cartoon cards. Say: 'These pictures tell a story but they are mixed up. Please put them in the correct order so they tell a story from start to finish.'" }
+    ]
+  },
+  {
+    id: 'left-frontal',
+    lobe: "Left Dorsolateral Frontal",
+    icon: <Languages className="text-blue-500" />,
+    tests: [
+      { id: 'digit_reverse', label: 'Digit Span Reverse', clinicalNote: "Tests working memory.", instructions: "Say: 'I will say some numbers. When I stop, say them backwards.' Start with 2 digits (2-4 -> 4-2). If correct, try 3 digits (5-1-8 -> 8-1-5). Pass if they can do 4 digits." },
+      { id: 'wisconsin_bedside', label: 'Bedside Wisconsin (Coin)', clinicalNote: "Tests set-shifting/adaptation.", instructions: "Hold a coin. Say: 'Guess which hand the coin is in.' Use a pattern (Left-Right-Left-Right). After they get it right 3 times, switch the pattern (e.g., Left-Left-Right) WITHOUT telling them. Do they adjust?" },
+      { id: 'animal_fluency', label: 'Verbal Fluency (Animals)', clinicalNote: "Semantic retrieval. Low fluency + Normal Naming = Executive.", instructions: "Say: 'Name as many animals as you can in one minute. Go.' Start timing. Do not count repetitions. Normal is >12." },
+      { id: 'fas_fluency', label: 'Phonemic Fluency (F-A-S)', clinicalNote: "Executive search/retrieval.", instructions: "Say: 'Name words that start with the letter F.' No names or places. Time 60s. Repeat for A and S. Normal is >10 per letter." },
+      { id: 'little_big', label: '“Little-Big” Stroop', clinicalNote: "Tests response inhibition.", instructions: "Show page with word 'BIG' printed small and 'little' printed large. Say: 'Read the word out loud.' Then say: 'Now, tell me the SIZE of the letters, not what the word says.'" },
+      { id: 'trails_b', label: 'Trails B (Oral)', clinicalNote: "Cognitive flexibility.", instructions: "Say: 'Connect numbers and letters in alternating order. Like this: 1-A, 2-B, 3-C...' Ask patient to continue up to L. (1-A, 2-B, 3-C, 4-D, 5-E...)" },
+      { id: 'luria_seq', label: 'Luria Motor Seq', clinicalNote: "Premotor/SMA function.", instructions: "Say: 'Watch my hand.' Demonstrate: Fist (on table), Edge (side of hand), Palm (flat). 'Now do it with me.' (Do 3 times). 'Now do it on your own.' Watch for getting stuck/perseveration." },
+      { id: 'gonogo', label: 'Go / No-Go', clinicalNote: "Inhibition (Orbitofrontal).", instructions: "Say: 'Tap the table once when I tap once. Do NOT tap when I tap twice.' Practice 2 times. Then do random sequence of 10 taps." }
+    ]
+  },
+  {
+    id: 'right-parietal',
+    lobe: "Right Parietal (Spatial)",
+    icon: <Eye className="text-purple-500" />,
+    tests: [
+      { id: 'cube_strategy', label: 'Cube/Complex Drawing', clinicalNote: "Improves w/ strategy? Frontal. No improvement? Parietal.", instructions: "Ask patient to copy a cube. If they fail, say: 'Let's try this way. Draw a square first. Now draw another square behind it...' If they pass only with help, mark 'Fail' but note 'Improved with strategy' in notes." },
+      { id: 'neglect_battery', label: 'Neglect Battery', clinicalNote: "Hemispatial Neglect.", instructions: "1. Draw a line and ask them to mark the center. 2. Touch their left and right hand at the same time (eyes closed) - ask 'Which side did I touch?' 3. Show Cookie Theft picture and ask what is happening (do they miss the left side?)." },
+      { id: 'line_orientation', label: 'Line Orientation', clinicalNote: "Pure visuospatial perception.", instructions: "Show book with angled lines. Ask: 'Which line on the bottom matches the angle of the top line?'" },
+      { id: 'dressing_praxis', label: 'Dressing Apraxia', clinicalNote: "Body-in-space orientation.", instructions: "Take a jacket and turn one sleeve inside out. Hand it to patient. Say: 'Please put this jacket on.' Watch if they can fix the sleeve and orient it correctly." }
+    ]
+  },
+  {
+    id: 'left-parietal',
+    lobe: "Left Parietal (Gerstmann's)",
+    icon: <Fingerprint className="text-emerald-500" />,
+    tests: [
+      { id: 'finger_agnosia', label: 'Finger Agnosia', clinicalNote: "Part of Gerstmann's.", instructions: "1. Ask: 'Show me your thumb.' 2. 'Touch your left ear with your right hand.' 3. With eyes closed, touch their finger and ask 'Which finger did I touch?'" },
+      { id: 'calculation', label: 'Calculation', clinicalNote: "Acalculia (Angular Gyrus).", instructions: "Ask: 'What is 100 minus 7?' (93). 'Minus 7 again?' (86). If failing, try written math: 'Write down 24 + 15 and solve it.'" },
+      { id: 'rl_orientation', label: 'Right-Left Orientation', clinicalNote: "Spatial-symbolic mapping.", instructions: "Ask: 'Touch your right ear with your left hand.' Then point to your own right hand and ask: 'Which hand is this?'" },
+      { id: 'drawing_details', label: 'Drawing Details', clinicalNote: "Missing details = Left Parietal.", instructions: "Ask: 'Draw a house.' Look for internal details (windows, door, chimney) vs just the outline." }
+    ]
+  },
+  {
+    id: 'right-temporal',
+    lobe: "Right Temporal (Visual Memory)",
+    icon: <Music className="text-orange-500" />,
+    tests: [
+      { id: 'visual_recall', label: 'Visual Memory', clinicalNote: "Right hippocampal function.", instructions: "Draw a simple geometric shape (e.g. rectangle with a triangle on top). Hide it. Wait 5 mins. Ask: 'Draw that shape I showed you earlier.'" },
+      { id: 'object_location', label: 'Object Location', clinicalNote: "Contextual visuospatial memory.", instructions: "Show 3 objects (Keys, Pen, Watch) and hide them in different spots in the room while patient watches. Wait 5 mins. Ask: 'Point to where I hid the objects.'" },
+      { id: 'melody_rec', label: 'Melody Recognition', clinicalNote: "Amusia/Auditory agnosia.", instructions: "Hum 'Happy Birthday' or the National Anthem (no words). Ask: 'What song is this?'" }
+    ]
+  },
+  {
+    id: 'left-temporal',
+    lobe: "Left Temporal (Verbal/Semantic)",
+    icon: <Languages className="text-indigo-500" />,
+    tests: [
+      { id: 'verbal_memory', label: '8-Word List Recall', clinicalNote: "No help with cues = Hippocampal.", instructions: "Say: 'I will read 8 words. Listen carefully.' Read list. 'Tell me as many as you can.' Repeat 3 times. Wait 5 mins. 'Tell me the words again.' If they miss some, provide category cues." },
+      { id: 'semantic_knowledge', label: 'Semantic/Category', clinicalNote: "Semantic Dementia check.", instructions: "Ask: 'What is a stethoscope?' 'What do you use it for?' (Ask about low frequency items)." },
+      { id: 'aphasia_screen', label: 'Comprehension/Repetition', clinicalNote: "Wernicke's / Conduction Aphasia.", instructions: "1. Command: 'Point to the ceiling, then touch your nose.' 2. Repetition: 'No ifs, ands, or buts.'" }
+    ]
+  },
+  {
+    id: 'occipital',
+    lobe: "Occipital (Visual Agnosias)",
+    icon: <Eye className="text-slate-500" />,
+    tests: [
+      { id: 'prosopagnosia', label: 'Prosopagnosia', clinicalNote: "Face blindness (Fusiform).", instructions: "Show photos of famous people (or family if available). Ask: 'Who is this?'" },
+      { id: 'simultanagnosia', label: 'Simultanagnosia', clinicalNote: "Dorsal stream (Balint's).", instructions: "Show the Cookie Theft picture. Ask: 'Tell me everything happening in this picture.' (Do they see the water overflowing AND the kids, or just one isolated part?)" },
+      { id: 'optic_ataxia', label: 'Optic Ataxia', clinicalNote: "Visuomotor disconnection.", instructions: "Hold a pen to the patient's side/periphery. Say: 'Reach out and grab the pen.' Watch for groping or missing the target." },
+      { id: 'visual_agnosia', label: 'Visual Agnosia', clinicalNote: "Ventral stream.", instructions: "Show a key. Ask: 'What is this?' If they can't name it, let them hold it. If they name it by touch but not sight, mark Fail (Visual Agnosia)." },
+      { id: 'color_agnosia', label: 'Color Imagery', clinicalNote: "Color anomia/agnosia.", instructions: "Ask: 'What color is a banana?' 'What color is a strawberry?' Then show something green and ask 'What color is this?'" }
+    ]
+  }
+];
+
+const App = () => {
+  const [examMode, setExamMode] = useState(null); 
+  const [activeTab, setActiveTab] = useState(0); 
+  const [scores, setScores] = useState({});
+  const [testNotes, setTestNotes] = useState({}); 
+  const [showAnalysis, setShowAnalysis] = useState(false);
+  const [showInstr, setShowInstr] = useState(null);
+  const [copied, setCopied] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const mainContentRef = useRef(null);
+
+  // Free Text States
+  const [reasonForExam, setReasonForExam] = useState("");
+  const [mocaNotes, setMocaNotes] = useState("");
+  const [mocaImage, setMocaImage] = useState(null);
+  const [reportText, setReportText] = useState("");
+
+  // Neuro Exam States
+  const [genAppearance, setGenAppearance] = useState("");
+  const [cnExam, setCnExam] = useState(DEFAULT_CN);
+  const [motorExam, setMotorExam] = useState(DEFAULT_MOTOR);
+  const [coordExam, setCoordExam] = useState(DEFAULT_COORD);
+  const [sensoryExam, setSensoryExam] = useState(DEFAULT_SENSORY);
+  const [reflexExam, setReflexExam] = useState(DEFAULT_REFLEXES);
+  const [gaitExam, setGaitExam] = useState(DEFAULT_GAIT);
+
+  // Scroll to top when tab changes
+  useEffect(() => {
+    if(mainContentRef.current) {
+      mainContentRef.current.scrollTop = 0;
+    }
+  }, [activeTab, showAnalysis]);
+
+  const handleScore = (id, val) => {
+    const numericVal = parseFloat(val);
+    setScores(prev => ({ ...prev, [id]: isNaN(numericVal) ? val : numericVal }));
+  };
+  
+  const handleTestNote = (id, val) => {
+    setTestNotes(prev => ({ ...prev, [id]: val }));
+  };
+  
+  const handleImageUpload = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setMocaImage(URL.createObjectURL(e.target.files[0]));
+    }
+  };
+
+  const calculateMoCATotal = () => {
+    return MOCA_SECTIONS.flatMap(s => s.tests).reduce((acc, t) => {
+      const val = scores[t.id];
+      return acc + (typeof val === 'number' ? val : 0);
+    }, 0);
+  };
+
+  // --- GEMINI AI INTEGRATION ---
+  const callGeminiAPI = async (prompt) => {
+    try {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }]
+        })
+      });
+      
+      const data = await response.json();
+      if (data.error) {
+        throw new Error(data.error.message);
+      }
+      return data.candidates?.[0]?.content?.parts?.[0]?.text || "Error: No response generated.";
+    } catch (error) {
+      console.error("Gemini API Error:", error);
+      return `Error generating report: ${error.message}. Please check your connection or API key.`;
+    }
+  };
+
+  const generateAIReport = async () => {
+    setIsGenerating(true);
+    
+    const mocaTotal = calculateMoCATotal();
+    const mocaScores = MOCA_SECTIONS.reduce((acc, sec) => {
+      sec.tests.forEach(t => acc[t.label] = scores[t.id] ?? 'Not Assessed');
+      return acc;
+    }, {});
+
+    const localizationData = EXAM_SECTIONS.map(sec => {
+      const tests = sec.tests.map(t => ({
+        test: t.label,
+        result: scores[t.id] || "Not Performed",
+        notes: testNotes[t.id] || ""
+      }));
+      return { lobe: sec.lobe, findings: tests };
+    });
+
+    const prompt = `
+      Act as an expert Behavioral Neurologist (MD). Write a professional, high-level consultation note based on the following exam data.
+      
+      PATIENT CONTEXT:
+      Reason for Exam/HPI: "${reasonForExam}"
+      
+      NEUROLOGICAL PHYSICAL EXAM:
+      General Appearance: ${genAppearance}
+      Cranial Nerves: ${cnExam}
+      Motor: ${motorExam}
+      Coordination: ${coordExam}
+      Sensory: ${sensoryExam}
+      Reflexes: ${reflexExam}
+      Gait: ${gaitExam}
+      
+      COGNITIVE SCREENING (MoCA):
+      Total Score: ${mocaTotal}/30
+      Breakdown: ${JSON.stringify(mocaScores)}
+      Clinical Notes: ${mocaNotes}
+      
+      DETAILED LOCALIZATION EXAM (Pass/Fail):
+      ${JSON.stringify(localizationData, null, 2)}
+      
+      INSTRUCTIONS FOR REPORT GENERATION:
+      1. **Cognitive & Behavioral Assessment**: 
+         - Start with a detailed paragraph analyzing the MoCA performance.
+         - If the "Detailed Localization Exam" contains results (Pass/Fail), write separate paragraphs for each major brain region (Frontal, Parietal, Temporal, Occipital). Interpret "Fail" as clinical deficits and "Pass" as intact. Weave specific "notes" into the narrative.
+         - If the "Detailed Localization Exam" is mostly "Not Performed" (Screening Mode), state that detailed localization testing was deferred and focus the narrative on the MoCA profile and History.
+      
+      2. **Diagnostic Formulation**: Synthesize all findings into a "Final Formulation". 
+         - Identify the likely syndrome (e.g., Amnestic AD, logopenic PPA, behavioral variant FTD, PCA, DLB, or MCI).
+         - Explain the localization (e.g., "Syndrome localizes to the left temporoparietal junction...").
+         - Discuss probable pathophysiology (e.g. "suggestive of underlying Alzheimer's pathology/Amyloid/Tau" or "TDP-43 proteinopathy").
+      
+      3. **Plan & Recommendations**: Provide a bulleted plan.
+         - Diagnostic Workup: Suggest specific imaging (MRI volumetrics, FDG-PET, Amyloid PET) or labs based on the differential.
+         - Medications: specifically assess eligibility for Anti-Amyloid agents (Lecanemab/Donanemab) vs symptomatic care (Donepezil/Memantine) based on the severity (MoCA score) and syndrome. If MoCA < 18, suggest symptomatic care only. If MoCA > 20 and Amnestic AD profile, mention Anti-Amyloid evaluation.
+         - Safety/Social.
+      
+      Format with clear headings. Use professional medical terminology.
+    `;
+
+    const aiResponse = await callGeminiAPI(prompt);
+    setReportText(aiResponse);
+    setIsGenerating(false);
+  };
+
+  useEffect(() => {
+    if (showAnalysis && !reportText && !isGenerating) {
+      generateAIReport();
+    }
+  }, [showAnalysis]);
+
+  const copyReport = async () => {
+    try {
+      await navigator.clipboard.writeText(reportText);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy', err);
+    }
+  };
+
+  const sidebarTabs = [
+    { id: 'neuro-exam', lobe: 'General Neuro Exam', icon: <User className="text-blue-600" /> },
+    { id: 'moca', lobe: 'MoCA Screening', icon: <Layout className="text-blue-600" /> },
+    ...(examMode === 'full' ? EXAM_SECTIONS : [])
+  ];
+
+  // --- UI COMPONENTS ---
+
+  if (!examMode) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center p-6 font-sans">
+        <div className="max-w-md w-full bg-white rounded-3xl p-8 shadow-2xl animate-in zoom-in-95 duration-500">
+          <div className="text-center mb-8">
+            <div className="inline-block p-4 bg-blue-100 rounded-2xl mb-4">
+              <Brain size={48} className="text-blue-600" />
+            </div>
+            <h1 className="text-2xl font-black text-slate-900">Neuro Navigator</h1>
+            <p className="text-slate-500 mt-2 font-medium italic">Behavioral Neurology Suite</p>
+          </div>
+          <div className="space-y-4">
+            <button onClick={() => { setExamMode('screening'); setActiveTab(1); }} className="w-full p-6 bg-slate-100 border-2 border-slate-200 rounded-2xl text-left hover:border-blue-500 hover:bg-blue-50 transition-all group">
+              <div className="flex justify-between items-center mb-1">
+                <span className="font-black text-slate-900 uppercase tracking-tight">MoCA Screening</span>
+                <CheckSquare className="text-slate-300 group-hover:text-blue-500" />
+              </div>
+              <p className="text-xs text-slate-500 font-bold uppercase">Rapid Assessment</p>
+            </button>
+            <button onClick={() => { setExamMode('full'); setActiveTab(0); }} className="w-full p-6 bg-slate-900 border-2 border-slate-900 rounded-2xl text-left hover:bg-slate-800 transition-all group">
+              <div className="flex justify-between items-center mb-1">
+                <span className="font-black text-white uppercase tracking-tight">Full Comprehensive Exam</span>
+                <Activity className="text-blue-400" />
+              </div>
+              <p className="text-xs text-slate-400 font-bold uppercase">General Neuro + Localization + Report</p>
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-slate-50 p-4 md:p-8 font-sans text-slate-900 flex flex-col">
+      <div className="max-w-7xl mx-auto w-full bg-white shadow-2xl rounded-3xl overflow-hidden border border-slate-200 flex flex-col flex-1">
+        
+        {/* Header */}
+        <header className="bg-slate-900 text-white p-6 flex flex-col md:flex-row justify-between items-center border-b border-slate-800 shrink-0">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-blue-600 rounded-xl cursor-pointer hover:bg-blue-500 transition-colors" onClick={() => setExamMode(null)}>
+              <Activity size={24} />
+            </div>
+            <div>
+              <h1 className="text-xl font-black uppercase tracking-tight">{APP_TITLE}</h1>
+              <p className="text-slate-400 text-xs font-bold flex items-center gap-2">
+                <Stethoscope size={12} className="text-blue-400" /> {examMode === 'full' ? 'Comprehensive Exam' : 'Screening Mode'}
+              </p>
+            </div>
+          </div>
+          <div className="mt-4 md:mt-0 text-right">
+            <div className="text-[10px] font-black text-slate-500 uppercase mb-1">MoCA Score</div>
+            <div className="text-3xl font-black text-blue-400 font-mono tracking-tighter leading-none">
+              {calculateMoCATotal()}<span className="text-slate-600 text-base">/30</span>
+            </div>
+          </div>
+        </header>
+
+        <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
+          {/* Sidebar */}
+          <nav className="w-full lg:w-64 bg-slate-100 border-r border-slate-200 p-3 space-y-1 overflow-y-auto shrink-0 h-48 lg:h-auto">
+            {sidebarTabs.map((sec, idx) => (
+              <button
+                key={sec.id}
+                onClick={() => { setActiveTab(idx); setShowAnalysis(false); }}
+                className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all font-bold text-xs ${
+                  activeTab === idx && !showAnalysis ? 'bg-white shadow-md text-blue-600 border border-slate-200' : 'text-slate-500 hover:bg-slate-200'
+                }`}
+              >
+                {sec.icon}
+                <span className="truncate">{sec.lobe}</span>
+              </button>
+            ))}
+            <div className="pt-6 px-1">
+              <button 
+                onClick={() => setShowAnalysis(true)}
+                className={`w-full p-3 rounded-xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${
+                  showAnalysis ? 'bg-blue-600 text-white shadow-xl' : 'bg-slate-800 text-white hover:bg-black'
+                }`}
+              >
+                <Sparkles size={16} /> Generate AI Report
+              </button>
+            </div>
+          </nav>
+
+          {/* Main Content */}
+          <main 
+            ref={mainContentRef}
+            className="flex-1 p-6 md:p-10 bg-white overflow-y-auto scroll-smooth"
+          >
+            {!showAnalysis ? (
+              <div className="animate-in fade-in slide-in-from-right-2 duration-200 pb-20">
+                <div className="flex items-center gap-3 mb-6">
+                   <div className="h-8 w-1 bg-blue-600 rounded-full"></div>
+                   <h2 className="text-2xl font-black text-slate-900 tracking-tight">{sidebarTabs[activeTab].lobe}</h2>
+                </div>
+
+                {/* --- RENDER LOGIC BASED ON TAB INDEX --- */}
+
+                {/* TAB 0: GENERAL NEURO EXAM */}
+                {activeTab === 0 && (
+                  <div className="space-y-6">
+                    <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 mb-6">
+                      <h3 className="flex items-center gap-2 font-black text-blue-800 uppercase text-xs tracking-widest mb-2">
+                        <Info size={14} /> Instructions
+                      </h3>
+                      <p className="text-xs text-blue-900 leading-relaxed">
+                        Complete the patient history first. The physical exam fields are pre-populated with "Normal" findings; edit only to document abnormalities.
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                       {/* REASON FOR EXAM MOVED HERE */}
+                       <div className="md:col-span-2">
+                          <label className="text-[10px] font-black uppercase text-blue-600 mb-1 block flex items-center gap-2">
+                            <History size={12} /> Reason for Exam / HPI
+                          </label>
+                          <textarea 
+                             className="w-full p-3 bg-white border-2 border-blue-100 rounded-xl text-sm h-32 focus:border-blue-500 outline-none resize-none transition-shadow focus:shadow-md"
+                             placeholder="e.g. 72yo M presenting with 2-year history of progressive short-term memory loss..."
+                             value={reasonForExam}
+                             onChange={(e) => setReasonForExam(e.target.value)}
+                          />
+                       </div>
+
+                       {/* General Appearance */}
+                       <div className="md:col-span-2">
+                          <label className="text-[10px] font-black uppercase text-slate-500 mb-1 block">General Appearance</label>
+                          <textarea 
+                             className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm h-24 focus:border-blue-500 outline-none resize-none transition-shadow focus:shadow-md"
+                             placeholder="e.g. Disheveled, poor hygiene, dressed inappropriately for weather..."
+                             value={genAppearance}
+                             onChange={(e) => setGenAppearance(e.target.value)}
+                          />
+                       </div>
+
+                       {/* Cranial Nerves */}
+                       <div className="md:col-span-2">
+                          <label className="text-[10px] font-black uppercase text-slate-500 mb-1 block">Cranial Nerves (II-XII)</label>
+                          <textarea 
+                             className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs h-48 font-mono leading-relaxed focus:border-blue-500 outline-none resize-none transition-shadow focus:shadow-md"
+                             value={cnExam}
+                             onChange={(e) => setCnExam(e.target.value)}
+                          />
+                       </div>
+
+                       {/* Motor */}
+                       <div className="md:col-span-2">
+                          <label className="text-[10px] font-black uppercase text-slate-500 mb-1 block">Motor / Tone / Bulk</label>
+                          <textarea 
+                             className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs h-64 font-mono leading-relaxed focus:border-blue-500 outline-none resize-none transition-shadow focus:shadow-md"
+                             value={motorExam}
+                             onChange={(e) => setMotorExam(e.target.value)}
+                          />
+                       </div>
+
+                       {/* Coordination */}
+                       <div>
+                          <label className="text-[10px] font-black uppercase text-slate-500 mb-1 block">Coordination</label>
+                          <textarea 
+                             className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs h-24 font-mono leading-relaxed focus:border-blue-500 outline-none resize-none transition-shadow focus:shadow-md"
+                             value={coordExam}
+                             onChange={(e) => setCoordExam(e.target.value)}
+                          />
+                       </div>
+
+                       {/* Sensory */}
+                       <div>
+                          <label className="text-[10px] font-black uppercase text-slate-500 mb-1 block">Sensory</label>
+                          <textarea 
+                             className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs h-24 font-mono leading-relaxed focus:border-blue-500 outline-none resize-none transition-shadow focus:shadow-md"
+                             value={sensoryExam}
+                             onChange={(e) => setSensoryExam(e.target.value)}
+                          />
+                       </div>
+
+                       {/* Reflexes */}
+                       <div>
+                          <label className="text-[10px] font-black uppercase text-slate-500 mb-1 block">Reflexes</label>
+                          <textarea 
+                             className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs h-40 font-mono leading-relaxed focus:border-blue-500 outline-none resize-none transition-shadow focus:shadow-md"
+                             value={reflexExam}
+                             onChange={(e) => setReflexExam(e.target.value)}
+                          />
+                       </div>
+
+                       {/* Gait */}
+                       <div>
+                          <label className="text-[10px] font-black uppercase text-slate-500 mb-1 block">Gait & Station</label>
+                          <textarea 
+                             className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs h-40 font-mono leading-relaxed focus:border-blue-500 outline-none resize-none transition-shadow focus:shadow-md"
+                             value={gaitExam}
+                             onChange={(e) => setGaitExam(e.target.value)}
+                          />
+                       </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* TAB 1: MOCA SCREENING */}
+                {activeTab === 1 && (
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {MOCA_SECTIONS.map((section) => (
+                        <div key={section.id} className="bg-slate-50 rounded-2xl p-5 border border-slate-100">
+                          <h3 className="text-[10px] font-black uppercase tracking-widest text-blue-600 mb-4 flex items-center gap-2">
+                            <Activity size={12} /> {section.title}
+                          </h3>
+                          <div className="space-y-3">
+                            {section.tests.map(test => (
+                              <div key={test.id} className="bg-white border border-slate-200 p-4 rounded-xl flex justify-between items-start gap-3">
+                                <div className="flex-1">
+                                  <h4 className="font-bold text-slate-800 text-sm">{test.label}</h4>
+                                  <p className="text-[11px] text-slate-500 italic mt-1 leading-tight">{test.instructions}</p>
+                                </div>
+                                <div className="flex flex-col items-end gap-1">
+                                  {/* DROPDOWN SELECT (MoCA still uses Numbers) */}
+                                  <select
+                                    value={scores[test.id] || 0}
+                                    onChange={(e) => handleScore(test.id, e.target.value)}
+                                    className="w-16 h-9 pl-2 text-center font-bold bg-slate-50 border-2 border-slate-200 rounded-lg focus:border-blue-500 outline-none text-sm cursor-pointer"
+                                  >
+                                    {[...Array(test.max + 1).keys()].map(n => (
+                                      <option key={n} value={n}>{n}</option>
+                                    ))}
+                                  </select>
+                                  <span className="text-[9px] font-bold text-slate-400 uppercase">Max {test.max}</span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    
+                    {/* MoCA FOOTER: NOTES & IMAGE */}
+                    <div className="mt-8 border-t border-slate-100 pt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="bg-blue-50/50 rounded-2xl p-6 border border-blue-100">
+                        <label className="text-[10px] font-black uppercase text-blue-600 mb-2 block flex items-center gap-2">
+                          <FileText size={12} /> Provider Clinical Notes (MoCA)
+                        </label>
+                        <textarea
+                          className="w-full bg-white border border-slate-200 rounded-xl p-3 text-sm h-32 focus:border-blue-500 outline-none resize-none"
+                          placeholder="e.g. Patient struggled specifically with cube copy, tremor noted during drawing..."
+                          value={mocaNotes}
+                          onChange={(e) => setMocaNotes(e.target.value)}
+                        />
+                      </div>
+                      <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100">
+                        <label className="text-[10px] font-black uppercase text-slate-500 mb-2 block flex items-center gap-2">
+                          <ImageIcon size={12} /> Upload Exam Sheet (For Interpretation)
+                        </label>
+                        
+                        {!mocaImage ? (
+                          <div className="border-2 border-dashed border-slate-300 rounded-xl h-32 flex flex-col items-center justify-center text-slate-400 hover:bg-slate-100 transition-colors relative cursor-pointer group">
+                             <Upload size={24} className="mb-2 group-hover:text-blue-500" />
+                             <span className="text-xs font-bold">Click to Upload Image</span>
+                             <input 
+                               type="file" 
+                               accept="image/*"
+                               onChange={handleImageUpload}
+                               className="absolute inset-0 opacity-0 cursor-pointer"
+                             />
+                          </div>
+                        ) : (
+                          <div className="relative rounded-xl overflow-hidden h-32 border border-slate-200 bg-white flex items-center justify-center">
+                            <img src={mocaImage} alt="Exam" className="h-full w-auto object-contain" />
+                            <button 
+                              onClick={() => setMocaImage(null)}
+                              className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
+                            >
+                              <RotateCcw size={12} />
+                            </button>
+                          </div>
+                        )}
+                        <p className="text-[10px] text-slate-400 mt-2 italic text-center">
+                          Upload drawing (Clock, Cube, Trails) for visual reference.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* TABS 2+: LOCALIZATION EXAMS */}
+                {activeTab > 1 && (
+                  <div className="grid grid-cols-1 gap-4">
+                    {EXAM_SECTIONS[activeTab - 2].tests.map((test) => (
+                      <div key={test.id} className="group border border-slate-200 rounded-xl p-5 hover:border-blue-300 transition-all relative bg-white">
+                        <div className="flex justify-between items-start gap-4">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                               <h3 className="text-base font-bold text-slate-800">{test.label}</h3>
+                               <button onClick={() => setShowInstr(showInstr === test.id ? null : test.id)} className="text-blue-500 hover:bg-blue-50 p-1 rounded-full"><Info size={16} /></button>
+                            </div>
+                            <p className="text-xs text-slate-500 font-medium italic">{test.clinicalNote}</p>
+                            
+                            {/* OBSERVATIONS / NUANCE INPUT */}
+                            <div className="mt-3 relative">
+                               <div className="absolute top-3 left-3 pointer-events-none text-slate-300">
+                                  <PenTool size={14} />
+                               </div>
+                               <textarea
+                                 className="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 pl-9 pr-3 text-xs focus:border-blue-500 outline-none resize-none h-16 transition-all focus:bg-white"
+                                 placeholder="Specific observations (e.g., 'Missed left side', 'Perseverated on 3')..."
+                                 value={testNotes[test.id] || ''}
+                                 onChange={(e) => handleTestNote(test.id, e.target.value)}
+                               />
+                            </div>
+                            
+                            {/* Expanded Instructions */}
+                            {(showInstr === test.id || true) && (
+                              <div className="mt-3 p-3 bg-slate-50 rounded-lg border border-slate-100 text-xs text-slate-600 leading-relaxed">
+                                <span className="font-bold text-blue-600 uppercase text-[10px] block mb-1">Instruction:</span>
+                                {test.instructions}
+                                {test.norm && <div className="mt-2 text-slate-400 border-t border-slate-200 pt-1 font-semibold">{test.norm}</div>}
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="flex flex-col items-end shrink-0 gap-1">
+                             {/* DROPDOWN SELECT (PASS / FAIL / NOT PERFORMED) */}
+                             <select
+                               value={scores[test.id] || ""}
+                               onChange={(e) => handleScore(test.id, e.target.value)}
+                               className={`w-32 p-2 border-2 rounded-xl text-center font-bold text-sm focus:outline-none cursor-pointer ${
+                                 scores[test.id] === 'Pass' ? 'bg-green-50 border-green-200 text-green-700' :
+                                 scores[test.id] === 'Fail' ? 'bg-red-50 border-red-200 text-red-700' :
+                                 'bg-white border-slate-200 text-slate-700'
+                               }`}
+                             >
+                               <option value="">Select...</option>
+                               <option value="Pass">Pass</option>
+                               <option value="Fail">Fail</option>
+                               <option value="Not Performed">Not Performed</option>
+                             </select>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                 {/* Navigation Footer */}
+                 <div className="mt-10 pt-6 border-t border-slate-200 flex justify-between items-center">
+                    <button 
+                      onClick={() => {
+                        if (activeTab > 0) setActiveTab(t => t - 1);
+                        else setExamMode(null);
+                      }}
+                      className="flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-slate-500 hover:bg-slate-100 transition-colors"
+                    >
+                      <ChevronLeft size={20} />
+                      {activeTab === 0 ? "Back to Menu" : "Previous"}
+                    </button>
+                    
+                    <button 
+                      onClick={() => {
+                        if (activeTab < sidebarTabs.length - 1) setActiveTab(t => t + 1);
+                        else setShowAnalysis(true);
+                      }}
+                      className="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 transition-all shadow-lg"
+                    >
+                      {activeTab === sidebarTabs.length - 1 ? "Finish & Report" : "Next Section"}
+                      <ChevronRight size={20} />
+                    </button>
+                 </div>
+              </div>
+            ) : (
+              /* REPORT GENERATOR VIEW */
+              <div className="h-full flex flex-col animate-in fade-in zoom-in-95 duration-300">
+                <div className="flex justify-between items-center mb-6 border-b pb-4 shrink-0">
+                  <h2 className="text-2xl font-black text-slate-900">Final Report</h2>
+                  <div className="flex gap-2">
+                     <button onClick={() => { setShowAnalysis(false); setReportText(''); generateAIReport(); }} className="flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-xl font-bold text-sm hover:bg-blue-200 transition-all">
+                       <RotateCcw size={16} /> Regenerate
+                     </button>
+                     <button onClick={copyReport} className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-sm transition-all ${copied ? 'bg-green-500 text-white' : 'bg-slate-900 text-white hover:bg-slate-800'}`}>
+                        {copied ? <Check size={16} /> : <Copy size={16} />}
+                        {copied ? 'Copied!' : 'Copy'}
+                     </button>
+                     <button onClick={() => setShowAnalysis(false)} className="flex items-center gap-2 px-4 py-2 text-slate-500 font-bold hover:bg-slate-100 rounded-lg transition-colors">
+                       <ChevronLeft size={20} /> Back to Exam
+                     </button>
+                  </div>
+                </div>
+
+                <div className="flex-1 bg-slate-50 border border-slate-200 rounded-xl p-4 overflow-hidden flex flex-col relative">
+                  {isGenerating && (
+                    <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center z-10">
+                      <Loader2 className="w-10 h-10 text-blue-600 animate-spin mb-3" />
+                      <p className="text-sm font-black text-slate-600 uppercase tracking-widest animate-pulse">Consulting AI Neurologist...</p>
+                    </div>
+                  )}
+                  
+                  <label className="text-[10px] font-black uppercase text-slate-400 mb-2 block flex items-center gap-2">
+                    <Sparkles size={12} className="text-blue-500" /> AI-Generated Clinical Note (Editable)
+                  </label>
+                  <textarea 
+                    className="flex-1 w-full bg-white border border-slate-200 rounded-lg p-6 text-sm font-mono text-slate-700 leading-relaxed focus:border-blue-500 outline-none resize-none"
+                    value={reportText}
+                    onChange={(e) => setReportText(e.target.value)}
+                  />
+                </div>
+              </div>
+            )}
+          </main>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default App;
