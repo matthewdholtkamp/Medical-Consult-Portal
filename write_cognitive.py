@@ -1,4 +1,5 @@
-<!DOCTYPE html>
+
+file_content = r"""<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -593,7 +594,7 @@ No tremor, bradykinesia, dystonic posturing, dyskinesias, chorea, myoclonus.`;
         });
 
         // --- AI REPORT GENERATION ---
-        
+
         window.showAnalysisView = () => {
             document.getElementById('inputView').classList.add('hidden');
             document.getElementById('reportView').classList.remove('hidden');
@@ -709,4 +710,7 @@ Format with clear Markdown headings. Professional medical terminology.
 
     </script>
 </body>
-</html>
+</html>"""
+
+with open("Cognitive.html", "w") as f:
+    f.write(file_content)
