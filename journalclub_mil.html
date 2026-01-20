@@ -109,6 +109,42 @@
             color: #ffdadf;
         }
 
+        /* Medical Data Grid - Modern Table Styles */
+        .prose-invert table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 2em 0;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(22, 33, 62, 0.5);
+            font-size: 0.95rem;
+        }
+        .prose-invert th {
+            background: rgba(233, 69, 96, 0.2); /* Accent color tint */
+            color: #ffdadf;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+            padding: 14px 16px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .prose-invert td {
+            padding: 14px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: #d1d5db;
+            vertical-align: top;
+        }
+        .prose-invert tr:last-child td {
+            border-bottom: none;
+        }
+        .prose-invert tr:nth-child(even) {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
         /* Tiered Alert System */
         .prose-invert blockquote.quote-red {
             border-left-color: #ef4444;
@@ -625,12 +661,15 @@
                 [Provide a 2-sentence bottom-line answer to the operational question (BLUF).]
 
                 ## Operational Evidence Matrix
-                | Source | Year | Evidence Level | Key Recommendation/Finding | Operational Impact |
+                | Source | Year | Evid. Lvl / SOR | Key Recommendation | Operational Impact |
                 |---|---|---|---|---|
-                | **CPG:** [Name] | [YYYY] | [CPG] | [Recommendation] | [Role 1/PFC] |
-                | **CPG:** [Name] | [YYYY] | [CPG] | [Recommendation] | [Role 1/PFC] |
+                | **CPG:** [Name] | [YYYY] | [CPG/SOR] | [Recommendation] | [Role 1/PFC] |
+                | **CPG:** [Name] | [YYYY] | [CPG/SOR] | [Recommendation] | [Role 1/PFC] |
                 | **Recent:** [Name] | [YYYY] | [TAG] | [Result] | [Protocol Change] |
                 | **Recent:** [Name] | [YYYY] | [TAG] | [Result] | [Protocol Change] |
+
+                **INSTRUCTION FOR SOR (Strength of Recommendation):**
+                - For CPGs, include the Strength of Recommendation (e.g., "SOR A", "Strong") if available.
 
                 **INSTRUCTION FOR [TAG]:** You MUST use one of these exact tags for the Evidence Level column:
                 - `[CPG]` for JTS Guidelines (Blue).
@@ -643,12 +682,14 @@
 
                 ## Key CPG/Doctrine 1: [CPG Name/Number]
                 * **Publication Date:** [YYYY]
+                * **Strength of Recommendation:** [e.g. Strong/Weak/SOR A]
                 * **Key Recommendation:**
                 * **Operational Relevance:** [Role 1/PFC Application]
                 * **Link:** [Click to Search](https://www.google.com/search?q=JTS+CPG+[Topic])
 
                 ## Key CPG/Doctrine 2: [CPG Name/Number]
                 * **Publication Date:** [YYYY]
+                * **Strength of Recommendation:** [e.g. Strong/Weak/SOR A]
                 * **Key Recommendation:**
                 * **Operational Relevance:** [Role 1/PFC Application]
                 * **Link:** [Click to Search](https://www.google.com/search?q=JTS+CPG+[Topic])

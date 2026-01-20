@@ -109,6 +109,42 @@
             color: #ffdadf;
         }
 
+        /* Medical Data Grid - Modern Table Styles */
+        .prose-invert table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 2em 0;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(22, 33, 62, 0.5);
+            font-size: 0.95rem;
+        }
+        .prose-invert th {
+            background: rgba(233, 69, 96, 0.2); /* Accent color tint */
+            color: #ffdadf;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+            padding: 14px 16px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .prose-invert td {
+            padding: 14px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: #d1d5db;
+            vertical-align: top;
+        }
+        .prose-invert tr:last-child td {
+            border-bottom: none;
+        }
+        .prose-invert tr:nth-child(even) {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
         /* Tiered Alert System */
         .prose-invert blockquote.quote-red {
             border-left-color: #ef4444;
@@ -626,12 +662,16 @@
                 [Provide a 2-sentence bottom-line answer to the clinical question.]
 
                 ## Evidence Matrix
-                | Trial | Year | Evidence Level | Key Findings | Clinical Impact |
+                | Trial | Year | Evidence Level | NNT/NNH | Key Findings |
                 |---|---|---|---|---|
-                | **Landmark:** [Name] | [YYYY] | [TAG] (N=[N]) | [Result] | [Impact] |
-                | **Landmark:** [Name] | [YYYY] | [TAG] (N=[N]) | [Result] | [Impact] |
-                | **Recent:** [Name] | [YYYY] | [TAG] (N=[N]) | [Result] | [Impact] |
-                | **Recent:** [Name] | [YYYY] | [TAG] (N=[N]) | [Result] | [Impact] |
+                | **Landmark:** [Name] | [YYYY] | [TAG] (N=[N]) | [Value/NA] | [Result] |
+                | **Landmark:** [Name] | [YYYY] | [TAG] (N=[N]) | [Value/NA] | [Result] |
+                | **Recent:** [Name] | [YYYY] | [TAG] (N=[N]) | [Value/NA] | [Result] |
+                | **Recent:** [Name] | [YYYY] | [TAG] (N=[N]) | [Value/NA] | [Result] |
+
+                **INSTRUCTION FOR NNT/NNH:**
+                - Calculate or extract "Number Needed to Treat" (NNT) or "Number Needed to Harm" (NNH) for the primary outcome if data permits.
+                - If not applicable or not reported, write "N/A".
 
                 **INSTRUCTION FOR [TAG]:** You MUST use one of these exact tags for the Evidence Level column:
                 - `[RCT]` for Randomized Controlled Trials (Green).
@@ -648,7 +688,7 @@
                 * **Design/PICO:**
                 * **Evidence Level:** [e.g. High (RCT), Moderate (Observational)]
                 * **Results:**
-                * **Limitations:**
+                * **Risk of Bias:** [Low/Moderate/High] - [Brief Reason]
                 * **Link:** [Click to Search](https://www.google.com/search?q=[Trial Name]+[Year])
                 
                 ## Landmark Trial 2: [Trial Name/Acronym]
@@ -656,7 +696,7 @@
                 * **Design/PICO:**
                 * **Evidence Level:** [e.g. High (RCT), Moderate (Observational)]
                 * **Results:**
-                * **Limitations:**
+                * **Risk of Bias:** [Low/Moderate/High] - [Brief Reason]
                 * **Link:** [Click to Search](https://www.google.com/search?q=[Trial Name]+[Year])
                 
                 ## Recent Major Trial 1: [Trial Name]
