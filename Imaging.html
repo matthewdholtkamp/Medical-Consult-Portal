@@ -426,7 +426,9 @@
                 2.  **Anatomical Inventory:** Systematically identify all visible structures.
                 3.  **Observation:** Note positive and pertinent negative findings.
                 4.  **Guideline Verification:** Cross-reference findings with standard criteria (e.g., Fleischner, ACR, Ottawa).
-                5.  **Acuity Assignment:** Determine if findings are Routine, Urgent, or Critical.
+                5.  **Differential Generation:** Generate a ranked list of diagnoses with likelihood estimates.
+                6.  **Self-Correction:** Review findings for consistency and ensure no hallucinations.
+                7.  **Acuity Assignment:** Determine if findings are Routine, Urgent, or Critical.
 
                 ### MANDATORY OUTPUT FORMAT (Markdown):
                 Start the response EXACTLY with this tag:
@@ -447,9 +449,13 @@
                 *   **[Structure/System]:** [Detailed description. Be precise with measurements if applicable.]
                 *   **[Structure/System]:** [Pertinent negatives.]
 
+                ### DIFFERENTIAL DIAGNOSIS
+                | Diagnosis | Likelihood | Rationale |
+                | :--- | :--- | :--- |
+                | [Dx Name] | [High/Mod/Low] | [Brief evidence from findings] |
+
                 ### IMPRESSION
-                1.  [Primary Diagnosis / Finding]
-                2.  [Secondary Findings]
+                [Synthesize the findings and top differential into a final conclusion.]
 
                 **Recommendation:**
                 *   [Specific follow-up or clinical correlation]
