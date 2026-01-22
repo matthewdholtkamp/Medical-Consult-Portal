@@ -78,7 +78,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
             
             <!-- LEFT: INPUT PANELS -->
-            <div class="lg:col-span-5 space-y-6">
+            <div class="lg:col-span-5 space-y-6 lg:sticky lg:top-32 lg:self-start">
                 <!-- Drop Zone -->
                 <div id="dropZone" class="group relative bg-gemini-800 border-2 border-dashed border-slate-700 rounded-[2rem] p-10 text-center transition-all cursor-pointer hover:border-indigo-500 hover:bg-indigo-500/5">
                     <input type="file" id="fileInput" class="hidden" accept="image/*,video/*" multiple>
@@ -450,6 +450,12 @@
                 ### IMPRESSION
                 1.  [Primary Diagnosis / Finding]
                 2.  [Secondary Findings]
+
+                ### DIFFERENTIAL DIAGNOSIS
+                | Diagnosis | Likelihood | Rationale |
+                | :--- | :--- | :--- |
+                | [Dx 1] | [High/Med/Low] | [Evidence from image] |
+                | [Dx 2] | [High/Med/Low] | [Evidence from image] |
 
                 **Recommendation:**
                 *   [Specific follow-up or clinical correlation]
