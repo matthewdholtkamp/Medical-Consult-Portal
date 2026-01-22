@@ -170,6 +170,47 @@
             color: #93c5fd;
         }
 
+        /* Medical Data Tables - Modernized for 2025 */
+        .prose-invert table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 2em 0;
+            background: rgba(30, 41, 59, 0.5); /* Slate-800/50 */
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .prose-invert th {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fbbf24; /* Amber-400 */
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .prose-invert td {
+            padding: 14px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: #e2e8f0; /* Slate-200 */
+            font-size: 0.95rem;
+            vertical-align: middle;
+        }
+        .prose-invert tr:last-child td {
+            border-bottom: none;
+        }
+        .prose-invert tr:nth-child(even) {
+            background: rgba(255, 255, 255, 0.02);
+        }
+        .prose-invert tr:hover td {
+            background: rgba(255, 255, 255, 0.05);
+            transition: background 0.15s ease;
+        }
+
         /* Evidence Level Badges - Medical Dashboard Style */
         .badge {
             display: inline-flex;
@@ -403,9 +444,9 @@
             </div>
 
             <!-- Content Areas -->
-            <div id="summaryContent" class="tab-content prose prose-invert max-w-none text-gray-300"></div>
-            <div id="planContent" class="tab-content hidden prose prose-invert max-w-none text-gray-300"></div>
-            <div id="refsContent" class="tab-content hidden font-mono text-sm bg-black/30 p-4 rounded text-gray-400 whitespace-pre-wrap"></div>
+            <div id="summaryContent" class="tab-content prose prose-invert max-w-none text-gray-300 overflow-x-auto"></div>
+            <div id="planContent" class="tab-content hidden prose prose-invert max-w-none text-gray-300 overflow-x-auto"></div>
+            <div id="refsContent" class="tab-content hidden font-mono text-sm bg-black/30 p-4 rounded text-gray-400 whitespace-pre-wrap overflow-x-auto"></div>
 
             <div class="mt-8 flex justify-center">
                 <button id="btnBackToRefineBottom" class="text-slate-500 hover:text-white underline text-sm flex items-center">
