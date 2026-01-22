@@ -232,6 +232,11 @@
         .badge-cohort { background: rgba(245, 158, 11, 0.2); color: #fcd34d; border-color: rgba(245, 158, 11, 0.4); } /* Amber */
         .badge-case { background: rgba(107, 114, 128, 0.2); color: #d1d5db; border-color: rgba(107, 114, 128, 0.4); } /* Gray */
         
+        /* Strength of Recommendation Badges */
+        .badge-strong { background: rgba(16, 185, 129, 0.4); color: #ffffff; border: 1px solid rgba(16, 185, 129, 0.6); box-shadow: 0 0 8px rgba(16, 185, 129, 0.2); }
+        .badge-weak { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px dashed rgba(245, 158, 11, 0.5); }
+        .badge-expert { background: rgba(59, 130, 246, 0.2); color: #93c5fd; border: 1px dotted rgba(59, 130, 246, 0.4); }
+
         /* Loading Animation */
         .pulse-ring {
             display: inline-block;
@@ -723,6 +728,11 @@
                 - `[Obs]` for Observational/Retrospective (Amber).
                 - `[Review]` for Reviews/White Papers (Gray).
 
+                **INSTRUCTION FOR [SOR]:** You MUST use one of these tags based on JTS/DoD strength of recommendation:
+                - `[Strong]` for directives/standards where benefits clearly outweigh risks.
+                - `[Weak]` for suggestions where evidence is less certain.
+                - `[Expert]` for consensus-based recommendations without high-level evidence.
+
                 ## Introduction
                 Brief tactical/clinical context.
 
@@ -855,7 +865,11 @@
                     '\\[CPG\\]': '<span class="badge badge-guide">JTS CPG</span>',
                     '\\[RCT\\]': '<span class="badge badge-rct">RCT</span>',
                     '\\[Obs\\]': '<span class="badge badge-cohort">Observational</span>',
-                    '\\[Review\\]': '<span class="badge badge-case">Review</span>'
+                    '\\[Review\\]': '<span class="badge badge-case">Review</span>',
+                    // Strength of Recommendation
+                    '\\[Strong\\]': '<span class="badge badge-strong">Strong Rec</span>',
+                    '\\[Weak\\]': '<span class="badge badge-weak">Weak Rec</span>',
+                    '\\[Expert\\]': '<span class="badge badge-expert">Expert Opinion</span>'
                 };
 
                 Object.keys(badgeMap).forEach(key => {

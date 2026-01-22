@@ -232,6 +232,11 @@
         .badge-cohort { background: rgba(245, 158, 11, 0.2); color: #fcd34d; border-color: rgba(245, 158, 11, 0.4); } /* Amber */
         .badge-case { background: rgba(107, 114, 128, 0.2); color: #d1d5db; border-color: rgba(107, 114, 128, 0.4); } /* Gray */
         
+        /* Strength of Recommendation Badges */
+        .badge-strong { background: rgba(16, 185, 129, 0.4); color: #ffffff; border: 1px solid rgba(16, 185, 129, 0.6); box-shadow: 0 0 8px rgba(16, 185, 129, 0.2); }
+        .badge-conditional { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px dashed rgba(245, 158, 11, 0.5); }
+        .badge-weak { background: rgba(100, 116, 139, 0.2); color: #cbd5e1; border: 1px dotted rgba(100, 116, 139, 0.4); }
+
         /* Loading Animation */
         .pulse-ring {
             display: inline-block;
@@ -711,12 +716,12 @@
                 [Provide a 2-sentence bottom-line answer to the clinical question.]
 
                 ## Evidence Matrix
-                | Trial | Year | Evidence Level | Key Findings | NNT/NNH | Risk of Bias | Clinical Impact |
-                |---|---|---|---|---|---|---|
-                | **Landmark:** [Name] | [YYYY] | [TAG] (N=[N]) | [Result] | [NNT/H] | [Low/High/Unclear] | [Impact] |
-                | **Landmark:** [Name] | [YYYY] | [TAG] (N=[N]) | [Result] | [NNT/H] | [Low/High/Unclear] | [Impact] |
-                | **Recent:** [Name] | [YYYY] | [TAG] (N=[N]) | [Result] | [NNT/H] | [Low/High/Unclear] | [Impact] |
-                | **Recent:** [Name] | [YYYY] | [TAG] (N=[N]) | [Result] | [NNT/H] | [Low/High/Unclear] | [Impact] |
+                | Trial | Year | Evidence Level | Strength of Rec (SOR) | Key Findings | NNT/NNH | Risk of Bias | Clinical Impact |
+                |---|---|---|---|---|---|---|---|
+                | **Landmark:** [Name] | [YYYY] | [TAG] (N=[N]) | [SOR] | [Result] | [NNT/H] | [Low/High/Unclear] | [Impact] |
+                | **Landmark:** [Name] | [YYYY] | [TAG] (N=[N]) | [SOR] | [Result] | [NNT/H] | [Low/High/Unclear] | [Impact] |
+                | **Recent:** [Name] | [YYYY] | [TAG] (N=[N]) | [SOR] | [Result] | [NNT/H] | [Low/High/Unclear] | [Impact] |
+                | **Recent:** [Name] | [YYYY] | [TAG] (N=[N]) | [SOR] | [Result] | [NNT/H] | [Low/High/Unclear] | [Impact] |
 
                 **INSTRUCTION FOR [TAG]:** You MUST use one of these exact tags for the Evidence Level column:
                 - `[RCT]` for Randomized Controlled Trials (Green).
@@ -724,6 +729,10 @@
                 - `[Guide]` for Clinical Guidelines (Blue).
                 - `[Cohort]` for Observational/Retrospective (Amber).
                 - `[Case]` for Case Series/Reports (Gray).
+
+                **INSTRUCTION FOR [SOR]:** You MUST use one of these tags based on GRADE:
+                - `[Strong]` for high-certainty evidence where benefits clearly outweigh risks.
+                - `[Conditional]` for lower certainty or when patient values/preferences vary significantly.
                 
                 ## Introduction
                 Brief clinical context.
@@ -862,7 +871,11 @@
                     '\\[MA\\]': '<span class="badge badge-meta">Meta-Analysis</span>',
                     '\\[Guide\\]': '<span class="badge badge-guide">Guideline</span>',
                     '\\[Cohort\\]': '<span class="badge badge-cohort">Cohort</span>',
-                    '\\[Case\\]': '<span class="badge badge-case">Case Series</span>'
+                    '\\[Case\\]': '<span class="badge badge-case">Case Series</span>',
+                    // Strength of Recommendation
+                    '\\[Strong\\]': '<span class="badge badge-strong">Strong Rec</span>',
+                    '\\[Conditional\\]': '<span class="badge badge-conditional">Conditional</span>',
+                    '\\[Weak\\]': '<span class="badge badge-weak">Weak Rec</span>'
                 };
 
                 Object.keys(badgeMap).forEach(key => {
