@@ -11,6 +11,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <!-- MathJax for rendering medical formulas -->
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <!-- Marked.js for Markdown rendering -->
@@ -236,6 +239,12 @@
         .badge-strong { background: rgba(16, 185, 129, 0.4); color: #ffffff; border: 1px solid rgba(16, 185, 129, 0.6); box-shadow: 0 0 8px rgba(16, 185, 129, 0.2); }
         .badge-weak { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px dashed rgba(245, 158, 11, 0.5); }
         .badge-expert { background: rgba(59, 130, 246, 0.2); color: #93c5fd; border: 1px dotted rgba(59, 130, 246, 0.4); }
+
+        /* Doctrine Status Badges (New 2025) */
+        .badge-doctrine { font-size: 0.85rem; padding: 0.25rem 0.75rem; margin-right: 0.75rem; border-width: 1px; vertical-align: middle; }
+        .badge-doctrine-standard { background: rgba(37, 99, 235, 0.15); color: #60a5fa; border-color: #2563eb; } /* Blue */
+        .badge-doctrine-emerging { background: rgba(147, 51, 234, 0.15); color: #c084fc; border-color: #9333ea; border-style: dotted; } /* Purple */
+        .badge-doctrine-not-rec { background: rgba(239, 68, 68, 0.15); color: #f87171; border-color: #dc2626; } /* Red */
 
         /* Loading Animation */
         .pulse-ring {
@@ -712,7 +721,12 @@
                 # Operational Journal Club Summary
 
                 ## Executive Summary
-                [Provide a 2-sentence bottom-line answer to the operational question (BLUF).]
+                [DOCTRINE: TAG] [Provide a 2-sentence bottom-line answer to the operational question (BLUF).]
+
+                **INSTRUCTION FOR [DOCTRINE: TAG]:** Start the Executive Summary with exactly one of:
+                - `[DOCTRINE: STANDARD]` (Core CPG/TCCC Protocol)
+                - `[DOCTRINE: EMERGING]` (Promising evidence, not yet standard)
+                - `[DOCTRINE: NOT RECOMMENDED]` (Against current doctrine or dangerous)
 
                 ## Operational Evidence Matrix
                 | Source | Year | Evidence Level | Strength of Rec (SOR) | Key Recommendation/Finding | Operational Impact |
@@ -869,7 +883,11 @@
                     // Strength of Recommendation
                     '\\[Strong\\]': '<span class="badge badge-strong">Strong Rec</span>',
                     '\\[Weak\\]': '<span class="badge badge-weak">Weak Rec</span>',
-                    '\\[Expert\\]': '<span class="badge badge-expert">Expert Opinion</span>'
+                    '\\[Expert\\]': '<span class="badge badge-expert">Expert Opinion</span>',
+                    // Doctrine Status
+                    '\\[DOCTRINE: STANDARD\\]': '<span class="badge badge-doctrine badge-doctrine-standard"><i class="fas fa-shield-alt mr-1"></i> Standard Protocol</span>',
+                    '\\[DOCTRINE: EMERGING\\]': '<span class="badge badge-doctrine badge-doctrine-emerging"><i class="fas fa-flask mr-1"></i> Emerging Data</span>',
+                    '\\[DOCTRINE: NOT RECOMMENDED\\]': '<span class="badge badge-doctrine badge-doctrine-not-rec"><i class="fas fa-ban mr-1"></i> Not Recommended</span>'
                 };
 
                 Object.keys(badgeMap).forEach(key => {

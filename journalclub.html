@@ -11,6 +11,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <!-- MathJax for rendering medical formulas -->
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <!-- Marked.js for Markdown rendering -->
@@ -236,6 +239,13 @@
         .badge-strong { background: rgba(16, 185, 129, 0.4); color: #ffffff; border: 1px solid rgba(16, 185, 129, 0.6); box-shadow: 0 0 8px rgba(16, 185, 129, 0.2); }
         .badge-conditional { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px dashed rgba(245, 158, 11, 0.5); }
         .badge-weak { background: rgba(100, 116, 139, 0.2); color: #cbd5e1; border: 1px dotted rgba(100, 116, 139, 0.4); }
+
+        /* Consensus Status Badges (New 2025) */
+        .badge-consensus { font-size: 0.85rem; padding: 0.25rem 0.75rem; margin-right: 0.75rem; border-width: 1px; vertical-align: middle; }
+        .badge-consensus-strong { background: rgba(16, 185, 129, 0.15); color: #34d399; border-color: #059669; }
+        .badge-consensus-conditional { background: rgba(251, 191, 36, 0.15); color: #fbbf24; border-color: #d97706; border-style: dashed; }
+        .badge-consensus-controversial { background: rgba(239, 68, 68, 0.15); color: #f87171; border-color: #dc2626; }
+        .badge-consensus-evolving { background: rgba(147, 51, 234, 0.15); color: #c084fc; border-color: #9333ea; border-style: dotted; }
 
         /* Loading Animation */
         .pulse-ring {
@@ -713,7 +723,13 @@
                 # Journal Club Summary
 
                 ## Executive Summary
-                [Provide a 2-sentence bottom-line answer to the clinical question.]
+                [CONSENSUS: TAG] [Provide a 2-sentence bottom-line answer to the clinical question.]
+
+                **INSTRUCTION FOR [CONSENSUS: TAG]:** Start the Executive Summary with exactly one of:
+                - `[CONSENSUS: STRONG]` (High certainty, broad agreement)
+                - `[CONSENSUS: CONDITIONAL]` (Moderate certainty, depends on patient factors)
+                - `[CONSENSUS: CONTROVERSIAL]` (Conflicting data, no agreement)
+                - `[CONSENSUS: EVOLVING]` (New emerging data, not yet standard)
 
                 ## Evidence Matrix
                 | Trial | Year | Evidence Level | Strength of Rec (SOR) | Key Findings | NNT/NNH | Risk of Bias | Clinical Impact |
@@ -875,7 +891,12 @@
                     // Strength of Recommendation
                     '\\[Strong\\]': '<span class="badge badge-strong">Strong Rec</span>',
                     '\\[Conditional\\]': '<span class="badge badge-conditional">Conditional</span>',
-                    '\\[Weak\\]': '<span class="badge badge-weak">Weak Rec</span>'
+                    '\\[Weak\\]': '<span class="badge badge-weak">Weak Rec</span>',
+                    // Consensus Status
+                    '\\[CONSENSUS: STRONG\\]': '<span class="badge badge-consensus badge-consensus-strong"><i class="fas fa-check-circle mr-1"></i> Strong Consensus</span>',
+                    '\\[CONSENSUS: CONDITIONAL\\]': '<span class="badge badge-consensus badge-consensus-conditional"><i class="fas fa-exclamation-circle mr-1"></i> Conditional</span>',
+                    '\\[CONSENSUS: CONTROVERSIAL\\]': '<span class="badge badge-consensus badge-consensus-controversial"><i class="fas fa-times-circle mr-1"></i> Controversial</span>',
+                    '\\[CONSENSUS: EVOLVING\\]': '<span class="badge badge-consensus badge-consensus-evolving"><i class="fas fa-flask mr-1"></i> Evolving Data</span>'
                 };
 
                 Object.keys(badgeMap).forEach(key => {
