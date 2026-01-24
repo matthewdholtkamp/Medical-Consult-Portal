@@ -716,8 +716,14 @@
 
                 2. Use Google Search to find real citations and DATES.
 
-                OUTPUT FORMAT (Use Markdown). You MUST use the separators |||SECTION_PLAN||| and |||SECTION_REFS||| exactly as written below to separate sections.
+                OUTPUT FORMAT (Use Markdown). You MUST use the separators |||SECTION_THOUGHTS|||, |||SECTION_SUMMARY|||, |||SECTION_PLAN|||, and |||SECTION_REFS||| exactly as written below.
 
+                |||SECTION_THOUGHTS|||
+                1. **Search Strategy:** [Queries used]
+                2. **Doctrine Verification:** [CPGs verified/superseded]
+                3. **Operational Relevance:** [Checked for Role 1/PFC applicability]
+
+                |||SECTION_SUMMARY|||
                 # Operational Journal Club Summary
 
                 ## Executive Summary
@@ -821,54 +827,104 @@
 
                 storedContext = rawText; // Save for follow up
 
-                // DEFENSIVE SPLIT LOGIC
-                let split1 = rawText.split('|||SECTION_PLAN|||');
-                let remaining = "";
+                // ROBUST PARSING LOGIC
+                const sections = { thoughts: "", summary: "", plan: "", refs: "" };
+                const markers = {
+                    thoughts: '|||SECTION_THOUGHTS|||',
+                    summary: '|||SECTION_SUMMARY|||',
+                    plan: '|||SECTION_PLAN|||',
+                    refs: '|||SECTION_REFS|||'
+                };
+
+                function parseSections(text) {
+                     const res = { thoughts: "", summary: "", plan: "", refs: "" };
+                     let temp = text;
+
+                     // Thoughts
+                     if (temp.includes(markers.thoughts)) {
+                         const parts = temp.split(markers.thoughts);
+                         temp = parts[1];
+                         let end = temp.length;
+                         [markers.summary, markers.plan, markers.refs].forEach(t => {
+                             const i = temp.indexOf(t);
+                             if(i !== -1 && i < end) end = i;
+                         });
+                         res.thoughts = temp.substring(0, end).trim();
+                         temp = temp.substring(end);
+                     }
+
+                     // Summary
+                     if (temp.includes(markers.summary)) {
+                         temp = temp.split(markers.summary)[1];
+                     }
+
+                     let sumEnd = temp.length;
+                     [markers.plan, markers.refs].forEach(t => {
+                         const i = temp.indexOf(t);
+                         if(i !== -1 && i < sumEnd) sumEnd = i;
+                     });
+
+                     if (!temp.startsWith(markers.plan) && !temp.startsWith(markers.refs)) {
+                        res.summary = temp.substring(0, sumEnd).trim();
+                     }
+                     temp = temp.substring(sumEnd);
+
+                     // Plan
+                     if (temp.includes(markers.plan)) {
+                         temp = temp.split(markers.plan)[1];
+                         let planEnd = temp.length;
+                         if (temp.indexOf(markers.refs) !== -1) planEnd = temp.indexOf(markers.refs);
+                         res.plan = temp.substring(0, planEnd).trim();
+                         temp = temp.substring(planEnd);
+                     }
+
+                     // Refs
+                     if (temp.includes(markers.refs)) {
+                         res.refs = temp.split(markers.refs)[1].trim();
+                     }
+
+                     return res;
+                }
                 
-                if (split1.length > 1) {
-                    storedSummary = split1[0];
-                    remaining = split1[1];
-                } else {
-                    // Fallback: Try regex for Header
+                let parsed = parseSections(rawText);
+
+                // Fallback for Summary if empty (Old format or missed tags)
+                if (!parsed.summary && !parsed.thoughts && !parsed.plan) {
+                    parsed.summary = rawText;
                     const planMatch = rawText.match(/\n#\s*(Operational Plan|Plan|Management)/i);
                     if (planMatch) {
-                        storedSummary = rawText.substring(0, planMatch.index);
-                        remaining = rawText.substring(planMatch.index + planMatch[0].length);
-                    } else {
-                        // Failed to find plan separator, put everything in summary
-                        storedSummary = rawText;
-                        remaining = "";
+                        parsed.summary = rawText.substring(0, planMatch.index);
+                        parsed.plan = rawText.substring(planMatch.index + planMatch[0].length);
+                        const refMatch = parsed.plan.match(/\n(?:\|\|\|SECTION_REFS\|\|\||#\s*References)/i);
+                        if (refMatch) {
+                            parsed.refs = parsed.plan.substring(refMatch.index + refMatch[0].length);
+                            parsed.plan = parsed.plan.substring(0, refMatch.index);
+                        }
                     }
                 }
 
-                let planText = "";
-                let refsText = "";
+                // Heuristic: If thoughts contain "# Operational Journal Club Summary", split it.
+                if (parsed.thoughts.match(/\n#\s+Operational Journal Club Summary/i)) {
+                    const match = parsed.thoughts.match(/\n#\s+Operational Journal Club Summary/i);
+                    parsed.summary = parsed.thoughts.substring(match.index).trim() + "\n" + parsed.summary;
+                    parsed.thoughts = parsed.thoughts.substring(0, match.index).trim();
+                }
 
-                if (remaining) {
-                    let split2 = remaining.split('|||SECTION_REFS|||');
-                    if (split2.length > 1) {
-                        planText = split2[0];
-                        refsText = split2[1];
-                    } else {
-                         // Fallback: Try regex for Refs
-                         const refMatch = remaining.match(/\n(?:\|\|\|SECTION_REFS\|\|\||#\s*References)/i);
-                         if (refMatch) {
-                             planText = remaining.substring(0, refMatch.index);
-                             refsText = remaining.substring(refMatch.index + refMatch[0].length);
-                         } else {
-                             planText = remaining;
-                             refsText = "No explicit references found.";
-                         }
-                    }
+                storedSummary = parsed.summary;
+                storedContext = rawText;
+
+                // Thoughts UI
+                if (parsed.thoughts) {
+                    el('thinkingContent').innerText = parsed.thoughts;
+                    el('thinkingContainer').classList.remove('hidden');
                 } else {
-                    planText = "No plan section generated.";
-                    refsText = "No references section generated.";
+                    el('thinkingContainer').classList.add('hidden');
                 }
 
                 // APPLY CLEANER
                 const cleanSummary = stripLatex(storedSummary);
-                const cleanPlan = stripLatex(planText);
-                const cleanRefs = stripLatex(refsText);
+                const cleanPlan = stripLatex(parsed.plan || "No plan section generated.");
+                const cleanRefs = stripLatex(parsed.refs || "No references section generated.");
 
                 // PARSE MARKDOWN
                 let htmlSummary = marked.parse(cleanSummary);
