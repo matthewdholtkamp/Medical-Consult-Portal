@@ -576,13 +576,18 @@
                         } catch (readError) {
                             // Failed to read response body, keep default statusText
                         }
-                        throw new Error(errorMsg);
+
+                        // Stop retrying on 4xx errors (Client Error) except 429 (Too Many Requests)
+                        const isFatal = res.status >= 400 && res.status < 500 && res.status !== 429;
+                        const err = new Error(errorMsg);
+                        if (isFatal) err.isFatal = true;
+                        throw err;
                     }
                     return await res.json();
 
                 } catch (e) {
-                    // Stop retrying if max retries reached
-                    if (i === maxRetries - 1) throw e;
+                    // Stop retrying if fatal (4xx) or max retries reached
+                    if (e.isFatal || i === maxRetries - 1) throw e;
 
                     // Exponential backoff: 1s, 2s, 4s, 8s, 16s
                     await new Promise(r => setTimeout(r, 1000 * Math.pow(2, i)));
