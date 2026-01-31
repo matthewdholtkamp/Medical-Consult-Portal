@@ -735,9 +735,9 @@
                 [DOCTRINE: TAG] [Provide a 2-sentence bottom-line answer to the operational question (BLUF).]
 
                 **INSTRUCTION FOR [DOCTRINE: TAG]:** Start the Executive Summary with exactly one of:
-                - `[DOCTRINE: STANDARD]` (Core CPG/TCCC Protocol)
-                - `[DOCTRINE: EMERGING]` (Promising evidence, not yet standard)
-                - `[DOCTRINE: NOT RECOMMENDED]` (Against current doctrine or dangerous)
+                - \`[DOCTRINE: STANDARD]\` (Core CPG/TCCC Protocol)
+                - \`[DOCTRINE: EMERGING]\` (Promising evidence, not yet standard)
+                - \`[DOCTRINE: NOT RECOMMENDED]\` (Against current doctrine or dangerous)
 
                 ## Operational Evidence Matrix
                 | Source | Year | Evidence Level | Strength of Rec (SOR) | Key Recommendation/Finding | Operational Impact |
@@ -748,15 +748,15 @@
                 | **Recent:** [Name] | [YYYY] | [TAG] | [N/A] | [Result] | [Protocol Change] |
 
                 **INSTRUCTION FOR [TAG]:** You MUST use one of these exact tags for the Evidence Level column:
-                - `[CPG]` for JTS Guidelines (Blue).
-                - `[RCT]` for Randomized Controlled Trials (Green).
-                - `[Obs]` for Observational/Retrospective (Amber).
-                - `[Review]` for Reviews/White Papers (Gray).
+                - \`[CPG]\` for JTS Guidelines (Blue).
+                - \`[RCT]\` for Randomized Controlled Trials (Green).
+                - \`[Obs]\` for Observational/Retrospective (Amber).
+                - \`[Review]\` for Reviews/White Papers (Gray).
 
                 **INSTRUCTION FOR [SOR]:** You MUST use one of these tags based on JTS/DoD strength of recommendation:
-                - `[Strong]` for directives/standards where benefits clearly outweigh risks.
-                - `[Weak]` for suggestions where evidence is less certain.
-                - `[Expert]` for consensus-based recommendations without high-level evidence.
+                - \`[Strong]\` for directives/standards where benefits clearly outweigh risks.
+                - \`[Weak]\` for suggestions where evidence is less certain.
+                - \`[Expert]\` for consensus-based recommendations without high-level evidence.
 
                 ## Introduction
                 Brief tactical/clinical context.
@@ -1296,50 +1296,54 @@ ${script}
             }
         }
 
-        setupSharing({
-            apiKey: jsonBinKey,
-            getState: () => {
-                return {
-                    initialQuestion: el('initialQuestion').value,
-                    dynamicInputs: getDynamicInputValues(),
-                    summaryContent: storedSummary,
-                    planContent: el('planContent').innerHTML,
-                    refsContent: el('refsContent').innerText,
-                    context: storedContext,
-                    currentStep: !el('results').classList.contains('hidden') ? 3
-                               : !el('step2').classList.contains('hidden') ? 2 : 1
-                };
-            },
-            restoreState: (state) => {
-                el('initialQuestion').value = state.initialQuestion || "";
+        try {
+            setupSharing({
+                apiKey: jsonBinKey,
+                getState: () => {
+                    return {
+                        initialQuestion: el('initialQuestion').value,
+                        dynamicInputs: getDynamicInputValues(),
+                        summaryContent: storedSummary,
+                        planContent: el('planContent').innerHTML,
+                        refsContent: el('refsContent').innerText,
+                        context: storedContext,
+                        currentStep: !el('results').classList.contains('hidden') ? 3
+                                   : !el('step2').classList.contains('hidden') ? 2 : 1
+                    };
+                },
+                restoreState: (state) => {
+                    el('initialQuestion').value = state.initialQuestion || "";
 
-                if (state.dynamicInputs) {
-                    restoreDynamicInputs(state.dynamicInputs);
+                    if (state.dynamicInputs) {
+                        restoreDynamicInputs(state.dynamicInputs);
+                    }
+
+                    if (state.summaryContent) {
+                        storedSummary = state.summaryContent;
+                        storedContext = state.context || "";
+                        el('summaryContent').innerHTML = marked.parse(stripLatex(state.summaryContent));
+                        el('planContent').innerHTML = state.planContent || "";
+                        el('refsContent').innerText = state.refsContent || "";
+
+                        if(window.MathJax) MathJax.typesetPromise();
+                    }
+
+                    el('step1').classList.add('hidden');
+                    el('step2').classList.add('hidden');
+                    el('results').classList.add('hidden');
+
+                    if (state.currentStep === 3) {
+                        el('results').classList.remove('hidden');
+                    } else if (state.currentStep === 2) {
+                        el('step2').classList.remove('hidden');
+                    } else {
+                        el('step1').classList.remove('hidden');
+                    }
                 }
-
-                if (state.summaryContent) {
-                    storedSummary = state.summaryContent;
-                    storedContext = state.context || "";
-                    el('summaryContent').innerHTML = marked.parse(stripLatex(state.summaryContent));
-                    el('planContent').innerHTML = state.planContent || "";
-                    el('refsContent').innerText = state.refsContent || "";
-
-                    if(window.MathJax) MathJax.typesetPromise();
-                }
-
-                el('step1').classList.add('hidden');
-                el('step2').classList.add('hidden');
-                el('results').classList.add('hidden');
-
-                if (state.currentStep === 3) {
-                    el('results').classList.remove('hidden');
-                } else if (state.currentStep === 2) {
-                    el('step2').classList.remove('hidden');
-                } else {
-                    el('step1').classList.remove('hidden');
-                }
-            }
-        });
+            });
+        } catch (e) {
+            console.warn("Sharing disabled due to error:", e);
+        }
 
     </script>
 </body>
