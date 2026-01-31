@@ -737,10 +737,10 @@
                 [CONSENSUS: TAG] [Provide a 2-sentence bottom-line answer to the clinical question.]
 
                 **INSTRUCTION FOR [CONSENSUS: TAG]:** Start the Executive Summary with exactly one of:
-                - `[CONSENSUS: STRONG]` (High certainty, broad agreement)
-                - `[CONSENSUS: CONDITIONAL]` (Moderate certainty, depends on patient factors)
-                - `[CONSENSUS: CONTROVERSIAL]` (Conflicting data, no agreement)
-                - `[CONSENSUS: EVOLVING]` (New emerging data, not yet standard)
+                - \`[CONSENSUS: STRONG]\` (High certainty, broad agreement)
+                - \`[CONSENSUS: CONDITIONAL]\` (Moderate certainty, depends on patient factors)
+                - \`[CONSENSUS: CONTROVERSIAL]\` (Conflicting data, no agreement)
+                - \`[CONSENSUS: EVOLVING]\` (New emerging data, not yet standard)
 
                 ## Evidence Matrix
                 | Trial | Year | Evidence Level | Strength of Rec (SOR) | Key Findings | NNT/NNH | Risk of Bias | Clinical Impact |
@@ -751,15 +751,15 @@
                 | **Recent:** [Name] | [YYYY] | [TAG] (N=[N]) | [SOR] | [Result] | [NNT/H] | [Low/High/Unclear] | [Impact] |
 
                 **INSTRUCTION FOR [TAG]:** You MUST use one of these exact tags for the Evidence Level column:
-                - `[RCT]` for Randomized Controlled Trials (Green).
-                - `[MA]` for Meta-Analyses (Purple).
-                - `[Guide]` for Clinical Guidelines (Blue).
-                - `[Cohort]` for Observational/Retrospective (Amber).
-                - `[Case]` for Case Series/Reports (Gray).
+                - \`[RCT]\` for Randomized Controlled Trials (Green).
+                - \`[MA]\` for Meta-Analyses (Purple).
+                - \`[Guide]\` for Clinical Guidelines (Blue).
+                - \`[Cohort]\` for Observational/Retrospective (Amber).
+                - \`[Case]\` for Case Series/Reports (Gray).
 
                 **INSTRUCTION FOR [SOR]:** You MUST use one of these tags based on GRADE:
-                - `[Strong]` for high-certainty evidence where benefits clearly outweigh risks.
-                - `[Conditional]` for lower certainty or when patient values/preferences vary significantly.
+                - \`[Strong]\` for high-certainty evidence where benefits clearly outweigh risks.
+                - \`[Conditional]\` for lower certainty or when patient values/preferences vary significantly.
                 
                 ## Introduction
                 Brief clinical context.
@@ -1311,57 +1311,61 @@ ${script}
             }
         }
 
-        setupSharing({
-            apiKey: jsonBinKey,
-            getState: () => {
-                return {
-                    initialQuestion: el('initialQuestion').value,
-                    dynamicInputs: getDynamicInputValues(),
-                    summaryContent: storedSummary,
-                    planContent: el('planContent').innerHTML,
-                    refsContent: el('refsContent').innerText,
-                    context: storedContext,
-                    currentStep: !el('results').classList.contains('hidden') ? 3
-                               : !el('step2').classList.contains('hidden') ? 2 : 1
-                };
-            },
-            restoreState: (state) => {
-                el('initialQuestion').value = state.initialQuestion || "";
+        try {
+            setupSharing({
+                apiKey: jsonBinKey,
+                getState: () => {
+                    return {
+                        initialQuestion: el('initialQuestion').value,
+                        dynamicInputs: getDynamicInputValues(),
+                        summaryContent: storedSummary,
+                        planContent: el('planContent').innerHTML,
+                        refsContent: el('refsContent').innerText,
+                        context: storedContext,
+                        currentStep: !el('results').classList.contains('hidden') ? 3
+                                   : !el('step2').classList.contains('hidden') ? 2 : 1
+                    };
+                },
+                restoreState: (state) => {
+                    el('initialQuestion').value = state.initialQuestion || "";
 
-                if (state.dynamicInputs) {
-                    restoreDynamicInputs(state.dynamicInputs);
+                    if (state.dynamicInputs) {
+                        restoreDynamicInputs(state.dynamicInputs);
+                    }
+
+                    if (state.summaryContent) {
+                        storedSummary = state.summaryContent;
+                        storedContext = state.context || "";
+                        el('summaryContent').innerHTML = marked.parse(stripLatex(state.summaryContent));
+                        el('planContent').innerHTML = state.planContent || ""; // planContent is likely already HTML if saved via innerHTML? No, wait.
+                        // Actually, in getState above: planContent: el('planContent').innerHTML
+                        // So we can assign it back directly.
+                        // But in original logic, we parse markdown.
+                        // If we saved innerHTML, we restore innerHTML.
+                        el('planContent').innerHTML = state.planContent || "";
+                        el('refsContent').innerText = state.refsContent || "";
+
+                        // MathJax
+                        if(window.MathJax) MathJax.typesetPromise();
+                    }
+
+                    // Show correct step
+                    el('step1').classList.add('hidden');
+                    el('step2').classList.add('hidden');
+                    el('results').classList.add('hidden');
+
+                    if (state.currentStep === 3) {
+                        el('results').classList.remove('hidden');
+                    } else if (state.currentStep === 2) {
+                        el('step2').classList.remove('hidden');
+                    } else {
+                        el('step1').classList.remove('hidden');
+                    }
                 }
-
-                if (state.summaryContent) {
-                    storedSummary = state.summaryContent;
-                    storedContext = state.context || "";
-                    el('summaryContent').innerHTML = marked.parse(stripLatex(state.summaryContent));
-                    el('planContent').innerHTML = state.planContent || ""; // planContent is likely already HTML if saved via innerHTML? No, wait.
-                    // Actually, in getState above: planContent: el('planContent').innerHTML
-                    // So we can assign it back directly.
-                    // But in original logic, we parse markdown.
-                    // If we saved innerHTML, we restore innerHTML.
-                    el('planContent').innerHTML = state.planContent || "";
-                    el('refsContent').innerText = state.refsContent || "";
-
-                    // MathJax
-                    if(window.MathJax) MathJax.typesetPromise();
-                }
-
-                // Show correct step
-                el('step1').classList.add('hidden');
-                el('step2').classList.add('hidden');
-                el('results').classList.add('hidden');
-
-                if (state.currentStep === 3) {
-                    el('results').classList.remove('hidden');
-                } else if (state.currentStep === 2) {
-                    el('step2').classList.remove('hidden');
-                } else {
-                    el('step1').classList.remove('hidden');
-                }
-            }
-        });
+            });
+        } catch (e) {
+            console.warn("Sharing disabled due to error:", e);
+        }
 
     </script>
 </body>
