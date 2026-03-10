@@ -11,12 +11,12 @@ def run_verification():
         page.goto("http://localhost:8000/Imaging.html")
 
         # Verify Model Selector is gone and replaced by static text
-        # The text "Node: Gemini 3 Flash (Advanced)" should be visible
+        # The text "Node: Gemini 3.1 Flash Lite (Advanced)" should be visible
         try:
-            expect(page.get_by_text("Node: Gemini 3 Flash (Advanced)")).to_be_visible()
-            print("SUCCESS: Gemini 3 Flash label found.")
+            expect(page.get_by_text("Node: Gemini 3.1 Flash Lite (Advanced)")).to_be_visible()
+            print("SUCCESS: Gemini 3.1 Flash Lite label found.")
         except Exception as e:
-            print(f"FAILURE: Gemini 3 Flash label NOT found. {e}")
+            print(f"FAILURE: Gemini 3.1 Flash Lite label NOT found. {e}")
 
         # Verify Selector is gone
         try:

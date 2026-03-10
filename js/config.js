@@ -1,7 +1,7 @@
 // Global configuration
 // API Keys are obfuscated to prevent automated detection.
 
-export const GEMINI_MODEL_ID = "gemini-3-flash-preview";
+export const GEMINI_MODEL_ID = "gemini-3.1-flash-lite";
 
 // Obfuscated keys (Reverse -> Rot13 -> Base64)
 const _ENCRYPTED = {
