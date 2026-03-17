@@ -1,21 +1,19 @@
-import { GEMINI_MODEL_ID } from './config.js';
+import { GEMINI_MODEL, GEMINI_THINKING_LEVEL, GEMINI_API_VERSION } from './model_config.js';
 
 /**
  * Shared function to call the Gemini API.
- *
- * @param {string} apiKey - The API Key (provided by the calling page).
- * @param {string} systemPrompt - The system instruction for the AI persona.
- * @param {string} userQuery - The user's input/context.
- * @param {number} retries - Number of times to retry on failure (default 3).
- * @returns {Promise<Object>} - The parsed JSON response from the AI.
  */
 export async function callGeminiApi(apiKey, systemPrompt, userQuery, retries = 3) {
     const cleanKey = apiKey ? apiKey.trim() : "";
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL_ID}:generateContent?key=${cleanKey}`;
+    const url = `https://generativelanguage.googleapis.com/${GEMINI_API_VERSION}/models/${GEMINI_MODEL}:generateContent?key=${cleanKey}`;
     const payload = {
         contents: [{ parts: [{ text: userQuery }] }],
         systemInstruction: { parts: [{ text: systemPrompt }] },
-        generationConfig: { responseMimeType: "application/json", temperature: 1.0 }
+        generationConfig: {
+            responseMimeType: "application/json",
+            temperature: 1.0,
+            thinkingConfig: { thinkingLevel: GEMINI_THINKING_LEVEL }
+        }
     };
 
     try {
@@ -32,9 +30,7 @@ export async function callGeminiApi(apiKey, systemPrompt, userQuery, retries = 3
                 if (errorData.error && errorData.error.message) {
                     errorMsg += ` - ${errorData.error.message}`;
                 }
-            } catch (e) {
-                // Ignore JSON parse error
-            }
+            } catch (e) {}
             throw new Error(errorMsg);
         }
 
@@ -43,13 +39,10 @@ export async function callGeminiApi(apiKey, systemPrompt, userQuery, retries = 3
 
         if (!text) throw new Error("No content generated");
 
-        // Clean Markdown code blocks if present (e.g., ```json ... ```)
         text = text.replace(/^```json\s*/, '').replace(/^```\s*/, '').replace(/```$/, '').trim();
-
         return JSON.parse(text);
     } catch (error) {
         if (retries > 0) {
-            // Exponential backoff
             await new Promise(r => setTimeout(r, 1000 + (3 - retries) * 1000));
             return callGeminiApi(apiKey, systemPrompt, userQuery, retries - 1);
         }
@@ -58,20 +51,18 @@ export async function callGeminiApi(apiKey, systemPrompt, userQuery, retries = 3
 }
 
 /**
- * Shared function for simple text responses (chat/refinement).
- *
- * @param {string} apiKey - The API Key.
- * @param {string} systemPrompt - The system instruction.
- * @param {string} userQuery - The user's question.
- * @returns {Promise<string>} - The raw text response.
+ * Shared function for simple text responses.
  */
 export async function callGeminiText(apiKey, systemPrompt, userQuery) {
     const cleanKey = apiKey ? apiKey.trim() : "";
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL_ID}:generateContent?key=${cleanKey}`;
+    const url = `https://generativelanguage.googleapis.com/${GEMINI_API_VERSION}/models/${GEMINI_MODEL}:generateContent?key=${cleanKey}`;
     const payload = {
         contents: [{ parts: [{ text: userQuery }] }],
         systemInstruction: { parts: [{ text: systemPrompt }] },
-        generationConfig: { temperature: 1.0 }
+        generationConfig: {
+            temperature: 1.0,
+            thinkingConfig: { thinkingLevel: GEMINI_THINKING_LEVEL }
+        }
     };
 
     const response = await fetch(url, {
@@ -87,9 +78,7 @@ export async function callGeminiText(apiKey, systemPrompt, userQuery) {
             if (errorData.error && errorData.error.message) {
                 errorMsg += ` - ${errorData.error.message}`;
             }
-        } catch (e) {
-            // Ignore JSON parse error
-        }
+        } catch (e) {}
         throw new Error(errorMsg);
     }
 
