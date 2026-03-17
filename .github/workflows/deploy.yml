@@ -1,4 +1,4 @@
-name: Deploy to GitHub Pages
+name: Deploy Pages
 
 on:
   push:
@@ -23,15 +23,16 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Setup Pages
         uses: actions/configure-pages@v5
-
+      - name: Inject API Key
+        run: |
+          sed -i "s/__KEY_ADTMC__/${{ secrets.KEY_ADTMC }}/g" js/config.template.js
+          mv js/config.template.js js/config.js
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: '.'
-
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
