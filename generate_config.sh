@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Configuration
+TEMPLATE_FILE="js/config.template.js"
 CONFIG_FILE="js/config.js"
 ENV_FILE=".env"
 
@@ -14,32 +15,27 @@ echo -e "${YELLOW}Starting configuration generation...${NC}"
 
 if [ ! -f "$ENV_FILE" ]; then
     echo -e "${RED}Error: .env file not found!${NC}"
-    echo "Please copy .env.example to .env and fill in your keys."
+    echo "Please copy .env.example to .env and set KEY_ADTMC."
     exit 1
 fi
 
 # Load .env variables
-export $(grep -v '^#' $ENV_FILE | xargs)
+export $(grep -v '^#' "$ENV_FILE" | xargs)
 
-# Create the config file
+if [ -z "$KEY_ADTMC" ]; then
+    echo -e "${RED}Error: KEY_ADTMC not found in $ENV_FILE!${NC}"
+    exit 1
+fi
+
+if [ ! -f "$TEMPLATE_FILE" ]; then
+    echo -e "${RED}Error: $TEMPLATE_FILE not found!${NC}"
+    exit 1
+fi
+
+# Create the config file by replacing the placeholder
 echo -e "${YELLOW}Generating $CONFIG_FILE...${NC}"
 
-cat <<EOF > $CONFIG_FILE
-// Global configuration (Local Generated)
-export const GEMINI_MODEL = "gemini-3-flash-preview";
+sed "s/__KEY_ADTMC__/$KEY_ADTMC/g" "$TEMPLATE_FILE" > "$CONFIG_FILE"
 
-export const API_KEYS = {
-    ADTMC: "$KEY_ADTMC",
-    CARDIOLOGY: "$KEY_CARDIOLOGY",
-    IM: "$KEY_IM",
-    JOURNAL_CLUB: "$KEY_JOURNAL_CLUB",
-    NEUROLOGY: "$KEY_NEUROLOGY",
-    ORTHOPEDICS: "$KEY_ORTHOPEDICS",
-    PSYCHIATRY: "$KEY_PSYCHIATRY",
-    RHEUMATOLOGY: "$KEY_RHEUMATOLOGY",
-    START_PAGE: "$KEY_START_PAGE"
-};
-EOF
-
-echo -e "${GREEN}Success! $CONFIG_FILE has been updated with local keys.${NC}"
+echo -e "${GREEN}Success! $CONFIG_FILE has been generated.${NC}"
 echo -e "${YELLOW}WARNING: Do not commit $CONFIG_FILE with real keys!${NC}"
