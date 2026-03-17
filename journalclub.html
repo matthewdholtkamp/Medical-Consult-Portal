@@ -482,14 +482,16 @@
     <script type="module">
         import { setupSharing } from './js/sharing.js';
         import { API_KEYS } from './js/config.js';
+        import { GEMINI_MODEL, GEMINI_THINKING_LEVEL, GEMINI_API_VERSION } from './js/model_config.js';
+        import { GEMINI_MODEL, GEMINI_THINKING_LEVEL, GEMINI_API_VERSION } from './js/model_config.js';
 
         // API Configuration
         const apiKey = API_KEYS.JOURNAL_CLUB;
         const jsonBinKey = "$2a$10$J/Gr0x7KT4o8YHMdHtRgV.MokfRSRnPPdXBI5jJidEiqrvJfbH5Py";
-        // Use Flash for quick Step 1 queries to avoid Rate Limits (429)
-        const FAST_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-        // Use 2.5 Pro for Step 2
-        const GENERATE_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+
+        // As per requirements, all calls route to centralized Gemini model
+        const GENERATE_URL = `https://generativelanguage.googleapis.com/${GEMINI_API_VERSION}/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
+        // Preserve TTS so it does not break.
         const TTS_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 
         // DOM Elements
@@ -663,7 +665,7 @@
 
             try {
                 // Use FAST_URL (Flash) for simple question generation
-                const data = await fetchWithRetry(FAST_URL, {
+                const data = await fetchWithRetry(GENERATE_URL, {
                     contents: [{ parts: [{ text: prompt }] }],
                     safetySettings: [
                         { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
@@ -671,6 +673,10 @@
                         { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
                         { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
                     ]
+                ,
+                    generationConfig: {
+                        thinkingConfig: { thinkingLevel: GEMINI_THINKING_LEVEL }
+                    }
                 });
                 
                 const text = data.candidates[0].content.parts[0].text;
@@ -826,6 +832,10 @@
                         { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
                         { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
                     ]
+                ,
+                    generationConfig: {
+                        thinkingConfig: { thinkingLevel: GEMINI_THINKING_LEVEL }
+                    }
                 });
 
                 const candidate = data.candidates[0];
@@ -1059,6 +1069,10 @@
                         { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
                         { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
                     ]
+                ,
+                    generationConfig: {
+                        thinkingConfig: { thinkingLevel: GEMINI_THINKING_LEVEL }
+                    }
                 });
                 let script = scriptRes.candidates[0].content.parts[0].text;
                 
@@ -1233,6 +1247,10 @@ ${script}
                         { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
                         { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
                     ]
+                ,
+                    generationConfig: {
+                        thinkingConfig: { thinkingLevel: GEMINI_THINKING_LEVEL }
+                    }
                 });
                 const rawFollowUp = data.candidates[0].content.parts[0].text;
                 container.innerHTML = marked.parse(stripLatex(rawFollowUp)); // Apply cleaner here too
