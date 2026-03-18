@@ -486,9 +486,11 @@
         const apiKey = API_KEYS.JOURNAL_CLUB;
         const jsonBinKey = "$2a$10$J/Gr0x7KT4o8YHMdHtRgV.MokfRSRnPPdXBI5jJidEiqrvJfbH5Py";
         
-        // Use Gemini 3.1 Flash-Lite Preview for text-generation steps.
-        const FAST_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent?key=${apiKey}`;
-        const GENERATE_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent?key=${apiKey}`;
+        // Use Gemini 2.5 Flash for grounded Journal Club generation.
+        // These requests ask the model to search for doctrine/citations and build a long final report,
+        // which is more reliable on the stable grounded model path.
+        const FAST_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+        const GENERATE_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 
         // DOM Elements
         const el = id => document.getElementById(id);
@@ -698,7 +700,7 @@
             const topic = el('initialQuestion').value;
             const details = Array.from(dynamicInputs.querySelectorAll('input')).map(i => `${i.previousElementSibling.innerText}: ${i.value}`).join('\n');
 
-            showLoader("Synthesizing Doctrine (Gemini 3.1 Flash-Lite Preview)...");
+            showLoader("Synthesizing Doctrine (Gemini 2.5 Flash)...");
             el('step2').classList.add('hidden');
 
             const mainPrompt = `
@@ -970,7 +972,10 @@
 
             } catch (err) {
                 console.error(err);
-                showToast("Error synthesizing data. Check API key/Quota. " + err.message);
+                const message = /429|quota|rate limit/i.test(err.message)
+                    ? "Rate limit hit while building the final grounded doctrine report. This step searches for citations and writes the full page. Wait a minute and try again."
+                    : "Error building the final doctrine report. " + err.message;
+                showToast(message);
                 el('step2').classList.remove('hidden');
                 hideLoader();
             }
