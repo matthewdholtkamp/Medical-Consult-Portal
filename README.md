@@ -43,20 +43,5 @@ MedCon Portal is a comprehensive, AI-powered platform designed to assist medical
 5.  **Consult Generator**: Select a specialty, enter de-identified patient data (Chief Complaint, Vitals, Labs, etc.), answer follow-up questions from the AI, and review/edit the generated consultation note.
 
 ## Setup
-Since this is a static site using CDN links, no build process is required for the code itself. However, because it is a static frontend, repository secrets cannot be securely read directly by client-side JavaScript. Instead, the application uses a build-time/deploy-time generation step to inject a single secret (`KEY_ADTMC`) into the application.
-
-### Configuration
-
-**Local Development:**
-1. Copy `.env.example` to `.env` and set `KEY_ADTMC` to your Gemini API key.
-2. Run `./generate_config.sh` to generate the `js/config.js` file from the template.
-3. Open `index.html` locally or host the files on a local web server.
-*(Note: Do not commit the generated `js/config.js` or `.env` files. They are included in `.gitignore`.)*
-
-**Deployment (e.g., GitHub Pages):**
-The application uses a GitHub Actions workflow (`.github/workflows/deploy.yml`) to automatically read the repository secret `KEY_ADTMC` and inject it into `js/config.template.js`, renaming it to `js/config.js` before deployment.
-
-### ⚠️ Security Limitations
-Due to the static frontend architecture, the generated `js/config.js` will contain the plaintext API key when loaded by the browser. Ensure that the deployment environment and key access are appropriately restricted for your use case, as the key is ultimately visible to the client.
-
+Since this is a static site using CDN links, no build process is required. Simply host the files on a web server or open them locally.
 *Note: An active internet connection is required for Tailwind CSS, Icons, and the Gemini API.*
