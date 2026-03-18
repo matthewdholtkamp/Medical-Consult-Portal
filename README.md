@@ -45,3 +45,19 @@ MedCon Portal is a comprehensive, AI-powered platform designed to assist medical
 ## Setup
 Since this is a static site using CDN links, no build process is required. Simply host the files on a web server or open them locally.
 *Note: An active internet connection is required for Tailwind CSS, Icons, and the Gemini API.*
+
+### API Key Setup
+This repo now uses a single shared Gemini API key for all pages.
+
+For local use:
+1. Copy `.env.example` to `.env`
+2. Set `KEY_ADTMC` to your Gemini API key
+3. Run `bash ./generate_config.sh`
+
+For GitHub Pages:
+1. Add the repository secret `KEY_ADTMC`
+2. Push to `main`
+3. The deploy workflow will generate `js/config.js` during deployment
+
+### Security Note
+Removing the committed browser-side keys is an improvement, but GitHub Pages is still a static frontend. Any Gemini API key injected into client-side JavaScript will still be visible to end users in the deployed site. For true secret protection, move Gemini API calls behind a server-side proxy or backend.
