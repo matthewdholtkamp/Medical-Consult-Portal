@@ -481,8 +481,6 @@
     <script type="module">
         import { setupSharing } from './js/sharing.js';
         import { API_KEYS } from './js/config.js';
-        import { GEMINI_MODEL, GEMINI_THINKING_LEVEL, GEMINI_API_VERSION } from './js/model_config.js';
-        import { GEMINI_MODEL, GEMINI_THINKING_LEVEL, GEMINI_API_VERSION } from './js/model_config.js';
 
         // API Configuration
         const apiKey = API_KEYS.JOURNAL_CLUB;
@@ -663,7 +661,7 @@
             `;
 
             try {
-                const data = await fetchWithRetry(GENERATE_URL, {
+                const data = await fetchWithRetry(FAST_URL, {
                     contents: [{ parts: [{ text: prompt }] }],
                     safetySettings: [
                         { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
@@ -671,10 +669,6 @@
                         { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
                         { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
                     ]
-                ,
-                    generationConfig: {
-                        thinkingConfig: { thinkingLevel: GEMINI_THINKING_LEVEL }
-                    }
                 });
 
                 const text = data.candidates[0].content.parts[0].text;
@@ -825,10 +819,6 @@
                         { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
                         { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
                     ]
-                ,
-                    generationConfig: {
-                        thinkingConfig: { thinkingLevel: GEMINI_THINKING_LEVEL }
-                    }
                 });
 
                 const candidate = data.candidates[0];
@@ -1059,10 +1049,6 @@
                         { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
                         { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
                     ]
-                ,
-                    generationConfig: {
-                        thinkingConfig: { thinkingLevel: GEMINI_THINKING_LEVEL }
-                    }
                 });
                 let script = scriptRes.candidates[0].content.parts[0].text;
 
@@ -1233,10 +1219,6 @@ ${script}
                         { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
                         { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
                     ]
-                ,
-                    generationConfig: {
-                        thinkingConfig: { thinkingLevel: GEMINI_THINKING_LEVEL }
-                    }
                 });
                 const rawFollowUp = data.candidates[0].content.parts[0].text;
                 container.innerHTML = marked.parse(stripLatex(rawFollowUp)); // Apply cleaner here too

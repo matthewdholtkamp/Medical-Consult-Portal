@@ -281,8 +281,7 @@
 
     <script type="module">
         import { setupSharing } from './js/sharing.js';
-        import { API_KEYS } from './js/config.js?v=secure';
-        import { GEMINI_MODEL, GEMINI_THINKING_LEVEL, GEMINI_API_VERSION } from './js/model_config.js?v=secure';
+        import { API_KEYS, GEMINI_MODEL_ID } from './js/config.js?v=secure';
 
         // --- State Management ---
         let intakeState = {
@@ -350,12 +349,12 @@
         // --- API Logic ---
         async function callGeminiApi(systemPrompt, userQuery, retries = 3) {
             const cleanKey = apiKey ? apiKey.trim() : "";
-
-            const url = `https://generativelanguage.googleapis.com/${GEMINI_API_VERSION}/models/${GEMINI_MODEL}:generateContent?key=${cleanKey}`;
+            const modelId = (typeof GEMINI_MODEL_ID !== 'undefined' && GEMINI_MODEL_ID) ? GEMINI_MODEL_ID : "gemini-3-flash-preview";
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${cleanKey}`;
             const payload = {
                 contents: [{ parts: [{ text: userQuery }] }],
                 systemInstruction: { parts: [{ text: systemPrompt }] },
-                generationConfig: { responseMimeType: "application/json", temperature: 1.0, thinkingConfig: { thinkingLevel: GEMINI_THINKING_LEVEL } }
+                generationConfig: { responseMimeType: "application/json", temperature: 1.0 }
             };
 
             try {
@@ -382,12 +381,11 @@
 
         async function callGeminiText(systemPrompt, userQuery) {
             const cleanKey = apiKey ? apiKey.trim() : "";
-
-            const url = `https://generativelanguage.googleapis.com/${GEMINI_API_VERSION}/models/${GEMINI_MODEL}:generateContent?key=${cleanKey}`;
+            const modelId = (typeof GEMINI_MODEL_ID !== 'undefined' && GEMINI_MODEL_ID) ? GEMINI_MODEL_ID : "gemini-3-flash-preview";
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${cleanKey}`;
              const payload = {
                 contents: [{ parts: [{ text: userQuery }] }],
-                systemInstruction: { parts: [{ text: systemPrompt }] },
-                generationConfig: { thinkingConfig: { thinkingLevel: GEMINI_THINKING_LEVEL } }
+                systemInstruction: { parts: [{ text: systemPrompt }] }
             };
             const response = await fetch(url, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload)});
             const data = await response.json();

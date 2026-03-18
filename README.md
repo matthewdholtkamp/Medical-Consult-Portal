@@ -27,7 +27,7 @@ MedCon Portal is a comprehensive, AI-powered platform designed to assist medical
 ## Technologies
 *   **Frontend**: HTML5, JavaScript (Vanilla)
 *   **Styling**: Tailwind CSS (via CDN)
-*   **AI Integration**: Google Gemini API (`gemini-3.1-flash-lite-preview` with `thinkingLevel: "high"`) (`gemini-3.1-flash-lite-preview` with `thinkingLevel: "high"`)
+*   **AI Integration**: Google Gemini API
 *   **Icons**: Google Material Symbols, Font Awesome
 
 ## File Structure
