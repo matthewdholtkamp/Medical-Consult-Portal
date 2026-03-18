@@ -486,11 +486,10 @@
         // API Configuration
         const apiKey = API_KEYS.JOURNAL_CLUB;
         const jsonBinKey = "$2a$10$J/Gr0x7KT4o8YHMdHtRgV.MokfRSRnPPdXBI5jJidEiqrvJfbH5Py";
-        // Use Flash for quick Step 1 queries to avoid Rate Limits (429)
-        const FAST_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-        // Use 2.5 Pro for Step 2
-        const GENERATE_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-        const TTS_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+        // Use Gemini 3.1 Flash-Lite Preview for text-generation steps.
+        const FAST_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent?key=${apiKey}`;
+        // Use the same text model for script generation.
+        const GENERATE_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent?key=${apiKey}`;
 
         // DOM Elements
         const el = id => document.getElementById(id);
@@ -831,7 +830,7 @@
                 const candidate = data.candidates[0];
                 const parts = candidate.content.parts;
 
-                // Extract Text (No thinking model support in 2.5 Flash)
+                // Extract the text response from the text-generation step.
                 const rawText = parts.map(p => p.text).join("");
 
                 // Hide thinking container

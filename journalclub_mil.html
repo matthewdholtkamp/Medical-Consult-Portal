@@ -486,10 +486,9 @@
         const apiKey = API_KEYS.JOURNAL_CLUB;
         const jsonBinKey = "$2a$10$J/Gr0x7KT4o8YHMdHtRgV.MokfRSRnPPdXBI5jJidEiqrvJfbH5Py";
         
-        // Consistent Gemini 2.5 Flash for Text & TTS
-        const FAST_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-        const GENERATE_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-        // TTS Endpoint (Variable used in Audio Handler)
+        // Use Gemini 3.1 Flash-Lite Preview for text-generation steps.
+        const FAST_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent?key=${apiKey}`;
+        const GENERATE_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent?key=${apiKey}`;
 
         // DOM Elements
         const el = id => document.getElementById(id);
@@ -699,7 +698,7 @@
             const topic = el('initialQuestion').value;
             const details = Array.from(dynamicInputs.querySelectorAll('input')).map(i => `${i.previousElementSibling.innerText}: ${i.value}`).join('\n');
 
-            showLoader("Synthesizing Doctrine (Gemini 2.5 Flash)...");
+            showLoader("Synthesizing Doctrine (Gemini 3.1 Flash-Lite Preview)...");
             el('step2').classList.add('hidden');
 
             const mainPrompt = `
@@ -824,7 +823,7 @@
                 const candidate = data.candidates[0];
                 const parts = candidate.content.parts;
 
-                // Extract Text (No thinking model support in 2.5 Flash)
+                // Extract the text response from the text-generation step.
                 const rawText = parts.map(p => p.text).join("");
 
                 // Hide thinking container

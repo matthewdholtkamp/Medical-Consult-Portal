@@ -671,9 +671,7 @@ Your mission is to provide authoritative, evidence-based clinical decision suppo
         async function callGeminiDrHoltkamp(apiKey, systemPrompt, userQuery) {
             const cleanKey = apiKey ? apiKey.trim() : "";
 
-            const isThinkingMode = document.getElementById('deepThinkToggle').checked;
-            // Toggle Logic: Checked = gemini-3-flash-preview, Unchecked = gemini-2.5-flash-lite
-            const modelId = isThinkingMode ? "gemini-3-flash-preview" : "gemini-2.5-flash-lite";
+            const modelId = "gemini-3.1-flash-lite-preview";
 
             const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${cleanKey}`;
 
@@ -724,7 +722,7 @@ Your mission is to provide authoritative, evidence-based clinical decision suppo
         }
 
         async function callStandardGemini(apiKey, systemPrompt, userQuery) {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent?key=${apiKey}`;
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent?key=${apiKey}`;
             const payload = {
                 contents: [...chatHistory, { role: "user", parts: [{ text: userQuery }] }],
                 systemInstruction: { parts: [{ text: systemPrompt }] },
