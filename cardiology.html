@@ -122,25 +122,25 @@
                 <!-- Vitals & History Grid -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     <div>
-                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Vitals (Include Orthostatics if avail)</label>
+                        <label for="vitals-input" class="block text-xs font-bold text-slate-400 uppercase mb-1">Vitals (Include Orthostatics if avail)</label>
                         <textarea id="vitals-input" rows="2" class="w-full p-2 border border-slate-600 rounded-md bg-slate-900 text-white text-sm focus:border-red-500 outline-none" placeholder="BP 140/90, HR 110 Irreg, RR 22, O2 92% RA"></textarea>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Cardiac Exam / Physical Findings</label>
+                        <label for="pe-input" class="block text-xs font-bold text-slate-400 uppercase mb-1">Cardiac Exam / Physical Findings</label>
                         <textarea id="pe-input" rows="2" class="w-full p-2 border border-slate-600 rounded-md bg-slate-900 text-white text-sm focus:border-red-500 outline-none" placeholder="JVD, Murmurs, Rubs, Gallops, Edema, Lung sounds"></textarea>
                     </div>
                     <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
                          <div>
-                            <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Current Meds</label>
+                            <label for="meds-input" class="block text-xs font-bold text-slate-400 uppercase mb-1">Current Meds</label>
                             <input type="text" id="meds-input" class="w-full p-2 border border-slate-600 rounded-md bg-slate-900 text-white text-sm focus:border-red-500 outline-none" placeholder="e.g., Lasix 40mg bid, Eliquis 5mg bid">
                          </div>
                          <div>
-                             <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Relevant Labs / EKG / Echo</label>
+                             <label for="prior-labs-input" class="block text-xs font-bold text-slate-400 uppercase mb-1">Relevant Labs / EKG / Echo</label>
                              <input type="text" id="prior-labs-input" class="w-full p-2 border border-slate-600 rounded-md bg-slate-900 text-white text-sm focus:border-red-500 outline-none" placeholder="Trop, BNP, K+, Cr, recent EF%">
                          </div>
                     </div>
                     <div class="md:col-span-2">
-                         <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Pertinent Cardiac History</label>
+                         <label for="pmh-input" class="block text-xs font-bold text-slate-400 uppercase mb-1">Pertinent Cardiac History</label>
                          <input type="text" id="pmh-input" class="w-full p-2 border border-slate-600 rounded-md bg-slate-900 text-white text-sm focus:border-red-500 outline-none" placeholder="CAD (stents?), AFib, HF, HTN, Fam Hx Sudden Death">
                     </div>
                 </div>
@@ -217,12 +217,12 @@
                     <div class="bg-slate-900 p-4 rounded border border-slate-700">
                         <h3 class="font-bold text-red-400 mb-2 uppercase text-xs tracking-wider">Disposition & Follow-up</h3>
                         <div class="mb-3">
-                            <label class="text-xs text-slate-500 block mb-1">Primary Recommendation</label>
+                            <div class="text-xs text-slate-500 block mb-1">Primary Recommendation</div>
                             <div id="review-disposition" class="text-white font-medium bg-slate-800 p-2 rounded border border-slate-600"></div>
                         </div>
                          <div id="review-profile-container" class="space-y-2"></div>
                          <div class="mt-3 flex items-center bg-slate-800 p-2 rounded">
-                             <label class="text-xs text-slate-400 mr-2 font-bold uppercase">Profile/Limit Duration (Days)</label>
+                             <label for="profile-days" class="text-xs text-slate-400 mr-2 font-bold uppercase">Profile/Limit Duration (Days)</label>
                              <input type="number" id="profile-days" class="w-20 bg-slate-700 border border-slate-600 text-white text-center text-sm p-1 rounded focus:border-red-500 outline-none">
                          </div>
                     </div>
@@ -241,7 +241,7 @@
             
             <!-- Refinement Box -->
             <div class="bg-slate-700 p-4 rounded-md mb-6 border border-slate-600">
-                <label class="block text-xs font-bold text-red-300 mb-2 uppercase">Consultant Q&A (Refine the plan)</label>
+                <label for="refine-input" class="block text-xs font-bold text-red-300 mb-2 uppercase">Consultant Q&A (Refine the plan)</label>
                 <div class="flex space-x-2">
                     <input type="text" id="refine-input" class="flex-1 p-2 bg-slate-900 border border-slate-600 rounded text-white text-sm focus:border-red-500 outline-none" placeholder="e.g., 'What is the drip rate for Cardizem?' or 'Add low salt diet education'">
                     <button type="button" id="refine-btn" class="bg-red-700 hover:bg-red-600 text-white px-4 rounded font-medium text-sm">Ask</button>
@@ -435,11 +435,12 @@
                 state.questions = result.questions; // Save to state
                 const container = document.getElementById('questions-container');
                 container.innerHTML = '';
-                result.questions.forEach(q => {
+                result.questions.forEach((q, index) => {
+                    const qId = `question-input-${index}`;
                     container.innerHTML += `
                         <div class="bg-slate-900 p-3 rounded border border-slate-700">
-                            <label class="block text-sm text-red-300 mb-1 font-medium">${q}</label>
-                            <input type="text" data-q="${q}" class="w-full p-2 border-b border-slate-600 bg-transparent text-white focus:border-red-500 outline-none transition-colors" placeholder="Answer...">
+                            <label for="${qId}" class="block text-sm text-red-300 mb-1 font-medium">${q}</label>
+                            <input type="text" id="${qId}" data-q="${q}" class="w-full p-2 border-b border-slate-600 bg-transparent text-white focus:border-red-500 outline-none transition-colors" placeholder="Answer...">
                         </div>`;
                 });
                 showSection('questions');
@@ -760,14 +761,15 @@
                 // Reconstruct questions UI
                 const questionsToRender = state.questions;
 
-                questionsToRender.forEach(q => {
+                questionsToRender.forEach((q, index) => {
                     const ansObj = state.answers ? state.answers.find(a => a.q === q) : null;
                     const val = ansObj ? ansObj.a : "";
+                    const qId = `question-input-${index}`;
 
                     container.innerHTML += `
                         <div class="bg-slate-900 p-3 rounded border border-slate-700">
-                            <label class="block text-sm text-red-300 mb-1 font-medium">${q}</label>
-                            <input type="text" data-q="${q}" value="${val}" class="w-full p-2 border-b border-slate-600 bg-transparent text-white focus:border-red-500 outline-none transition-colors" placeholder="Answer...">
+                            <label for="${qId}" class="block text-sm text-red-300 mb-1 font-medium">${q}</label>
+                            <input type="text" id="${qId}" data-q="${q}" value="${val}" class="w-full p-2 border-b border-slate-600 bg-transparent text-white focus:border-red-500 outline-none transition-colors" placeholder="Answer...">
                         </div>`;
                 });
             }
