@@ -173,8 +173,8 @@
 
     <!-- Lightbox Overlay -->
     <div id="lightboxOverlay" class="lightbox-overlay" onclick="closeLightbox()">
-        <span class="lightbox-close" onclick="closeLightbox()">&times;</span>
-        <img id="lightboxImg" class="lightbox-content">
+        <button class="lightbox-close focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none" onclick="closeLightbox()" aria-label="Close lightbox">&times;</button>
+        <img id="lightboxImg" class="lightbox-content" alt="Full screen preview">
         <!-- Video element for lightbox (hidden by default) -->
         <video id="lightboxVideo" class="lightbox-content" controls style="display:none;"></video>
     </div>
@@ -293,7 +293,7 @@
                         ? `<div class="w-full h-full flex items-center justify-center bg-black rounded-lg"><span class="material-symbols-outlined text-indigo-500 text-4xl">play_circle</span></div>`
                         : `<img src="${m.b64}" class="w-full h-full object-cover rounded-lg opacity-80 group-hover:opacity-100 transition-opacity">`
                     }
-                    <button onclick="event.stopPropagation(); removeItem(${m.id})" class="absolute top-1 right-1 bg-red-500/90 hover:bg-red-600 text-white rounded-full h-5 w-5 flex items-center justify-center text-[10px] font-bold shadow-sm transition-colors z-10">×</button>
+                    <button onclick="event.stopPropagation(); removeItem(${m.id})" class="absolute top-1 right-1 bg-red-500/90 hover:bg-red-600 text-white rounded-full h-5 w-5 flex items-center justify-center text-[10px] font-bold shadow-sm transition-colors z-10 focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none" aria-label="Remove uploaded image">×</button>
                     <div class="absolute bottom-0 left-0 right-0 bg-black/60 backdrop-blur-sm p-1 pointer-events-none">
                         <p class="text-[8px] text-white text-center font-mono font-bold truncate">${m.label}</p>
                     </div>

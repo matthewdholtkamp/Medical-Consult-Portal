@@ -1,3 +1,7 @@
 ## 2024-05-21 - Accessible Controls on Dashboard
 **Learning:** The dashboard has several interactive controls (hamburger menu, search input) that lack accessible labels, making navigation difficult for screen reader users. The "Consult Cards" are also `div`s with `onclick` handlers but lack `role="button"` and `tabindex`, which is a larger systemic issue to address in a future iteration.
 **Action:** Added `aria-label` to the sidebar toggle buttons and the search input in `index.html` to immediately improve the experience for screen reader users.
+
+## 2024-05-21 - Accessible Interactive Cards and Icon Buttons
+**Learning:** This application heavily relies on `div` elements for interactive "cards" (e.g., the dashboard fast links and main grid) and icon-only buttons for actions like copy, mic input, and audio controls. While `div`s with `onclick` are functional, they completely exclude keyboard and screen reader users. Additionally, Material Symbols often read out their textual names (e.g., "mic" or "content_copy") confusingly without `aria-hidden="true"` and an overarching `aria-label`.
+**Action:** When working on interactive UI elements in this repository, always ensure that clickable `div`s get `role="button"`, `tabindex="0"`, an explicit `onkeydown` handler for Enter/Space, and a `focus-visible` ring. Icon-only buttons must have `aria-label`s and `aria-hidden="true"` on the icon itself. Added these improvements to `index.html`, `Audioconsult.html`, and `Imaging.html`.
