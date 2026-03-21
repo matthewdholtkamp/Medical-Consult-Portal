@@ -415,7 +415,8 @@
                                     placeholder="Clinical query (e.g., 'Latest STEMI guidelines')..." 
                                     class="w-full bg-transparent text-slate-200 placeholder-slate-500 p-4 pl-5 min-h-[60px] max-h-48 resize-none focus:outline-none rounded-2xl"
                                     rows="1"
-                                    oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px'"></textarea>
+                                    onkeydown="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); if(this.value.trim()) askDrHoltkamp(); }"
+                                    oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px'; document.getElementById('askBtn').disabled = !this.value.trim();"></textarea>
                                 
                                 <div class="flex items-center justify-between px-3 pb-3 relative">
                                     <!-- New Question Button (Hidden by default) -->
@@ -440,7 +441,7 @@
                                             <span class="text-xs font-medium text-slate-400 group-hover:text-slate-200 transition-colors">Thinking Mode</span>
                                         </label>
 
-                                        <button id="askBtn" onclick="askDrHoltkamp()" class="px-4 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-500 transition-all shadow-lg shadow-blue-900/20 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none">
+                                        <button id="askBtn" onclick="askDrHoltkamp()" disabled class="px-4 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-500 transition-all shadow-lg shadow-blue-900/20 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none">
                                             Ask Dr. H
                                         </button>
                                     </div>
@@ -735,6 +736,7 @@ Your mission is to provide authoritative, evidence-based clinical decision suppo
 
         window.resetConsult = function() {
             document.getElementById('chatInput').value = '';
+            document.getElementById('askBtn').disabled = true;
             const conversationHistory = document.getElementById('conversationHistory');
             conversationHistory.innerHTML = '';
             document.getElementById('newQuestionBtn').classList.add('hidden');
@@ -886,7 +888,7 @@ Your mission is to provide authoritative, evidence-based clinical decision suppo
                     </div>
                 `);
             } finally {
-                askBtn.disabled = false;
+                askBtn.disabled = !document.getElementById('chatInput').value.trim();
                 askBtn.textContent = "Ask Dr. H";
                 newQuestionBtn.classList.remove('hidden');
             }
