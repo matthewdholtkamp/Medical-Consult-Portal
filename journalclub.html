@@ -55,27 +55,32 @@
             letter-spacing: -0.025em;
         }
         .prose-invert h2 {
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 1.5em;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             padding-bottom: 8px;
+            margin-top: 2.5em;
             font-size: 1.5rem;
         }
         .prose-invert h3 {
             font-size: 1.25rem;
+            margin-top: 1.5em;
             color: #ffb74d; /* Softer orange for subheads */
         }
         .prose-invert strong {
-            color: var(--accent);
-            font-weight: 600;
+            color: #f1f5f9; /* Slate-100: Much brighter to pop against dark background */
+            font-weight: 700;
         }
         .prose-invert ul {
             list-style-type: none;
             padding-left: 0;
-            margin: 16px 0;
+            margin: 20px 0;
         }
         .prose-invert li {
-            margin-bottom: 8px;
+            margin-bottom: 12px;
             padding-left: 24px;
             position: relative;
+            line-height: 1.8;
         }
         .prose-invert li::before {
             content: "•";
@@ -85,7 +90,7 @@
             left: 0;
         }
         .prose-invert p {
-            margin-bottom: 1.5em; /* Increased breathing room */
+            margin-bottom: 1.75em; /* Increased breathing room */
             line-height: 1.9; /* Enhanced readability */
             color: #d1d5db;
             font-size: 1.1rem; /* Slightly larger base text */
@@ -449,6 +454,15 @@
                     <button type="submit" class="bg-orange-600 hover:bg-orange-500 text-white px-6 rounded-lg font-bold">Ask</button>
                 </form>
                 <div id="followUpResult" class="mt-4 p-4 bg-slate-800/50 rounded-lg border-l-4 border-orange-500 hidden prose prose-invert max-w-none"></div>
+            </div>
+
+            <!-- Clinical Bottom Line (Dynamic) -->
+            <div id="clinicalBottomLine" class="hidden mb-8 p-6 bg-gradient-to-r from-orange-900/40 to-slate-900/40 border-l-4 border-orange-500 rounded-r-lg shadow-lg">
+                <h3 class="text-sm font-bold text-orange-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" /></svg>
+                    Clinical Bottom Line
+                </h3>
+                <div id="clinicalBottomLineContent" class="prose prose-invert max-w-none text-lg text-slate-200 font-medium leading-relaxed"></div>
             </div>
 
             <!-- Content Tabs -->
@@ -960,14 +974,32 @@
                     '\\[CONSENSUS: EVOLVING\\]': '<span class="badge badge-consensus badge-consensus-evolving"><i class="fas fa-flask mr-1"></i> Evolving Data</span>'
                 };
 
-                Object.keys(badgeMap).forEach(key => {
-                    const regex = new RegExp(key, 'g');
-                    htmlSummary = htmlSummary.replace(regex, badgeMap[key]);
-                });
+                // Apply badges helper function
+                const applyBadges = (htmlString) => {
+                    let result = htmlString;
+                    Object.keys(badgeMap).forEach(key => {
+                        const regex = new RegExp(key, 'g');
+                        result = result.replace(regex, badgeMap[key]);
+                    });
+                    return result;
+                };
+
+                htmlSummary = applyBadges(htmlSummary);
 
                 el('summaryContent').innerHTML = htmlSummary;
                 el('planContent').innerHTML = marked.parse(cleanPlan);
                 el('refsContent').innerText = cleanRefs.trim();
+
+                // Extract Executive Summary for Bottom Line Display
+                const execSummaryMatch = cleanSummary.match(/##\s*Executive Summary\s*\n([\s\S]*?)(?=\n##\s|$)/i);
+                if (execSummaryMatch && execSummaryMatch[1].trim()) {
+                    let execHtml = marked.parse(execSummaryMatch[1].trim());
+                    execHtml = applyBadges(execHtml);
+                    el('clinicalBottomLineContent').innerHTML = execHtml;
+                    el('clinicalBottomLine').classList.remove('hidden');
+                } else {
+                    el('clinicalBottomLine').classList.add('hidden');
+                }
 
                 // Typeset Math
                 MathJax.typesetPromise();
