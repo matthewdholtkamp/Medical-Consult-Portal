@@ -49,6 +49,34 @@
             <p class="text-lg text-slate-400">Decision Support for Inpatient & Outpatient Cardiac Care</p>
         </header>
 
+        <!-- PROGRESS STEPPER -->
+        <div class="mb-8 hidden sm:block">
+            <div class="flex items-center justify-between relative">
+                <div class="absolute left-0 top-1/2 transform -translate-y-1/2 w-full h-1 bg-slate-700 z-0"></div>
+                <div id="progress-bar" class="absolute left-0 top-1/2 transform -translate-y-1/2 h-1 bg-red-600 z-0 transition-all duration-500 w-0"></div>
+
+                <div class="relative z-10 flex flex-col items-center step-indicator" id="step-1-ind">
+                    <div class="w-10 h-10 rounded-full bg-red-600 text-white flex items-center justify-center font-bold border-4 border-slate-900 shadow-[0_0_10px_rgba(220,38,38,0.5)] transition-colors duration-300">1</div>
+                    <div class="text-xs font-semibold text-slate-300 mt-2 uppercase tracking-wider">Intake</div>
+                </div>
+
+                <div class="relative z-10 flex flex-col items-center step-indicator" id="step-2-ind">
+                    <div class="w-10 h-10 rounded-full bg-slate-800 text-slate-500 flex items-center justify-center font-bold border-4 border-slate-900 transition-colors duration-300">2</div>
+                    <div class="text-xs font-semibold text-slate-500 mt-2 uppercase tracking-wider transition-colors duration-300">Q&A</div>
+                </div>
+
+                <div class="relative z-10 flex flex-col items-center step-indicator" id="step-3-ind">
+                    <div class="w-10 h-10 rounded-full bg-slate-800 text-slate-500 flex items-center justify-center font-bold border-4 border-slate-900 transition-colors duration-300">3</div>
+                    <div class="text-xs font-semibold text-slate-500 mt-2 uppercase tracking-wider transition-colors duration-300">Review</div>
+                </div>
+
+                <div class="relative z-10 flex flex-col items-center step-indicator" id="step-4-ind">
+                    <div class="w-10 h-10 rounded-full bg-slate-800 text-slate-500 flex items-center justify-center font-bold border-4 border-slate-900 transition-colors duration-300">4</div>
+                    <div class="text-xs font-semibold text-slate-500 mt-2 uppercase tracking-wider transition-colors duration-300">Final Note</div>
+                </div>
+            </div>
+        </div>
+
         <!-- HIPAA WARNING (UPDATED WITH 18 IDENTIFIERS) -->
         <details class="bg-slate-800 border border-slate-600 rounded-md mb-8 shadow-lg">
             <summary class="font-semibold text-slate-300 p-4 cursor-pointer text-lg flex justify-between items-center hover:bg-slate-750 transition">
@@ -110,38 +138,22 @@
                      </select>
                 </div>
 
-                <!-- Chief Complaint Area -->
+                <!-- Unified Clinical Data Area -->
                 <div class="mb-6">
-                    <label for="initial-symptoms" class="block text-sm font-bold text-white mb-1">Consult Reason / HPI (De-identified):</label>
-                    <textarea id="initial-symptoms" rows="3" class="w-full p-3 border border-slate-600 rounded-md focus:ring-2 focus:ring-red-500 focus:outline-none bg-slate-700 text-white placeholder-slate-400" placeholder="e.g., 65M w/ Hx of HFpEF presenting with increasing dyspnea, orthopnea, and 5lb weight gain over 3 days."></textarea>
-                    <div class="flex justify-end">
-                        <button type="button" id="example-complaint-btn" class="mt-1 text-xs text-red-400 hover:text-red-300 underline">Load CHF Exacerbation Case</button>
-                    </div>
-                </div>
+                    <label for="clinical-vignette" class="block text-sm font-bold text-white mb-2">Clinical Information (Paste H&P or Vignette):</label>
+                    <p class="text-xs text-slate-400 mb-3">Include all relevant de-identified data (HPI, Vitals, Exam, Meds, Labs, etc.)</p>
+                    <textarea id="clinical-vignette" rows="8" class="w-full p-4 border border-slate-600 rounded-lg focus:ring-2 focus:ring-red-500 focus:outline-none bg-slate-700 text-white placeholder-slate-400 text-base leading-relaxed overflow-hidden resize-none" placeholder="e.g., 65M w/ Hx of HFpEF presenting with increasing dyspnea, orthopnea, and 5lb weight gain over 3 days. &#10;&#10;Vitals: BP 140/90, HR 110 Irreg, RR 22, O2 92% RA&#10;Exam: JVD, +2 pitting edema..."></textarea>
 
-                <!-- Vitals & History Grid -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                    <div>
-                        <label for="vitals-input" class="block text-xs font-bold text-slate-400 uppercase mb-1">Vitals (Include Orthostatics if avail)</label>
-                        <textarea id="vitals-input" rows="2" class="w-full p-2 border border-slate-600 rounded-md bg-slate-900 text-white text-sm focus:border-red-500 outline-none" placeholder="BP 140/90, HR 110 Irreg, RR 22, O2 92% RA"></textarea>
-                    </div>
-                    <div>
-                        <label for="pe-input" class="block text-xs font-bold text-slate-400 uppercase mb-1">Cardiac Exam / Physical Findings</label>
-                        <textarea id="pe-input" rows="2" class="w-full p-2 border border-slate-600 rounded-md bg-slate-900 text-white text-sm focus:border-red-500 outline-none" placeholder="JVD, Murmurs, Rubs, Gallops, Edema, Lung sounds"></textarea>
-                    </div>
-                    <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-                         <div>
-                            <label for="meds-input" class="block text-xs font-bold text-slate-400 uppercase mb-1">Current Meds</label>
-                            <input type="text" id="meds-input" class="w-full p-2 border border-slate-600 rounded-md bg-slate-900 text-white text-sm focus:border-red-500 outline-none" placeholder="e.g., Lasix 40mg bid, Eliquis 5mg bid">
-                         </div>
-                         <div>
-                             <label for="prior-labs-input" class="block text-xs font-bold text-slate-400 uppercase mb-1">Relevant Labs / EKG / Echo</label>
-                             <input type="text" id="prior-labs-input" class="w-full p-2 border border-slate-600 rounded-md bg-slate-900 text-white text-sm focus:border-red-500 outline-none" placeholder="Trop, BNP, K+, Cr, recent EF%">
-                         </div>
-                    </div>
-                    <div class="md:col-span-2">
-                         <label for="pmh-input" class="block text-xs font-bold text-slate-400 uppercase mb-1">Pertinent Cardiac History</label>
-                         <input type="text" id="pmh-input" class="w-full p-2 border border-slate-600 rounded-md bg-slate-900 text-white text-sm focus:border-red-500 outline-none" placeholder="CAD (stents?), AFib, HF, HTN, Fam Hx Sudden Death">
+                    <div class="flex flex-wrap gap-2 mt-4" id="quick-fill-container">
+                        <button type="button" class="quick-fill-btn text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 py-1.5 px-3 rounded-full border border-slate-600 transition-colors" data-template="hf">
+                            <i class="fa-solid fa-water mr-1 text-blue-400"></i> Heart Failure
+                        </button>
+                        <button type="button" class="quick-fill-btn text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 py-1.5 px-3 rounded-full border border-slate-600 transition-colors" data-template="acs">
+                            <i class="fa-solid fa-heart-crack mr-1 text-red-400"></i> ACS / Chest Pain
+                        </button>
+                        <button type="button" class="quick-fill-btn text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 py-1.5 px-3 rounded-full border border-slate-600 transition-colors" data-template="afib">
+                            <i class="fa-solid fa-wave-square mr-1 text-yellow-400"></i> Atrial Fibrillation
+                        </button>
                     </div>
                 </div>
 
@@ -154,6 +166,16 @@
 
         <!-- SECTION 2: CARDIOLOGIST FOLLOW-UP QUESTIONS -->
         <div id="section-questions" class="hidden bg-slate-800 p-6 rounded-lg shadow-xl border border-slate-700">
+            <!-- Read-Only Context Header -->
+            <details class="bg-slate-900 border border-slate-700 rounded-md mb-6 group">
+                <summary class="font-semibold text-slate-300 p-3 cursor-pointer text-sm flex justify-between items-center hover:bg-slate-800 transition rounded-md">
+                    <span class="flex items-center"><i class="fa-solid fa-file-medical text-slate-400 mr-2"></i> Patient Context</span>
+                    <i class="fa-solid fa-chevron-down text-slate-500 group-open:rotate-180 transition-transform"></i>
+                </summary>
+                <div class="p-3 border-t border-slate-700 text-sm text-slate-300 bg-slate-800/50 max-h-48 overflow-y-auto whitespace-pre-wrap font-mono leading-relaxed" id="context-panel-questions">
+                </div>
+            </details>
+
             <h2 class="text-xl font-semibold mb-4 text-white border-b border-slate-700 pb-2 flex items-center">
                 <i class="fa-solid fa-user-doctor text-red-500 mr-2"></i> Consultant Follow-up
             </h2>
@@ -172,6 +194,16 @@
 
         <!-- SECTION 3: PLAN REVIEW -->
         <div id="section-review" class="hidden bg-slate-800 p-6 rounded-lg shadow-xl border border-slate-700">
+             <!-- Read-Only Context Header -->
+             <details class="bg-slate-900 border border-slate-700 rounded-md mb-6 group">
+                <summary class="font-semibold text-slate-300 p-3 cursor-pointer text-sm flex justify-between items-center hover:bg-slate-800 transition rounded-md">
+                    <span class="flex items-center"><i class="fa-solid fa-file-medical text-slate-400 mr-2"></i> Patient Context</span>
+                    <i class="fa-solid fa-chevron-down text-slate-500 group-open:rotate-180 transition-transform"></i>
+                </summary>
+                <div class="p-3 border-t border-slate-700 text-sm text-slate-300 bg-slate-800/50 max-h-48 overflow-y-auto whitespace-pre-wrap font-mono leading-relaxed" id="context-panel-review">
+                </div>
+            </details>
+
              <!-- Critical Safety Banner -->
              <div id="safety-banner-container" class="hidden mb-6">
                 <!-- Populated via JS -->
@@ -291,12 +323,7 @@
         
         let state = {
             location: "",
-            chiefComplaint: "",
-            vitals: "",
-            physicalExam: "",
-            pmh: "",
-            meds: "",
-            labs: "",
+            clinicalVignette: "",
             questions: [],
             answers: [],
             generatedPlan: null
@@ -323,9 +350,50 @@
             if (isLoading) Object.values(sections).forEach(s => s.classList.add('hidden'));
         }
 
+        function updateStepper(activeSection) {
+            const steps = ['intake', 'questions', 'review', 'final'];
+            const activeIndex = steps.indexOf(activeSection);
+
+            // Update progress bar width
+            const progressBar = document.getElementById('progress-bar');
+            if(progressBar) {
+                progressBar.style.width = activeIndex === 0 ? '0%' :
+                                        activeIndex === 1 ? '33%' :
+                                        activeIndex === 2 ? '66%' : '100%';
+            }
+
+            // Update step indicators
+            steps.forEach((step, index) => {
+                const ind = document.getElementById(`step-${index + 1}-ind`);
+                if (!ind) return;
+
+                const circle = ind.querySelector('div:first-child');
+                const text = ind.querySelector('div:last-child');
+
+                if (index <= activeIndex) {
+                    circle.className = "w-10 h-10 rounded-full bg-red-600 text-white flex items-center justify-center font-bold border-4 border-slate-900 shadow-[0_0_10px_rgba(220,38,38,0.5)] transition-colors duration-300";
+                    text.className = "text-xs font-semibold text-slate-300 mt-2 uppercase tracking-wider transition-colors duration-300";
+                } else {
+                    circle.className = "w-10 h-10 rounded-full bg-slate-800 text-slate-500 flex items-center justify-center font-bold border-4 border-slate-900 transition-colors duration-300";
+                    text.className = "text-xs font-semibold text-slate-500 mt-2 uppercase tracking-wider transition-colors duration-300";
+                }
+            });
+        }
+
         function showSection(name) {
             showLoading(false);
+
+            // Populate Context Panels if moving past intake
+            if(name === 'questions' || name === 'review') {
+                const ctxText = `Location: ${state.location}\n\nClinical Information:\n${state.clinicalVignette}`;
+                const panelQ = document.getElementById('context-panel-questions');
+                const panelR = document.getElementById('context-panel-review');
+                if(panelQ) panelQ.textContent = ctxText;
+                if(panelR) panelR.textContent = ctxText;
+            }
+
             Object.keys(sections).forEach(key => sections[key].classList.toggle('hidden', key !== name));
+            updateStepper(name);
             window.scrollTo(0, 0);
         }
 
@@ -387,14 +455,31 @@
 
 
         // --- Step 1: Intake Logic ---
-        document.getElementById('example-complaint-btn').addEventListener('click', () => {
-            document.getElementById('location-input').value = "Inpatient";
-            document.getElementById('initial-symptoms').value = "68M admitted last night for ADHF. Now complaining of increasing SOB while lying flat and palpitations. Urine output low overnight.";
-            document.getElementById('vitals-input').value = "BP 105/70, HR 115 Irreg (AFib?), RR 24, 89% RA -> 94% 2L NC";
-            document.getElementById('pe-input').value = "Bibasilar crackles 1/2 way up fields. +3 pitting edema BL LE. JVD to mandible.";
-            document.getElementById('meds-input').value = "Home: Metoprolol 25, Lisinopril 10. Inpatient: Lasix 20mg IV x1 given 4 hours ago.";
-            document.getElementById('prior-labs-input').value = "Cr 1.4 (Baseline 1.0), K 4.2, BNP 1200.";
-            document.getElementById('pmh-input').value = "HFpEF, HTN, Hx AFib (not anticoagulated recently).";
+
+        // Quick Fill Templates
+        const templates = {
+            hf: "68M admitted last night for ADHF. Now complaining of increasing SOB while lying flat and palpitations. Urine output low overnight.\n\nVitals: BP 105/70, HR 115 Irreg, RR 24, 89% RA -> 94% 2L NC\nExam: Bibasilar crackles 1/2 way up fields. +3 pitting edema BL LE. JVD to mandible.\nMeds: Home: Metoprolol 25, Lisinopril 10. Inpatient: Lasix 20mg IV x1 given 4 hours ago.\nLabs: Cr 1.4 (Baseline 1.0), K 4.2, BNP 1200.\nPMH: HFpEF, HTN, Hx AFib (not anticoagulated recently).",
+            acs: "55M presenting with acute onset, crushing substernal chest pain radiating to left arm, started 1 hour ago. Diaphoretic and nauseous.\n\nVitals: BP 160/95, HR 98, RR 18, 98% RA\nExam: Anxious, diaphoretic. Heart regular rate and rhythm, no murmurs. Lungs clear.\nMeds: None prior.\nLabs/EKG: EKG shows 2mm ST elevation in V2-V5. Troponin pending.\nPMH: HTN, Hyperlipidemia, Smoker (1 PPD).",
+            afib: "72F presenting with palpitations and fatigue for the past 2 days. Denies chest pain or shortness of breath. No syncope.\n\nVitals: BP 130/80, HR 140-150 Irreg, RR 16, 96% RA\nExam: Tachycardic, irregularly irregular rhythm. Lungs clear. No edema.\nMeds: Metoprolol tartrate 25mg BID.\nLabs/EKG: EKG shows Atrial Fibrillation with RVR. TSH normal, K 4.0.\nPMH: Paroxysmal AFib, HTN, Type 2 DM."
+        };
+
+        // Auto-resize textarea
+        const autoResizeTextarea = (el) => {
+            el.style.height = 'auto';
+            el.style.height = el.scrollHeight + 'px';
+        };
+
+        const clinicalInput = document.getElementById('clinical-vignette');
+        clinicalInput.addEventListener('input', () => autoResizeTextarea(clinicalInput));
+
+        document.querySelectorAll('.quick-fill-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const templateKey = e.currentTarget.dataset.template;
+                if (templates[templateKey]) {
+                    clinicalInput.value = templates[templateKey];
+                    autoResizeTextarea(clinicalInput);
+                }
+            });
         });
 
         document.getElementById('intake-form').addEventListener('submit', async (e) => {
@@ -402,14 +487,9 @@
             clearErrors();
             
             state.location = document.getElementById('location-input').value;
-            state.chiefComplaint = document.getElementById('initial-symptoms').value.trim();
-            state.vitals = document.getElementById('vitals-input').value;
-            state.physicalExam = document.getElementById('pe-input').value;
-            state.meds = document.getElementById('meds-input').value;
-            state.labs = document.getElementById('prior-labs-input').value;
-            state.pmh = document.getElementById('pmh-input').value;
+            state.clinicalVignette = document.getElementById('clinical-vignette').value.trim();
 
-            if(state.chiefComplaint.length < 5) return showError('intake', 'Please enter a valid clinical complaint.');
+            if(state.clinicalVignette.length < 10) return showError('intake', 'Please enter a detailed clinical vignette.');
 
             showLoading(true, "Consulting Cardiologist AI...");
 
@@ -423,11 +503,7 @@
 
             const context = `
                 Location: ${state.location}
-                CC: ${state.chiefComplaint}
-                Vitals: ${state.vitals}
-                Exam: ${state.physicalExam}
-                Meds: ${state.meds}
-                History: ${state.pmh}
+                Clinical Data: ${state.clinicalVignette}
             `;
 
             try {
@@ -464,9 +540,8 @@
             showLoading(true, "Developing Clinical Plan...");
 
             // Context construction
-            let contextData = `Location: ${state.location}\nCC: ${state.chiefComplaint}\n`;
+            let contextData = `Location: ${state.location}\nClinical Data: ${state.clinicalVignette}\n`;
             state.answers.forEach(item => contextData += `Q: ${item.q} A: ${item.a}\n`);
-            contextData += `\nVitals: ${state.vitals}\nPE: ${state.physicalExam}\nPMH: ${state.pmh}\nMeds: ${state.meds}\nLabs: ${state.labs}`;
 
             const systemPrompt = `
                 You are a Senior Board-Certified Cardiology Consultant.
@@ -627,11 +702,8 @@
             note += `ROS / Focused History:\n`;
             soap.subjective.ros_bullets.forEach(b => note += `- ${b}\n`);
             
-            note += `\nOBJECTIVE:\n`;
-            note += `Vitals: ${state.vitals || "--"}\n`;
-            note += `Exam: ${state.physicalExam || "--"}\n`;
-            note += `Meds: ${state.meds || "--"}\n`;
-            note += `Labs/Data: ${state.labs || "--"}\n`;
+            note += `\nCLINICAL DATA:\n`;
+            note += `${state.clinicalVignette}\n`;
 
             note += `\nASSESSMENT & PATHOPHYSIOLOGY:\n`;
             note += `${soap.assessment.synthesis_statement}\n\n`;
@@ -680,7 +752,7 @@
             box.textContent = "Consulting literature...";
             
             const sys = "You are a concise Cardiologist. Answer the specific question based on the context of the current patient.";
-            const ctx = `Patient Context: ${state.chiefComplaint}. Plan: ${JSON.stringify(state.generatedPlan.plan)}. Question: ${q}`;
+            const ctx = `Patient Context: ${state.clinicalVignette}. Plan: ${JSON.stringify(state.generatedPlan.plan)}. Question: ${q}`;
             
             try {
                 const ans = await callGeminiText(sys, ctx);
@@ -714,12 +786,7 @@
         function updateStateFromDOM() {
             // Helper to ensure state object matches current inputs
             state.location = document.getElementById('location-input').value;
-            state.chiefComplaint = document.getElementById('initial-symptoms').value;
-            state.vitals = document.getElementById('vitals-input').value;
-            state.physicalExam = document.getElementById('pe-input').value;
-            state.meds = document.getElementById('meds-input').value;
-            state.labs = document.getElementById('prior-labs-input').value;
-            state.pmh = document.getElementById('pmh-input').value;
+            state.clinicalVignette = document.getElementById('clinical-vignette').value;
 
             // Capture answers from DOM
             const questionInputs = document.querySelectorAll('#questions-container input');
@@ -746,12 +813,18 @@
 
             // Restore Intake Inputs
             document.getElementById('location-input').value = state.location || "Inpatient";
-            document.getElementById('initial-symptoms').value = state.chiefComplaint || "";
-            document.getElementById('vitals-input').value = state.vitals || "";
-            document.getElementById('pe-input').value = state.physicalExam || "";
-            document.getElementById('meds-input').value = state.meds || "";
-            document.getElementById('prior-labs-input').value = state.labs || "";
-            document.getElementById('pmh-input').value = state.pmh || "";
+
+            // Backwards compatibility with old state format
+            if(state.chiefComplaint && !state.clinicalVignette) {
+                 state.clinicalVignette = `CC/HPI: ${state.chiefComplaint}\n`;
+                 if(state.vitals) state.clinicalVignette += `Vitals: ${state.vitals}\n`;
+                 if(state.physicalExam) state.clinicalVignette += `Exam: ${state.physicalExam}\n`;
+                 if(state.meds) state.clinicalVignette += `Meds: ${state.meds}\n`;
+                 if(state.labs) state.clinicalVignette += `Labs: ${state.labs}\n`;
+                 if(state.pmh) state.clinicalVignette += `PMH: ${state.pmh}\n`;
+            }
+
+            document.getElementById('clinical-vignette').value = state.clinicalVignette || "";
 
             // Restore Questions if they exist
             if (state.questions && state.questions.length > 0) {
