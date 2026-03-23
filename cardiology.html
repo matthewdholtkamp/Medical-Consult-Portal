@@ -494,11 +494,11 @@
             showLoading(true, "Consulting Cardiologist AI...");
 
             const prompt = `
-                You are an expert Board-Certified Cardiologist. 
-                Review the intake data.
-                Generate 3-5 targeted, high-level cardiology questions to refine the differential (ACS, HF, Arrhythmia, Valvular).
-                Focus on risk stratification and determining "sick vs not sick".
-                Provide 3-4 highly probable multiple-choice options for each question to make it easy for the user to answer.
+                You are an expert Board-Certified Cardiologist acting as a consultant.
+                Review the intake data provided by a referring provider.
+                Generate 3-5 targeted, high-level cardiology questions to clarify the clinical picture, gather missing essential details, and refine the differential (ACS, HF, Arrhythmia, Valvular).
+                DO NOT ask educational, theoretical, or quiz-like questions (e.g., "What is the most common cause of..."). The goal is strictly to gather missing clinical data from the provider to determine risk stratification and "sick vs not sick" status for this specific patient.
+                Provide 3-4 highly probable multiple-choice options for each question to make it easy for the referring provider to answer.
                 Return strictly JSON: { "questions": [ { "question": "Question text?", "options": ["Option A", "Option B", "Option C"] } ] }
             `;
 
