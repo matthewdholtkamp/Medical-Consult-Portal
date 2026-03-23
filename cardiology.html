@@ -214,7 +214,17 @@
                 <!-- Populated via JS -->
              </div>
 
-            <h2 class="text-xl font-semibold mb-4 text-white pb-2">Review Recommendations</h2>
+            <h2 class="text-xl font-semibold mb-4 text-white pb-2 flex justify-between items-center">
+                <span>Review Recommendations</span>
+                <details id="thinking-process-details" class="bg-slate-900 border border-slate-700 rounded-md text-sm cursor-pointer ml-4">
+                    <summary class="font-semibold text-slate-300 p-2 hover:bg-slate-800 transition rounded-md flex items-center outline-none select-none">
+                        <i class="fa-solid fa-brain text-purple-400 mr-2"></i> Thinking Process
+                        <i class="fa-solid fa-chevron-down text-slate-500 ml-2 transition-transform"></i>
+                    </summary>
+                    <div class="p-4 border-t border-slate-700 text-slate-300 bg-slate-800/50 max-h-96 overflow-y-auto whitespace-pre-wrap font-mono leading-relaxed" id="thinking-process-content">
+                    </div>
+                </details>
+            </h2>
             <div id="error-message-review" class="error-box hidden"></div>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
@@ -222,8 +232,19 @@
                 <div class="space-y-4">
                     <div class="bg-slate-900 p-4 rounded border border-slate-700">
                         <h3 class="font-bold text-red-400 mb-2 uppercase text-xs tracking-wider">Assessment & Pathophysiology</h3>
-                        <p id="review-diagnosis" class="text-sm text-slate-200 mb-3 italic leading-relaxed"></p>
-                        <h4 class="text-xs font-bold text-slate-500 uppercase mt-2">Differential Diagnosis</h4>
+                        <p id="review-diagnosis" class="text-sm text-slate-200 mb-4 italic leading-relaxed"></p>
+
+                        <div class="mb-4">
+                            <h4 class="text-xs font-bold text-slate-500 uppercase">Hemodynamic Profile</h4>
+                            <div id="review-hemodynamics" class="text-sm text-slate-300 bg-slate-800 p-2 rounded border border-slate-700 mt-1 font-mono"></div>
+                        </div>
+
+                        <div class="mb-4">
+                            <h4 class="text-xs font-bold text-slate-500 uppercase">Risk Stratification</h4>
+                            <ul id="review-risk-scores" class="text-sm text-slate-300 bg-slate-800 p-2 rounded border border-slate-700 mt-1 list-none space-y-1 font-mono"></ul>
+                        </div>
+
+                        <h4 class="text-xs font-bold text-slate-500 uppercase mt-4">Differential Diagnosis</h4>
                         <ul id="review-ddx-list" class="text-sm text-slate-400 list-none space-y-2 mt-2"></ul>
                     </div>
 
@@ -240,17 +261,22 @@
                 <div class="space-y-4">
                     <div class="bg-slate-900 p-4 rounded border border-slate-700">
                         <h3 class="font-bold text-red-400 mb-2 uppercase text-xs tracking-wider flex justify-between">
-                            <span>Medications & Interventions</span>
+                            <span>Acute Medications & Interventions</span>
                             <span id="meds-tag" class="text-[10px] px-2 rounded bg-slate-800 border border-slate-600"></span>
                         </h3>
-                        <div id="review-treatment-container" class="space-y-2"></div>
+                        <div id="review-treatment-container" class="space-y-2 mb-4"></div>
+
+                        <h3 class="font-bold text-purple-400 mb-2 uppercase text-xs tracking-wider border-t border-slate-700 pt-3 flex items-center">
+                            <i class="fa-solid fa-pills mr-2"></i> GDMT Optimization
+                        </h3>
+                        <div id="review-gdmt-container" class="space-y-2"></div>
                     </div>
 
                     <div class="bg-slate-900 p-4 rounded border border-slate-700">
                         <h3 class="font-bold text-red-400 mb-2 uppercase text-xs tracking-wider">Disposition & Follow-up</h3>
-                        <div class="mb-3">
-                            <div class="text-xs text-slate-500 block mb-1">Primary Recommendation</div>
-                            <div id="review-disposition" class="text-white font-medium bg-slate-800 p-2 rounded border border-slate-600"></div>
+                        <div class="mb-4">
+                            <div class="text-xs text-slate-500 block mb-1">Disposition Options</div>
+                            <div id="review-disposition-container" class="space-y-2"></div>
                         </div>
                          <div id="review-profile-container" class="space-y-2"></div>
                          <div class="mt-3 flex items-center bg-slate-800 p-2 rounded">
@@ -418,7 +444,12 @@
             const payload = {
                 contents: [{ parts: [{ text: userQuery }] }],
                 systemInstruction: { parts: [{ text: systemPrompt }] },
-                generationConfig: { responseMimeType: "application/json" }
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    thinkingConfig: {
+                        thinkingBudget: 1024
+                    }
+                }
             };
 
             try {
@@ -612,14 +643,14 @@
             state.answers.forEach(item => contextData += `Q: ${item.q} A: ${item.a}\n`);
 
             const systemPrompt = `
-                You are a Senior Board-Certified Cardiology Consultant.
-                Your task is to generate a high-precision, guideline-directed SOAP note and Clinical Plan using **Chain of Verification (CoV)**.
+                You are a Subspecialty Board-Certified Cardiology Consultant.
+                Your task is to generate a rigorous, high-precision, subspecialist-level cardiology consultation note using deep **Chain of Thought (CoT)** reasoning.
 
-                ### Clinical Reasoning Framework (Chain of Verification):
-                1.  **Draft & Verify:** Internally generate the plan, then explicitly cross-check it against current guidelines (e.g., 2024 ESC/AHA).
-                2.  **Risk Stratification:** Determine "Sick" (Unstable/Inpatient) vs "Not Sick" (Stable/Outpatient).
-                3.  **Guideline Application:** Apply specific criteria (e.g., HEART Score, TIMI, CHA2DS2-VASc, GDMT).
-                4.  **Pathophysiology:** Link findings to the underlying mechanism.
+                ### Advanced Cardiology Reasoning Framework:
+                1.  **Hemodynamic Profiling:** Assess filling pressures, perfusion status (e.g., warm/dry, cold/wet), and structural constraints.
+                2.  **Risk Stratification:** Explicitly calculate relevant clinical scores (e.g., CHA2DS2-VASc, HAS-BLED, TIMI, HEART, GRACE, ASCVD risk) based on the provided data.
+                3.  **GDMT Optimization:** Identify opportunities to initiate, titrate, or adjust Guideline-Directed Medical Therapy (e.g., ARNI, SGLT2i, MRA, Beta-blockers for HFrEF).
+                4.  **Evidence-Based Practice:** Cross-reference decisions against recent AHA/ACC or ESC guidelines (e.g., 2022 AHA/ACC/HFSA Heart Failure, 2021 ESC CVD Prevention).
 
                 ### Safety Protocol:
                 - **RED FLAGS:** Explicitly check for life-threatening conditions (e.g., STEMI, Vtach, Dissection, Tamponade, Severe Hyperkalemia).
@@ -627,32 +658,37 @@
 
                 ### Critical Location Rules:
                 1.  **Patient Location:** ${state.location}.
-                2.  **Inpatient:** Order aggressive IV therapies (Diuretics, Anti-arrhythmics), Telemetry.
-                3.  **Outpatient:** Oral meds only. If unstable -> Recommend ADMIT.
+                2.  **Inpatient:** Order aggressive IV therapies (Diuretics, Anti-arrhythmics, Inotropes), invasive monitoring if needed, Telemetry.
+                3.  **Outpatient:** Oral meds only. If unstable or high risk -> Recommend ADMIT.
 
                 ### Output Requirements (JSON):
-                -   **Treatment:** Must be PRESCRIPTIVE (Drug, Dose, Route, Freq). Example: "Lasix 40mg IV BID".
-                -   **Assessment:** Must include the "Synthesis Statement" explaining the *why* (pathophysiology).
-                -   **DDx:** Ranked by likelihood.
+                -   **Thinking Process:** You MUST populate "thinking_process" with an extremely detailed narrative of your step-by-step diagnostic reasoning, score calculations, and logic for GDMT selection.
+                -   **Extensive Menus:** For "disposition", "workup", "treatment", and "gdmt_optimization", provide a comprehensive menu of options (e.g., 5-8 options each). Use "is_primary": true for the essential, immediate actions and "is_primary": false for secondary/alternative options the provider might consider.
+                -   **Treatment:** Must be PRESCRIPTIVE (Drug, Dose, Route, Freq). Example: "Bumetanide 1mg IV BID".
+                -   **Assessment:** Must include the "Synthesis Statement" explaining the precise subspecialty pathophysiology.
 
                 ${COV_INSTRUCTIONS}
 
                 OUTPUT JSON SCHEMA:
                 {
+                    "thinking_process": "Detailed internal reasoning narrative explaining pathophysiology, score calculation logic, and treatment decisions.",
                     "subjective": { "hpi_paragraph": "string", "ros_bullets": ["string"] },
                     "red_flags": ["string"],
                     "assessment": { 
-                        "synthesis_statement": "Summary of cardiac status INCLUDING brief pathophysiology explaining the 'why' behind the plan.", 
+                        "synthesis_statement": "Subspecialist summary of cardiac status INCLUDING deep pathophysiology.",
+                        "hemodynamic_profile": "Assessment of volume and perfusion status (e.g., 'Warm and Wet', 'Euvolemic').",
+                        "risk_stratification": ["string (e.g., 'CHA2DS2-VASc: 3 (Age>75, HTN) -> 3.2% stroke risk')"],
                         "ddx": [ {"name": "string", "icd10": "string", "desc": "string", "likelihood": "High/Med/Low"} ] 
                     },
                     "plan": {
-                        "disposition": "string (e.g. Continue Inpatient Care, Discharge Home, Admit)",
-                        "workup": ["string (Specific Labs, Imaging, Consults)"],
-                        "treatment": ["string (Medication Name with EXACT Dose/Route/Frequency, Interventions)"],
+                        "disposition": [ {"intervention": "string (e.g., Admit to Telemetry, Discharge Home, Transfer to CVICU)", "is_primary": boolean} ],
+                        "workup": [ {"intervention": "string (Specific Labs, Echo parameters, Cath lab)", "is_primary": boolean} ],
+                        "treatment": [ {"intervention": "string (Acute interventions/meds)", "is_primary": boolean} ],
+                        "gdmt_optimization": [ {"intervention": "string (Specific guideline-directed long-term therapies to start/stop/titrate)", "is_primary": boolean} ],
                         "profile": { 
                             "days": number, 
-                            "limitations": ["string"], 
-                            "instructions": ["string"] 
+                            "limitations": [ {"intervention": "string", "is_primary": boolean} ],
+                            "instructions": [ {"intervention": "string", "is_primary": boolean} ]
                         }
                     },
                     "references": [ {"title": "string", "url": "string"} ]
@@ -713,8 +749,20 @@
                 medsTag.textContent = "Oral Only";
             }
 
+            // Thinking Process
+            document.getElementById('thinking-process-content').textContent = soap.thinking_process || "No detailed thinking process provided by the model.";
+
             // Assessment
             document.getElementById('review-diagnosis').textContent = soap.assessment.synthesis_statement;
+            document.getElementById('review-hemodynamics').textContent = soap.assessment.hemodynamic_profile || "N/A";
+
+            const scoresList = document.getElementById('review-risk-scores');
+            if(soap.assessment.risk_stratification && soap.assessment.risk_stratification.length > 0) {
+                scoresList.innerHTML = soap.assessment.risk_stratification.map(s => `<li><i class="fa-solid fa-calculator text-slate-500 mr-2"></i> ${s}</li>`).join('');
+            } else {
+                scoresList.innerHTML = `<li>No specific scores calculated.</li>`;
+            }
+
             document.getElementById('review-ddx-list').innerHTML = soap.assessment.ddx.map(d => `
                 <li class="flex justify-between items-start border-b border-slate-800 pb-1">
                     <span><span class="text-red-400 font-bold">${d.name}</span> <span class="text-slate-600 text-xs">[${d.icd10}]</span></span>
@@ -724,19 +772,29 @@
             // Checkboxes Helper
             const createCheckboxes = (id, items, cat) => {
                 const el = document.getElementById(id);
-                el.innerHTML = items.map(i => `
+                if(!items || items.length === 0) {
+                    el.innerHTML = '<span class="text-slate-500 text-sm italic">None</span>';
+                    return;
+                }
+                el.innerHTML = items.map(i => {
+                    // Handle both new object format {intervention, is_primary} and legacy string format
+                    const val = typeof i === 'object' ? i.intervention : i;
+                    const isChecked = typeof i === 'object' ? i.is_primary : true;
+
+                    return `
                     <label class="flex items-start space-x-3 p-2 hover:bg-slate-800 rounded cursor-pointer group">
-                        <input type="checkbox" checked class="mt-1 form-checkbox text-red-600 rounded bg-slate-700 border-slate-500 focus:ring-red-500 item-check" data-cat="${cat}" data-val="${i}">
-                        <span class="text-sm text-slate-300 group-hover:text-white transition-colors">${i}</span>
+                        <input type="checkbox" ${isChecked ? 'checked' : ''} class="mt-1 form-checkbox text-red-600 rounded bg-slate-700 border-slate-500 focus:ring-red-500 item-check" data-cat="${cat}" data-val="${val}">
+                        <span class="text-sm ${isChecked ? 'text-slate-200 font-medium' : 'text-slate-400'} group-hover:text-white transition-colors leading-snug">${val}</span>
                     </label>
-                `).join('');
+                `}).join('');
             };
 
             createCheckboxes('review-workup-container', soap.plan.workup, 'workup');
             createCheckboxes('review-treatment-container', soap.plan.treatment, 'treatment');
+            createCheckboxes('review-gdmt-container', soap.plan.gdmt_optimization, 'gdmt');
+            createCheckboxes('review-disposition-container', soap.plan.disposition, 'disposition');
             createCheckboxes('review-profile-container', soap.plan.profile.limitations, 'profile');
             
-            document.getElementById('review-disposition').textContent = soap.plan.disposition;
             document.getElementById('profile-days').value = soap.plan.profile.days;
         }
 
@@ -751,8 +809,10 @@
             const soap = state.generatedPlan;
             const getChecked = (cat) => Array.from(document.querySelectorAll(`.item-check[data-cat="${cat}"]:checked`)).map(c => c.dataset.val);
             
+            const selDisposition = getChecked('disposition');
             const selWorkup = getChecked('workup');
             const selTx = getChecked('treatment');
+            const selGdmt = getChecked('gdmt');
             const selProf = getChecked('profile');
             const days = document.getElementById('profile-days').value;
 
@@ -775,25 +835,51 @@
 
             note += `\nASSESSMENT & PATHOPHYSIOLOGY:\n`;
             note += `${soap.assessment.synthesis_statement}\n\n`;
+
+            if(soap.assessment.hemodynamic_profile) {
+                note += `Hemodynamic Profile: ${soap.assessment.hemodynamic_profile}\n\n`;
+            }
+
+            if(soap.assessment.risk_stratification && soap.assessment.risk_stratification.length > 0) {
+                note += `Risk Stratification / Scores:\n`;
+                soap.assessment.risk_stratification.forEach(s => note += `- ${s}\n`);
+                note += `\n`;
+            }
+
             note += `Differential Diagnosis:\n`;
             soap.assessment.ddx.forEach(d => note += `- ${d.name} [${d.icd10}] (${d.likelihood})\n`);
 
             note += `\nPLAN:\n`;
-            note += `Disposition: ${soap.plan.disposition}\n\n`;
+            note += `Disposition:\n`;
+            if(selDisposition.length) selDisposition.forEach(i => note += `• ${i}\n`);
+            else note += `(None selected)\n\n`;
             
-            note += `Workup / Orders:\n`;
+            note += `\nWorkup / Orders:\n`;
             if(selWorkup.length) selWorkup.forEach(i => note += `• ${i}\n`);
             else note += `(None selected)\n`;
 
-            note += `\nTreatment / Interventions:\n`;
+            note += `\nAcute Medications / Interventions:\n`;
             if(selTx.length) selTx.forEach(i => note += `• ${i}\n`);
+            else note += `(None selected)\n`;
+
+            note += `\nGDMT Optimization:\n`;
+            if(selGdmt.length) selGdmt.forEach(i => note += `• ${i}\n`);
             else note += `(None selected)\n`;
 
             note += `\nProfile / Limitations (${days} days):\n`;
             if(selProf.length) selProf.forEach(i => note += `- ${i}\n`);
             
             note += `\nPatient Instructions:\n`;
-            if (soap.plan.profile.instructions) { if (Array.isArray(soap.plan.profile.instructions)) { soap.plan.profile.instructions.forEach(i => note += `- ${i}\n`); } else { note += `- ${soap.plan.profile.instructions}\n`; } }
+            if (soap.plan.profile.instructions) {
+                if (Array.isArray(soap.plan.profile.instructions)) {
+                    soap.plan.profile.instructions.forEach(i => {
+                        const val = typeof i === 'object' ? i.intervention : i;
+                        note += `- ${val}\n`;
+                    });
+                } else {
+                    note += `- ${soap.plan.profile.instructions}\n`;
+                }
+            }
 
             document.getElementById('final-note-content').textContent = note;
 
@@ -878,8 +964,10 @@
             // Capture plan modifications (checkboxes) if review section is active
             if (document.querySelectorAll('.item-check').length > 0) {
                 state.planModifications = {
+                    disposition: Array.from(document.querySelectorAll('.item-check[data-cat="disposition"]:checked')).map(c => c.dataset.val),
                     workup: Array.from(document.querySelectorAll('.item-check[data-cat="workup"]:checked')).map(c => c.dataset.val),
                     treatment: Array.from(document.querySelectorAll('.item-check[data-cat="treatment"]:checked')).map(c => c.dataset.val),
+                    gdmt: Array.from(document.querySelectorAll('.item-check[data-cat="gdmt"]:checked')).map(c => c.dataset.val),
                     profile: Array.from(document.querySelectorAll('.item-check[data-cat="profile"]:checked')).map(c => c.dataset.val),
                     days: document.getElementById('profile-days').value
                 };
@@ -994,8 +1082,10 @@
                         });
                     };
 
+                    applyChecks('disposition', state.planModifications.disposition);
                     applyChecks('workup', state.planModifications.workup);
                     applyChecks('treatment', state.planModifications.treatment);
+                    applyChecks('gdmt', state.planModifications.gdmt);
                     applyChecks('profile', state.planModifications.profile);
                 }
 
