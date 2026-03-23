@@ -242,7 +242,7 @@
             </div>
         </div>
         <!-- Mobile Close Button -->
-        <button onclick="toggleSidebar()" class="md:hidden text-slate-400 hover:text-white" aria-label="Close sidebar">
+        <button onclick="toggleSidebar()" class="md:hidden text-slate-400 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded p-1" aria-label="Close sidebar">
             <span class="material-symbols-outlined">close</span>
         </button>
     </div>
@@ -345,7 +345,7 @@
         <!-- Left: Page Title -->
         <div class="flex items-center gap-4">
             <!-- Added onclick to toggle Sidebar -->
-            <button onclick="toggleSidebar()" class="md:hidden text-slate-400 hover:text-white" aria-label="Open sidebar">
+            <button onclick="toggleSidebar()" class="md:hidden text-slate-400 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded p-1" aria-label="Open sidebar">
                 <span class="material-symbols-outlined">menu</span>
             </button>
             <h1 id="page-title" class="text-xl font-bold text-slate-100">
@@ -364,8 +364,11 @@
                         id="top-search-input"
                         aria-label="Search protocols"
                         oninput="handleGlobalSearch(this.value)"
-                        class="glass-search border border-slate-700 text-slate-200 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2 placeholder-slate-500 transition-all focus:bg-slate-800" 
+                        class="glass-search border border-slate-700 text-slate-200 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 pr-10 p-2 placeholder-slate-500 transition-all focus:bg-slate-800"
                         placeholder="Search protocols...">
+                 <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                    <kbd class="hidden sm:inline-block border border-slate-600 rounded px-1.5 text-[10px] font-medium text-slate-400 bg-slate-800/50">/</kbd>
+                 </div>
             </div>
             
             <!-- External Link Button -->
@@ -1226,6 +1229,18 @@ ADTMC, ADTMC+, Internal Medicine, ICU, Cardiology, Neurology, Pediatrics, Psychi
     </script>
 
     <script>
+    // Global Keyboard Shortcut for Search
+    document.addEventListener('keydown', function(event) {
+        // Only trigger if we aren't already focused on an input/textarea
+        if (event.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+            event.preventDefault(); // Prevent '/' from being typed in the search box initially
+            const searchInput = document.getElementById('top-search-input');
+            if (searchInput) {
+                searchInput.focus();
+            }
+        }
+    });
+
     // --- GLOBAL SEARCH LOGIC ---
     function handleGlobalSearch(term) {
         const resultsContainer = document.getElementById("search-results-container");
