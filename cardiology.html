@@ -274,9 +274,9 @@
 
                     <div class="bg-slate-900 p-4 rounded border border-slate-700">
                         <h3 class="font-bold text-red-400 mb-2 uppercase text-xs tracking-wider">Disposition & Follow-up</h3>
-                        <div class="mb-3">
-                            <div class="text-xs text-slate-500 block mb-1">Primary Recommendation</div>
-                            <div id="review-disposition" class="text-white font-medium bg-slate-800 p-2 rounded border border-slate-600"></div>
+                        <div class="mb-4">
+                            <div class="text-xs text-slate-500 block mb-1">Disposition Options</div>
+                            <div id="review-disposition-container" class="space-y-2"></div>
                         </div>
                          <div id="review-profile-container" class="space-y-2"></div>
                          <div class="mt-3 flex items-center bg-slate-800 p-2 rounded">
@@ -663,6 +663,7 @@
 
                 ### Output Requirements (JSON):
                 -   **Thinking Process:** You MUST populate "thinking_process" with an extremely detailed narrative of your step-by-step diagnostic reasoning, score calculations, and logic for GDMT selection.
+                -   **Extensive Menus:** For "disposition", "workup", "treatment", and "gdmt_optimization", provide a comprehensive menu of options (e.g., 5-8 options each). Use "is_primary": true for the essential, immediate actions and "is_primary": false for secondary/alternative options the provider might consider.
                 -   **Treatment:** Must be PRESCRIPTIVE (Drug, Dose, Route, Freq). Example: "Bumetanide 1mg IV BID".
                 -   **Assessment:** Must include the "Synthesis Statement" explaining the precise subspecialty pathophysiology.
 
@@ -680,14 +681,14 @@
                         "ddx": [ {"name": "string", "icd10": "string", "desc": "string", "likelihood": "High/Med/Low"} ] 
                     },
                     "plan": {
-                        "disposition": "string",
-                        "workup": ["string (Specific Labs, Echo parameters, Cath lab)"],
-                        "treatment": ["string (Acute interventions/meds)"],
-                        "gdmt_optimization": ["string (Specific guideline-directed long-term therapies to start/stop/titrate)"],
+                        "disposition": [ {"intervention": "string (e.g., Admit to Telemetry, Discharge Home, Transfer to CVICU)", "is_primary": boolean} ],
+                        "workup": [ {"intervention": "string (Specific Labs, Echo parameters, Cath lab)", "is_primary": boolean} ],
+                        "treatment": [ {"intervention": "string (Acute interventions/meds)", "is_primary": boolean} ],
+                        "gdmt_optimization": [ {"intervention": "string (Specific guideline-directed long-term therapies to start/stop/titrate)", "is_primary": boolean} ],
                         "profile": { 
                             "days": number, 
-                            "limitations": ["string"], 
-                            "instructions": ["string"] 
+                            "limitations": [ {"intervention": "string", "is_primary": boolean} ],
+                            "instructions": [ {"intervention": "string", "is_primary": boolean} ]
                         }
                     },
                     "references": [ {"title": "string", "url": "string"} ]
@@ -775,20 +776,25 @@
                     el.innerHTML = '<span class="text-slate-500 text-sm italic">None</span>';
                     return;
                 }
-                el.innerHTML = items.map(i => `
+                el.innerHTML = items.map(i => {
+                    // Handle both new object format {intervention, is_primary} and legacy string format
+                    const val = typeof i === 'object' ? i.intervention : i;
+                    const isChecked = typeof i === 'object' ? i.is_primary : true;
+
+                    return `
                     <label class="flex items-start space-x-3 p-2 hover:bg-slate-800 rounded cursor-pointer group">
-                        <input type="checkbox" checked class="mt-1 form-checkbox text-red-600 rounded bg-slate-700 border-slate-500 focus:ring-red-500 item-check" data-cat="${cat}" data-val="${i}">
-                        <span class="text-sm text-slate-300 group-hover:text-white transition-colors">${i}</span>
+                        <input type="checkbox" ${isChecked ? 'checked' : ''} class="mt-1 form-checkbox text-red-600 rounded bg-slate-700 border-slate-500 focus:ring-red-500 item-check" data-cat="${cat}" data-val="${val}">
+                        <span class="text-sm ${isChecked ? 'text-slate-200 font-medium' : 'text-slate-400'} group-hover:text-white transition-colors leading-snug">${val}</span>
                     </label>
-                `).join('');
+                `}).join('');
             };
 
             createCheckboxes('review-workup-container', soap.plan.workup, 'workup');
             createCheckboxes('review-treatment-container', soap.plan.treatment, 'treatment');
             createCheckboxes('review-gdmt-container', soap.plan.gdmt_optimization, 'gdmt');
+            createCheckboxes('review-disposition-container', soap.plan.disposition, 'disposition');
             createCheckboxes('review-profile-container', soap.plan.profile.limitations, 'profile');
             
-            document.getElementById('review-disposition').textContent = soap.plan.disposition;
             document.getElementById('profile-days').value = soap.plan.profile.days;
         }
 
@@ -803,6 +809,7 @@
             const soap = state.generatedPlan;
             const getChecked = (cat) => Array.from(document.querySelectorAll(`.item-check[data-cat="${cat}"]:checked`)).map(c => c.dataset.val);
             
+            const selDisposition = getChecked('disposition');
             const selWorkup = getChecked('workup');
             const selTx = getChecked('treatment');
             const selGdmt = getChecked('gdmt');
@@ -843,9 +850,11 @@
             soap.assessment.ddx.forEach(d => note += `- ${d.name} [${d.icd10}] (${d.likelihood})\n`);
 
             note += `\nPLAN:\n`;
-            note += `Disposition: ${soap.plan.disposition}\n\n`;
+            note += `Disposition:\n`;
+            if(selDisposition.length) selDisposition.forEach(i => note += `• ${i}\n`);
+            else note += `(None selected)\n\n`;
             
-            note += `Workup / Orders:\n`;
+            note += `\nWorkup / Orders:\n`;
             if(selWorkup.length) selWorkup.forEach(i => note += `• ${i}\n`);
             else note += `(None selected)\n`;
 
@@ -861,7 +870,16 @@
             if(selProf.length) selProf.forEach(i => note += `- ${i}\n`);
             
             note += `\nPatient Instructions:\n`;
-            if (soap.plan.profile.instructions) { if (Array.isArray(soap.plan.profile.instructions)) { soap.plan.profile.instructions.forEach(i => note += `- ${i}\n`); } else { note += `- ${soap.plan.profile.instructions}\n`; } }
+            if (soap.plan.profile.instructions) {
+                if (Array.isArray(soap.plan.profile.instructions)) {
+                    soap.plan.profile.instructions.forEach(i => {
+                        const val = typeof i === 'object' ? i.intervention : i;
+                        note += `- ${val}\n`;
+                    });
+                } else {
+                    note += `- ${soap.plan.profile.instructions}\n`;
+                }
+            }
 
             document.getElementById('final-note-content').textContent = note;
 
@@ -946,6 +964,7 @@
             // Capture plan modifications (checkboxes) if review section is active
             if (document.querySelectorAll('.item-check').length > 0) {
                 state.planModifications = {
+                    disposition: Array.from(document.querySelectorAll('.item-check[data-cat="disposition"]:checked')).map(c => c.dataset.val),
                     workup: Array.from(document.querySelectorAll('.item-check[data-cat="workup"]:checked')).map(c => c.dataset.val),
                     treatment: Array.from(document.querySelectorAll('.item-check[data-cat="treatment"]:checked')).map(c => c.dataset.val),
                     gdmt: Array.from(document.querySelectorAll('.item-check[data-cat="gdmt"]:checked')).map(c => c.dataset.val),
@@ -1063,6 +1082,7 @@
                         });
                     };
 
+                    applyChecks('disposition', state.planModifications.disposition);
                     applyChecks('workup', state.planModifications.workup);
                     applyChecks('treatment', state.planModifications.treatment);
                     applyChecks('gdmt', state.planModifications.gdmt);
