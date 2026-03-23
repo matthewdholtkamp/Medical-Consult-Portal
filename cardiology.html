@@ -447,7 +447,7 @@
                 generationConfig: {
                     responseMimeType: "application/json",
                     thinkingConfig: {
-                        thinkingBudget: 8192
+                        thinkingBudget: 32768
                     }
                 }
             };
@@ -480,7 +480,7 @@
                 systemInstruction: { parts: [{ text: systemPrompt }] },
                 generationConfig: {
                     thinkingConfig: {
-                        thinkingBudget: 8192
+                        thinkingBudget: 32768
                     }
                 }
             };
@@ -648,14 +648,14 @@
             state.answers.forEach(item => contextData += `Q: ${item.q} A: ${item.a}\n`);
 
             const systemPrompt = `
-                You are a Subspecialty Board-Certified Cardiology Consultant.
-                Your task is to generate a rigorous, high-precision, subspecialist-level cardiology consultation note using deep **Chain of Thought (CoT)** reasoning.
+                You are a Subspecialty Board-Certified Cardiology Consultant operating at the highest level of clinical reasoning, akin to a flagship "Pro" AI model.
+                Your task is to generate an exhaustive, highly detailed, rigorous subspecialist-level cardiology consultation note using deep **Chain of Thought (CoT)** reasoning.
 
                 ### Advanced Cardiology Reasoning Framework:
-                1.  **Hemodynamic Profiling:** Assess filling pressures, perfusion status (e.g., warm/dry, cold/wet), and structural constraints.
-                2.  **Risk Stratification:** Explicitly calculate relevant clinical scores (e.g., CHA2DS2-VASc, HAS-BLED, TIMI, HEART, GRACE, ASCVD risk) based on the provided data.
-                3.  **GDMT Optimization:** Identify opportunities to initiate, titrate, or adjust Guideline-Directed Medical Therapy (e.g., ARNI, SGLT2i, MRA, Beta-blockers for HFrEF).
-                4.  **Evidence-Based Practice:** Cross-reference decisions against recent AHA/ACC or ESC guidelines (e.g., 2022 AHA/ACC/HFSA Heart Failure, 2021 ESC CVD Prevention).
+                1.  **Hemodynamic Profiling:** Deeply assess filling pressures, perfusion status (e.g., warm/dry, cold/wet), and structural constraints. Provide physiological justification.
+                2.  **Risk Stratification:** Explicitly calculate ALL relevant clinical scores (e.g., CHA2DS2-VASc, HAS-BLED, TIMI, HEART, GRACE, ASCVD risk) based on the provided data, detailing the points for each variable.
+                3.  **GDMT Optimization:** Exhaustively identify opportunities to initiate, titrate, or adjust Guideline-Directed Medical Therapy. Detail the survival benefit and specific trial data (e.g., PARADIGM-HF, DAPA-HF).
+                4.  **Evidence-Based Practice:** Cross-reference every single decision against recent AHA/ACC or ESC guidelines. Cite specific class of recommendation and level of evidence where applicable.
 
                 ### Safety Protocol:
                 - **RED FLAGS:** Explicitly check for life-threatening conditions (e.g., STEMI, Vtach, Dissection, Tamponade, Severe Hyperkalemia).
@@ -667,29 +667,30 @@
                 3.  **Outpatient:** Oral meds only. If unstable or high risk -> Recommend ADMIT.
 
                 ### Output Requirements (JSON):
-                -   **Thinking Process:** You MUST populate "thinking_process" with an extremely detailed narrative of your step-by-step diagnostic reasoning, score calculations, and logic for GDMT selection.
-                -   **Extensive Menus:** For "disposition", "workup", "treatment", and "gdmt_optimization", provide a comprehensive menu of options (e.g., 5-8 options each). Use "is_primary": true for the essential, immediate actions and "is_primary": false for secondary/alternative options the provider might consider.
+                -   **Thinking Process:** You MUST populate "thinking_process" with an extremely long, narrative dissertation of your step-by-step diagnostic reasoning, score calculations, differential diagnosis winnowing, and logic for GDMT selection. It should be comprehensive.
+                -   **Extensive Menus:** For "disposition", "workup", "treatment", and "gdmt_optimization", provide a comprehensive menu of options (e.g., 5-8 options each). Use "is_primary": true for the essential, immediate actions.
+                -   **Rationale:** YOU MUST provide a deeply detailed "rationale" string for EVERY item in disposition, workup, treatment, and gdmt_optimization arrays. The rationale must explain the "why", citing guidelines, pathophysiology, and expected outcomes.
                 -   **Treatment:** Must be PRESCRIPTIVE (Drug, Dose, Route, Freq). Example: "Bumetanide 1mg IV BID".
-                -   **Assessment:** Must include the "Synthesis Statement" explaining the precise subspecialty pathophysiology.
+                -   **Assessment:** Must include the "Synthesis Statement" explaining the precise subspecialty pathophysiology in expansive detail.
 
                 ${COV_INSTRUCTIONS}
 
                 OUTPUT JSON SCHEMA:
                 {
-                    "thinking_process": "Detailed internal reasoning narrative explaining pathophysiology, score calculation logic, and treatment decisions.",
+                    "thinking_process": "Extremely detailed internal reasoning narrative explaining pathophysiology, score calculation logic, and exhaustive treatment decisions.",
                     "subjective": { "hpi_paragraph": "string", "ros_bullets": ["string"] },
                     "red_flags": ["string"],
                     "assessment": { 
-                        "synthesis_statement": "Subspecialist summary of cardiac status INCLUDING deep pathophysiology.",
-                        "hemodynamic_profile": "Assessment of volume and perfusion status (e.g., 'Warm and Wet', 'Euvolemic').",
-                        "risk_stratification": ["string (e.g., 'CHA2DS2-VASc: 3 (Age>75, HTN) -> 3.2% stroke risk')"],
+                        "synthesis_statement": "Deep subspecialist summary of cardiac status INCLUDING extensive pathophysiology.",
+                        "hemodynamic_profile": "Detailed assessment of volume and perfusion status.",
+                        "risk_stratification": ["string (e.g., 'CHA2DS2-VASc: 3 (Age>75, HTN) -> 3.2% stroke risk. Justification:...')"],
                         "ddx": [ {"name": "string", "icd10": "string", "desc": "string", "likelihood": "High/Med/Low"} ] 
                     },
                     "plan": {
-                        "disposition": [ {"intervention": "string (e.g., Admit to Telemetry, Discharge Home, Transfer to CVICU)", "is_primary": boolean} ],
-                        "workup": [ {"intervention": "string (Specific Labs, Echo parameters, Cath lab)", "is_primary": boolean} ],
-                        "treatment": [ {"intervention": "string (Acute interventions/meds)", "is_primary": boolean} ],
-                        "gdmt_optimization": [ {"intervention": "string (Specific guideline-directed long-term therapies to start/stop/titrate)", "is_primary": boolean} ],
+                        "disposition": [ {"intervention": "string (e.g., Admit to Telemetry)", "is_primary": boolean, "rationale": "Detailed explanation citing guidelines and pathophysiology"} ],
+                        "workup": [ {"intervention": "string (Specific Labs, Echo parameters, Cath lab)", "is_primary": boolean, "rationale": "Detailed explanation of why this test is ordered and what it will change clinically"} ],
+                        "treatment": [ {"intervention": "string (Acute interventions/meds)", "is_primary": boolean, "rationale": "Detailed explanation of drug mechanism, why this dose, and expected physiological change"} ],
+                        "gdmt_optimization": [ {"intervention": "string (Specific guideline-directed long-term therapies to start/stop/titrate)", "is_primary": boolean, "rationale": "Detailed explanation of guideline evidence (e.g. Class I, LOE A) and expected survival benefit"} ],
                         "profile": { 
                             "days": number, 
                             "limitations": [ {"intervention": "string", "is_primary": boolean} ],
@@ -782,16 +783,27 @@
                     return;
                 }
                 el.innerHTML = items.map(i => {
-                    // Handle both new object format {intervention, is_primary} and legacy string format
+                    // Handle both new object format {intervention, is_primary, rationale} and legacy string format
                     const val = typeof i === 'object' ? i.intervention : i;
                     const isChecked = typeof i === 'object' ? i.is_primary : true;
+                    const rationale = typeof i === 'object' && i.rationale ? i.rationale : null;
 
-                    return `
+                    // We encode the rationale into a data attribute so we can retrieve it in Step 4
+                    const safeRationale = rationale ? rationale.replace(/"/g, '&quot;') : '';
+
+                    let html = `
                     <label class="flex items-start space-x-3 p-2 hover:bg-slate-800 rounded cursor-pointer group">
-                        <input type="checkbox" ${isChecked ? 'checked' : ''} class="mt-1 form-checkbox text-red-600 rounded bg-slate-700 border-slate-500 focus:ring-red-500 item-check" data-cat="${cat}" data-val="${val}">
-                        <span class="text-sm ${isChecked ? 'text-slate-200 font-medium' : 'text-slate-400'} group-hover:text-white transition-colors leading-snug">${val}</span>
-                    </label>
-                `}).join('');
+                        <input type="checkbox" ${isChecked ? 'checked' : ''} class="mt-1 form-checkbox text-red-600 rounded bg-slate-700 border-slate-500 focus:ring-red-500 item-check" data-cat="${cat}" data-val="${val}" data-rationale="${safeRationale}">
+                        <div class="flex flex-col">
+                            <span class="text-sm ${isChecked ? 'text-slate-200 font-medium' : 'text-slate-400'} group-hover:text-white transition-colors leading-snug">${val}</span>`;
+
+                    if (rationale) {
+                        html += `<span class="text-xs text-slate-400 italic mt-1 leading-tight group-hover:text-slate-300 transition-colors"><i class="fa-solid fa-lightbulb text-yellow-500/50 mr-1"></i>${rationale}</span>`;
+                    }
+
+                    html += `</div></label>`;
+                    return html;
+                }).join('');
             };
 
             createCheckboxes('review-workup-container', soap.plan.workup, 'workup');
@@ -812,13 +824,18 @@
         // --- Step 4: Final Note ---
         function renderFinalNote() {
             const soap = state.generatedPlan;
-            const getChecked = (cat) => Array.from(document.querySelectorAll(`.item-check[data-cat="${cat}"]:checked`)).map(c => c.dataset.val);
+            // Get both the value and the rationale from the checked items
+            const getChecked = (cat) => Array.from(document.querySelectorAll(`.item-check[data-cat="${cat}"]:checked`)).map(c => ({
+                val: c.dataset.val,
+                rationale: c.dataset.rationale
+            }));
             
             const selDisposition = getChecked('disposition');
             const selWorkup = getChecked('workup');
             const selTx = getChecked('treatment');
             const selGdmt = getChecked('gdmt');
-            const selProf = getChecked('profile');
+            // For profile, we just need the values (no rationale in the prompt schema for profile)
+            const selProf = Array.from(document.querySelectorAll(`.item-check[data-cat="profile"]:checked`)).map(c => c.dataset.val);
             const days = document.getElementById('profile-days').value;
 
             const now = new Date();
@@ -854,21 +871,33 @@
             note += `Differential Diagnosis:\n`;
             soap.assessment.ddx.forEach(d => note += `- ${d.name} [${d.icd10}] (${d.likelihood})\n`);
 
+            // Helper function to format items with their rationales
+            const formatItems = (items) => {
+                let out = "";
+                items.forEach(i => {
+                    out += `• ${i.val}\n`;
+                    if (i.rationale) {
+                        out += `    Rationale: ${i.rationale}\n`;
+                    }
+                });
+                return out;
+            };
+
             note += `\nPLAN:\n`;
             note += `Disposition:\n`;
-            if(selDisposition.length) selDisposition.forEach(i => note += `• ${i}\n`);
+            if(selDisposition.length) note += formatItems(selDisposition);
             else note += `(None selected)\n\n`;
             
             note += `\nWorkup / Orders:\n`;
-            if(selWorkup.length) selWorkup.forEach(i => note += `• ${i}\n`);
+            if(selWorkup.length) note += formatItems(selWorkup);
             else note += `(None selected)\n`;
 
             note += `\nAcute Medications / Interventions:\n`;
-            if(selTx.length) selTx.forEach(i => note += `• ${i}\n`);
+            if(selTx.length) note += formatItems(selTx);
             else note += `(None selected)\n`;
 
             note += `\nGDMT Optimization:\n`;
-            if(selGdmt.length) selGdmt.forEach(i => note += `• ${i}\n`);
+            if(selGdmt.length) note += formatItems(selGdmt);
             else note += `(None selected)\n`;
 
             note += `\nProfile / Limitations (${days} days):\n`;
