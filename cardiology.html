@@ -50,29 +50,29 @@
         </header>
 
         <!-- PROGRESS STEPPER -->
-        <div class="mb-8 hidden sm:block">
+        <div class="mb-8 w-full max-w-3xl mx-auto px-2">
             <div class="flex items-center justify-between relative">
-                <div class="absolute left-0 top-1/2 transform -translate-y-1/2 w-full h-1 bg-slate-700 z-0"></div>
-                <div id="progress-bar" class="absolute left-0 top-1/2 transform -translate-y-1/2 h-1 bg-red-600 z-0 transition-all duration-500 w-0"></div>
+                <div class="absolute left-0 top-1/2 transform -translate-y-1/2 w-full h-2 rounded-full bg-slate-700 z-0"></div>
+                <div id="progress-bar" class="absolute left-0 top-1/2 transform -translate-y-1/2 h-2 rounded-full bg-red-600 z-0 transition-all duration-500 w-0"></div>
 
                 <div class="relative z-10 flex flex-col items-center step-indicator" id="step-1-ind">
-                    <div class="w-10 h-10 rounded-full bg-red-600 text-white flex items-center justify-center font-bold border-4 border-slate-900 shadow-[0_0_10px_rgba(220,38,38,0.5)] transition-colors duration-300">1</div>
-                    <div class="text-xs font-semibold text-slate-300 mt-2 uppercase tracking-wider">Intake</div>
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-red-600 text-white flex items-center justify-center font-bold border-4 border-slate-900 shadow-[0_0_10px_rgba(220,38,38,0.5)] transition-colors duration-300">1</div>
+                    <div class="text-[10px] sm:text-xs font-semibold text-slate-200 mt-2 uppercase tracking-wider text-center">Intake</div>
                 </div>
 
                 <div class="relative z-10 flex flex-col items-center step-indicator" id="step-2-ind">
-                    <div class="w-10 h-10 rounded-full bg-slate-800 text-slate-500 flex items-center justify-center font-bold border-4 border-slate-900 transition-colors duration-300">2</div>
-                    <div class="text-xs font-semibold text-slate-500 mt-2 uppercase tracking-wider transition-colors duration-300">Q&A</div>
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-slate-700 text-slate-300 flex items-center justify-center font-bold border-4 border-slate-900 transition-colors duration-300">2</div>
+                    <div class="text-[10px] sm:text-xs font-semibold text-slate-400 mt-2 uppercase tracking-wider transition-colors duration-300 text-center">Q&A</div>
                 </div>
 
                 <div class="relative z-10 flex flex-col items-center step-indicator" id="step-3-ind">
-                    <div class="w-10 h-10 rounded-full bg-slate-800 text-slate-500 flex items-center justify-center font-bold border-4 border-slate-900 transition-colors duration-300">3</div>
-                    <div class="text-xs font-semibold text-slate-500 mt-2 uppercase tracking-wider transition-colors duration-300">Review</div>
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-slate-700 text-slate-300 flex items-center justify-center font-bold border-4 border-slate-900 transition-colors duration-300">3</div>
+                    <div class="text-[10px] sm:text-xs font-semibold text-slate-400 mt-2 uppercase tracking-wider transition-colors duration-300 text-center">Review</div>
                 </div>
 
                 <div class="relative z-10 flex flex-col items-center step-indicator" id="step-4-ind">
-                    <div class="w-10 h-10 rounded-full bg-slate-800 text-slate-500 flex items-center justify-center font-bold border-4 border-slate-900 transition-colors duration-300">4</div>
-                    <div class="text-xs font-semibold text-slate-500 mt-2 uppercase tracking-wider transition-colors duration-300">Final Note</div>
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-slate-700 text-slate-300 flex items-center justify-center font-bold border-4 border-slate-900 transition-colors duration-300">4</div>
+                    <div class="text-[10px] sm:text-xs font-semibold text-slate-400 mt-2 uppercase tracking-wider transition-colors duration-300 text-center">Final Note</div>
                 </div>
             </div>
         </div>
@@ -397,11 +397,11 @@
                 const text = ind.querySelector('div:last-child');
 
                 if (index <= activeIndex) {
-                    circle.className = "w-10 h-10 rounded-full bg-red-600 text-white flex items-center justify-center font-bold border-4 border-slate-900 shadow-[0_0_10px_rgba(220,38,38,0.5)] transition-colors duration-300";
-                    text.className = "text-xs font-semibold text-slate-300 mt-2 uppercase tracking-wider transition-colors duration-300";
+                    circle.className = "w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-red-600 text-white flex items-center justify-center font-bold border-4 border-slate-900 shadow-[0_0_10px_rgba(220,38,38,0.5)] transition-colors duration-300";
+                    text.className = "text-[10px] sm:text-xs font-semibold text-slate-200 mt-2 uppercase tracking-wider text-center transition-colors duration-300";
                 } else {
-                    circle.className = "w-10 h-10 rounded-full bg-slate-800 text-slate-500 flex items-center justify-center font-bold border-4 border-slate-900 transition-colors duration-300";
-                    text.className = "text-xs font-semibold text-slate-500 mt-2 uppercase tracking-wider transition-colors duration-300";
+                    circle.className = "w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-slate-700 text-slate-300 flex items-center justify-center font-bold border-4 border-slate-900 transition-colors duration-300";
+                    text.className = "text-[10px] sm:text-xs font-semibold text-slate-400 mt-2 uppercase tracking-wider text-center transition-colors duration-300";
                 }
             });
         }
