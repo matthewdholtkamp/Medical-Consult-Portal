@@ -44,7 +44,7 @@
         
         <header class="text-center mb-8 border-b border-slate-700 pb-6">
             <div class="flex justify-center items-center mb-2">
-                <i class="fa-solid fa-brain text-indigo-500 text-4xl mr-3"></i>
+                <i aria-hidden="true" class="fa-solid fa-brain text-indigo-500 text-4xl mr-3"></i>
                 <h1 class="text-4xl font-bold text-white tracking-wider">AI NEUROLOGY <span class="text-indigo-500">CONSULTANT</span></h1>
             </div>
             <p class="text-lg text-slate-400">Small Military Community Hospital (General Neuro & Stroke Protocols)</p>
@@ -52,8 +52,8 @@
 
         <!-- HIPAA WARNING -->
         <details class="bg-slate-800 border border-slate-600 rounded-md mb-8 shadow-lg">
-            <summary class="font-semibold text-slate-300 p-4 cursor-pointer text-lg flex justify-between items-center hover:bg-slate-750 transition">
-                <span class="flex items-center"><i class="fa-solid fa-shield-halved mr-2 text-blue-400"></i> NON-HIPAA Compliance</span>
+            <summary class="font-semibold text-slate-300 p-4 cursor-pointer text-lg flex justify-between items-center hover:bg-slate-750 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-md">
+                <span class="flex items-center"><i aria-hidden="true" class="fa-solid fa-shield-halved mr-2 text-blue-400"></i> NON-HIPAA Compliance</span>
                 <span class="text-xs bg-red-900/80 text-red-100 px-2 py-1 rounded border border-red-500">Required Check</span>
             </summary>
             <div class="p-4 border-t border-slate-600 text-sm bg-slate-900/50">
@@ -100,7 +100,7 @@
                 <!-- Location Selection -->
                 <div class="mb-8 bg-slate-900 p-4 rounded-lg border border-slate-700 shadow-inner">
                      <label for="location-input" class="block text-sm font-bold text-indigo-400 mb-2 uppercase tracking-wide">
-                        <i class="fa-solid fa-hospital-user mr-1"></i> Patient Location
+                        <i aria-hidden="true" class="fa-solid fa-hospital-user mr-1"></i> Patient Location
                      </label>
                      <p class="text-xs text-slate-500 mb-2">Determines urgency, formulary, and transfer necessity.</p>
                      <select id="location-input" class="w-full p-3 border border-slate-600 rounded bg-slate-800 text-white focus:ring-2 focus:ring-indigo-500 outline-none text-lg">
@@ -149,7 +149,7 @@
 
                 <button type="submit" class="w-full bg-gradient-to-r from-indigo-700 to-indigo-600 text-white font-bold text-lg py-4 px-6 rounded-lg shadow-lg hover:from-indigo-600 hover:to-indigo-500 transition-all transform hover:-translate-y-1 flex items-center justify-center">
                     <span class="mr-3">Start Neurology Assessment</span>
-                    <i class="fa-solid fa-arrow-right"></i>
+                    <i aria-hidden="true" class="fa-solid fa-arrow-right"></i>
                 </button>
             </form>
         </div>
@@ -157,7 +157,7 @@
         <!-- SECTION 2: NEUROLOGIST FOLLOW-UP QUESTIONS -->
         <div id="section-questions" class="hidden bg-slate-800 p-6 rounded-lg shadow-xl border border-slate-700">
             <h2 class="text-xl font-semibold mb-4 text-white border-b border-slate-700 pb-2 flex items-center">
-                <i class="fa-solid fa-user-doctor text-indigo-500 mr-2"></i> Localization & Etiology
+                <i aria-hidden="true" class="fa-solid fa-user-doctor text-indigo-500 mr-2"></i> Localization & Etiology
             </h2>
             <p class="text-sm text-slate-400 mb-6 bg-slate-900 p-3 rounded border-l-4 border-indigo-500">
                 To refine the differential (Stroke vs Migraine vs Seizure vs TBI) and determine disposition/duty status, I need to clarify the following.
@@ -182,9 +182,9 @@
             <h2 class="text-xl font-semibold mb-4 text-white pb-2 flex justify-between items-center">
                 <span>Review Recommendations</span>
                 <details id="thinking-process-details" class="bg-slate-900 border border-slate-700 rounded-md text-sm cursor-pointer ml-4">
-                    <summary class="font-semibold text-slate-300 p-2 hover:bg-slate-800 transition rounded-md flex items-center outline-none select-none">
-                        <i class="fa-solid fa-brain text-indigo-400 mr-2"></i> Thinking Process
-                        <i class="fa-solid fa-chevron-down text-slate-500 ml-2 transition-transform"></i>
+                    <summary class="font-semibold text-slate-300 p-2 hover:bg-slate-800 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-md flex items-center select-none">
+                        <i aria-hidden="true" class="fa-solid fa-brain text-indigo-400 mr-2"></i> Thinking Process
+                        <i aria-hidden="true" class="fa-solid fa-chevron-down text-slate-500 ml-2 transition-transform"></i>
                     </summary>
                     <div class="p-4 border-t border-slate-700 text-slate-300 bg-slate-800/50 max-h-96 overflow-y-auto whitespace-pre-wrap font-mono leading-relaxed" id="thinking-process-content">
                     </div>
@@ -263,14 +263,14 @@
             </div>
             
             <button type="button" id="copy-note-btn" class="w-full bg-slate-700 hover:bg-slate-600 text-white font-bold text-lg py-4 px-6 rounded-lg shadow-lg border border-slate-500 flex items-center justify-center mb-6">
-                <i class="fa-regular fa-copy mr-2"></i> Copy to Clipboard
+                <i aria-hidden="true" class="fa-regular fa-copy mr-2"></i> Copy to Clipboard
             </button>
             <p id="copy-success" class="hidden mt-2 text-center text-green-400 font-semibold text-sm">Copied to clipboard!</p>
 
             <!-- References -->
             <div id="references-container" class="bg-slate-900 p-4 rounded border border-slate-600 mb-8">
                 <h3 class="text-indigo-400 font-bold mb-2 text-xs uppercase flex items-center">
-                    <i class="fa-solid fa-book-medical mr-2"></i> Clinical Guidelines & Evidence
+                    <i aria-hidden="true" class="fa-solid fa-book-medical mr-2"></i> Clinical Guidelines & Evidence
                 </h3>
                 <ul id="references-list" class="list-disc ml-5 text-sm space-y-2 text-slate-400"></ul>
             </div>
@@ -640,12 +640,12 @@
 
             if(state.location === 'ER' || state.location === 'Inpatient') {
                 alertBanner.className = "mb-6 p-4 rounded-md flex items-start bg-red-900/40 border border-red-600 text-red-200";
-                alertBanner.innerHTML = `<i class="fa-solid fa-truck-medical mt-1 mr-3"></i><div><strong>Small Hospital Acute Mode</strong><br><span class="text-sm">Capabilities: CT, TNK (Stroke), Cocktails (Migraine). No EVT/Neuro ICU.</span></div>`;
+                alertBanner.innerHTML = `<i aria-hidden="true" class="fa-solid fa-truck-medical mt-1 mr-3"></i><div><strong>Small Hospital Acute Mode</strong><br><span class="text-sm">Capabilities: CT, TNK (Stroke), Cocktails (Migraine). No EVT/Neuro ICU.</span></div>`;
                 workupTag.textContent = "STAT / Transfer";
                 medsTag.textContent = "IV / Acute";
             } else {
                 alertBanner.className = "mb-6 p-4 rounded-md flex items-start bg-green-900/40 border border-green-600 text-green-200";
-                alertBanner.innerHTML = `<i class="fa-solid fa-user-injured mt-1 mr-3"></i><div><strong>Clinic / Outpatient Mode</strong><br><span class="text-sm">Focus on oral meds, duty status profiles, and referrals.</span></div>`;
+                alertBanner.innerHTML = `<i aria-hidden="true" class="fa-solid fa-user-injured mt-1 mr-3"></i><div><strong>Clinic / Outpatient Mode</strong><br><span class="text-sm">Focus on oral meds, duty status profiles, and referrals.</span></div>`;
                 workupTag.textContent = "Ambulatory";
                 medsTag.textContent = "Oral Only";
             }
@@ -682,7 +682,7 @@
                             <span class="text-sm ${isChecked ? 'text-slate-200 font-medium' : 'text-slate-400'} group-hover:text-white transition-colors leading-snug">${val}</span>`;
 
                     if (rationale) {
-                        html += `<span class="text-xs text-slate-400 italic mt-1 leading-tight group-hover:text-slate-300 transition-colors"><i class="fa-solid fa-lightbulb text-yellow-500/50 mr-1"></i>${rationale}</span>`;
+                        html += `<span class="text-xs text-slate-400 italic mt-1 leading-tight group-hover:text-slate-300 transition-colors"><i aria-hidden="true" class="fa-solid fa-lightbulb text-yellow-500/50 mr-1"></i>${rationale}</span>`;
                     }
 
                     html += `</div></label>`;
