@@ -234,7 +234,7 @@
     <div class="p-6 pb-2 flex justify-between items-center">
         <div class="flex items-center gap-3">
             <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
-                <span class="material-symbols-outlined text-white text-[20px]">medical_services</span>
+                <span class="material-symbols-outlined text-white text-[20px]" aria-hidden="true">medical_services</span>
             </div>
             <div class="flex flex-col">
                 <span class="font-bold text-slate-100 tracking-tight">MedCon Portal</span>
@@ -243,7 +243,7 @@
         </div>
         <!-- Mobile Close Button -->
         <button onclick="toggleSidebar()" class="md:hidden text-slate-400 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded p-1" aria-label="Close sidebar">
-            <span class="material-symbols-outlined">close</span>
+            <span class="material-symbols-outlined" aria-hidden="true">close</span>
         </button>
     </div>
 
@@ -252,33 +252,33 @@
         
         <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 px-3">Main Menu</div>
         <nav class="space-y-1 mb-8">
-            <button onclick="switchView('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-white bg-blue-600/10 border border-blue-600/20 transition-all group text-left">
-                <span class="material-symbols-outlined text-[20px] text-blue-400">dashboard</span>
+            <button onclick="switchView('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-white bg-blue-600/10 border border-blue-600/20 transition-all group text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
+                <span class="material-symbols-outlined text-[20px] text-blue-400" aria-hidden="true">dashboard</span>
                 <span class="text-sm font-medium">Dashboard</span>
             </button>
 
-            <button onclick="switchView('consults')" id="nav-consults" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:bg-white/5 hover:text-white transition-all group text-left">
-                <span class="material-symbols-outlined text-[20px] text-slate-500 group-hover:text-teal-400">clinical_notes</span>
+            <button onclick="switchView('consults')" id="nav-consults" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:bg-white/5 hover:text-white transition-all group text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
+                <span class="material-symbols-outlined text-[20px] text-slate-500 group-hover:text-teal-400" aria-hidden="true">clinical_notes</span>
                 <span class="text-sm font-medium">Consult Generator</span>
             </button>
 
-            <button onclick="switchView('journal')" id="nav-journal" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:bg-white/5 hover:text-white transition-all group text-left">
-                <span class="material-symbols-outlined text-[20px] text-slate-500 group-hover:text-amber-400">menu_book</span>
+            <button onclick="switchView('journal')" id="nav-journal" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:bg-white/5 hover:text-white transition-all group text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
+                <span class="material-symbols-outlined text-[20px] text-slate-500 group-hover:text-amber-400" aria-hidden="true">menu_book</span>
                 <span class="text-sm font-medium">Journal Clubs</span>
             </button>
 
-            <button onclick="openFrame('Audioconsult.html', 'Live Ai Consults')" id="nav-live-consults" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:bg-white/5 hover:text-white transition-all group text-left">
-                <span class="material-symbols-outlined text-[20px] text-slate-500 group-hover:text-rose-400">mic</span>
+            <button onclick="openFrame('Audioconsult.html', 'Live Ai Consults')" id="nav-live-consults" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:bg-white/5 hover:text-white transition-all group text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
+                <span class="material-symbols-outlined text-[20px] text-slate-500 group-hover:text-rose-400" aria-hidden="true">mic</span>
                 <span class="text-sm font-medium">Live Ai Consults</span>
             </button>
 
-            <button onclick="openFrame('Imaging.html', 'AI Imaging Vision')" id="nav-imaging" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:bg-white/5 hover:text-white transition-all group text-left">
-                <span class="material-symbols-outlined text-[20px] text-slate-500 group-hover:text-indigo-400">imagesmode</span>
+            <button onclick="openFrame('Imaging.html', 'AI Imaging Vision')" id="nav-imaging" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:bg-white/5 hover:text-white transition-all group text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
+                <span class="material-symbols-outlined text-[20px] text-slate-500 group-hover:text-indigo-400" aria-hidden="true">imagesmode</span>
                 <span class="text-sm font-medium">AI Imaging Vision</span>
             </button>
 
-            <button onclick="openFrame('Cognitive.html', 'Cognitive Assessment')" id="nav-cognitive" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:bg-white/5 hover:text-white transition-all group text-left">
-                <span class="material-symbols-outlined text-[20px] text-slate-500 group-hover:text-indigo-400">psychology</span>
+            <button onclick="openFrame('Cognitive.html', 'Cognitive Assessment')" id="nav-cognitive" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:bg-white/5 hover:text-white transition-all group text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
+                <span class="material-symbols-outlined text-[20px] text-slate-500 group-hover:text-indigo-400" aria-hidden="true">psychology</span>
                 <span class="text-sm font-medium">Cognitive Assessment</span>
             </button>
         </nav>
@@ -286,46 +286,46 @@
         <!-- Quick References -->
         <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 px-3">Quick Reference</div>
         <nav class="space-y-1 mb-6">
-            <button onclick="window.open('https://www.express-scripts.com/frontend/open-enrollment/tricare/fst/#/', '_blank')" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-colors group text-left">
-                <span class="material-symbols-outlined text-[18px] text-slate-500 group-hover:text-slate-300">medication</span>
+            <button onclick="window.open('https://www.express-scripts.com/frontend/open-enrollment/tricare/fst/#/', '_blank')" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-colors group text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
+                <span class="material-symbols-outlined text-[18px] text-slate-500 group-hover:text-slate-300" aria-hidden="true">medication</span>
                 <span class="text-sm truncate">Formulary (DOD)</span>
             </button>
             
-            <button onclick="window.open('https://www.mdcalc.com/', '_blank')" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-colors group text-left">
-                <span class="material-symbols-outlined text-[18px] text-slate-500 group-hover:text-slate-300">calculate</span>
+            <button onclick="window.open('https://www.mdcalc.com/', '_blank')" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-colors group text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
+                <span class="material-symbols-outlined text-[18px] text-slate-500 group-hover:text-slate-300" aria-hidden="true">calculate</span>
                 <span class="text-sm truncate">MedCalc</span>
             </button>
 
-            <button onclick="window.open('https://www.openevidence.com/', '_blank')" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-colors group text-left">
-                <span class="material-symbols-outlined text-[18px] text-slate-500 group-hover:text-slate-300">search</span>
+            <button onclick="window.open('https://www.openevidence.com/', '_blank')" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-colors group text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
+                <span class="material-symbols-outlined text-[18px] text-slate-500 group-hover:text-slate-300" aria-hidden="true">search</span>
                 <span class="text-sm truncate">OpenEvidence</span>
             </button>
 
-            <button onclick="window.open('https://www.pubmed.ai/search/', '_blank')" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-colors group text-left">
-                <span class="material-symbols-outlined text-[18px] text-slate-500 group-hover:text-slate-300">science</span>
+            <button onclick="window.open('https://www.pubmed.ai/search/', '_blank')" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-colors group text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
+                <span class="material-symbols-outlined text-[18px] text-slate-500 group-hover:text-slate-300" aria-hidden="true">science</span>
                 <span class="text-sm truncate">PubMed AI</span>
             </button>
 
-            <button onclick="window.open('https://chat.genai.army.mil/login?code=CDAO-NORTHCOM/', '_blank')" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-colors group text-left">
-                <span class="material-symbols-outlined text-[18px] text-slate-500 group-hover:text-slate-300">military_tech</span>
+            <button onclick="window.open('https://chat.genai.army.mil/login?code=CDAO-NORTHCOM/', '_blank')" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-colors group text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
+                <span class="material-symbols-outlined text-[18px] text-slate-500 group-hover:text-slate-300" aria-hidden="true">military_tech</span>
                 <span class="text-sm truncate">Ask Sage</span>
             </button>
         </nav>
         <!-- Military (CAC Required) -->
         <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 px-3 border-t border-white/5 pt-4">Military (CAC Required)</div>
         <nav class="space-y-1">
-            <button onclick="window.open('https://avhe.health.mil', '_blank')" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-colors group text-left">
-                <span class="material-symbols-outlined text-[18px] text-slate-500 group-hover:text-slate-300">dns</span>
+            <button onclick="window.open('https://avhe.health.mil', '_blank')" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-colors group text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
+                <span class="material-symbols-outlined text-[18px] text-slate-500 group-hover:text-slate-300" aria-hidden="true">dns</span>
                 <span class="text-sm truncate">Genesis (EMR)</span>
             </button>
 
-            <button onclick="window.open('https://www.mods.army.mil', '_blank')" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-colors group text-left">
-                <span class="material-symbols-outlined text-[18px] text-slate-500 group-hover:text-slate-300">admin_panel_settings</span>
+            <button onclick="window.open('https://www.mods.army.mil', '_blank')" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-colors group text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
+                <span class="material-symbols-outlined text-[18px] text-slate-500 group-hover:text-slate-300" aria-hidden="true">admin_panel_settings</span>
                 <span class="text-sm truncate">MODS</span>
             </button>
 
-            <button onclick="window.open('https://client.wvd.azure.us/arm/webclient/index.html', '_blank')" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-colors group text-left">
-                <span class="material-symbols-outlined text-[18px] text-slate-500 group-hover:text-slate-300">monitor_heart</span>
+            <button onclick="window.open('https://client.wvd.azure.us/arm/webclient/index.html', '_blank')" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-colors group text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
+                <span class="material-symbols-outlined text-[18px] text-slate-500 group-hover:text-slate-300" aria-hidden="true">monitor_heart</span>
                 <span class="text-sm truncate">Army Remote Dash</span>
             </button>
         </nav>
@@ -346,7 +346,7 @@
         <div class="flex items-center gap-4">
             <!-- Added onclick to toggle Sidebar -->
             <button onclick="toggleSidebar()" class="md:hidden text-slate-400 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded p-1" aria-label="Open sidebar">
-                <span class="material-symbols-outlined">menu</span>
+                <span class="material-symbols-outlined" aria-hidden="true">menu</span>
             </button>
             <h1 id="page-title" class="text-xl font-bold text-slate-100">
                 Dashboard
@@ -358,7 +358,7 @@
              <!-- Generic Search (Now Active) -->
              <div class="relative w-64 hidden sm:block">
                  <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <span class="material-symbols-outlined text-slate-500 text-[18px]">search</span>
+                    <span class="material-symbols-outlined text-slate-500 text-[18px]" aria-hidden="true">search</span>
                  </div>
                  <input type="text" 
                         id="top-search-input"
@@ -373,13 +373,13 @@
             
             <!-- External Link Button -->
             <div id="frame-controls" class="hidden flex items-center gap-2">
-                <button onclick="switchView('dashboard')" class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-700 text-slate-300 hover:bg-slate-600 hover:text-white transition-colors text-xs font-medium">
-                    <span class="material-symbols-outlined text-[14px]">close</span>
+                <button onclick="switchView('dashboard')" class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-700 text-slate-300 hover:bg-slate-600 hover:text-white transition-colors text-xs font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
+                    <span class="material-symbols-outlined text-[14px]" aria-hidden="true">close</span>
                     <span>Close View</span>
                 </button>
-                <a id="external-link-btn" href="#" target="_blank" class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-blue-600/10 text-blue-400 hover:bg-blue-600 hover:text-white transition-colors text-xs font-medium border border-blue-600/20">
+                <a id="external-link-btn" href="#" target="_blank" class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-blue-600/10 text-blue-400 hover:bg-blue-600 hover:text-white transition-colors text-xs font-medium border border-blue-600/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
                     <span>Open in New Tab</span>
-                    <span class="material-symbols-outlined text-[14px]">open_in_new</span>
+                    <span class="material-symbols-outlined text-[14px]" aria-hidden="true">open_in_new</span>
                 </a>
             </div>
         </div>
@@ -514,7 +514,7 @@
                     <div class="relative z-10 flex flex-col md:flex-row gap-8 items-start">
                         <div class="flex-1 w-full">
                             <h2 class="text-2xl font-bold text-white mb-2 flex items-center gap-3">
-                                <span class="material-symbols-outlined text-teal-400">route</span>
+                                <span class="material-symbols-outlined text-teal-400" aria-hidden="true">route</span>
                                 Let me help you find the right doc
                             </h2>
                             <p class="text-slate-400 mb-6 text-sm">
@@ -545,7 +545,7 @@
                         <div id="routerResultContainer" class="flex-1 w-full hidden">
                              <div class="bg-slate-800/80 rounded-2xl p-6 border border-teal-500/30 shadow-lg relative h-full">
                                 <div id="routerLoading" class="hidden flex flex-col items-center justify-center h-full space-y-3 py-8">
-                                    <span class="material-symbols-outlined animate-brain text-4xl text-teal-400">psychology</span>
+                                    <span class="material-symbols-outlined animate-brain text-4xl text-teal-400" aria-hidden="true">psychology</span>
                                     <span class="text-sm text-slate-400 animate-pulse">Analyzing clinical scenario...</span>
                                 </div>
                                 <div id="routerContent" class="hidden h-full flex flex-col">
@@ -855,7 +855,7 @@ ADTMC, ADTMC+, Internal Medicine, ICU, Cardiology, Neurology, Pediatrics, Psychi
             const loadingId = 'loading-' + Date.now();
             conversationHistory.insertAdjacentHTML('beforeend', `
                 <div id="${loadingId}" class="flex items-center gap-3 text-slate-400 animate-fade-in pl-2">
-                    <span class="material-symbols-outlined animate-brain text-2xl">psychology</span>
+                    <span class="material-symbols-outlined animate-brain text-2xl" aria-hidden="true">psychology</span>
                     <span class="font-medium text-sm tracking-wide">Dr. Holtkamp is reviewing clinical guidelines...</span>
                 </div>
             `);
@@ -890,7 +890,7 @@ ADTMC, ADTMC+, Internal Medicine, ICU, Cardiology, Neurology, Pediatrics, Psychi
                     <div class="space-y-4">
                         <div class="flex items-start gap-4">
                             <div class="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center flex-shrink-0">
-                                <span class="material-symbols-outlined text-blue-400">smart_toy</span>
+                                <span class="material-symbols-outlined text-blue-400" aria-hidden="true">smart_toy</span>
                             </div>
                             <div class="flex-1 min-w-0">
                                 <div class="flex items-center justify-between mb-2">
@@ -913,10 +913,10 @@ ADTMC, ADTMC+, Internal Medicine, ICU, Cardiology, Neurology, Pediatrics, Psychi
                                 <details class="group bg-slate-900/40 rounded-xl border border-slate-700/30 overflow-hidden">
                                     <summary class="list-none p-3 cursor-pointer flex items-center justify-between text-[10px] text-slate-500 font-bold uppercase tracking-widest hover:bg-slate-800/50 transition-colors">
                                         <div class="flex items-center gap-2">
-                                            <span class="material-symbols-outlined text-sm text-blue-500/50">neurology</span>
+                                            <span class="material-symbols-outlined text-sm text-blue-500/50" aria-hidden="true">neurology</span>
                                             <span>View Internal Reasoning Process</span>
                                         </div>
-                                        <span class="material-symbols-outlined text-sm group-open:rotate-180 transition-transform">expand_more</span>
+                                        <span class="material-symbols-outlined text-sm group-open:rotate-180 transition-transform" aria-hidden="true">expand_more</span>
                                     </summary>
                                     <div class="px-4 pb-4 text-xs text-slate-500 italic font-mono leading-relaxed bg-black/10">
                                         <div class="pt-2 whitespace-pre-line">
@@ -969,7 +969,7 @@ ADTMC, ADTMC+, Internal Medicine, ICU, Cardiology, Neurology, Pediatrics, Psychi
                                     <div class="absolute top-0 right-0 w-24 h-24 rounded-bl-full -mr-4 -mt-4 transition-all \${c.bgBase} \${c.bgHover}"></div>
 
                                     <div class="flex items-center gap-2 mb-3 relative z-10">
-                                        <span class="material-symbols-outlined text-[20px] \${c.text}">medical_services</span>
+                                        <span class="material-symbols-outlined text-[20px] \${c.text}" aria-hidden="true">medical_services</span>
                                         <span class="text-xs uppercase font-bold text-slate-400 tracking-wider">Recommended Consult</span>
                                     </div>
 
@@ -1131,7 +1131,7 @@ ADTMC, ADTMC+, Internal Medicine, ICU, Cardiology, Neurology, Pediatrics, Psychi
                                  role="button" tabindex="0" onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); ${item.action}; }" onclick="${item.action}">
                                 <div class="absolute top-0 right-0 w-20 h-20 rounded-bl-full -mr-4 -mt-4 transition-all \${c.bgBase} \${c.bgHover}"></div>
                                 <div class="flex items-center gap-2 mb-2 relative z-10">
-                                    <span class="material-symbols-outlined text-[20px] \${c.text}">medical_services</span>
+                                    <span class="material-symbols-outlined text-[20px] \${c.text}" aria-hidden="true">medical_services</span>
                                     <h3 class="text-lg font-bold text-white">${item.title}</h3>
                                 </div>
                                 <p class="text-slate-400 text-xs mb-3 flex-grow relative z-10">${item.desc}</p>
@@ -1190,7 +1190,7 @@ ADTMC, ADTMC+, Internal Medicine, ICU, Cardiology, Neurology, Pediatrics, Psychi
                 recognition.onstart = () => {
                     isRecording = true;
                     // Change icon to mic_off and color to red/orange
-                    micBtn.innerHTML = '<span class="material-symbols-outlined text-[20px]">mic_off</span>';
+                    micBtn.innerHTML = '<span class="material-symbols-outlined text-[20px]" aria-hidden="true">mic_off</span>';
                     micBtn.classList.remove('text-slate-400', 'hover:text-white', 'border-slate-600/50');
                     micBtn.classList.add('text-red-400', 'border-red-500/50', 'bg-red-500/10');
                 };
@@ -1198,7 +1198,7 @@ ADTMC, ADTMC+, Internal Medicine, ICU, Cardiology, Neurology, Pediatrics, Psychi
                 recognition.onend = () => {
                     isRecording = false;
                     // Reset icon and color
-                    micBtn.innerHTML = '<span class="material-symbols-outlined text-[20px]">mic</span>';
+                    micBtn.innerHTML = '<span class="material-symbols-outlined text-[20px]" aria-hidden="true">mic</span>';
                     micBtn.classList.add('text-slate-400', 'hover:text-white', 'border-slate-600/50');
                     micBtn.classList.remove('text-red-400', 'border-red-500/50', 'bg-red-500/10');
                 };
@@ -1269,7 +1269,7 @@ ADTMC, ADTMC+, Internal Medicine, ICU, Cardiology, Neurology, Pediatrics, Psychi
         if (results.length === 0) {
             resultsContainer.innerHTML = `
                 <div class="col-span-full flex flex-col items-center justify-center py-20 text-slate-500">
-                    <span class="material-symbols-outlined text-4xl mb-4 opacity-50">search_off</span>
+                    <span class="material-symbols-outlined text-4xl mb-4 opacity-50" aria-hidden="true">search_off</span>
                     <p>No matching resources found for "${term}"</p>
                 </div>
             `;
@@ -1277,9 +1277,9 @@ ADTMC, ADTMC+, Internal Medicine, ICU, Cardiology, Neurology, Pediatrics, Psychi
             resultsContainer.innerHTML = results.map(item => {
                 let iconHtml = '';
                 // Customize icon based on type
-                if(item.type === 'consult') iconHtml = `<div class="w-10 h-10 rounded-lg bg-${item.color}-500/10 flex items-center justify-center mb-4"><span class="material-symbols-outlined text-${item.color}-400">medical_services</span></div>`;
-                else if(item.type === 'journal') iconHtml = `<div class="w-10 h-10 rounded-lg bg-${item.color}-500/10 flex items-center justify-center mb-4"><span class="material-symbols-outlined text-${item.color}-400">menu_book</span></div>`;
-                else if(item.type === 'tool' || item.type === 'military') iconHtml = `<div class="w-10 h-10 rounded-lg bg-slate-700/50 flex items-center justify-center mb-4"><span class="material-symbols-outlined text-slate-300">${item.icon || 'link'}</span></div>`;
+                if(item.type === 'consult') iconHtml = `<div class="w-10 h-10 rounded-lg bg-${item.color}-500/10 flex items-center justify-center mb-4"><span class="material-symbols-outlined text-${item.color}-400" aria-hidden="true">medical_services</span></div>`;
+                else if(item.type === 'journal') iconHtml = `<div class="w-10 h-10 rounded-lg bg-${item.color}-500/10 flex items-center justify-center mb-4"><span class="material-symbols-outlined text-${item.color}-400" aria-hidden="true">menu_book</span></div>`;
+                else if(item.type === 'tool' || item.type === 'military') iconHtml = `<div class="w-10 h-10 rounded-lg bg-slate-700/50 flex items-center justify-center mb-4"><span class="material-symbols-outlined text-slate-300" aria-hidden="true">${item.icon || 'link'}</span></div>`;
 
                 return `
                 <div onclick="${item.action}" role="button" tabindex="0" onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); ${item.action}; }" class="card bg-gemini-800 hover:bg-slate-800 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none border border-slate-700/50 rounded-xl p-5 cursor-pointer transition-all hover:shadow-lg hover:-translate-y-1">
