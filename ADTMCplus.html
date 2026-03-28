@@ -864,7 +864,7 @@
             refList.innerHTML = '';
             if (soap.references && soap.references.length > 0) {
                 soap.references.forEach(ref => {
-                    refList.innerHTML += \`<li><a href="${ref.url}" target="_blank" class="text-blue-400 hover:underline">${ref.title}</a></li>\`;
+                    refList.innerHTML += `<li><a href="${ref.url}" target="_blank" class="text-blue-400 hover:underline">${ref.title}</a></li>`;
                 });
                 document.getElementById('references-container').classList.remove('hidden');
             } else {
