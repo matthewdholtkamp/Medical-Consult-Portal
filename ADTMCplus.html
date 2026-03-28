@@ -37,93 +37,98 @@
         .note-preview::-webkit-scrollbar-track { background: #1f2937; }
         .note-preview::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
     </style>
+    <!-- Font Awesome for medical icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-gray-900 text-zinc-200">
+<body class="bg-slate-900 text-zinc-200">
 
     <div class="max-w-4xl mx-auto p-4 sm:p-8">
         
         <header class="text-center mb-6 relative">
             <h1 class="text-3xl font-bold text-orange-500">ADTMC + (The MAJ Russell Special)</h1>
-            <p class="text-lg text-gray-300">Medic Decision Support & Documentation Tool</p>
+            <p class="text-lg text-slate-300">Medic Decision Support & Documentation Tool</p>
         </header>
 
         <!-- PROGRESS STEPPER -->
         <div class="mb-8 w-full max-w-3xl mx-auto px-2">
             <div class="flex items-center justify-between relative">
-                <div class="absolute left-0 top-1/2 transform -translate-y-1/2 w-full h-2 rounded-full bg-gray-700 z-0"></div>
+                <div class="absolute left-0 top-1/2 transform -translate-y-1/2 w-full h-2 rounded-full bg-slate-700 z-0"></div>
                 <div id="progress-bar" class="absolute left-0 top-1/2 transform -translate-y-1/2 h-2 rounded-full bg-orange-600 z-0 transition-all duration-500 w-0"></div>
 
                 <div class="relative z-10 flex flex-col items-center step-indicator" id="step-1-ind">
-                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-orange-600 text-white flex items-center justify-center font-bold border-4 border-gray-900 shadow-[0_0_10px_rgba(249,115,22,0.5)] transition-colors duration-300">1</div>
-                    <div class="text-[10px] sm:text-xs font-semibold text-gray-200 mt-2 uppercase tracking-wider text-center">Intake</div>
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-orange-600 text-white flex items-center justify-center font-bold border-4 border-slate-900 shadow-[0_0_10px_rgba(249,115,22,0.5)] transition-colors duration-300">1</div>
+                    <div class="text-[10px] sm:text-xs font-semibold text-slate-200 mt-2 uppercase tracking-wider text-center">Intake</div>
                 </div>
 
                 <div class="relative z-10 flex flex-col items-center step-indicator" id="step-2-ind">
-                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gray-700 text-gray-300 flex items-center justify-center font-bold border-4 border-gray-900 transition-colors duration-300">2</div>
-                    <div class="text-[10px] sm:text-xs font-semibold text-gray-400 mt-2 uppercase tracking-wider transition-colors duration-300 text-center">Q&A</div>
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-slate-700 text-slate-300 flex items-center justify-center font-bold border-4 border-slate-900 transition-colors duration-300">2</div>
+                    <div class="text-[10px] sm:text-xs font-semibold text-slate-400 mt-2 uppercase tracking-wider transition-colors duration-300 text-center">Q&A</div>
                 </div>
 
                 <div class="relative z-10 flex flex-col items-center step-indicator" id="step-3-ind">
-                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gray-700 text-gray-300 flex items-center justify-center font-bold border-4 border-gray-900 transition-colors duration-300">3</div>
-                    <div class="text-[10px] sm:text-xs font-semibold text-gray-400 mt-2 uppercase tracking-wider transition-colors duration-300 text-center">Review</div>
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-slate-700 text-slate-300 flex items-center justify-center font-bold border-4 border-slate-900 transition-colors duration-300">3</div>
+                    <div class="text-[10px] sm:text-xs font-semibold text-slate-400 mt-2 uppercase tracking-wider transition-colors duration-300 text-center">Review</div>
                 </div>
 
                 <div class="relative z-10 flex flex-col items-center step-indicator" id="step-4-ind">
-                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gray-700 text-gray-300 flex items-center justify-center font-bold border-4 border-gray-900 transition-colors duration-300">4</div>
-                    <div class="text-[10px] sm:text-xs font-semibold text-gray-400 mt-2 uppercase tracking-wider transition-colors duration-300 text-center">Final Note</div>
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-slate-700 text-slate-300 flex items-center justify-center font-bold border-4 border-slate-900 transition-colors duration-300">4</div>
+                    <div class="text-[10px] sm:text-xs font-semibold text-slate-400 mt-2 uppercase tracking-wider transition-colors duration-300 text-center">Final Note</div>
                 </div>
             </div>
         </div>
 
-        <!-- HIPAA WARNING & CHECKLIST -->
-        <details class="bg-red-900/50 border border-red-600 rounded-md mb-8">
-            <summary class="font-semibold text-red-300 p-3 cursor-pointer text-lg flex justify-between items-center">
-                <span>Click to Review: De-identified Data Only (HIPAA Warning)</span>
-                <span class="text-xs bg-red-800 px-2 py-1 rounded border border-red-500">Required Check</span>
+        <!-- HIPAA WARNING (UPDATED WITH 18 IDENTIFIERS) -->
+        <details class="bg-slate-800 border border-slate-600 rounded-md mb-8 shadow-lg">
+            <summary class="font-semibold text-slate-300 p-4 cursor-pointer text-lg flex justify-between items-center hover:bg-slate-750 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 rounded-md">
+                <span class="flex items-center"><i aria-hidden="true" class="fa-solid fa-shield-halved mr-2 text-blue-400"></i> NON-HIPAA Compliance</span>
+                <span class="text-xs bg-red-900/80 text-red-100 px-2 py-1 rounded border border-red-500">Required Check</span>
             </summary>
-            <div class="p-4 border-t border-red-700 text-sm">
-                <p class="font-bold text-red-200 mb-2">You MUST remove the following 18 identifiers:</p>
-                <ul class="list-disc ml-5 space-y-1 text-red-300 grid grid-cols-1 md:grid-cols-2 gap-x-4">
+            <div class="p-4 border-t border-slate-600 text-sm bg-slate-900/50">
+                <p class="font-bold text-red-400 mb-3">YOU MUST REMOVE THE FOLLOWING 18 IDENTIFIERS:</p>
+                <ul class="list-disc ml-5 space-y-1 text-slate-400 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-4">
                     <li>Names</li>
-                    <li>Geographic subdivisions < State</li>
-                    <li>Dates (except year)</li>
-                    <li>Telephone #</li>
-                    <li>Fax #</li>
+                    <li>Geographic subdivisions smaller than State</li>
+                    <li>All dates (except year) related to an individual</li>
+                    <li>Telephone numbers</li>
+                    <li>Fax numbers</li>
                     <li>Email addresses</li>
-                    <li>SSN</li>
-                    <li>Medical Record #</li>
-                    <li>Health Plan Beneficiary #</li>
-                    <li>Account #</li>
-                    <li>Certificate/License #</li>
-                    <li>Vehicle IDs / Serial #</li>
-                    <li>Device IDs / Serial #</li>
+                    <li>Social Security numbers</li>
+                    <li>Medical Record numbers</li>
+                    <li>Health plan beneficiary numbers</li>
+                    <li>Account numbers</li>
+                    <li>Certificate/license numbers</li>
+                    <li>Vehicle identifiers (license plates)</li>
+                    <li>Device identifiers/serial numbers</li>
                     <li>Web URLs</li>
-                    <li>IP Addresses</li>
-                    <li>Biometric Identifiers</li>
+                    <li>IP address numbers</li>
+                    <li>Biometric identifiers (finger/voice prints)</li>
                     <li>Full face photos</li>
-                    <li>Any other unique ID number</li>
+                    <li>Any other unique identifying number</li>
                 </ul>
-                <p class="mt-3 font-bold text-red-200">Do not enter unit specifics or unique events (e.g., "The Brigade Commander").</p>
+                <p class="mt-3 font-bold text-red-400">Do not enter unit specifics or unique events (e.g., "The Brigade Commander").</p>
             </div>
         </details>
 
         <!-- LOADING SPINNER -->
         <div id="loading-spinner" class="hidden flex justify-center items-center p-8">
             <div class="spinner"></div>
-            <p class="ml-4 text-lg font-semibold text-gray-300">Processing Clinical Data...</p>
+            <p class="ml-4 text-lg font-semibold text-slate-300">Processing Clinical Data...</p>
         </div>
 
         <!-- SECTION 1: CONSOLIDATED INTAKE -->
-        <div id="section-intake" class="hidden bg-gray-800 p-6 rounded-lg shadow-md border border-gray-700">
-            <h2 class="text-xl font-semibold mb-4 text-orange-500 border-b border-gray-700 pb-2">1. Initial Intake & Vitals</h2>
+        <div id="section-intake" class=" bg-slate-800 p-6 rounded-lg shadow-md border border-slate-700">
+            <h2 class="text-xl font-semibold mb-6 text-white flex items-center">
+                <span class="bg-orange-600 text-white w-8 h-8 rounded-full flex items-center justify-center mr-3 text-sm">1</span>
+                Clinical Context & Intake
+            </h2>
             <div id="error-message-intake" class="error-box hidden"></div>
             
             <form id="intake-form">
                 
                 <!-- Location Selection -->
-                <div class="mb-6 bg-gray-900 p-3 rounded border border-gray-600">
+                <div class="mb-6 bg-slate-900 p-3 rounded border border-slate-600">
                      <label for="location-input" class="block text-sm font-bold text-orange-400 mb-1 uppercase tracking-wide">Current Location of Interview</label>
-                     <select id="location-input" class="w-full p-2 border border-gray-500 rounded bg-gray-800 text-white focus:ring-2 focus:ring-orange-500 outline-none">
+                     <select id="location-input" class="w-full p-2 border border-slate-500 rounded bg-slate-800 text-white focus:ring-2 focus:ring-orange-500 outline-none">
                          <option value="CTMC">Consolidated Troop Medical Center (CTMC)</option>
                          <option value="BAS">Battalion Aid Station (BAS)</option>
                          <option value="ER">Emergency Room (ER)</option>
@@ -134,185 +139,171 @@
                 <!-- Unified Clinical Data Area -->
                 <div class="mb-6">
                     <label for="clinical-vignette" class="block text-sm font-bold text-white mb-2">Clinical Information (Paste H&P or Vignette):</label>
-                    <p class="text-xs text-gray-400 mb-3">Include all relevant de-identified data (HPI, Vitals, Exam, Meds, Allergies, PMH, etc.)</p>
-                    <textarea id="clinical-vignette" rows="8" class="w-full p-4 border border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:outline-none bg-gray-700 text-white placeholder-gray-400 text-base leading-relaxed overflow-hidden resize-none" placeholder="e.g., 22M active duty soldier with right ankle pain. Twisted it during PT run this morning. &#10;&#10;Vitals: BP 124/78, HR 82, RR 16, 98% RA&#10;Exam: Swelling lateral malleolus. (+) Anterior Drawer..."></textarea>
+                    <p class="text-xs text-slate-400 mb-3">Include all relevant de-identified data (HPI, Vitals, Exam, Meds, Allergies, PMH, etc.)</p>
+                    <textarea id="clinical-vignette" rows="8" class="w-full p-4 border border-slate-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:outline-none bg-slate-700 text-white placeholder-slate-400 text-base leading-relaxed overflow-hidden resize-none" placeholder="e.g., 22M active duty soldier with right ankle pain. Twisted it during PT run this morning. &#10;&#10;Vitals: BP 124/78, HR 82, RR 16, 98% RA&#10;Exam: Swelling lateral malleolus. (+) Anterior Drawer..."></textarea>
 
                     <div class="flex flex-wrap gap-2 mt-4" id="quick-fill-container">
-                        <button type="button" class="quick-fill-btn text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 py-1.5 px-3 rounded-full border border-gray-600 transition-colors" data-template="msk">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 inline mr-1 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg> Ankle Sprain
+                        <button type="button" class="quick-fill-btn text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 py-1.5 px-3 rounded-full border border-slate-600 transition-colors" data-template="msk">
+                            <i aria-hidden="true" class="fa-solid fa-bone mr-1 text-orange-400"></i> Ankle Sprain
                         </button>
-                        <button type="button" class="quick-fill-btn text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 py-1.5 px-3 rounded-full border border-gray-600 transition-colors" data-template="uri">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 inline mr-1 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" /></svg> URI / Cough
+                        <button type="button" class="quick-fill-btn text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 py-1.5 px-3 rounded-full border border-slate-600 transition-colors" data-template="uri">
+                            <i aria-hidden="true" class="fa-solid fa-lungs-virus mr-1 text-blue-400"></i> URI / Cough
                         </button>
-                        <button type="button" class="quick-fill-btn text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 py-1.5 px-3 rounded-full border border-gray-600 transition-colors" data-template="heat">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 inline mr-1 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg> Heat Illness
+                        <button type="button" class="quick-fill-btn text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 py-1.5 px-3 rounded-full border border-slate-600 transition-colors" data-template="heat">
+                            <i aria-hidden="true" class="fa-solid fa-temperature-arrow-up mr-1 text-red-400"></i> Heat Illness
                         </button>
                     </div>
                 </div>
 
-                <!-- Unified Action Button (Start) -->
-                <button type="submit" class="w-full bg-orange-600 text-white font-bold text-lg py-4 px-6 rounded-lg shadow-lg border-2 border-orange-500 hover:bg-orange-500 hover:shadow-orange-500/40 transition-all transform hover:-translate-y-1 flex items-center justify-center">
-                    <span class="mr-3">START AI INTERVIEW</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                <button type="submit" class="w-full bg-gradient-to-r from-orange-700 to-orange-600 text-white font-bold text-lg py-4 px-6 rounded-lg shadow-lg hover:from-orange-600 hover:to-orange-500 transition-all transform hover:-translate-y-1 flex items-center justify-center">
+                    <span class="mr-3">Start Medic Assessment</span>
+                    <i aria-hidden="true" class="fa-solid fa-arrow-right"></i>
                 </button>
-                <p class="text-center text-xs text-gray-500 mt-2">Generates targeted follow-up questions based on the data above.</p>
             </form>
         </div>
 
         <!-- SECTION 2: AI QUESTIONS -->
-        <div id="section-questions" class="hidden bg-gray-800 p-6 rounded-lg shadow-md border border-gray-700">
+        <div id="section-questions" class="hidden bg-slate-800 p-6 rounded-lg shadow-md border border-slate-700">
             <!-- Read-Only Context Header -->
-            <details class="bg-gray-900 border border-gray-700 rounded-md mb-6 group">
-                <summary class="font-semibold text-gray-300 p-3 cursor-pointer text-sm flex justify-between items-center hover:bg-gray-800 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 rounded-md">
-                    <span class="flex items-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg> Patient Context</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-2 text-gray-500 group-open:rotate-180 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+            <details class="bg-slate-900 border border-slate-700 rounded-md mb-6 group">
+                <summary class="font-semibold text-slate-300 p-3 cursor-pointer text-sm flex justify-between items-center hover:bg-slate-800 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 rounded-md">
+                    <span class="flex items-center"><i aria-hidden="true" class="fa-solid fa-file-medical text-slate-400 mr-2"></i> Patient Context</span>
+                    <i aria-hidden="true" class="fa-solid fa-chevron-down text-slate-500 group-open:rotate-180 transition-transform"></i>
                 </summary>
-                <div class="p-3 border-t border-gray-700 text-sm text-gray-300 bg-gray-800/50 max-h-48 overflow-y-auto whitespace-pre-wrap font-mono leading-relaxed" id="context-panel-questions">
+                <div class="p-3 border-t border-slate-700 text-sm text-slate-300 bg-slate-800/50 max-h-48 overflow-y-auto whitespace-pre-wrap font-mono leading-relaxed" id="context-panel-questions">
                 </div>
             </details>
 
-            <h2 class="text-xl font-semibold mb-4 text-orange-500 border-b border-gray-700 pb-2">2. Guided Intake Questions</h2>
-            <p class="text-sm text-gray-400 mb-4">The AI has generated specific questions to clarify the case.</p>
+            <h2 class="text-xl font-semibold mb-4 text-white border-b border-slate-700 pb-2 flex items-center">
+                <i aria-hidden="true" class="fa-solid fa-clipboard-question text-orange-500 mr-2"></i> Clinical Clarification
+            </h2>
+            <p class="text-sm text-slate-400 mb-6 bg-slate-900 p-3 rounded border-l-4 border-orange-500">
+                The AI has generated specific questions to clarify the case.
+            </p>
             <div id="error-message-questions" class="error-box hidden"></div>
             <form id="questions-form">
                 <div id="questions-container" class="space-y-4 mb-6"></div>
                 <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
-                    <!-- Unified Action Button (Back) -->
-                    <button type="button" id="questions-back-btn" class="flex-1 bg-gray-700 text-gray-200 font-bold text-lg py-4 px-6 rounded-lg shadow-lg border-2 border-gray-600 hover:bg-gray-600 hover:text-white hover:border-gray-500 hover:shadow-gray-500/40 transition-all transform hover:-translate-y-1 flex items-center justify-center">
-                        Back to Intake
-                    </button>
-                    <!-- Unified Action Button (Continue) -->
-                    <button type="submit" class="flex-1 bg-orange-600 text-white font-bold text-lg py-4 px-6 rounded-lg shadow-lg border-2 border-orange-500 hover:bg-orange-500 hover:shadow-orange-500/40 transition-all transform hover:-translate-y-1 flex items-center justify-center">
-                        Generate Plan
-                    </button>
+                    <button type="button" id="questions-back-btn" class="flex-1 bg-slate-700 text-slate-300 font-bold py-3 rounded-lg hover:bg-slate-600 transition">Back</button>
+                    <button type="submit" class="flex-[2] bg-orange-600 text-white font-bold py-3 rounded-lg hover:bg-orange-500 transition shadow-lg">Generate Assessment & Plan</button>
                 </div>
             </form>
         </div>
 
         <!-- SECTION 3: PLAN REVIEW -->
-        <div id="section-review" class="hidden bg-gray-800 p-6 rounded-lg shadow-md border border-gray-700">
+        <div id="section-review" class="hidden bg-slate-800 p-6 rounded-lg shadow-md border border-slate-700">
              <!-- Read-Only Context Header -->
-             <details class="bg-gray-900 border border-gray-700 rounded-md mb-6 group">
-                <summary class="font-semibold text-gray-300 p-3 cursor-pointer text-sm flex justify-between items-center hover:bg-gray-800 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 rounded-md">
-                    <span class="flex items-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg> Patient Context</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-2 text-gray-500 group-open:rotate-180 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+             <details class="bg-slate-900 border border-slate-700 rounded-md mb-6 group">
+                <summary class="font-semibold text-slate-300 p-3 cursor-pointer text-sm flex justify-between items-center hover:bg-slate-800 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 rounded-md">
+                    <span class="flex items-center"><i aria-hidden="true" class="fa-solid fa-file-medical text-slate-400 mr-2"></i> Patient Context</span>
+                    <i aria-hidden="true" class="fa-solid fa-chevron-down text-slate-500 group-open:rotate-180 transition-transform"></i>
                 </summary>
-                <div class="p-3 border-t border-gray-700 text-sm text-gray-300 bg-gray-800/50 max-h-48 overflow-y-auto whitespace-pre-wrap font-mono leading-relaxed" id="context-panel-review">
+                <div class="p-3 border-t border-slate-700 text-sm text-slate-300 bg-slate-800/50 max-h-48 overflow-y-auto whitespace-pre-wrap font-mono leading-relaxed" id="context-panel-review">
                 </div>
             </details>
 
-             <!-- Emergency Alert -->
-             <div id="emergency-alert" class="hidden bg-red-900/50 border-l-4 border-red-600 text-red-300 p-4 rounded-md mb-6">
+             <!-- Critical Safety Banner -->
+             <div id="safety-banner-container" class="hidden mb-6">
                 <!-- Populated via JS -->
-            </div>
+             </div>
 
-            <h2 class="text-xl font-semibold mb-4 text-orange-500 pb-2 flex justify-between items-center border-b border-gray-700">
-                <span>3. Review & Select Plan Items</span>
-                <details id="thinking-process-details" class="bg-gray-900 border border-gray-700 rounded-md text-sm cursor-pointer ml-4">
-                    <summary class="font-semibold text-gray-300 p-2 hover:bg-gray-800 transition rounded-md flex items-center outline-none select-none">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-                        Thinking Process
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-2 text-gray-500 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+            <h2 class="text-xl font-semibold mb-4 text-white pb-2 flex justify-between items-center">
+                <span>Review Recommendations</span>
+                <details id="thinking-process-details" class="bg-slate-900 border border-slate-700 rounded-md text-sm cursor-pointer ml-4">
+                    <summary class="font-semibold text-slate-300 p-2 hover:bg-slate-800 transition rounded-md flex items-center outline-none select-none focus-visible:ring-2 focus-visible:ring-orange-500">
+                        <i aria-hidden="true" class="fa-solid fa-brain text-orange-400 mr-2"></i> Thinking Process
+                        <i aria-hidden="true" class="fa-solid fa-chevron-down text-slate-500 ml-2 transition-transform"></i>
                     </summary>
-                    <div class="p-4 border-t border-gray-700 text-gray-300 bg-gray-800/50 max-h-96 overflow-y-auto whitespace-pre-wrap font-mono leading-relaxed" id="thinking-process-content">
+                    <div class="p-4 border-t border-slate-700 text-slate-300 bg-slate-800/50 max-h-96 overflow-y-auto whitespace-pre-wrap font-mono leading-relaxed" id="thinking-process-content">
                     </div>
                 </details>
             </h2>
-            <p class="text-sm text-gray-400 mb-4 mt-4">Review the AI suggestions. Uncheck items to exclude them from the final note.</p>
+
             <div id="error-message-review" class="error-box hidden"></div>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                 <!-- Col 1 -->
                 <div class="space-y-4">
-                    <div class="bg-gray-900 p-4 rounded border border-gray-700">
-                        <h3 class="font-bold text-orange-400 mb-2 border-b border-gray-700 pb-1">Assessment</h3>
-                        <p id="review-diagnosis" class="text-sm text-gray-200 mb-2 italic"></p>
-                        <h4 class="text-xs font-bold text-gray-500 uppercase mt-2">Differential (DDx) & Probability</h4>
-                        <ul id="review-ddx-list" class="text-sm text-gray-400 list-none space-y-1 mt-1"></ul>
+                    <div class="bg-slate-900 p-4 rounded border border-slate-700">
+                        <h3 class="font-bold text-orange-400 mb-2 border-b border-slate-700 pb-1">Assessment</h3>
+                        <p id="review-diagnosis" class="text-sm text-slate-200 mb-2 italic"></p>
+                        <h4 class="text-xs font-bold text-slate-500 uppercase mt-2">Differential (DDx) & Probability</h4>
+                        <ul id="review-ddx-list" class="text-sm text-slate-400 list-none space-y-1 mt-1"></ul>
                     </div>
 
-                    <div class="bg-gray-900 p-4 rounded border border-gray-700">
-                        <h3 class="font-bold text-orange-400 mb-2 border-b border-gray-700 pb-1">Workup (Labs/Rads/Consults)</h3>
+                    <div class="bg-slate-900 p-4 rounded border border-slate-700">
+                        <h3 class="font-bold text-orange-400 mb-2 border-b border-slate-700 pb-1">Workup (Labs/Rads/Consults)</h3>
                         <div id="review-workup-container" class="space-y-2"></div>
                     </div>
                 </div>
 
                 <!-- Col 2 -->
                 <div class="space-y-4">
-                    <div class="bg-gray-900 p-4 rounded border border-gray-700">
-                        <h3 class="font-bold text-orange-400 mb-2 border-b border-gray-700 pb-1">Treatment (Meds/Edu)</h3>
+                    <div class="bg-slate-900 p-4 rounded border border-slate-700">
+                        <h3 class="font-bold text-orange-400 mb-2 border-b border-slate-700 pb-1">Treatment (Meds/Edu)</h3>
                         <div id="review-treatment-container" class="space-y-2"></div>
                     </div>
 
-                    <div class="bg-gray-900 p-4 rounded border border-gray-700">
-                        <h3 class="font-bold text-orange-400 mb-2 border-b border-gray-700 pb-1">Disposition</h3>
+                    <div class="bg-slate-900 p-4 rounded border border-slate-700">
+                        <h3 class="font-bold text-orange-400 mb-2 border-b border-slate-700 pb-1">Disposition</h3>
                         <div id="review-disposition-container" class="space-y-2 mb-4"></div>
 
-                        <h3 class="font-bold text-orange-400 mb-2 border-b border-gray-700 pb-1">Profile / Limitations</h3>
+                        <h3 class="font-bold text-orange-400 mb-2 border-b border-slate-700 pb-1">Profile / Limitations</h3>
                         <div id="review-profile-container" class="space-y-2"></div>
-                        <div class="mt-3 flex items-center bg-gray-800 p-2 rounded">
-                             <label class="text-xs text-gray-400 mr-2 font-bold uppercase">Profile Duration (Days)</label>
-                             <input type="number" id="profile-days" class="w-20 bg-gray-700 border border-gray-600 text-white text-center text-sm p-1 rounded focus:border-orange-500 outline-none">
+                        <div class="mt-3 flex items-center bg-slate-800 p-2 rounded">
+                             <label class="text-xs text-slate-400 mr-2 font-bold uppercase">Profile Duration (Days)</label>
+                             <input type="number" id="profile-days" class="w-20 bg-slate-700 border border-slate-600 text-white text-center text-sm p-1 rounded focus:border-orange-500 outline-none">
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
-                <!-- Unified Action Button (Back) -->
-                <button type="button" id="review-back-btn" class="flex-1 bg-gray-700 text-gray-200 font-bold text-lg py-4 px-6 rounded-lg shadow-lg border-2 border-gray-600 hover:bg-gray-600 hover:text-white hover:border-gray-500 hover:shadow-gray-500/40 transition-all transform hover:-translate-y-1 flex items-center justify-center">
-                    Back
-                </button>
-                <!-- Unified Action Button (Continue) -->
-                <button type="button" id="review-continue-btn" class="flex-1 bg-orange-600 text-white font-bold text-lg py-4 px-6 rounded-lg shadow-lg border-2 border-orange-500 hover:bg-orange-500 hover:shadow-orange-500/40 transition-all transform hover:-translate-y-1 flex items-center justify-center">
-                    Finalize Note
-                </button>
+                <button type="button" id="review-back-btn" class="flex-1 bg-slate-700 text-slate-300 font-bold py-3 rounded-lg hover:bg-slate-600">Back</button>
+                <button type="button" id="review-continue-btn" class="flex-1 bg-green-700 text-white font-bold py-3 rounded-lg hover:bg-green-600 shadow-lg">Finalize Note</button>
             </div>
         </div>
 
         <!-- SECTION 4: REFINE & FINAL NOTE -->
-        <div id="section-final" class="hidden bg-gray-800 p-6 rounded-lg shadow-md border border-gray-700">
-            <h2 class="text-xl font-semibold mb-4 text-orange-500 border-b border-gray-700 pb-2">4. Final SOAP Note</h2>
+        <div id="section-final" class="hidden bg-slate-800 p-6 rounded-lg shadow-md border border-slate-700">
+            <h2 class="text-xl font-semibold mb-4 text-white border-b border-slate-700 pb-2">Final SOAP Note</h2>
             
             <!-- Refinement / Q&A Box -->
-            <div class="bg-gray-700 p-4 rounded-md mb-6 border border-gray-600">
-                <label class="block text-sm font-bold text-orange-300 mb-2">Ask AI for Clarification or Adjustments</label>
+            <div class="bg-slate-700 p-4 rounded-md mb-6 border border-slate-600">
+                <label class="block text-xs font-bold text-orange-300 mb-2 uppercase">Consultant Q&A (Refine the plan)</label>
                 <div class="flex space-x-2">
-                    <input type="text" id="refine-input" class="flex-1 p-2 bg-gray-900 border border-gray-600 rounded text-white text-sm focus:border-orange-500 outline-none" placeholder="e.g., 'What is the dose for Motrin?' or 'Why did you suggest X-Ray?'">
-                    <button type="button" id="refine-btn" class="bg-orange-600 hover:bg-orange-500 text-white px-4 rounded font-medium text-sm transition-colors">Ask</button>
+                    <input type="text" id="refine-input" class="flex-1 p-2 bg-slate-900 border border-slate-600 rounded text-white text-sm focus:border-orange-500 outline-none" placeholder="e.g., 'What is the dose for Motrin?' or 'Why did you suggest X-Ray?'">
+                    <button type="button" id="refine-btn" class="bg-orange-700 hover:bg-orange-600 text-white px-4 rounded font-medium text-sm">Ask</button>
                 </div>
-                <div id="refine-response" class="hidden mt-3 p-3 bg-gray-800 rounded text-sm text-gray-300 border border-gray-600 italic"></div>
+                <div id="refine-response" class="hidden mt-3 p-3 bg-slate-800 rounded text-sm text-slate-300 border border-slate-600 italic"></div>
             </div>
 
             <!-- The Note -->
-            <div class="bg-white text-black p-6 rounded-md shadow-inner max-h-[500px] overflow-y-auto note-preview font-mono text-sm leading-tight border-2 border-gray-400 mb-4">
+            <div class="bg-white text-black p-6 rounded-md shadow-inner max-h-[500px] overflow-y-auto note-preview font-mono text-sm leading-tight border-2 border-slate-400 mb-4">
                 <pre id="final-note-content" class="whitespace-pre-wrap"></pre>
             </div>
             
-            <button type="button" id="copy-note-btn" class="w-full bg-gray-700 hover:bg-gray-600 text-white font-bold text-lg py-4 px-6 rounded-lg shadow-lg border-2 border-gray-500 hover:shadow-gray-500/40 transition-all transform hover:-translate-y-1 flex items-center justify-center mb-6">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" /><path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" /></svg>
-                Copy Note to Clipboard
+            <button type="button" id="copy-note-btn" class="w-full bg-slate-700 hover:bg-slate-600 text-white font-bold text-lg py-4 px-6 rounded-lg shadow-lg border border-slate-500 flex items-center justify-center mb-6">
+                <i aria-hidden="true" class="fa-regular fa-copy mr-2"></i> Copy to Clipboard
             </button>
             <p id="copy-success" class="hidden mt-2 text-center text-green-400 font-semibold text-sm">Copied successfully!</p>
 
             <!-- REFERENCES SECTION (NEW) -->
-            <div id="references-container" class="bg-gray-900 p-4 rounded border border-gray-600 mb-8">
-                <h3 class="text-orange-400 font-bold mb-2 border-b border-gray-700 pb-1 flex items-center">
+            <div id="references-container" class="bg-slate-900 p-4 rounded border border-slate-600 mb-8">
+                <h3 class="text-orange-400 font-bold mb-2 border-b border-slate-700 pb-1 flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" viewBox="0 0 20 20" fill="currentColor"><path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z" /></svg>
                     Clinical Evidence & References (Not included in Clipboard Copy)
                 </h3>
-                <p class="text-xs text-gray-500 mb-3">Links to guidelines and evidence supporting this plan.</p>
+                <p class="text-xs text-slate-500 mb-3">Links to guidelines and evidence supporting this plan.</p>
                 <ul id="references-list" class="list-disc ml-5 text-sm space-y-2"></ul>
             </div>
 
-            <div class="mt-6 flex justify-center space-x-4">
-                <button type="button" id="final-back-btn" class="text-gray-400 hover:text-white underline text-sm flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+            <div class="mt-6 flex justify-center space-x-6">
+                <button type="button" id="final-back-btn" class="text-slate-500 hover:text-white underline text-sm">
                     Back to Review
                 </button>
-                <button type="button" id="start-over-btn" class="text-gray-400 hover:text-white underline text-sm flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
-                    Start Over (New Patient)
+                <button type="button" id="start-over-btn" class="text-slate-500 hover:text-white underline text-sm">
+                    Start New Consult
                 </button>
             </div>
         </div>
@@ -383,11 +374,11 @@
                 const text = ind.querySelector('div:last-child');
 
                 if (index <= activeIndex) {
-                    circle.className = "w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-orange-600 text-white flex items-center justify-center font-bold border-4 border-gray-900 shadow-[0_0_10px_rgba(249,115,22,0.5)] transition-colors duration-300";
-                    text.className = "text-[10px] sm:text-xs font-semibold text-gray-200 mt-2 uppercase tracking-wider text-center transition-colors duration-300";
+                    circle.className = "w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-orange-600 text-white flex items-center justify-center font-bold border-4 border-slate-900 shadow-[0_0_10px_rgba(249,115,22,0.5)] transition-colors duration-300";
+                    text.className = "text-[10px] sm:text-xs font-semibold text-slate-200 mt-2 uppercase tracking-wider text-center transition-colors duration-300";
                 } else {
-                    circle.className = "w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gray-700 text-gray-300 flex items-center justify-center font-bold border-4 border-gray-900 transition-colors duration-300";
-                    text.className = "text-[10px] sm:text-xs font-semibold text-gray-400 mt-2 uppercase tracking-wider text-center transition-colors duration-300";
+                    circle.className = "w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-slate-700 text-slate-300 flex items-center justify-center font-bold border-4 border-slate-900 transition-colors duration-300";
+                    text.className = "text-[10px] sm:text-xs font-semibold text-slate-400 mt-2 uppercase tracking-wider text-center transition-colors duration-300";
                 }
             });
         }
@@ -549,7 +540,7 @@
                     const options = typeof qObj === 'string' ? [] : (qObj.options || []);
                     const qId = `question-input-${index}`;
 
-                    let html = `<div class="bg-gray-900 p-4 rounded border border-gray-700 mb-4" data-q-index="${index}">
+                    let html = `<div class="bg-slate-900 p-4 rounded border border-slate-700 mb-4" data-q-index="${index}">
                         <label class="block text-sm text-orange-300 mb-3 font-medium">${questionText}</label>
                         <div class="space-y-2 mb-3">`;
 
@@ -557,22 +548,22 @@
                         options.forEach((opt, optIndex) => {
                             const optId = `q-${index}-opt-${optIndex}`;
                             html += `
-                            <label for="${optId}" class="flex items-start space-x-3 p-2 hover:bg-gray-800 rounded cursor-pointer group border border-transparent hover:border-gray-700 transition-all">
-                                <input type="radio" name="q-${index}-radio" id="${optId}" value="${opt}" class="mt-1 form-radio text-orange-500 bg-gray-700 border-gray-500 focus:ring-orange-500 q-radio">
-                                <span class="text-sm text-gray-300 group-hover:text-white transition-colors leading-tight">${opt}</span>
+                            <label for="${optId}" class="flex items-start space-x-3 p-2 hover:bg-slate-800 rounded cursor-pointer group border border-transparent hover:border-slate-700 transition-all">
+                                <input type="radio" name="q-${index}-radio" id="${optId}" value="${opt}" class="mt-1 form-radio text-orange-500 bg-slate-700 border-slate-500 focus:ring-orange-500 q-radio">
+                                <span class="text-sm text-slate-300 group-hover:text-white transition-colors leading-tight">${opt}</span>
                             </label>`;
                         });
 
                         const otherId = `q-${index}-opt-other`;
                         html += `
-                            <label for="${otherId}" class="flex items-start space-x-3 p-2 hover:bg-gray-800 rounded cursor-pointer group border border-transparent hover:border-gray-700 transition-all">
-                                <input type="radio" name="q-${index}-radio" id="${otherId}" value="other" class="mt-1 form-radio text-orange-500 bg-gray-700 border-gray-500 focus:ring-orange-500 q-radio">
-                                <span class="text-sm text-gray-300 group-hover:text-white transition-colors leading-tight">Other (Type below)</span>
+                            <label for="${otherId}" class="flex items-start space-x-3 p-2 hover:bg-slate-800 rounded cursor-pointer group border border-transparent hover:border-slate-700 transition-all">
+                                <input type="radio" name="q-${index}-radio" id="${otherId}" value="other" class="mt-1 form-radio text-orange-500 bg-slate-700 border-slate-500 focus:ring-orange-500 q-radio">
+                                <span class="text-sm text-slate-300 group-hover:text-white transition-colors leading-tight">Other (Type below)</span>
                             </label>`;
                     }
 
                     html += `</div>
-                        <input type="text" id="${qId}" data-q="${questionText}" class="w-full p-2 border border-gray-600 rounded bg-gray-700 text-white focus:border-orange-500 outline-none transition-colors ${options.length > 0 ? 'opacity-50 cursor-not-allowed' : ''}" placeholder="${options.length > 0 ? 'Select an option above, or choose Other to type...' : 'Type answer...'}" ${options.length > 0 ? 'disabled' : ''}>
+                        <input type="text" id="${qId}" data-q="${questionText}" class="w-full p-2 border border-slate-600 rounded bg-slate-700 text-white focus:border-orange-500 outline-none transition-colors ${options.length > 0 ? 'opacity-50 cursor-not-allowed' : ''}" placeholder="${options.length > 0 ? 'Select an option above, or choose Other to type...' : 'Type answer...'}" ${options.length > 0 ? 'disabled' : ''}>
                     </div>`;
 
                     container.innerHTML += html;
@@ -696,34 +687,38 @@
         // --- Step 3: Review & Select ---
         function renderReview(soap) {
             // Safety Banner
-             const alert = document.getElementById('emergency-alert');
+             const safetyContainer = document.getElementById('safety-banner-container');
              if (soap.red_flags && soap.red_flags.length > 0) {
-                 alert.innerHTML = `
-                         <p class="font-bold flex items-center">
-                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-                             RED FLAG / TRIAGE ALERT
-                         </p>
-                         <ul class="list-disc ml-5 text-red-200 text-sm font-semibold mt-1">
-                             ${soap.red_flags.map(f => `<li>${f}</li>`).join('')}
-                         </ul>`;
-                 alert.classList.remove('hidden');
+                 safetyContainer.innerHTML = `
+                     <div class="bg-red-900/50 border-l-4 border-red-500 p-4 rounded shadow-lg animate-pulse">
+                         <div class="flex items-center">
+                             <i aria-hidden="true" class="fa-solid fa-triangle-exclamation text-red-500 text-2xl mr-4"></i>
+                             <div>
+                                 <h3 class="font-bold text-red-200 uppercase tracking-wider text-sm">Critical Safety Alerts</h3>
+                                 <ul class="list-disc ml-5 text-red-100 text-sm font-semibold mt-1">
+                                     ${soap.red_flags.map(f => `<li>${f}</li>`).join('')}
+                                 </ul>
+                             </div>
+                         </div>
+                     </div>`;
+                 safetyContainer.classList.remove('hidden');
              } else {
-                 alert.classList.add('hidden');
-                 alert.innerHTML = '';
+                 safetyContainer.classList.add('hidden');
+                 safetyContainer.innerHTML = '';
              }
 
             // Assessment
             document.getElementById('review-diagnosis').textContent = soap.assessment.synthesis_statement;
             const ddxList = document.getElementById('review-ddx-list');
             ddxList.innerHTML = soap.assessment.ddx.map(d => `
-                <li class="flex items-start p-1 border-b border-gray-800">
+                <li class="flex items-start p-1 border-b border-slate-800">
                     <span class="text-orange-500 mr-2 font-bold">•</span>
                     <div class="flex-1">
                         <div class="flex justify-between">
-                            <strong class="text-white">${d.name} <span class="text-gray-500 text-xs font-normal ml-1">[${d.icd10}]</span></strong>
-                            <span class="text-xs font-mono text-orange-300 bg-gray-800 px-2 rounded">${d.likelihood}</span>
+                            <strong class="text-white">${d.name} <span class="text-slate-500 text-xs font-normal ml-1">[${d.icd10}]</span></strong>
+                            <span class="text-xs font-mono text-orange-300 bg-slate-800 px-2 rounded">${d.likelihood}</span>
                         </div>
-                        <p class="text-gray-400 text-xs">${d.desc}</p>
+                        <p class="text-slate-400 text-xs">${d.desc}</p>
                     </div>
                 </li>
             `).join('');
@@ -735,7 +730,7 @@
             const createCheckboxes = (containerId, items, category) => {
                 const cont = document.getElementById(containerId);
                 if(!items || items.length === 0) {
-                    cont.innerHTML = '<span class="text-gray-500 text-sm italic">None</span>';
+                    cont.innerHTML = '<span class="text-slate-500 text-sm italic">None</span>';
                     return;
                 }
                 cont.innerHTML = items.map((i, idx) => {
@@ -745,13 +740,13 @@
                     const safeRationale = rationale ? rationale.replace(/"/g, '&quot;') : '';
 
                     let html = `
-                        <label class="flex items-start space-x-2 p-2 rounded hover:bg-gray-800 cursor-pointer border border-transparent hover:border-gray-700 transition-colors">
+                        <label class="flex items-start space-x-2 p-2 rounded hover:bg-slate-800 cursor-pointer border border-transparent hover:border-slate-700 transition-colors">
                             <input type="checkbox" ${isChecked ? 'checked' : ''} class="mt-1 text-orange-600 rounded focus:ring-orange-500 item-check" data-cat="${category}" data-val="${val}" data-rationale="${safeRationale}">
                             <div class="flex flex-col">
-                                <span class="text-sm ${isChecked ? 'text-gray-200 font-medium' : 'text-gray-400'} leading-tight">${val}</span>`;
+                                <span class="text-sm ${isChecked ? 'text-slate-200 font-medium' : 'text-slate-400'} leading-tight">${val}</span>`;
 
                     if (rationale) {
-                        html += `<span class="text-xs text-gray-400 italic mt-1 leading-tight"><svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 inline-block mr-1 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>${rationale}</span>`;
+                        html += `<span class="text-xs text-slate-400 italic mt-1 leading-tight"><i aria-hidden="true" class="fa-solid fa-lightbulb text-yellow-500/50 mr-1"></i>${rationale}</span>`;
                     }
 
                     html += `</div></label>`;
@@ -837,14 +832,7 @@
             refList.innerHTML = '';
             if (soap.references && soap.references.length > 0) {
                 soap.references.forEach(ref => {
-                    refList.innerHTML += `
-                        <li>
-                            <a href="${ref.url}" target="_blank" class="text-blue-400 hover:underline flex items-center">
-                                ${ref.title}
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 ml-1 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
-                            </a>
-                        </li>
-                    `;
+                    refList.innerHTML += \`<li><a href="${ref.url}" target="_blank" class="text-blue-400 hover:underline">${ref.title}</a></li>\`;
                 });
                 document.getElementById('references-container').classList.remove('hidden');
             } else {
@@ -986,7 +974,7 @@
                         const val = ansObj ? ansObj.a : "";
                         const qId = `question-input-${index}`;
 
-                        let html = `<div class="bg-gray-900 p-4 rounded border border-gray-700 mb-4" data-q-index="${index}">
+                        let html = `<div class="bg-slate-900 p-4 rounded border border-slate-700 mb-4" data-q-index="${index}">
                             <label class="block text-sm text-orange-300 mb-3 font-medium">${questionText}</label>
                             <div class="space-y-2 mb-3">`;
 
@@ -1000,9 +988,9 @@
                                 if (isChecked) isOptionSelected = true;
 
                                 html += `
-                                <label for="${optId}" class="flex items-start space-x-3 p-2 hover:bg-gray-800 rounded cursor-pointer group border border-transparent hover:border-gray-700 transition-all">
-                                    <input type="radio" name="q-${index}-radio" id="${optId}" value="${opt}" ${isChecked ? 'checked' : ''} class="mt-1 form-radio text-orange-500 bg-gray-700 border-gray-500 focus:ring-orange-500 q-radio">
-                                    <span class="text-sm text-gray-300 group-hover:text-white transition-colors leading-tight">${opt}</span>
+                                <label for="${optId}" class="flex items-start space-x-3 p-2 hover:bg-slate-800 rounded cursor-pointer group border border-transparent hover:border-slate-700 transition-all">
+                                    <input type="radio" name="q-${index}-radio" id="${optId}" value="${opt}" ${isChecked ? 'checked' : ''} class="mt-1 form-radio text-orange-500 bg-slate-700 border-slate-500 focus:ring-orange-500 q-radio">
+                                    <span class="text-sm text-slate-300 group-hover:text-white transition-colors leading-tight">${opt}</span>
                                 </label>`;
                             });
 
@@ -1010,9 +998,9 @@
                             if (val && !isOptionSelected) isOtherSelected = true;
 
                             html += `
-                                <label for="${otherId}" class="flex items-start space-x-3 p-2 hover:bg-gray-800 rounded cursor-pointer group border border-transparent hover:border-gray-700 transition-all">
-                                    <input type="radio" name="q-${index}-radio" id="${otherId}" value="other" ${isOtherSelected ? 'checked' : ''} class="mt-1 form-radio text-orange-500 bg-gray-700 border-gray-500 focus:ring-orange-500 q-radio">
-                                    <span class="text-sm text-gray-300 group-hover:text-white transition-colors leading-tight">Other (Type below)</span>
+                                <label for="${otherId}" class="flex items-start space-x-3 p-2 hover:bg-slate-800 rounded cursor-pointer group border border-transparent hover:border-slate-700 transition-all">
+                                    <input type="radio" name="q-${index}-radio" id="${otherId}" value="other" ${isOtherSelected ? 'checked' : ''} class="mt-1 form-radio text-orange-500 bg-slate-700 border-slate-500 focus:ring-orange-500 q-radio">
+                                    <span class="text-sm text-slate-300 group-hover:text-white transition-colors leading-tight">Other (Type below)</span>
                                 </label>`;
                         }
 
@@ -1020,7 +1008,7 @@
                         const textValue = isOtherSelected || options.length === 0 ? val : "";
 
                         html += `</div>
-                            <input type="text" id="${qId}" data-q="${questionText}" value="${textValue}" class="w-full p-2 border border-gray-600 rounded bg-gray-700 text-white focus:border-orange-500 outline-none transition-colors ${shouldDisableText ? 'opacity-50 cursor-not-allowed' : ''}" placeholder="${options.length > 0 ? 'Select an option above, or choose Other to type...' : 'Type answer...'}" ${shouldDisableText ? 'disabled' : ''}>
+                            <input type="text" id="${qId}" data-q="${questionText}" value="${textValue}" class="w-full p-2 border border-slate-600 rounded bg-slate-700 text-white focus:border-orange-500 outline-none transition-colors ${shouldDisableText ? 'opacity-50 cursor-not-allowed' : ''}" placeholder="${options.length > 0 ? 'Select an option above, or choose Other to type...' : 'Type answer...'}" ${shouldDisableText ? 'disabled' : ''}>
                         </div>`;
 
                         container.innerHTML += html;
