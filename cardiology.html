@@ -142,22 +142,22 @@
                 <div class="mb-6">
                     <label for="clinical-vignette" class="block text-sm font-bold text-white mb-2">Clinical Information (Paste H&P or Vignette):</label>
                     <p class="text-xs text-slate-400 mb-3">Include all relevant de-identified data (HPI, Vitals, Exam, Meds, Labs, etc.)</p>
-                    <textarea id="clinical-vignette" rows="8" class="w-full p-4 border border-slate-600 rounded-lg focus:ring-2 focus:ring-red-500 focus:outline-none bg-slate-700 text-white placeholder-slate-400 text-base leading-relaxed overflow-hidden resize-none" placeholder="e.g., 65M w/ Hx of HFpEF presenting with increasing dyspnea, orthopnea, and 5lb weight gain over 3 days. &#10;&#10;Vitals: BP 140/90, HR 110 Irreg, RR 22, O2 92% RA&#10;Exam: JVD, +2 pitting edema..."></textarea>
+                    <textarea id="clinical-vignette" rows="8" class="w-full p-4 border border-slate-600 rounded-lg focus:ring-2 focus:ring-red-500 focus:outline-none bg-slate-700 text-white placeholder-slate-400 text-base leading-relaxed overflow-hidden resize-none" placeholder="e.g., 65M w/ Hx of HFpEF presenting with increasing dyspnea, orthopnea, and 5lb weight gain over 3 days. &#10;&#10;Vitals: BP 140/90, HR 110 Irreg, RR 22, O2 92% RA&#10;Exam: JVD, +2 pitting edema..." oninput="document.getElementById('intake-submit-btn').disabled = this.value.trim().length < 10;"></textarea>
 
                     <div class="flex flex-wrap gap-2 mt-4" id="quick-fill-container">
-                        <button type="button" class="quick-fill-btn text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 py-1.5 px-3 rounded-full border border-slate-600 transition-colors" data-template="hf">
+                        <button type="button" class="quick-fill-btn text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 py-1.5 px-3 rounded-full border border-slate-600 transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none" data-template="hf">
                             <i aria-hidden="true" class="fa-solid fa-water mr-1 text-blue-400"></i> Heart Failure
                         </button>
-                        <button type="button" class="quick-fill-btn text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 py-1.5 px-3 rounded-full border border-slate-600 transition-colors" data-template="acs">
+                        <button type="button" class="quick-fill-btn text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 py-1.5 px-3 rounded-full border border-slate-600 transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none" data-template="acs">
                             <i aria-hidden="true" class="fa-solid fa-heart-crack mr-1 text-red-400"></i> ACS / Chest Pain
                         </button>
-                        <button type="button" class="quick-fill-btn text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 py-1.5 px-3 rounded-full border border-slate-600 transition-colors" data-template="afib">
+                        <button type="button" class="quick-fill-btn text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 py-1.5 px-3 rounded-full border border-slate-600 transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none" data-template="afib">
                             <i aria-hidden="true" class="fa-solid fa-wave-square mr-1 text-yellow-400"></i> Atrial Fibrillation
                         </button>
                     </div>
                 </div>
 
-                <button type="submit" class="w-full bg-gradient-to-r from-red-700 to-red-600 text-white font-bold text-lg py-4 px-6 rounded-lg shadow-lg hover:from-red-600 hover:to-red-500 transition-all transform hover:-translate-y-1 flex items-center justify-center">
+                <button id="intake-submit-btn" type="submit" disabled class="w-full bg-gradient-to-r from-red-700 to-red-600 text-white font-bold text-lg py-4 px-6 rounded-lg shadow-lg hover:from-red-600 hover:to-red-500 transition-all transform hover:-translate-y-1 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
                     <span class="mr-3">Start Cardiac Assessment</span>
                     <i aria-hidden="true" class="fa-solid fa-arrow-right"></i>
                 </button>
@@ -514,6 +514,7 @@
                 if (templates[templateKey]) {
                     clinicalInput.value = templates[templateKey];
                     autoResizeTextarea(clinicalInput);
+                    document.getElementById('intake-submit-btn').disabled = false;
                 }
             });
         });
