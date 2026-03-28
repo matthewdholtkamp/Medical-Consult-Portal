@@ -842,7 +842,7 @@
             box.textContent = "Consulting literature...";
             
             const sys = "You are a concise Internal Medicine Consultant. Answer the specific question based on the context of the current patient.";
-            const ctx = `Patient Context: ${state.chiefComplaint}. Plan: ${JSON.stringify(state.generatedPlan.plan)}. Question: ${q}`;
+            const ctx = `Patient Context: ${state.clinicalVignette}. Plan: ${JSON.stringify(state.generatedPlan.plan)}. Question: ${q}`;
             
             try {
                 const ans = await callGeminiText(apiKey, sys, ctx);
