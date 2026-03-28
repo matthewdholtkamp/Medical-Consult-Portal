@@ -42,7 +42,7 @@
 
     <div class="max-w-5xl mx-auto p-4 sm:p-8">
         
-        <header class="text-center mb-8 border-b border-slate-700 pb-6">
+        <header class="text-center mb-8 border-b border-slate-700 pb-6 relative">
             <div class="flex justify-center items-center mb-2">
                 <i aria-hidden="true" class="fa-solid fa-brain text-indigo-500 text-4xl mr-3"></i>
                 <h1 class="text-4xl font-bold text-white tracking-wider">AI NEUROLOGY <span class="text-indigo-500">CONSULTANT</span></h1>
@@ -50,7 +50,35 @@
             <p class="text-lg text-slate-400">Small Military Community Hospital (General Neuro & Stroke Protocols)</p>
         </header>
 
-        <!-- HIPAA WARNING -->
+        <!-- PROGRESS STEPPER -->
+        <div class="mb-8 w-full max-w-3xl mx-auto px-2">
+            <div class="flex items-center justify-between relative">
+                <div class="absolute left-0 top-1/2 transform -translate-y-1/2 w-full h-2 rounded-full bg-slate-700 z-0"></div>
+                <div id="progress-bar" class="absolute left-0 top-1/2 transform -translate-y-1/2 h-2 rounded-full bg-indigo-600 z-0 transition-all duration-500 w-0"></div>
+
+                <div class="relative z-10 flex flex-col items-center step-indicator" id="step-1-ind">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold border-4 border-slate-900 shadow-[0_0_10px_rgba(79,70,229,0.5)] transition-colors duration-300">1</div>
+                    <div class="text-[10px] sm:text-xs font-semibold text-slate-200 mt-2 uppercase tracking-wider text-center">Intake</div>
+                </div>
+
+                <div class="relative z-10 flex flex-col items-center step-indicator" id="step-2-ind">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-slate-700 text-slate-300 flex items-center justify-center font-bold border-4 border-slate-900 transition-colors duration-300">2</div>
+                    <div class="text-[10px] sm:text-xs font-semibold text-slate-400 mt-2 uppercase tracking-wider transition-colors duration-300 text-center">Q&A</div>
+                </div>
+
+                <div class="relative z-10 flex flex-col items-center step-indicator" id="step-3-ind">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-slate-700 text-slate-300 flex items-center justify-center font-bold border-4 border-slate-900 transition-colors duration-300">3</div>
+                    <div class="text-[10px] sm:text-xs font-semibold text-slate-400 mt-2 uppercase tracking-wider transition-colors duration-300 text-center">Review</div>
+                </div>
+
+                <div class="relative z-10 flex flex-col items-center step-indicator" id="step-4-ind">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-slate-700 text-slate-300 flex items-center justify-center font-bold border-4 border-slate-900 transition-colors duration-300">4</div>
+                    <div class="text-[10px] sm:text-xs font-semibold text-slate-400 mt-2 uppercase tracking-wider transition-colors duration-300 text-center">Final Note</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- HIPAA WARNING (UPDATED WITH 18 IDENTIFIERS) -->
         <details class="bg-slate-800 border border-slate-600 rounded-md mb-8 shadow-lg">
             <summary class="font-semibold text-slate-300 p-4 cursor-pointer text-lg flex justify-between items-center hover:bg-slate-750 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-md">
                 <span class="flex items-center"><i aria-hidden="true" class="fa-solid fa-shield-halved mr-2 text-blue-400"></i> NON-HIPAA Compliance</span>
@@ -111,39 +139,22 @@
                      </select>
                 </div>
 
-                <!-- Chief Complaint Area -->
+                <!-- Unified Clinical Data Area -->
                 <div class="mb-6">
-                    <label for="initial-symptoms" class="block text-sm font-bold text-white mb-1">Consult Reason / HPI (De-identified):</label>
-                    <textarea id="initial-symptoms" rows="3" class="w-full p-3 border border-slate-600 rounded-md focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-slate-700 text-white placeholder-slate-400" placeholder="e.g., 24M Active Duty with intractable migraine x3 days. Or: 65M retiree with R sided weakness."></textarea>
-                    <div class="flex justify-end space-x-3">
-                         <button type="button" id="example-migraine-btn" class="mt-1 text-xs text-indigo-400 hover:text-indigo-300 underline">Load Migraine Case</button>
-                        <button type="button" id="example-complaint-btn" class="mt-1 text-xs text-red-400 hover:text-red-300 underline">Load Stroke Case</button>
-                    </div>
-                </div>
+                    <label for="clinical-vignette" class="block text-sm font-bold text-white mb-2">Clinical Information (Paste H&P or Vignette):</label>
+                    <p class="text-xs text-slate-400 mb-3">Include all relevant de-identified data (HPI, Vitals, Exam, Meds, Labs, etc.)</p>
+                    <textarea id="clinical-vignette" rows="8" class="w-full p-4 border border-slate-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-slate-700 text-white placeholder-slate-400 text-base leading-relaxed overflow-hidden resize-none" placeholder="e.g., 24M Active Duty with intractable migraine x3 days. &#10;&#10;Vitals: BP 110/70, HR 80, Temp 98.4&#10;Exam: Non-focal exam. CN intact. Neck supple..."></textarea>
 
-                <!-- Vitals & History Grid -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Vitals</label>
-                        <textarea id="vitals-input" rows="2" class="w-full p-2 border border-slate-600 rounded-md bg-slate-900 text-white text-sm focus:border-indigo-500 outline-none" placeholder="BP 130/80, HR 75, Temp 98.6"></textarea>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Neuro Exam (NIHSS / MACE 2 / CN)</label>
-                        <textarea id="pe-input" rows="2" class="w-full p-2 border border-slate-600 rounded-md bg-slate-900 text-white text-sm focus:border-indigo-500 outline-none" placeholder="CN II-XII intact, PERRL, non-focal motor/sensory."></textarea>
-                    </div>
-                    <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-                         <div>
-                            <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Current Meds</label>
-                            <input type="text" id="meds-input" class="w-full p-2 border border-slate-600 rounded-md bg-slate-900 text-white text-sm focus:border-indigo-500 outline-none" placeholder="e.g., Sumatriptan, Topamax, Motrin">
-                         </div>
-                         <div>
-                             <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Relevant Labs / Imaging</label>
-                             <input type="text" id="prior-labs-input" class="w-full p-2 border border-slate-600 rounded-md bg-slate-900 text-white text-sm focus:border-indigo-500 outline-none" placeholder="CT Head negative. HCG Negative.">
-                         </div>
-                    </div>
-                    <div class="md:col-span-2">
-                         <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Pertinent Neuro History</label>
-                         <input type="text" id="pmh-input" class="w-full p-2 border border-slate-600 rounded-md bg-slate-900 text-white text-sm focus:border-indigo-500 outline-none" placeholder="TBI, Migraine, Seizure, Vertigo">
+                    <div class="flex flex-wrap gap-2 mt-4" id="quick-fill-container">
+                        <button type="button" class="quick-fill-btn text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 py-1.5 px-3 rounded-full border border-slate-600 transition-colors" data-template="stroke">
+                            <i aria-hidden="true" class="fa-solid fa-truck-medical mr-1 text-red-400"></i> Stroke (Ischemic)
+                        </button>
+                        <button type="button" class="quick-fill-btn text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 py-1.5 px-3 rounded-full border border-slate-600 transition-colors" data-template="migraine">
+                            <i aria-hidden="true" class="fa-solid fa-bolt mr-1 text-indigo-400"></i> Migraine
+                        </button>
+                        <button type="button" class="quick-fill-btn text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 py-1.5 px-3 rounded-full border border-slate-600 transition-colors" data-template="seizure">
+                            <i aria-hidden="true" class="fa-solid fa-wave-square mr-1 text-yellow-400"></i> Seizure
+                        </button>
                     </div>
                 </div>
 
@@ -156,6 +167,16 @@
 
         <!-- SECTION 2: NEUROLOGIST FOLLOW-UP QUESTIONS -->
         <div id="section-questions" class="hidden bg-slate-800 p-6 rounded-lg shadow-xl border border-slate-700">
+            <!-- Read-Only Context Header -->
+            <details class="bg-slate-900 border border-slate-700 rounded-md mb-6 group">
+                <summary class="font-semibold text-slate-300 p-3 cursor-pointer text-sm flex justify-between items-center hover:bg-slate-800 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-md">
+                    <span class="flex items-center"><i aria-hidden="true" class="fa-solid fa-file-medical text-slate-400 mr-2"></i> Patient Context</span>
+                    <i aria-hidden="true" class="fa-solid fa-chevron-down text-slate-500 group-open:rotate-180 transition-transform"></i>
+                </summary>
+                <div class="p-3 border-t border-slate-700 text-sm text-slate-300 bg-slate-800/50 max-h-48 overflow-y-auto whitespace-pre-wrap font-mono leading-relaxed" id="context-panel-questions">
+                </div>
+            </details>
+
             <h2 class="text-xl font-semibold mb-4 text-white border-b border-slate-700 pb-2 flex items-center">
                 <i aria-hidden="true" class="fa-solid fa-user-doctor text-indigo-500 mr-2"></i> Localization & Etiology
             </h2>
@@ -174,6 +195,21 @@
 
         <!-- SECTION 3: PLAN REVIEW -->
         <div id="section-review" class="hidden bg-slate-800 p-6 rounded-lg shadow-xl border border-slate-700">
+             <!-- Read-Only Context Header -->
+             <details class="bg-slate-900 border border-slate-700 rounded-md mb-6 group">
+                <summary class="font-semibold text-slate-300 p-3 cursor-pointer text-sm flex justify-between items-center hover:bg-slate-800 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-md">
+                    <span class="flex items-center"><i aria-hidden="true" class="fa-solid fa-file-medical text-slate-400 mr-2"></i> Patient Context</span>
+                    <i aria-hidden="true" class="fa-solid fa-chevron-down text-slate-500 group-open:rotate-180 transition-transform"></i>
+                </summary>
+                <div class="p-3 border-t border-slate-700 text-sm text-slate-300 bg-slate-800/50 max-h-48 overflow-y-auto whitespace-pre-wrap font-mono leading-relaxed" id="context-panel-review">
+                </div>
+            </details>
+
+             <!-- Critical Safety Banner -->
+             <div id="safety-banner-container" class="hidden mb-6">
+                <!-- Populated via JS -->
+             </div>
+
              <!-- Logic Alert Banner -->
              <div id="location-alert-banner" class="mb-6 p-4 rounded-md flex items-start">
                 <!-- Populated via JS -->
@@ -329,9 +365,50 @@
             if (isLoading) Object.values(sections).forEach(s => s.classList.add('hidden'));
         }
 
+        function updateStepper(activeSection) {
+            const steps = ['intake', 'questions', 'review', 'final'];
+            const activeIndex = steps.indexOf(activeSection);
+
+            // Update progress bar width
+            const progressBar = document.getElementById('progress-bar');
+            if(progressBar) {
+                progressBar.style.width = activeIndex === 0 ? '0%' :
+                                        activeIndex === 1 ? '33%' :
+                                        activeIndex === 2 ? '66%' : '100%';
+            }
+
+            // Update step indicators
+            steps.forEach((step, index) => {
+                const ind = document.getElementById(`step-${index + 1}-ind`);
+                if (!ind) return;
+
+                const circle = ind.querySelector('div:first-child');
+                const text = ind.querySelector('div:last-child');
+
+                if (index <= activeIndex) {
+                    circle.className = "w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold border-4 border-slate-900 shadow-[0_0_10px_rgba(79,70,229,0.5)] transition-colors duration-300";
+                    text.className = "text-[10px] sm:text-xs font-semibold text-slate-200 mt-2 uppercase tracking-wider text-center transition-colors duration-300";
+                } else {
+                    circle.className = "w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-slate-700 text-slate-300 flex items-center justify-center font-bold border-4 border-slate-900 transition-colors duration-300";
+                    text.className = "text-[10px] sm:text-xs font-semibold text-slate-400 mt-2 uppercase tracking-wider text-center transition-colors duration-300";
+                }
+            });
+        }
+
         function showSection(name) {
             showLoading(false);
+
+            // Populate Context Panels if moving past intake
+            if(name === 'questions' || name === 'review') {
+                const ctxText = `Location: ${state.location}\n\nClinical Information:\n${state.clinicalVignette}`;
+                const panelQ = document.getElementById('context-panel-questions');
+                const panelR = document.getElementById('context-panel-review');
+                if(panelQ) panelQ.textContent = ctxText;
+                if(panelR) panelR.textContent = ctxText;
+            }
+
             Object.keys(sections).forEach(key => sections[key].classList.toggle('hidden', key !== name));
+            updateStepper(name);
             window.scrollTo(0, 0);
         }
 
@@ -358,7 +435,8 @@
                 systemInstruction: { parts: [{ text: systemPrompt }] },
                 generationConfig: {
                     responseMimeType: "application/json",
-                    thinkingConfig: { thinkingBudget: 32768 }
+                    thinkingConfig: { thinkingBudget: 32768 },
+                    maxOutputTokens: 8192
                 }
             };
 
@@ -389,7 +467,8 @@
                 contents: [{ parts: [{ text: userQuery }] }],
                 systemInstruction: { parts: [{ text: systemPrompt }] },
                 generationConfig: {
-                    thinkingConfig: { thinkingBudget: 32768 }
+                    thinkingConfig: { thinkingBudget: 32768 },
+                    maxOutputTokens: 8192
                 }
             };
             const response = await fetch(url, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload)});
@@ -399,24 +478,31 @@
 
 
         // --- Step 1: Intake Logic ---
-        document.getElementById('example-complaint-btn').addEventListener('click', () => {
-            document.getElementById('location-input').value = "ER";
-            document.getElementById('initial-symptoms').value = "58M Retiree brought in by EMS. Wife states he slumped over at breakfast 45 mins ago. R sided weakness, global aphasia. Last known well 0800 (1 hour ago).";
-            document.getElementById('vitals-input').value = "BP 195/105, HR 92 (Irreg), O2 96%, Glucose 108";
-            document.getElementById('pe-input').value = "Global aphasia. Eyes deviated left. R facial droop. R Arm drift (falls immediately). R Leg 2/5. NIHSS approx 18.";
-            document.getElementById('meds-input').value = "Lisinopril, Atorvastatin. No anticoagulants known.";
-            document.getElementById('prior-labs-input').value = "CT Head Non-Con: No hemorrhage, no large infarct. ASPECTS 10.";
-            document.getElementById('pmh-input').value = "HTN, HLP, Smoker.";
-        });
         
-        document.getElementById('example-migraine-btn').addEventListener('click', () => {
-            document.getElementById('location-input').value = "ER";
-            document.getElementById('initial-symptoms').value = "24F Active Duty. Severe throbbing HA x2 days. Photophobia, Nausea. Tried Motrin/Tylenol/Excedrin with no relief. No focal weakness.";
-            document.getElementById('vitals-input').value = "BP 110/70, HR 80, Temp 98.4";
-            document.getElementById('pe-input').value = "Non-focal exam. CN intact. Neck supple. Distress due to pain.";
-            document.getElementById('meds-input').value = "OCP. No other daily meds.";
-            document.getElementById('prior-labs-input').value = "None yet.";
-            document.getElementById('pmh-input').value = "History of Migraines.";
+        // Quick Fill Templates
+        const templates = {
+            stroke: "58M Retiree brought in by EMS. Wife states he slumped over at breakfast 45 mins ago. R sided weakness, global aphasia. Last known well 0800 (1 hour ago).\n\nVitals: BP 195/105, HR 92 (Irreg), O2 96%, Glucose 108\nExam: Global aphasia. Eyes deviated left. R facial droop. R Arm drift (falls immediately). R Leg 2/5. NIHSS approx 18.\nMeds: Lisinopril, Atorvastatin. No anticoagulants known.\nLabs: CT Head Non-Con: No hemorrhage, no large infarct. ASPECTS 10.\nPMH: HTN, HLP, Smoker.",
+            migraine: "24F Active Duty. Severe throbbing HA x2 days. Photophobia, Nausea. Tried Motrin/Tylenol/Excedrin with no relief. No focal weakness.\n\nVitals: BP 110/70, HR 80, Temp 98.4\nExam: Non-focal exam. CN intact. Neck supple. Distress due to pain.\nMeds: OCP. No other daily meds.\nLabs: None yet.\nPMH: History of Migraines.",
+            seizure: "30M presenting after a witnessed generalized tonic-clonic seizure lasting 2 minutes. Currently post-ictal, confused but breathing spontaneously.\n\nVitals: BP 140/90, HR 110, RR 20, 98% RA\nExam: Lethargic, follows simple commands. No focal deficits. Small tongue bite.\nMeds: None.\nLabs: Glucose 110. CT Head pending.\nPMH: No prior seizure history. Recent mild head trauma 1 week ago."
+        };
+
+        // Auto-resize textarea
+        const autoResizeTextarea = (el) => {
+            el.style.height = 'auto';
+            el.style.height = el.scrollHeight + 'px';
+        };
+
+        const clinicalInput = document.getElementById('clinical-vignette');
+        clinicalInput.addEventListener('input', () => autoResizeTextarea(clinicalInput));
+
+        document.querySelectorAll('.quick-fill-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const templateKey = e.currentTarget.dataset.template;
+                if (templates[templateKey]) {
+                    clinicalInput.value = templates[templateKey];
+                    autoResizeTextarea(clinicalInput);
+                }
+            });
         });
 
         document.getElementById('intake-form').addEventListener('submit', async (e) => {
@@ -424,14 +510,9 @@
             clearErrors();
             
             state.location = document.getElementById('location-input').value;
-            state.chiefComplaint = document.getElementById('initial-symptoms').value.trim();
-            state.vitals = document.getElementById('vitals-input').value;
-            state.physicalExam = document.getElementById('pe-input').value;
-            state.meds = document.getElementById('meds-input').value;
-            state.labs = document.getElementById('prior-labs-input').value;
-            state.pmh = document.getElementById('pmh-input').value;
+            state.clinicalVignette = document.getElementById('clinical-vignette').value.trim();
 
-            if(state.chiefComplaint.length < 5) return showError('intake', 'Please enter a valid clinical complaint.');
+            if(state.clinicalVignette.length < 10) return showError('intake', 'Please enter a detailed clinical vignette.');
 
             showLoading(true, "Consulting Neurology AI...");
 
@@ -452,11 +533,7 @@
 
             const context = `
                 Location: ${state.location}
-                CC: ${state.chiefComplaint}
-                Vitals: ${state.vitals}
-                Exam: ${state.physicalExam}
-                Meds: ${state.meds}
-                History: ${state.pmh}
+                Clinical Data: ${state.clinicalVignette}
             `;
 
             try {
@@ -550,9 +627,8 @@
             showLoading(true, "Developing Neuro Plan...");
 
             // Context construction
-            let contextData = `Location: ${state.location}\nCC: ${state.chiefComplaint}\n`;
+            let contextData = `Location: ${state.location}\nClinical Data: ${state.clinicalVignette}\n`;
             state.answers.forEach(item => contextData += `Q: ${item.q} A: ${item.a}\n`);
-            contextData += `\nVitals: ${state.vitals}\nPE: ${state.physicalExam}\nPMH: ${state.pmh}\nMeds: ${state.meds}\nLabs: ${state.labs}`;
 
             const systemPrompt = `
 
@@ -599,6 +675,7 @@
                 {
                     "thinking_process": "Extremely detailed internal reasoning narrative explaining pathophysiology, score calculation logic, and exhaustive treatment decisions.",
                     "subjective": { "hpi_paragraph": "string", "ros_bullets": ["string"] },
+                    "red_flags": ["string"],
                     "assessment": { 
                         "synthesis_statement": "Summary of neuro status INCLUDING localization and pathophysiology.", 
                         "ddx": [ {"name": "string", "icd10": "string", "desc": "string", "likelihood": "High/Med/Low"} ] 
@@ -633,6 +710,27 @@
 
         // --- Step 3: Review & Render ---
         function renderReview(soap) {
+             // Safety Banner
+             const safetyContainer = document.getElementById('safety-banner-container');
+             if (soap.red_flags && soap.red_flags.length > 0) {
+                 safetyContainer.innerHTML = `
+                     <div class="bg-red-900/50 border-l-4 border-red-500 p-4 rounded shadow-lg animate-pulse">
+                         <div class="flex items-center">
+                             <i aria-hidden="true" class="fa-solid fa-triangle-exclamation text-red-500 text-2xl mr-4"></i>
+                             <div>
+                                 <h3 class="font-bold text-red-200 uppercase tracking-wider text-sm">Critical Safety Alerts</h3>
+                                 <ul class="list-disc ml-5 text-red-100 text-sm font-semibold mt-1">
+                                     ${soap.red_flags.map(f => `<li>${f}</li>`).join('')}
+                                 </ul>
+                             </div>
+                         </div>
+                     </div>`;
+                 safetyContainer.classList.remove('hidden');
+             } else {
+                 safetyContainer.classList.add('hidden');
+                 safetyContainer.innerHTML = '';
+             }
+
             // Dynamic Location Alert
             const alertBanner = document.getElementById('location-alert-banner');
             const workupTag = document.getElementById('workup-tag');
@@ -732,11 +830,8 @@
             note += `ROS / Focused History:\n`;
             soap.subjective.ros_bullets.forEach(b => note += `- ${b}\n`);
             
-            note += `\nOBJECTIVE:\n`;
-            note += `Vitals: ${state.vitals || "--"}\n`;
-            note += `Neuro Exam: ${state.physicalExam || "--"}\n`;
-            note += `Meds: ${state.meds || "--"}\n`;
-            note += `Labs/Imaging: ${state.labs || "--"}\n`;
+            note += `\nCLINICAL DATA:\n`;
+            note += `${state.clinicalVignette}\n`;
 
             note += `\nASSESSMENT & LOCALIZATION:\n`;
             note += `${soap.assessment.synthesis_statement}\n\n`;
@@ -822,6 +917,31 @@
         document.getElementById('final-back-btn').addEventListener('click', () => showSection('review'));
         document.getElementById('start-over-btn').addEventListener('click', () => location.reload());
         
+            function updateStateFromDOM() {
+                // Sync inputs
+                state.location = document.getElementById('location-input').value;
+                state.clinicalVignette = document.getElementById('clinical-vignette').value;
+
+                // Sync Answers
+                const questionInputs = document.querySelectorAll('#questions-container input[type="text"]');
+                if (questionInputs.length > 0) {
+                    state.answers = [];
+                    questionInputs.forEach(inp => {
+                        const index = inp.id.split('-').pop();
+                        const checkedRadio = document.querySelector(`input[name="q-${index}-radio"]:checked`);
+                        let a = inp.value;
+                        if (checkedRadio && checkedRadio.value !== 'other') {
+                            a = checkedRadio.value;
+                        } else if (checkedRadio && checkedRadio.value === 'other') {
+                            a = inp.value;
+                        } else if (!checkedRadio && inp.disabled) {
+                            a = "";
+                        }
+                        state.answers.push({ q: inp.dataset.q, a: a });
+                    });
+                }
+            }
+
         // --- Sharing Setup ---
         function getPlanModifications() {
             // Helper to capture checkboxes in review section
@@ -840,34 +960,7 @@
         setupSharing({
             apiKey: jsonBinKey,
             getState: () => {
-                // Sync current input state
-                state.location = document.getElementById('location-input').value;
-                state.chiefComplaint = document.getElementById('initial-symptoms').value;
-                state.vitals = document.getElementById('vitals-input').value;
-                state.physicalExam = document.getElementById('pe-input').value;
-                state.meds = document.getElementById('meds-input').value;
-                state.labs = document.getElementById('prior-labs-input').value;
-                state.pmh = document.getElementById('pmh-input').value;
-
-                // Sync Question Answers
-                const questionInputs = document.querySelectorAll('#questions-container input[type="text"]');
-                if (questionInputs.length > 0) {
-                    state.answers = [];
-                    questionInputs.forEach(inp => {
-                        const index = inp.id.split('-').pop();
-                        const checkedRadio = document.querySelector(`input[name="q-${index}-radio"]:checked`);
-                        let a = inp.value;
-                        if (checkedRadio && checkedRadio.value !== 'other') {
-                            a = checkedRadio.value;
-                        } else if (checkedRadio && checkedRadio.value === 'other') {
-                            a = inp.value;
-                        } else if (!checkedRadio && inp.disabled) {
-                            a = "";
-                        }
-                        state.answers.push({ q: inp.dataset.q, a: a });
-                    });
-                }
-
+                updateStateFromDOM();
                 return {
                     appState: state,
                     planModifications: getPlanModifications(),
@@ -881,14 +974,19 @@
             restoreState: (saved) => {
                 if(saved.appState) Object.assign(state, saved.appState);
 
+                // Backwards compatibility with old state format
+                if(state.chiefComplaint && !state.clinicalVignette) {
+                     state.clinicalVignette = `CC/HPI: ${state.chiefComplaint}\n`;
+                     if(state.vitals) state.clinicalVignette += `Vitals: ${state.vitals}\n`;
+                     if(state.physicalExam) state.clinicalVignette += `Exam: ${state.physicalExam}\n`;
+                     if(state.meds) state.clinicalVignette += `Meds: ${state.meds}\n`;
+                     if(state.labs) state.clinicalVignette += `Labs: ${state.labs}\n`;
+                     if(state.pmh) state.clinicalVignette += `PMH: ${state.pmh}\n`;
+                }
+
                 // Restore Inputs
                 document.getElementById('location-input').value = state.location || "ER";
-                document.getElementById('initial-symptoms').value = state.chiefComplaint || "";
-                document.getElementById('vitals-input').value = state.vitals || "";
-                document.getElementById('pe-input').value = state.physicalExam || "";
-                document.getElementById('meds-input').value = state.meds || "";
-                document.getElementById('prior-labs-input').value = state.labs || "";
-                document.getElementById('pmh-input').value = state.pmh || "";
+                document.getElementById('clinical-vignette').value = state.clinicalVignette || "";
 
                 // Restore Questions
                 if (state.questions && state.questions.length > 0) {

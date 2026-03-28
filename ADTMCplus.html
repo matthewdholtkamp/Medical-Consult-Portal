@@ -42,10 +42,38 @@
 
     <div class="max-w-4xl mx-auto p-4 sm:p-8">
         
-        <header class="text-center mb-6">
+        <header class="text-center mb-6 relative">
             <h1 class="text-3xl font-bold text-orange-500">ADTMC + (The MAJ Russell Special)</h1>
             <p class="text-lg text-gray-300">Medic Decision Support & Documentation Tool</p>
         </header>
+
+        <!-- PROGRESS STEPPER -->
+        <div class="mb-8 w-full max-w-3xl mx-auto px-2">
+            <div class="flex items-center justify-between relative">
+                <div class="absolute left-0 top-1/2 transform -translate-y-1/2 w-full h-2 rounded-full bg-gray-700 z-0"></div>
+                <div id="progress-bar" class="absolute left-0 top-1/2 transform -translate-y-1/2 h-2 rounded-full bg-orange-600 z-0 transition-all duration-500 w-0"></div>
+
+                <div class="relative z-10 flex flex-col items-center step-indicator" id="step-1-ind">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-orange-600 text-white flex items-center justify-center font-bold border-4 border-gray-900 shadow-[0_0_10px_rgba(249,115,22,0.5)] transition-colors duration-300">1</div>
+                    <div class="text-[10px] sm:text-xs font-semibold text-gray-200 mt-2 uppercase tracking-wider text-center">Intake</div>
+                </div>
+
+                <div class="relative z-10 flex flex-col items-center step-indicator" id="step-2-ind">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gray-700 text-gray-300 flex items-center justify-center font-bold border-4 border-gray-900 transition-colors duration-300">2</div>
+                    <div class="text-[10px] sm:text-xs font-semibold text-gray-400 mt-2 uppercase tracking-wider transition-colors duration-300 text-center">Q&A</div>
+                </div>
+
+                <div class="relative z-10 flex flex-col items-center step-indicator" id="step-3-ind">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gray-700 text-gray-300 flex items-center justify-center font-bold border-4 border-gray-900 transition-colors duration-300">3</div>
+                    <div class="text-[10px] sm:text-xs font-semibold text-gray-400 mt-2 uppercase tracking-wider transition-colors duration-300 text-center">Review</div>
+                </div>
+
+                <div class="relative z-10 flex flex-col items-center step-indicator" id="step-4-ind">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gray-700 text-gray-300 flex items-center justify-center font-bold border-4 border-gray-900 transition-colors duration-300">4</div>
+                    <div class="text-[10px] sm:text-xs font-semibold text-gray-400 mt-2 uppercase tracking-wider transition-colors duration-300 text-center">Final Note</div>
+                </div>
+            </div>
+        </div>
 
         <!-- HIPAA WARNING & CHECKLIST -->
         <details class="bg-red-900/50 border border-red-600 rounded-md mb-8">
@@ -103,41 +131,23 @@
                      </select>
                 </div>
 
-                <!-- Chief Complaint Area -->
+                <!-- Unified Clinical Data Area -->
                 <div class="mb-6">
-                    <label for="initial-symptoms" class="block text-sm font-bold text-white mb-1">Chief Complaint & HPI Context (De-identified):</label>
-                    <textarea id="initial-symptoms" rows="3" class="w-full p-3 border border-gray-600 rounded-md focus:ring-2 focus:ring-orange-500 focus:outline-none bg-gray-700 text-white placeholder-gray-400" placeholder="e.g., 24yo Male with R ankle pain after twisting it on a ruck march this morning. Swelling noted immediately."></textarea>
-                    <div class="flex justify-end">
-                        <button type="button" id="example-complaint-btn" class="mt-1 text-xs text-orange-400 hover:text-orange-300 underline">Load Example Case</button>
-                    </div>
-                </div>
+                    <label for="clinical-vignette" class="block text-sm font-bold text-white mb-2">Clinical Information (Paste H&P or Vignette):</label>
+                    <p class="text-xs text-gray-400 mb-3">Include all relevant de-identified data (HPI, Vitals, Exam, Meds, Allergies, PMH, etc.)</p>
+                    <textarea id="clinical-vignette" rows="8" class="w-full p-4 border border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:outline-none bg-gray-700 text-white placeholder-gray-400 text-base leading-relaxed overflow-hidden resize-none" placeholder="e.g., 22M active duty soldier with right ankle pain. Twisted it during PT run this morning. &#10;&#10;Vitals: BP 124/78, HR 82, RR 16, 98% RA&#10;Exam: Swelling lateral malleolus. (+) Anterior Drawer..."></textarea>
 
-                <!-- Vitals & History Grid -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                    <div>
-                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Vitals</label>
-                        <textarea id="vitals-input" rows="2" class="w-full p-2 border border-gray-600 rounded-md bg-gray-900 text-white text-sm focus:border-orange-500 outline-none" placeholder="BP, HR, RR, Temp, SpO2"></textarea>
+                    <div class="flex flex-wrap gap-2 mt-4" id="quick-fill-container">
+                        <button type="button" class="quick-fill-btn text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 py-1.5 px-3 rounded-full border border-gray-600 transition-colors" data-template="msk">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 inline mr-1 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg> Ankle Sprain
+                        </button>
+                        <button type="button" class="quick-fill-btn text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 py-1.5 px-3 rounded-full border border-gray-600 transition-colors" data-template="uri">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 inline mr-1 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" /></svg> URI / Cough
+                        </button>
+                        <button type="button" class="quick-fill-btn text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 py-1.5 px-3 rounded-full border border-gray-600 transition-colors" data-template="heat">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 inline mr-1 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg> Heat Illness
+                        </button>
                     </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Physical Exam / Initial Findings</label>
-                        <textarea id="pe-input" rows="2" class="w-full p-2 border border-gray-600 rounded-md bg-gray-900 text-white text-sm focus:border-orange-500 outline-none" placeholder="Brief objective findings (e.g., TTP, ROM, swelling)"></textarea>
-                    </div>
-                    <div>
-                         <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Current Meds</label>
-                        <input type="text" id="meds-input" class="w-full p-2 border border-gray-600 rounded-md bg-gray-900 text-white text-sm focus:border-orange-500 outline-none" placeholder="e.g., Lisinopril, Motrin">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Allergies</label>
-                        <input type="text" id="allergies-input" class="w-full p-2 border border-gray-600 rounded-md bg-gray-900 text-white text-sm focus:border-orange-500 outline-none" placeholder="e.g., NKDA, Penicillin">
-                    </div>
-                    <div class="md:col-span-2">
-                         <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Past Medical History (PMH)</label>
-                         <input type="text" id="pmh-input" class="w-full p-2 border border-gray-600 rounded-md bg-gray-900 text-white text-sm focus:border-orange-500 outline-none" placeholder="e.g., HTN, Chronic Low Back Pain, Previous Surgeries">
-                    </div>
-                    <div class="md:col-span-2">
-                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Prior Labs / Imaging</label>
-                        <input type="text" id="prior-labs-input" class="w-full p-2 border border-gray-600 rounded-md bg-gray-900 text-white text-sm focus:border-orange-500 outline-none" placeholder="Any relevant recent results">
-                   </div>
                 </div>
 
                 <!-- Unified Action Button (Start) -->
@@ -151,6 +161,16 @@
 
         <!-- SECTION 2: AI QUESTIONS -->
         <div id="section-questions" class="hidden bg-gray-800 p-6 rounded-lg shadow-md border border-gray-700">
+            <!-- Read-Only Context Header -->
+            <details class="bg-gray-900 border border-gray-700 rounded-md mb-6 group">
+                <summary class="font-semibold text-gray-300 p-3 cursor-pointer text-sm flex justify-between items-center hover:bg-gray-800 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 rounded-md">
+                    <span class="flex items-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg> Patient Context</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-2 text-gray-500 group-open:rotate-180 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                </summary>
+                <div class="p-3 border-t border-gray-700 text-sm text-gray-300 bg-gray-800/50 max-h-48 overflow-y-auto whitespace-pre-wrap font-mono leading-relaxed" id="context-panel-questions">
+                </div>
+            </details>
+
             <h2 class="text-xl font-semibold mb-4 text-orange-500 border-b border-gray-700 pb-2">2. Guided Intake Questions</h2>
             <p class="text-sm text-gray-400 mb-4">The AI has generated specific questions to clarify the case.</p>
             <div id="error-message-questions" class="error-box hidden"></div>
@@ -171,13 +191,19 @@
 
         <!-- SECTION 3: PLAN REVIEW -->
         <div id="section-review" class="hidden bg-gray-800 p-6 rounded-lg shadow-md border border-gray-700">
+             <!-- Read-Only Context Header -->
+             <details class="bg-gray-900 border border-gray-700 rounded-md mb-6 group">
+                <summary class="font-semibold text-gray-300 p-3 cursor-pointer text-sm flex justify-between items-center hover:bg-gray-800 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 rounded-md">
+                    <span class="flex items-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg> Patient Context</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-2 text-gray-500 group-open:rotate-180 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                </summary>
+                <div class="p-3 border-t border-gray-700 text-sm text-gray-300 bg-gray-800/50 max-h-48 overflow-y-auto whitespace-pre-wrap font-mono leading-relaxed" id="context-panel-review">
+                </div>
+            </details>
+
              <!-- Emergency Alert -->
              <div id="emergency-alert" class="hidden bg-red-900/50 border-l-4 border-red-600 text-red-300 p-4 rounded-md mb-6">
-                <p class="font-bold flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-                    RED FLAG / TRIAGE ALERT
-                </p>
-                <p id="emergency-reason" class="mt-2 text-sm font-mono bg-red-900/30 p-2 rounded"></p>
+                <!-- Populated via JS -->
             </div>
 
             <h2 class="text-xl font-semibold mb-4 text-orange-500 pb-2 flex justify-between items-center border-b border-gray-700">
@@ -336,11 +362,52 @@
             if (isLoading) Object.values(sections).forEach(s => s.classList.add('hidden'));
         }
 
+        function updateStepper(activeSection) {
+            const steps = ['intake', 'questions', 'review', 'final'];
+            const activeIndex = steps.indexOf(activeSection);
+
+            // Update progress bar width
+            const progressBar = document.getElementById('progress-bar');
+            if(progressBar) {
+                progressBar.style.width = activeIndex === 0 ? '0%' :
+                                        activeIndex === 1 ? '33%' :
+                                        activeIndex === 2 ? '66%' : '100%';
+            }
+
+            // Update step indicators
+            steps.forEach((step, index) => {
+                const ind = document.getElementById(`step-${index + 1}-ind`);
+                if (!ind) return;
+
+                const circle = ind.querySelector('div:first-child');
+                const text = ind.querySelector('div:last-child');
+
+                if (index <= activeIndex) {
+                    circle.className = "w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-orange-600 text-white flex items-center justify-center font-bold border-4 border-gray-900 shadow-[0_0_10px_rgba(249,115,22,0.5)] transition-colors duration-300";
+                    text.className = "text-[10px] sm:text-xs font-semibold text-gray-200 mt-2 uppercase tracking-wider text-center transition-colors duration-300";
+                } else {
+                    circle.className = "w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gray-700 text-gray-300 flex items-center justify-center font-bold border-4 border-gray-900 transition-colors duration-300";
+                    text.className = "text-[10px] sm:text-xs font-semibold text-gray-400 mt-2 uppercase tracking-wider text-center transition-colors duration-300";
+                }
+            });
+        }
+
         function showSection(name) {
             showLoading(false);
+
+            // Populate Context Panels if moving past intake
+            if(name === 'questions' || name === 'review') {
+                const ctxText = `Location: ${intakeState.location}\n\nClinical Information:\n${intakeState.clinicalVignette}`;
+                const panelQ = document.getElementById('context-panel-questions');
+                const panelR = document.getElementById('context-panel-review');
+                if(panelQ) panelQ.textContent = ctxText;
+                if(panelR) panelR.textContent = ctxText;
+            }
+
             Object.keys(sections).forEach(key => {
                 sections[key].classList.toggle('hidden', key !== name);
             });
+            updateStepper(name);
             window.scrollTo(0, 0);
         }
 
@@ -371,7 +438,8 @@
                 generationConfig: {
                     responseMimeType: "application/json",
                     temperature: 1.0,
-                    thinkingConfig: { thinkingBudget: 32768 }
+                    thinkingConfig: { thinkingBudget: 32768 },
+                    maxOutputTokens: 8192
                 }
             };
 
@@ -405,7 +473,8 @@
                 contents: [{ parts: [{ text: userQuery }] }],
                 systemInstruction: { parts: [{ text: systemPrompt }] },
                 generationConfig: {
-                    thinkingConfig: { thinkingBudget: 32768 }
+                    thinkingConfig: { thinkingBudget: 32768 },
+                    maxOutputTokens: 8192
                 }
             };
             const response = await fetch(url, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload)});
@@ -415,31 +484,43 @@
 
 
         // --- Step 1: Intake (CC + Data) ---
-        document.getElementById('example-complaint-btn').addEventListener('click', () => {
-            document.getElementById('initial-symptoms').value = "22M active duty soldier with right ankle pain. Twisted it during PT run this morning. Swollen, can bear weight but painful.";
-            document.getElementById('vitals-input').value = "BP 124/78, HR 82, RR 16, 98% RA";
-            document.getElementById('pe-input').value = "Swelling lateral malleolus. (+) Anterior Drawer. FROM. PMS Intact.";
-            document.getElementById('meds-input').value = "None";
-            document.getElementById('allergies-input').value = "NKDA";
-            document.getElementById('pmh-input').value = "None";
+
+        // Quick Fill Templates
+        const templates = {
+            msk: "22M active duty soldier with right ankle pain. Twisted it during PT run this morning. Swollen, can bear weight but painful.\n\nVitals: BP 124/78, HR 82, RR 16, 98% RA\nExam: Swelling lateral malleolus. (+) Anterior Drawer. FROM. PMS Intact.\nMeds: None\nAllergies: NKDA\nPMH: None",
+            uri: "19F presenting with 3 days of sore throat, rhinorrhea, and non-productive cough. Denies fever or shortness of breath.\n\nVitals: T 98.9, HR 76, BP 115/72, RR 14, 100% RA\nExam: Pharynx erythematous, no exudates. Lungs clear to auscultation bilaterally.\nMeds: Occasional Ibuprofen for HA.\nAllergies: Penicillin (hives)\nPMH: None",
+            heat: "20M brought to BAS after falling out of a 6-mile ruck march. C/o severe muscle cramps, headache, and nausea.\n\nVitals: T 100.2 (oral), HR 115, BP 105/65, RR 20\nExam: Diaphoretic, flushed. Alert and oriented x3. Diffuse muscle cramping in bilateral LE.\nMeds: None\nAllergies: NKDA\nPMH: None"
+        };
+
+        // Auto-resize textarea
+        const autoResizeTextarea = (el) => {
+            el.style.height = 'auto';
+            el.style.height = el.scrollHeight + 'px';
+        };
+
+        const clinicalInput = document.getElementById('clinical-vignette');
+        clinicalInput.addEventListener('input', () => autoResizeTextarea(clinicalInput));
+
+        document.querySelectorAll('.quick-fill-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const templateKey = e.currentTarget.dataset.template;
+                if (templates[templateKey]) {
+                    clinicalInput.value = templates[templateKey];
+                    autoResizeTextarea(clinicalInput);
+                }
+            });
         });
 
         document.getElementById('intake-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             clearErrors();
 
-            const val = document.getElementById('initial-symptoms').value.trim();
-            if(val.length < 5) return showError('intake', 'Please enter a valid Chief Complaint.');
+            const val = document.getElementById('clinical-vignette').value.trim();
+            if(val.length < 10) return showError('intake', 'Please enter a detailed clinical vignette.');
             
             // Capture all data
             intakeState.location = document.getElementById('location-input').value;
-            intakeState.chiefComplaint = val;
-            intakeState.vitals = document.getElementById('vitals-input').value;
-            intakeState.physicalExam = document.getElementById('pe-input').value;
-            intakeState.pmh = document.getElementById('pmh-input').value;
-            intakeState.allergies = document.getElementById('allergies-input').value;
-            intakeState.meds = document.getElementById('meds-input').value;
-            intakeState.priorLabs = document.getElementById('prior-labs-input').value;
+            intakeState.clinicalVignette = val;
 
             showLoading(true);
 
@@ -447,7 +528,7 @@
                 // Prompt includes ALL context to make questions smarter
                 const prompt = `
                     You are an expert combat medic assistant. 
-                    Based on the Chief Complaint, Vitals, and History provided, generate 5-7 concise, targeted follow-up questions to build a complete HPI and ROS.
+                    Based on the Clinical Data provided, generate 5-7 concise, targeted follow-up questions to build a complete HPI and ROS.
                     Do NOT ask for data already provided (e.g., if Vitals are present, don't ask for them).
                     Provide 3-4 highly probable multiple-choice options for each question to make it easy for the user to answer.
                     Return strictly JSON: { "questions": [ { "question": "Question text?", "options": ["Option A", "Option B", "Option C"] } ] }
@@ -455,11 +536,7 @@
                 
                 const userContext = `
                     Current Location: ${intakeState.location}
-                    Complaint: ${intakeState.chiefComplaint}
-                    Vitals: ${intakeState.vitals}
-                    Med Hx: ${intakeState.pmh}
-                    Current Meds: ${intakeState.meds}
-                    Allergies: ${intakeState.allergies}
+                    Clinical Data: ${intakeState.clinicalVignette}
                 `;
 
                 const result = await callGeminiApi(prompt, userContext);
@@ -553,9 +630,8 @@
             showLoading(true);
 
             // Construct Full Context
-            let context = `Location: ${intakeState.location}\nChief Complaint: ${intakeState.chiefComplaint}\n`;
+            let context = `Location: ${intakeState.location}\nClinical Data: ${intakeState.clinicalVignette}\n`;
             intakeState.answers.forEach(item => context += `Q: ${item.q} A: ${item.a}\n`);
-            context += `\nVitals: ${intakeState.vitals}\nPhysical Exam: ${intakeState.physicalExam}\nPMH: ${intakeState.pmh}\nAllergies: ${intakeState.allergies}\nMeds: ${intakeState.meds}\nPrior Labs: ${intakeState.priorLabs}`;
 
             const systemPrompt = `
                 You are an expert Military Physician Assistant/Medical Provider.
@@ -579,6 +655,7 @@
                         "hpi_paragraph": "A complete paragraph narrative of the HPI.",
                         "ros_bullets": ["ROS point 1", "ROS point 2"]
                     },
+                    "red_flags": ["string"],
                     "assessment": {
                         "synthesis_statement": "The most likely diagnosis and reasoning supported by evidence.",
                         "ddx": [
@@ -587,8 +664,6 @@
                     },
                     "plan": {
                         "disposition": [ {"intervention": "Triage recommendation (e.g., Maintain Outpatient, ER Transfer, Admission)", "is_primary": boolean, "rationale": "Detailed explanation"} ],
-                        "is_emergency": boolean,
-                        "emergency_reason": "string or null",
                         "workup": [ {"intervention": "Lab 1, X-Ray View, Consult Name", "is_primary": boolean, "rationale": "Detailed explanation"} ],
                         "treatment": [ {"intervention": "Medication Name & Dose, Non-pharm intervention", "is_primary": boolean, "rationale": "Detailed explanation"} ],
                         "profile": {
@@ -620,14 +695,22 @@
 
         // --- Step 3: Review & Select ---
         function renderReview(soap) {
-            // Emergency Alert
-            const alert = document.getElementById('emergency-alert');
-            if(soap.plan.is_emergency) {
-                document.getElementById('emergency-reason').textContent = soap.plan.emergency_reason;
-                alert.classList.remove('hidden');
-            } else {
-                alert.classList.add('hidden');
-            }
+            // Safety Banner
+             const alert = document.getElementById('emergency-alert');
+             if (soap.red_flags && soap.red_flags.length > 0) {
+                 alert.innerHTML = `
+                         <p class="font-bold flex items-center">
+                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                             RED FLAG / TRIAGE ALERT
+                         </p>
+                         <ul class="list-disc ml-5 text-red-200 text-sm font-semibold mt-1">
+                             ${soap.red_flags.map(f => `<li>${f}</li>`).join('')}
+                         </ul>`;
+                 alert.classList.remove('hidden');
+             } else {
+                 alert.classList.add('hidden');
+                 alert.innerHTML = '';
+             }
 
             // Assessment
             document.getElementById('review-diagnosis').textContent = soap.assessment.synthesis_statement;
@@ -714,13 +797,8 @@
             note += `Review of Systems:\n`;
             soap.subjective.ros_bullets.forEach(b => note += `- ${b}\n`);
 
-            note += `\nOBJECTIVE:\n`;
-            note += `Vitals: ${intakeState.vitals || "Not recorded"}\n`;
-            note += `Physical Exam: ${intakeState.physicalExam || "Not recorded"}\n`;
-            note += `PMH: ${intakeState.pmh || "None"}\n`;
-            note += `Allergies: ${intakeState.allergies || "NKDA"}\n`;
-            note += `Current Meds: ${intakeState.meds || "None"}\n`;
-            note += `Prior Labs/Img: ${intakeState.priorLabs || "None"}\n`;
+            note += `\nCLINICAL DATA:\n`;
+            note += `${intakeState.clinicalVignette}\n`;
 
             note += `\nASSESSMENT:\n`;
             note += `${soap.assessment.synthesis_statement}\n\n`;
@@ -825,33 +903,10 @@
         document.getElementById('final-back-btn').addEventListener('click', () => showSection('review'));
         document.getElementById('start-over-btn').addEventListener('click', () => location.reload());
         
-        // --- Sharing Setup ---
-        function getPlanModifications() {
-            // Helper to capture checkboxes in review section
-            if (document.querySelectorAll('.item-check').length > 0) {
-                return {
-                    disposition: Array.from(document.querySelectorAll('.item-check[data-cat="disposition"]:checked')).map(cb => cb.dataset.val),
-                    workup: Array.from(document.querySelectorAll('.item-check[data-cat="workup"]:checked')).map(cb => cb.dataset.val),
-                    treatment: Array.from(document.querySelectorAll('.item-check[data-cat="treatment"]:checked')).map(cb => cb.dataset.val),
-                    profile: Array.from(document.querySelectorAll('.item-check[data-cat="profile"]:checked')).map(cb => cb.dataset.val),
-                    profDays: document.getElementById('profile-days').value
-                };
-            }
-            return null;
-        }
-
-        setupSharing({
-            apiKey: jsonBinKey,
-            getState: () => {
+            function updateStateFromDOM() {
                 // Ensure state captures current inputs even if not submitted
                 intakeState.location = document.getElementById('location-input').value;
-                intakeState.chiefComplaint = document.getElementById('initial-symptoms').value;
-                intakeState.vitals = document.getElementById('vitals-input').value;
-                intakeState.physicalExam = document.getElementById('pe-input').value;
-                intakeState.meds = document.getElementById('meds-input').value;
-                intakeState.allergies = document.getElementById('allergies-input').value;
-                intakeState.pmh = document.getElementById('pmh-input').value;
-                intakeState.priorLabs = document.getElementById('prior-labs-input').value;
+                intakeState.clinicalVignette = document.getElementById('clinical-vignette').value;
 
                 // Capture Questions Answers from DOM
                 const questionInputs = document.querySelectorAll('#questions-container input[type="text"]');
@@ -871,7 +926,27 @@
                         intakeState.answers.push({ q: inp.dataset.q, a: a });
                     });
                 }
+            }
 
+        // --- Sharing Setup ---
+        function getPlanModifications() {
+            // Helper to capture checkboxes in review section
+            if (document.querySelectorAll('.item-check').length > 0) {
+                return {
+                    disposition: Array.from(document.querySelectorAll('.item-check[data-cat="disposition"]:checked')).map(cb => cb.dataset.val),
+                    workup: Array.from(document.querySelectorAll('.item-check[data-cat="workup"]:checked')).map(cb => cb.dataset.val),
+                    treatment: Array.from(document.querySelectorAll('.item-check[data-cat="treatment"]:checked')).map(cb => cb.dataset.val),
+                    profile: Array.from(document.querySelectorAll('.item-check[data-cat="profile"]:checked')).map(cb => cb.dataset.val),
+                    profDays: document.getElementById('profile-days').value
+                };
+            }
+            return null;
+        }
+
+        setupSharing({
+            apiKey: jsonBinKey,
+            getState: () => {
+                updateStateFromDOM();
                 return {
                     intakeState: intakeState,
                     planModifications: getPlanModifications(),
@@ -885,15 +960,20 @@
             restoreState: (saved) => {
                 if (saved.intakeState) Object.assign(intakeState, saved.intakeState);
 
+                // Backwards compatibility
+                if (intakeState.chiefComplaint && !intakeState.clinicalVignette) {
+                    intakeState.clinicalVignette = `CC/HPI: ${intakeState.chiefComplaint}\n`;
+                    if(intakeState.vitals) intakeState.clinicalVignette += `Vitals: ${intakeState.vitals}\n`;
+                    if(intakeState.physicalExam) intakeState.clinicalVignette += `Exam: ${intakeState.physicalExam}\n`;
+                    if(intakeState.meds) intakeState.clinicalVignette += `Meds: ${intakeState.meds}\n`;
+                    if(intakeState.allergies) intakeState.clinicalVignette += `Allergies: ${intakeState.allergies}\n`;
+                    if(intakeState.pmh) intakeState.clinicalVignette += `PMH: ${intakeState.pmh}\n`;
+                    if(intakeState.priorLabs) intakeState.clinicalVignette += `Labs: ${intakeState.priorLabs}\n`;
+                }
+
                 // Restore Intake Inputs
                 document.getElementById('location-input').value = intakeState.location || "CTMC";
-                document.getElementById('initial-symptoms').value = intakeState.chiefComplaint || "";
-                document.getElementById('vitals-input').value = intakeState.vitals || "";
-                document.getElementById('pe-input').value = intakeState.physicalExam || "";
-                document.getElementById('meds-input').value = intakeState.meds || "";
-                document.getElementById('allergies-input').value = intakeState.allergies || "";
-                document.getElementById('pmh-input').value = intakeState.pmh || "";
-                document.getElementById('prior-labs-input').value = intakeState.priorLabs || "";
+                document.getElementById('clinical-vignette').value = intakeState.clinicalVignette || "";
 
                 // Restore Questions if they exist
                 if (intakeState.questions && intakeState.questions.length > 0) {
