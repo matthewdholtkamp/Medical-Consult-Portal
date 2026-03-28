@@ -142,22 +142,22 @@
                 <div class="mb-6">
                     <label for="clinical-vignette" class="block text-sm font-bold text-white mb-2">Clinical Information (Paste H&P or Vignette):</label>
                     <p class="text-xs text-slate-400 mb-3">Include all relevant de-identified data (HPI, Vitals, Exam, Meds, Labs, etc.)</p>
-                    <textarea id="clinical-vignette" rows="8" class="w-full p-4 border border-slate-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-slate-700 text-white placeholder-slate-400 text-base leading-relaxed overflow-hidden resize-none" placeholder="e.g., 74F presenting with 3 days of productive cough, fever, and confusion. &#10;&#10;Vitals: T 102.5, HR 115, BP 92/58, RR 24, O2 91% on 4L NC&#10;Exam: Ill-appearing, oriented x1. Crackles RLL. Tachycardic reg rhythm. Abd soft..."></textarea>
+                    <textarea id="clinical-vignette" rows="8" class="w-full p-4 border border-slate-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-slate-700 text-white placeholder-slate-400 text-base leading-relaxed overflow-hidden resize-none" placeholder="e.g., 74F presenting with 3 days of productive cough, fever, and confusion. &#10;&#10;Vitals: T 102.5, HR 115, BP 92/58, RR 24, O2 91% on 4L NC&#10;Exam: Ill-appearing, oriented x1. Crackles RLL. Tachycardic reg rhythm. Abd soft..." oninput="document.getElementById('intake-submit-btn').disabled = this.value.trim().length < 10;"></textarea>
 
                     <div class="flex flex-wrap gap-2 mt-4" id="quick-fill-container">
-                        <button type="button" class="quick-fill-btn text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 py-1.5 px-3 rounded-full border border-slate-600 transition-colors" data-template="sepsis">
+                        <button type="button" class="quick-fill-btn text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 py-1.5 px-3 rounded-full border border-slate-600 transition-colors focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:outline-none" data-template="sepsis">
                             <i class="fa-solid fa-virus mr-1 text-red-400"></i> Sepsis / Pneumonia
                         </button>
-                        <button type="button" class="quick-fill-btn text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 py-1.5 px-3 rounded-full border border-slate-600 transition-colors" data-template="gi_bleed">
+                        <button type="button" class="quick-fill-btn text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 py-1.5 px-3 rounded-full border border-slate-600 transition-colors focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:outline-none" data-template="gi_bleed">
                             <i class="fa-solid fa-droplet mr-1 text-red-600"></i> GI Bleed
                         </button>
-                        <button type="button" class="quick-fill-btn text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 py-1.5 px-3 rounded-full border border-slate-600 transition-colors" data-template="dka">
+                        <button type="button" class="quick-fill-btn text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 py-1.5 px-3 rounded-full border border-slate-600 transition-colors focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:outline-none" data-template="dka">
                             <i class="fa-solid fa-cubes-stacked mr-1 text-blue-400"></i> DKA / HHS
                         </button>
                     </div>
                 </div>
 
-                <button type="submit" class="w-full bg-gradient-to-r from-indigo-700 to-indigo-600 text-white font-bold text-lg py-4 px-6 rounded-lg shadow-lg hover:from-indigo-600 hover:to-indigo-500 transition-all transform hover:-translate-y-1 flex items-center justify-center">
+                <button id="intake-submit-btn" type="submit" disabled class="w-full bg-gradient-to-r from-indigo-700 to-indigo-600 text-white font-bold text-lg py-4 px-6 rounded-lg shadow-lg hover:from-indigo-600 hover:to-indigo-500 transition-all transform hover:-translate-y-1 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
                     <span class="mr-3">Start Medical Assessment</span>
                     <i class="fa-solid fa-arrow-right"></i>
                 </button>
@@ -497,6 +497,7 @@
                 if (templates[templateKey]) {
                     clinicalInput.value = templates[templateKey];
                     autoResizeTextarea(clinicalInput);
+                    document.getElementById('intake-submit-btn').disabled = false;
                 }
             });
         });
@@ -545,7 +546,7 @@
                             const optId = `q-${index}-opt-${optIndex}`;
                             html += `
                             <label for="${optId}" class="flex items-start space-x-3 p-2 hover:bg-slate-800 rounded cursor-pointer group border border-transparent hover:border-slate-700 transition-all">
-                                <input type="radio" name="q-${index}-radio" id="${optId}" value="${opt}" class="mt-1 form-radio text-indigo-600 bg-slate-700 border-slate-500 focus:ring-indigo-500 q-radio">
+                                <input type="checkbox" name="q-${index}-checkbox" id="${optId}" value="${opt}" class="mt-1 form-checkbox text-indigo-600 bg-slate-700 border-slate-500 focus:ring-indigo-500 q-checkbox">
                                 <span class="text-sm text-slate-300 group-hover:text-white transition-colors leading-tight">${opt}</span>
                             </label>`;
                         });
@@ -553,24 +554,24 @@
                         const otherId = `q-${index}-opt-other`;
                         html += `
                             <label for="${otherId}" class="flex items-start space-x-3 p-2 hover:bg-slate-800 rounded cursor-pointer group border border-transparent hover:border-slate-700 transition-all">
-                                <input type="radio" name="q-${index}-radio" id="${otherId}" value="other" class="mt-1 form-radio text-indigo-600 bg-slate-700 border-slate-500 focus:ring-indigo-500 q-radio">
+                                <input type="checkbox" name="q-${index}-checkbox" id="${otherId}" value="other" class="mt-1 form-checkbox text-indigo-600 bg-slate-700 border-slate-500 focus:ring-indigo-500 q-checkbox-other">
                                 <span class="text-sm text-slate-300 group-hover:text-white transition-colors leading-tight">Other (Type below)</span>
                             </label>`;
                     }
 
                     html += `</div>
-                        <input type="text" id="${qId}" data-q="${questionText}" class="w-full p-2 border-b border-slate-600 bg-slate-800 text-white focus:border-indigo-500 outline-none transition-colors rounded ${options.length > 0 ? 'opacity-50 cursor-not-allowed' : ''}" placeholder="${options.length > 0 ? 'Select an option above, or choose Other to type...' : 'Type answer...'}" ${options.length > 0 ? 'disabled' : ''}>
+                        <input type="text" id="${qId}" data-q="${questionText}" class="w-full p-2 border-b border-slate-600 bg-slate-800 text-white focus:border-indigo-500 outline-none transition-colors rounded ${options.length > 0 ? 'opacity-50 cursor-not-allowed' : ''}" placeholder="${options.length > 0 ? 'Check an option above, or check Other to type...' : 'Type answer...'}" ${options.length > 0 ? 'disabled' : ''}>
                     </div>`;
 
                     container.innerHTML += html;
                 });
 
-                document.querySelectorAll('.q-radio').forEach(radio => {
-                    radio.addEventListener('change', (e) => {
+                document.querySelectorAll('.q-checkbox-other').forEach(checkbox => {
+                    checkbox.addEventListener('change', (e) => {
                         const index = e.target.closest('[data-q-index]').dataset.qIndex;
                         const textInput = document.getElementById(`question-input-${index}`);
 
-                        if (e.target.value === 'other') {
+                        if (e.target.checked) {
                             textInput.disabled = false;
                             textInput.classList.remove('opacity-50', 'cursor-not-allowed');
                             textInput.placeholder = "Type your answer here...";
@@ -578,7 +579,7 @@
                         } else {
                             textInput.disabled = true;
                             textInput.classList.add('opacity-50', 'cursor-not-allowed');
-                            textInput.placeholder = "Select an option above, or choose Other to type...";
+                            textInput.placeholder = "Check an option above, or check Other to type...";
                         }
                     });
                 });
@@ -600,15 +601,29 @@
             document.querySelectorAll('#questions-container input[type="text"]').forEach(inp => {
                 const questionText = inp.dataset.q;
                 const index = inp.id.split('-').pop();
-                const checkedRadio = document.querySelector(`input[name="q-${index}-radio"]:checked`);
+                const checkedBoxes = document.querySelectorAll(`input[name="q-${index}-checkbox"]:checked`);
 
-                let answerText = "";
-                if (checkedRadio && checkedRadio.value !== 'other') {
-                    answerText = checkedRadio.value;
-                } else if (checkedRadio && checkedRadio.value === 'other') {
-                    answerText = inp.value;
-                } else if (!checkedRadio && !inp.disabled) {
-                    answerText = inp.value;
+                let selectedValues = [];
+                let hasOther = false;
+
+                checkedBoxes.forEach(box => {
+                    if (box.value !== 'other') {
+                        selectedValues.push(box.value);
+                    } else {
+                        hasOther = true;
+                    }
+                });
+
+                let answerText = selectedValues.join(', ');
+
+                if (hasOther && inp.value.trim() !== '') {
+                    if (answerText.length > 0) {
+                        answerText += ', ' + inp.value.trim();
+                    } else {
+                        answerText = inp.value.trim();
+                    }
+                } else if (checkedBoxes.length === 0 && !inp.disabled && inp.value.trim() !== '') {
+                    answerText = inp.value.trim();
                 }
 
                 state.answers.push({ q: questionText, a: answerText });
@@ -801,21 +816,44 @@
             note += `Differential Diagnosis:\n`;
             soap.assessment.ddx.forEach(d => note += `- ${d.name} [${d.icd10}] (${d.likelihood})\n`);
 
-            note += `\nDISPOSITION: ${soap.plan.disposition}\n\n`;
+            // Helper function to format items with their rationales
+            const formatItems = (items) => {
+                let out = "";
+                items.forEach(i => {
+                    out += `• ${i.val}\n`;
+                    if (i.rationale) {
+                        out += `    Rationale: ${i.rationale}\n`;
+                    }
+                });
+                return out;
+            };
+
+            note += `\nDISPOSITION:\n`;
+            if(selDisposition.length) note += formatItems(selDisposition);
+            else note += `(None selected)\n\n`;
             
             note += `ORDERS / WORKUP:\n`;
-            if(selWorkup.length) selWorkup.forEach(i => note += `• ${i}\n`);
+            if(selWorkup.length) note += formatItems(selWorkup);
             else note += `(None selected)\n`;
 
             note += `\nMEDICATIONS / THERAPEUTICS:\n`;
-            if(selTx.length) selTx.forEach(i => note += `• ${i}\n`);
+            if(selTx.length) note += formatItems(selTx);
             else note += `(None selected)\n`;
 
             note += `\nLIMITATIONS / QUARTERS (${days} days):\n`;
             if(selProf.length) selProf.forEach(i => note += `- ${i}\n`);
             
             note += `\nINSTRUCTIONS:\n`;
-            if (soap.plan.profile.instructions) { if (Array.isArray(soap.plan.profile.instructions)) { soap.plan.profile.instructions.forEach(i => note += `- ${i}\n`); } else { note += `- ${soap.plan.profile.instructions}\n`; } }
+            if (soap.plan.profile.instructions) {
+                if (Array.isArray(soap.plan.profile.instructions)) {
+                    soap.plan.profile.instructions.forEach(i => {
+                        const val = typeof i === 'object' ? i.intervention : i;
+                        note += `- ${val}\n`;
+                    });
+                } else {
+                    note += `- ${soap.plan.profile.instructions}\n`;
+                }
+            }
 
             document.getElementById('final-note-content').textContent = note;
 
@@ -884,16 +922,32 @@
                     state.answers = [];
                     questionInputs.forEach(inp => {
                         const index = inp.id.split('-').pop();
-                        const checkedRadio = document.querySelector(`input[name="q-${index}-radio"]:checked`);
-                        let a = inp.value;
-                        if (checkedRadio && checkedRadio.value !== 'other') {
-                            a = checkedRadio.value;
-                        } else if (checkedRadio && checkedRadio.value === 'other') {
-                            a = inp.value;
-                        } else if (!checkedRadio && inp.disabled) {
-                            a = "";
+                        const checkedBoxes = document.querySelectorAll(`input[name="q-${index}-checkbox"]:checked`);
+
+                        let selectedValues = [];
+                        let hasOther = false;
+
+                        checkedBoxes.forEach(box => {
+                            if (box.value !== 'other') {
+                                selectedValues.push(box.value);
+                            } else {
+                                hasOther = true;
+                            }
+                        });
+
+                        let answerText = selectedValues.join(', ');
+
+                        if (hasOther && inp.value.trim() !== '') {
+                            if (answerText.length > 0) {
+                                answerText += ', ' + inp.value.trim();
+                            } else {
+                                answerText = inp.value.trim();
+                            }
+                        } else if (checkedBoxes.length === 0 && !inp.disabled && inp.value.trim() !== '') {
+                            answerText = inp.value.trim();
                         }
-                        state.answers.push({ q: inp.dataset.q, a: a });
+
+                        state.answers.push({ q: inp.dataset.q, a: answerText });
                     });
                 }
             }
@@ -954,52 +1008,59 @@
                         const val = ansObj ? ansObj.a : "";
                         const qId = `question-input-${index}`;
 
+                        // Split multiple answers if they were joined by ', '
+                        const valArr = val ? val.split(',').map(s => s.trim()) : [];
+
                         let html = `<div class="bg-slate-900 p-4 rounded border border-slate-700 mb-4" data-q-index="${index}">
                             <label class="block text-sm text-indigo-300 mb-3 font-medium">${questionText}</label>
                             <div class="space-y-2 mb-3">`;
 
-                        let isOptionSelected = false;
                         let isOtherSelected = false;
+                        let otherText = val;
 
                         if (options.length > 0) {
                             options.forEach((opt, optIndex) => {
                                 const optId = `q-${index}-opt-${optIndex}`;
-                                const isChecked = val === opt;
-                                if (isChecked) isOptionSelected = true;
+                                const isChecked = valArr.includes(opt);
+                                if (isChecked) {
+                                    // Remove this from otherText to isolate the custom part
+                                    otherText = otherText.replace(opt, '').replace(/^,|,$/g, '').trim();
+                                    otherText = otherText.replace(/, ,/g, ',').replace(/^,\s*/, '').replace(/,\s*$/, '').trim();
+                                }
 
                                 html += `
                                 <label for="${optId}" class="flex items-start space-x-3 p-2 hover:bg-slate-800 rounded cursor-pointer group border border-transparent hover:border-slate-700 transition-all">
-                                    <input type="radio" name="q-${index}-radio" id="${optId}" value="${opt}" ${isChecked ? 'checked' : ''} class="mt-1 form-radio text-indigo-600 bg-slate-700 border-slate-500 focus:ring-indigo-500 q-radio">
+                                    <input type="checkbox" name="q-${index}-checkbox" id="${optId}" value="${opt}" ${isChecked ? 'checked' : ''} class="mt-1 form-checkbox text-indigo-600 bg-slate-700 border-slate-500 focus:ring-indigo-500 q-checkbox">
                                     <span class="text-sm text-slate-300 group-hover:text-white transition-colors leading-tight">${opt}</span>
                                 </label>`;
                             });
 
                             const otherId = `q-${index}-opt-other`;
-                            if (val && !isOptionSelected) isOtherSelected = true;
+                            if (otherText && otherText.length > 0) isOtherSelected = true;
 
                             html += `
                                 <label for="${otherId}" class="flex items-start space-x-3 p-2 hover:bg-slate-800 rounded cursor-pointer group border border-transparent hover:border-slate-700 transition-all">
-                                    <input type="radio" name="q-${index}-radio" id="${otherId}" value="other" ${isOtherSelected ? 'checked' : ''} class="mt-1 form-radio text-indigo-600 bg-slate-700 border-slate-500 focus:ring-indigo-500 q-radio">
+                                    <input type="checkbox" name="q-${index}-checkbox" id="${otherId}" value="other" ${isOtherSelected ? 'checked' : ''} class="mt-1 form-checkbox text-indigo-600 bg-slate-700 border-slate-500 focus:ring-indigo-500 q-checkbox-other">
                                     <span class="text-sm text-slate-300 group-hover:text-white transition-colors leading-tight">Other (Type below)</span>
                                 </label>`;
                         }
 
                         const shouldDisableText = options.length > 0 && !isOtherSelected;
-                        const textValue = isOtherSelected || options.length === 0 ? val : "";
+                        const textValue = isOtherSelected ? otherText : (options.length === 0 ? val : "");
 
                         html += `</div>
-                            <input type="text" id="${qId}" data-q="${questionText}" value="${textValue}" class="w-full p-2 border-b border-slate-600 bg-slate-800 text-white focus:border-indigo-500 outline-none transition-colors rounded ${shouldDisableText ? 'opacity-50 cursor-not-allowed' : ''}" placeholder="${options.length > 0 ? 'Select an option above, or choose Other to type...' : 'Type answer...'}" ${shouldDisableText ? 'disabled' : ''}>
+                            <input type="text" id="${qId}" data-q="${questionText}" value="${textValue}" class="w-full p-2 border-b border-slate-600 bg-slate-800 text-white focus:border-indigo-500 outline-none transition-colors rounded ${shouldDisableText ? 'opacity-50 cursor-not-allowed' : ''}" placeholder="${options.length > 0 ? 'Check an option above, or check Other to type...' : 'Type answer...'}" ${shouldDisableText ? 'disabled' : ''}>
                         </div>`;
 
                         container.innerHTML += html;
                     });
 
-                    document.querySelectorAll('.q-radio').forEach(radio => {
-                        radio.addEventListener('change', (e) => {
+                    document.querySelectorAll('.q-checkbox-other').forEach(checkbox => {
+                        checkbox.addEventListener('change', (e) => {
                             const index = e.target.closest('[data-q-index]').dataset.qIndex;
                             const textInput = document.getElementById(`question-input-${index}`);
 
-                            if (e.target.value === 'other') {
+                            if (e.target.checked) {
                                 textInput.disabled = false;
                                 textInput.classList.remove('opacity-50', 'cursor-not-allowed');
                                 textInput.placeholder = "Type your answer here...";
@@ -1007,7 +1068,7 @@
                             } else {
                                 textInput.disabled = true;
                                 textInput.classList.add('opacity-50', 'cursor-not-allowed');
-                                textInput.placeholder = "Select an option above, or choose Other to type...";
+                                textInput.placeholder = "Check an option above, or check Other to type...";
                             }
                         });
                     });

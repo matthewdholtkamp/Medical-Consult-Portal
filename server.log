@@ -1,3 +1,5 @@
-127.0.0.1 - - [22/Mar/2026 11:40:54] "GET /journalclub.html HTTP/1.1" 200 -
-127.0.0.1 - - [22/Mar/2026 11:40:55] "GET /js/sharing.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Mar/2026 11:40:55] "GET /js/config.js HTTP/1.1" 200 -
+127.0.0.1 - - [28/Mar/2026 13:10:21] "GET /ADTMCplus.html HTTP/1.1" 200 -
+127.0.0.1 - - [28/Mar/2026 13:12:04] "GET /ADTMCplus.html HTTP/1.1" 200 -
+127.0.0.1 - - [28/Mar/2026 13:12:49] "GET /ADTMCplus.html HTTP/1.1" 200 -
+127.0.0.1 - - [28/Mar/2026 13:13:55] "GET /ADTMCplus.html HTTP/1.1" 200 -
+127.0.0.1 - - [28/Mar/2026 13:15:23] "GET /ADTMCplus.html HTTP/1.1" 200 -

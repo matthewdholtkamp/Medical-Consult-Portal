@@ -565,7 +565,7 @@
                             const optId = `q-${index}-opt-${optIndex}`;
                             html += `
                             <label for="${optId}" class="flex items-start space-x-3 p-2 hover:bg-slate-800 rounded cursor-pointer group border border-transparent hover:border-slate-600 transition-all">
-                                <input type="radio" name="q-${index}-radio" id="${optId}" value="${opt}" class="mt-1 form-radio text-red-600 bg-slate-700 border-slate-500 focus:ring-red-500 q-radio">
+                                <input type="checkbox" name="q-${index}-checkbox" id="${optId}" value="${opt}" class="mt-1 form-checkbox text-red-600 bg-slate-700 border-slate-500 focus:ring-red-500 q-checkbox">
                                 <span class="text-sm text-slate-300 group-hover:text-white transition-colors leading-tight">${opt}</span>
                             </label>`;
                         });
@@ -574,25 +574,24 @@
                         const otherId = `q-${index}-opt-other`;
                         html += `
                             <label for="${otherId}" class="flex items-start space-x-3 p-2 hover:bg-slate-800 rounded cursor-pointer group border border-transparent hover:border-slate-600 transition-all">
-                                <input type="radio" name="q-${index}-radio" id="${otherId}" value="other" class="mt-1 form-radio text-red-600 bg-slate-700 border-slate-500 focus:ring-red-500 q-radio">
+                                <input type="checkbox" name="q-${index}-checkbox" id="${otherId}" value="other" class="mt-1 form-checkbox text-red-600 bg-slate-700 border-slate-500 focus:ring-red-500 q-checkbox-other">
                                 <span class="text-sm text-slate-300 group-hover:text-white transition-colors leading-tight">Other (Type below)</span>
                             </label>`;
                     }
 
                     html += `</div>
-                        <input type="text" id="${qId}" data-q="${questionText}" class="w-full p-2 border-b border-slate-600 bg-slate-800 text-white focus:border-red-500 outline-none transition-colors rounded ${options.length > 0 ? 'opacity-50 cursor-not-allowed' : ''}" placeholder="${options.length > 0 ? 'Select an option above, or choose Other to type...' : 'Type answer...'}" ${options.length > 0 ? 'disabled' : ''}>
+                        <input type="text" id="${qId}" data-q="${questionText}" class="w-full p-2 border-b border-slate-600 bg-slate-800 text-white focus:border-red-500 outline-none transition-colors rounded ${options.length > 0 ? 'opacity-50 cursor-not-allowed' : ''}" placeholder="${options.length > 0 ? 'Check an option above, or check Other to type...' : 'Type answer...'}" ${options.length > 0 ? 'disabled' : ''}>
                     </div>`;
 
                     container.innerHTML += html;
                 });
 
-                // Add event listeners for radio buttons to toggle the text input
-                document.querySelectorAll('.q-radio').forEach(radio => {
-                    radio.addEventListener('change', (e) => {
+                document.querySelectorAll('.q-checkbox-other').forEach(checkbox => {
+                    checkbox.addEventListener('change', (e) => {
                         const index = e.target.closest('[data-q-index]').dataset.qIndex;
                         const textInput = document.getElementById(`question-input-${index}`);
 
-                        if (e.target.value === 'other') {
+                        if (e.target.checked) {
                             textInput.disabled = false;
                             textInput.classList.remove('opacity-50', 'cursor-not-allowed');
                             textInput.placeholder = "Type your answer here...";
@@ -600,8 +599,7 @@
                         } else {
                             textInput.disabled = true;
                             textInput.classList.add('opacity-50', 'cursor-not-allowed');
-                            textInput.placeholder = "Select an option above, or choose Other to type...";
-                            // Don't clear value so we don't lose typed text if user accidentally clicks away
+                            textInput.placeholder = "Check an option above, or check Other to type...";
                         }
                     });
                 });
@@ -625,20 +623,30 @@
                 const questionText = inp.dataset.q;
                 const index = inp.id.split('-').pop(); // 'question-input-0' -> '0'
 
-                // Try to find a checked radio button for this question
-                const checkedRadio = document.querySelector(`input[name="q-${index}-radio"]:checked`);
+                const checkedBoxes = document.querySelectorAll(`input[name="q-${index}-checkbox"]:checked`);
 
-                let answerText = "";
-                if (checkedRadio && checkedRadio.value !== 'other') {
-                    answerText = checkedRadio.value;
-                } else if (checkedRadio && checkedRadio.value === 'other') {
-                    answerText = inp.value;
-                } else if (!checkedRadio && !inp.disabled) {
+                let selectedValues = [];
+                let hasOther = false;
+
+                checkedBoxes.forEach(box => {
+                    if (box.value !== 'other') {
+                        selectedValues.push(box.value);
+                    } else {
+                        hasOther = true;
+                    }
+                });
+
+                let answerText = selectedValues.join(', ');
+
+                if (hasOther && inp.value.trim() !== '') {
+                    if (answerText.length > 0) {
+                        answerText += ', ' + inp.value.trim();
+                    } else {
+                        answerText = inp.value.trim();
+                    }
+                } else if (checkedBoxes.length === 0 && !inp.disabled && inp.value.trim() !== '') {
                     // Fallback for cases where there were no options generated (plain text input)
-                    answerText = inp.value;
-                } else if (!checkedRadio && inp.disabled) {
-                    // Options existed, but user didn't select any
-                    answerText = ""; // or could show an error, but let's just send empty
+                    answerText = inp.value.trim();
                 }
 
                 state.answers.push({ q: questionText, a: answerText });
@@ -985,16 +993,32 @@
                 state.answers = [];
                 questionInputs.forEach(inp => {
                     const index = inp.id.split('-').pop();
-                    const checkedRadio = document.querySelector(`input[name="q-${index}-radio"]:checked`);
-                    let a = inp.value;
-                    if (checkedRadio && checkedRadio.value !== 'other') {
-                        a = checkedRadio.value;
-                    } else if (checkedRadio && checkedRadio.value === 'other') {
-                        a = inp.value;
-                    } else if (!checkedRadio && inp.disabled) {
-                        a = "";
+                    const checkedBoxes = document.querySelectorAll(`input[name="q-${index}-checkbox"]:checked`);
+
+                    let selectedValues = [];
+                    let hasOther = false;
+
+                    checkedBoxes.forEach(box => {
+                        if (box.value !== 'other') {
+                            selectedValues.push(box.value);
+                        } else {
+                            hasOther = true;
+                        }
+                    });
+
+                    let answerText = selectedValues.join(', ');
+
+                    if (hasOther && inp.value.trim() !== '') {
+                        if (answerText.length > 0) {
+                            answerText += ', ' + inp.value.trim();
+                        } else {
+                            answerText = inp.value.trim();
+                        }
+                    } else if (checkedBoxes.length === 0 && !inp.disabled && inp.value.trim() !== '') {
+                        answerText = inp.value.trim();
                     }
-                    state.answers.push({ q: inp.dataset.q, a: a });
+
+                    state.answers.push({ q: inp.dataset.q, a: answerText });
                 });
             }
 
@@ -1042,55 +1066,61 @@
                     const val = ansObj ? ansObj.a : "";
                     const qId = `question-input-${index}`;
 
+                        // Split multiple answers if they were joined by ', '
+                        const valArr = val ? val.split(',').map(s => s.trim()) : [];
+
                     let html = `<div class="bg-slate-900 p-4 rounded border border-slate-700 mb-4" data-q-index="${index}">
                         <label class="block text-sm text-red-300 mb-3 font-medium">${questionText}</label>
                         <div class="space-y-2 mb-3">`;
 
-                    let isOptionSelected = false;
                     let isOtherSelected = false;
+                        let otherText = val;
 
                     if (options.length > 0) {
                         options.forEach((opt, optIndex) => {
                             const optId = `q-${index}-opt-${optIndex}`;
-                            const isChecked = val === opt;
-                            if (isChecked) isOptionSelected = true;
+                                const isChecked = valArr.includes(opt);
+                                if (isChecked) {
+                                    // Remove this from otherText to isolate the custom part
+                                    otherText = otherText.replace(opt, '').replace(/^,|,$/g, '').trim();
+                                    otherText = otherText.replace(/, ,/g, ',').replace(/^,\s*/, '').replace(/,\s*$/, '').trim();
+                                }
 
                             html += `
                             <label for="${optId}" class="flex items-start space-x-3 p-2 hover:bg-slate-800 rounded cursor-pointer group border border-transparent hover:border-slate-600 transition-all">
-                                <input type="radio" name="q-${index}-radio" id="${optId}" value="${opt}" ${isChecked ? 'checked' : ''} class="mt-1 form-radio text-red-600 bg-slate-700 border-slate-500 focus:ring-red-500 q-radio">
+                                    <input type="checkbox" name="q-${index}-checkbox" id="${optId}" value="${opt}" ${isChecked ? 'checked' : ''} class="mt-1 form-checkbox text-red-600 bg-slate-700 border-slate-500 focus:ring-red-500 q-checkbox">
                                 <span class="text-sm text-slate-300 group-hover:text-white transition-colors leading-tight">${opt}</span>
                             </label>`;
                         });
 
                         // Add "Other" option
                         const otherId = `q-${index}-opt-other`;
-                        if (val && !isOptionSelected) isOtherSelected = true; // Has value, not empty, not an option
+                            if (otherText && otherText.length > 0) isOtherSelected = true;
 
                         html += `
                             <label for="${otherId}" class="flex items-start space-x-3 p-2 hover:bg-slate-800 rounded cursor-pointer group border border-transparent hover:border-slate-600 transition-all">
-                                <input type="radio" name="q-${index}-radio" id="${otherId}" value="other" ${isOtherSelected ? 'checked' : ''} class="mt-1 form-radio text-red-600 bg-slate-700 border-slate-500 focus:ring-red-500 q-radio">
+                                    <input type="checkbox" name="q-${index}-checkbox" id="${otherId}" value="other" ${isOtherSelected ? 'checked' : ''} class="mt-1 form-checkbox text-red-600 bg-slate-700 border-slate-500 focus:ring-red-500 q-checkbox-other">
                                 <span class="text-sm text-slate-300 group-hover:text-white transition-colors leading-tight">Other (Type below)</span>
                             </label>`;
                     }
 
                     // The text input state
                     const shouldDisableText = options.length > 0 && !isOtherSelected;
-                    const textValue = isOtherSelected || options.length === 0 ? val : "";
+                        const textValue = isOtherSelected ? otherText : (options.length === 0 ? val : "");
 
                     html += `</div>
-                        <input type="text" id="${qId}" data-q="${questionText}" value="${textValue}" class="w-full p-2 border-b border-slate-600 bg-slate-800 text-white focus:border-red-500 outline-none transition-colors rounded ${shouldDisableText ? 'opacity-50 cursor-not-allowed' : ''}" placeholder="${options.length > 0 ? 'Select an option above, or choose Other to type...' : 'Type answer...'}" ${shouldDisableText ? 'disabled' : ''}>
+                            <input type="text" id="${qId}" data-q="${questionText}" value="${textValue}" class="w-full p-2 border-b border-slate-600 bg-slate-800 text-white focus:border-red-500 outline-none transition-colors rounded ${shouldDisableText ? 'opacity-50 cursor-not-allowed' : ''}" placeholder="${options.length > 0 ? 'Check an option above, or check Other to type...' : 'Type answer...'}" ${shouldDisableText ? 'disabled' : ''}>
                     </div>`;
 
                     container.innerHTML += html;
                 });
 
-                // Re-attach event listeners for radio buttons to toggle the text input
-                document.querySelectorAll('.q-radio').forEach(radio => {
-                    radio.addEventListener('change', (e) => {
+                    document.querySelectorAll('.q-checkbox-other').forEach(checkbox => {
+                        checkbox.addEventListener('change', (e) => {
                         const index = e.target.closest('[data-q-index]').dataset.qIndex;
                         const textInput = document.getElementById(`question-input-${index}`);
 
-                        if (e.target.value === 'other') {
+                            if (e.target.checked) {
                             textInput.disabled = false;
                             textInput.classList.remove('opacity-50', 'cursor-not-allowed');
                             textInput.placeholder = "Type your answer here...";
@@ -1098,7 +1128,7 @@
                         } else {
                             textInput.disabled = true;
                             textInput.classList.add('opacity-50', 'cursor-not-allowed');
-                            textInput.placeholder = "Select an option above, or choose Other to type...";
+                                textInput.placeholder = "Check an option above, or check Other to type...";
                         }
                     });
                 });
