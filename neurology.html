@@ -121,7 +121,7 @@
                 <span class="bg-indigo-600 text-white w-8 h-8 rounded-full flex items-center justify-center mr-3 text-sm">1</span>
                 Clinical Context & Intake
             </h2>
-            <div id="error-message-intake" class="error-box hidden"></div>
+            <div id="error-message-intake" class="error-box hidden" role="alert" aria-live="assertive"></div>
             
             <form id="intake-form">
                 
@@ -158,7 +158,7 @@
                     </div>
                 </div>
 
-                <button id="intake-submit-btn" type="submit" disabled class="w-full bg-gradient-to-r from-indigo-700 to-indigo-600 text-white font-bold text-lg py-4 px-6 rounded-lg shadow-lg hover:from-indigo-600 hover:to-indigo-500 transition-all transform hover:-translate-y-1 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
+                <button id="intake-submit-btn" type="submit" disabled class="w-full bg-gradient-to-r from-indigo-700 to-indigo-600 text-white font-bold text-lg py-4 px-6 rounded-lg shadow-lg hover:from-indigo-600 hover:to-indigo-500 transition-all transform hover:-translate-y-1 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800 focus-visible:ring-indigo-500">
                     <span class="mr-3">Start Neurology Assessment</span>
                     <i aria-hidden="true" class="fa-solid fa-arrow-right"></i>
                 </button>
@@ -183,12 +183,12 @@
             <p class="text-sm text-slate-400 mb-6 bg-slate-900 p-3 rounded border-l-4 border-indigo-500">
                 To refine the differential (Stroke vs Migraine vs Seizure vs TBI) and determine disposition/duty status, I need to clarify the following.
             </p>
-            <div id="error-message-questions" class="error-box hidden"></div>
+            <div id="error-message-questions" class="error-box hidden" role="alert" aria-live="assertive"></div>
             <form id="questions-form">
                 <div id="questions-container" class="space-y-5 mb-8"></div>
                 <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
-                    <button type="button" id="questions-back-btn" class="flex-1 bg-slate-700 text-slate-300 font-bold py-3 rounded-lg hover:bg-slate-600 transition">Back</button>
-                    <button type="submit" class="flex-[2] bg-indigo-600 text-white font-bold py-3 rounded-lg hover:bg-indigo-500 transition shadow-lg">Generate Plan & Orders</button>
+                    <button type="button" id="questions-back-btn" class="flex-1 bg-slate-700 text-slate-300 font-bold py-3 rounded-lg hover:bg-slate-600 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800 focus-visible:ring-slate-400">Back</button>
+                    <button type="submit" class="flex-[2] bg-indigo-600 text-white font-bold py-3 rounded-lg hover:bg-indigo-500 transition shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800 focus-visible:ring-indigo-500">Generate Plan & Orders</button>
                 </div>
             </form>
         </div>
@@ -226,7 +226,7 @@
                     </div>
                 </details>
             </h2>
-            <div id="error-message-review" class="error-box hidden"></div>
+            <div id="error-message-review" class="error-box hidden" role="alert" aria-live="assertive"></div>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                 <!-- Assessment Col -->
@@ -273,8 +273,8 @@
             </div>
 
             <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
-                <button type="button" id="review-back-btn" class="flex-1 bg-slate-700 text-slate-300 font-bold py-3 rounded-lg hover:bg-slate-600">Back</button>
-                <button type="button" id="review-continue-btn" class="flex-1 bg-green-700 text-white font-bold py-3 rounded-lg hover:bg-green-600 shadow-lg">Finalize Note</button>
+                <button type="button" id="review-back-btn" class="flex-1 bg-slate-700 text-slate-300 font-bold py-3 rounded-lg hover:bg-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800 focus-visible:ring-slate-400">Back</button>
+                <button type="button" id="review-continue-btn" class="flex-1 bg-green-700 text-white font-bold py-3 rounded-lg hover:bg-green-600 shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800 focus-visible:ring-green-500">Finalize Note</button>
             </div>
         </div>
 
@@ -287,7 +287,7 @@
                 <label class="block text-xs font-bold text-indigo-300 mb-2 uppercase">Consultant Q&A (Refine the plan)</label>
                 <div class="flex space-x-2">
                     <input type="text" id="refine-input" class="flex-1 p-2 bg-slate-900 border border-slate-600 rounded text-white text-sm focus:border-indigo-500 outline-none" placeholder="e.g., 'What is the max dose of Compazine?' or 'Can they go to the field?'">
-                    <button type="button" id="refine-btn" class="bg-indigo-700 hover:bg-indigo-600 text-white px-4 rounded font-medium text-sm">Ask</button>
+                    <button type="button" id="refine-btn" class="bg-indigo-700 hover:bg-indigo-600 text-white px-4 rounded font-medium text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800 focus-visible:ring-indigo-500">Ask</button>
                 </div>
                 <div id="refine-response" class="hidden mt-3 p-3 bg-slate-800 rounded text-sm text-slate-300 border border-slate-600 italic"></div>
             </div>
@@ -298,7 +298,7 @@
                 <pre id="final-note-content" class="whitespace-pre-wrap"></pre>
             </div>
             
-            <button type="button" id="copy-note-btn" class="w-full bg-slate-700 hover:bg-slate-600 text-white font-bold text-lg py-4 px-6 rounded-lg shadow-lg border border-slate-500 flex items-center justify-center mb-6">
+            <button type="button" id="copy-note-btn" class="w-full bg-slate-700 hover:bg-slate-600 text-white font-bold text-lg py-4 px-6 rounded-lg shadow-lg border border-slate-500 flex items-center justify-center mb-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800 focus-visible:ring-slate-400">
                 <i aria-hidden="true" class="fa-regular fa-copy mr-2"></i> Copy to Clipboard
             </button>
             <p id="copy-success" class="hidden mt-2 text-center text-green-400 font-semibold text-sm">Copied to clipboard!</p>
@@ -312,10 +312,10 @@
             </div>
 
             <div class="mt-6 flex justify-center space-x-6">
-                <button type="button" id="final-back-btn" class="text-slate-500 hover:text-white underline text-sm">
+                <button type="button" id="final-back-btn" class="text-slate-500 hover:text-white underline text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800 focus-visible:ring-slate-400 rounded px-2 py-1">
                     Back to Review
                 </button>
-                <button type="button" id="start-over-btn" class="text-slate-500 hover:text-white underline text-sm">
+                <button type="button" id="start-over-btn" class="text-slate-500 hover:text-white underline text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800 focus-visible:ring-slate-400 rounded px-2 py-1">
                     Start New Consult
                 </button>
             </div>
