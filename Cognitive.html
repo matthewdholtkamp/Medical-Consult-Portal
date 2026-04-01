@@ -507,7 +507,7 @@ No tremor, bradykinesia, dystonic posturing, dyskinesias, chorea, myoclonus.`;
                              <label class="text-xs font-black uppercase text-slate-500 mb-2 block">Upload Exam Sheet</label>
                              <div role="button" tabindex="0" onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); handleImageUpload(); }" aria-label="Upload MoCA Exam Sheet" onclick="handleImageUpload()" class="border-2 border-dashed border-slate-700 rounded-xl h-32 flex flex-col items-center justify-center text-slate-500 hover:bg-slate-800 hover:border-indigo-500 transition-all cursor-pointer relative overflow-hidden group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500">
                                 ${appState.mocaImage
-                                    ? `<img src="${appState.mocaImage}" class="w-full h-full object-contain absolute inset-0 z-10"><div class="absolute inset-0 bg-black/50 z-20 opacity-0 group-hover:opacity-100 flex items-center justify-center text-xs font-bold text-white">Change Image</div>`
+                                    ? `<img src="${appState.mocaImage}" class="w-full h-full object-contain absolute inset-0 z-10" alt="MoCA test image"><div class="absolute inset-0 bg-black/50 z-20 opacity-0 group-hover:opacity-100 flex items-center justify-center text-xs font-bold text-white">Change Image</div>`
                                     : `<span class="material-symbols-outlined mb-2 text-3xl" aria-hidden="true">cloud_upload</span><span class="text-xs font-bold">Click to Upload</span>`
                                 }
                              </div>
