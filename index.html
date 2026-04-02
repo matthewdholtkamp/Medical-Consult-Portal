@@ -439,7 +439,7 @@
                                         <label class="toggle-switch-container flex items-center gap-2 cursor-pointer group">
                                             <div class="relative">
                                                 <input type="checkbox" id="deepThinkToggle" class="sr-only peer" aria-label="Toggle Thinking Mode">
-                                                <div class="w-9 h-5 bg-slate-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500/30 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                                                <div class="w-9 h-5 bg-slate-700 peer-focus-visible:outline-none peer-focus-visible:ring-2 peer-focus-visible:ring-blue-500 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
                                             </div>
                                             <span class="text-xs font-medium text-slate-400 group-hover:text-slate-200 transition-colors">Thinking Mode</span>
                                         </label>
@@ -1014,7 +1014,7 @@ ADTMC, ADTMC+, Internal Medicine, ICU, Cardiology, Neurology, Pediatrics, Psychi
                 removeLoadingIndicator(loadingId);
                 const conversationHistory = document.getElementById('conversationHistory');
                 conversationHistory.insertAdjacentHTML('beforeend', `
-                    <div class="p-4 bg-red-900/20 text-red-200 text-xs rounded-xl border border-red-500/30 animate-fade-in">
+                    <div role="alert" aria-live="assertive" class="p-4 bg-red-900/20 text-red-200 text-xs rounded-xl border border-red-500/30 animate-fade-in">
                         <strong>Error:</strong> ${error.message}
                     </div>
                 `);
@@ -1149,7 +1149,7 @@ ADTMC, ADTMC+, Internal Medicine, ICU, Cardiology, Neurology, Pediatrics, Psychi
                 loading.classList.add('hidden');
                 loading.classList.remove('flex');
                 content.classList.remove('hidden');
-                content.innerHTML = `<div class="text-red-400 text-sm bg-red-900/20 p-3 rounded-lg border border-red-500/30">Failed to analyze scenario. Please try again.</div>`;
+                content.innerHTML = `<div role="alert" aria-live="assertive" class="text-red-400 text-sm bg-red-900/20 p-3 rounded-lg border border-red-500/30">Failed to analyze scenario. Please try again.</div>`;
             } finally {
                 btn.disabled = false;
                 btn.textContent = "Find Consultant";
