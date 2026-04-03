@@ -347,7 +347,7 @@
                 <div>
                     <label class="block text-lg font-semibold mb-2" for="initialQuestion">Topic or Clinical Question</label>
                     <input type="text" id="initialQuestion" 
-                           class="w-full bg-slate-800 border border-slate-600 rounded-lg p-4 text-white focus:ring-2 focus:ring-orange-500 outline-none transition"
+                           class="w-full bg-slate-800 border border-slate-600 rounded-lg p-4 text-white focus:outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 transition"
                            placeholder="e.g., Dual antiplatelet therapy after minor stroke" required>
                 </div>
                 <button type="submit" id="btnRefine"
@@ -695,7 +695,7 @@
                     dynamicInputs.innerHTML += `
                         <div>
                             <label class="block text-sm text-gray-400 mb-1" for="q${idx}">${q.replace(/^[Q\-*0-9: ]+/, '')}</label>
-                            <input type="text" id="q${idx}" name="q${idx}" class="w-full bg-slate-800 border border-slate-600 rounded p-3 text-white focus:border-orange-500" placeholder="Enter details...">
+                            <input type="text" id="q${idx}" name="q${idx}" class="w-full bg-slate-800 border border-slate-600 rounded p-3 text-white focus:outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900" placeholder="Enter details...">
                         </div>
                     `;
                 });
@@ -1339,7 +1339,7 @@ ${script}
                     dynamicInputs.innerHTML += `
                         <div>
                             <label class="block text-sm text-gray-400 mb-1" for="q${idx}">${item.label}</label>
-                            <input type="text" id="q${idx}" name="q${idx}" value="${item.value}" class="w-full bg-slate-800 border border-slate-600 rounded p-3 text-white focus:border-orange-500" placeholder="Enter details...">
+                            <input type="text" id="q${idx}" name="q${idx}" value="${item.value}" class="w-full bg-slate-800 border border-slate-600 rounded p-3 text-white focus:outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900" placeholder="Enter details...">
                         </div>
                     `;
                 });
