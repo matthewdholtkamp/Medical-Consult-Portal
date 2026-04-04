@@ -58,7 +58,7 @@
         
         <header class="text-center mb-8 border-b border-slate-800 pb-6">
             <div class="flex justify-center items-center mb-2">
-                <i class="fa-solid fa-heart-pulse text-rose-500 text-4xl mr-3"></i>
+                <i aria-hidden="true" class="fa-solid fa-heart-pulse text-rose-500 text-4xl mr-3"></i>
                 <h1 class="text-4xl font-bold text-white tracking-wider">AI CRITICAL <span class="text-gradient-icu">CARE</span></h1>
             </div>
             <p class="text-lg text-slate-400">Systems-Based Decision Support & Workflow Automation</p>
@@ -67,7 +67,7 @@
         <!-- HIPAA WARNING -->
         <details class="bg-slate-900 border border-slate-700 rounded-md mb-8 shadow-lg">
             <summary class="font-semibold text-slate-300 p-4 cursor-pointer text-lg flex justify-between items-center hover:bg-slate-800 transition">
-                <span class="flex items-center"><i class="fa-solid fa-user-shield mr-2 text-rose-500"></i> SECURITY & COMPLIANCE</span>
+                <span class="flex items-center"><i aria-hidden="true" class="fa-solid fa-user-shield mr-2 text-rose-500"></i> SECURITY & COMPLIANCE</span>
                 <span class="text-xs bg-rose-900/80 text-rose-100 px-2 py-1 rounded border border-rose-500">HIPAA Safe Harbor Required</span>
             </summary>
             <div class="p-4 border-t border-slate-700 text-sm bg-slate-950/50">
@@ -113,8 +113,8 @@
 
                 <!-- TYPE TOGGLE -->
                 <div class="bg-slate-800 p-1 rounded-lg flex border border-slate-700">
-                    <button type="button" id="btn-initial" class="px-6 py-2 rounded-md text-sm font-bold transition-all bg-rose-600 text-white shadow">Initial Consult</button>
-                    <button type="button" id="btn-followup" class="px-6 py-2 rounded-md text-sm font-bold transition-all text-slate-400 hover:text-white">Follow-up Note</button>
+                    <button type="button" id="btn-initial" class="px-6 py-2 rounded-md text-sm font-bold transition-all bg-rose-600 text-white shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800 focus-visible:ring-rose-500">Initial Consult</button>
+                    <button type="button" id="btn-followup" class="px-6 py-2 rounded-md text-sm font-bold transition-all text-slate-400 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800 focus-visible:ring-rose-500">Follow-up Note</button>
                 </div>
             </div>
 
@@ -126,13 +126,13 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 bg-slate-950 p-4 rounded-lg border border-slate-800">
                       <div class="md:col-span-1">
                          <label class="block text-xs font-bold text-rose-400 mb-2 uppercase tracking-wide">
-                             <i class="fa-solid fa-hashtag mr-1"></i> Age / Sex
+                             <i aria-hidden="true" class="fa-solid fa-hashtag mr-1"></i> Age / Sex
                          </label>
                          <input type="text" id="age-input" class="w-full p-3 border border-slate-700 rounded bg-slate-900 text-white focus:ring-2 focus:ring-rose-500 outline-none" placeholder="e.g. 65yo M">
                       </div>
                       <div class="md:col-span-1">
                          <label class="block text-xs font-bold text-rose-400 mb-2 uppercase tracking-wide">
-                             <i class="fa-solid fa-hospital-user mr-1"></i> Location
+                             <i aria-hidden="true" class="fa-solid fa-hospital-user mr-1"></i> Location
                           </label>
                           <select id="location-input" class="w-full p-3 border border-slate-700 rounded bg-slate-900 text-white focus:ring-2 focus:ring-rose-500 outline-none">
                              <option value="ICU">Inpatient ICU</option>
@@ -142,7 +142,7 @@
                       </div>
                       <div class="md:col-span-1">
                          <label class="block text-xs font-bold text-rose-400 mb-2 uppercase tracking-wide">
-                             <i class="fa-solid fa-bed-pulse mr-1"></i> Code Status
+                             <i aria-hidden="true" class="fa-solid fa-bed-pulse mr-1"></i> Code Status
                          </label>
                          <select id="code-status" class="w-full p-3 border border-slate-700 rounded bg-slate-900 text-white focus:ring-2 focus:ring-rose-500 outline-none">
                             <option value="Full Code">Full Code</option>
@@ -161,7 +161,7 @@
                         <textarea id="hpi-input" rows="3" class="w-full p-3 border border-slate-700 rounded-md focus:ring-2 focus:ring-rose-500 focus:outline-none bg-slate-800 text-white placeholder-slate-500" placeholder="e.g., Acute respiratory failure, septic shock etiology unclear..."></textarea>
                     </div>
                     <div class="flex justify-end">
-                        <button type="button" id="load-example-btn" class="text-xs text-rose-400 hover:text-rose-300 underline">Load Sepsis Case</button>
+                        <button type="button" id="load-example-btn" class="text-xs text-rose-400 hover:text-rose-300 underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800 focus-visible:ring-rose-500">Load Sepsis Case</button>
                     </div>
                     <div>
                         <label class="block text-sm font-bold text-white mb-1">Past Medical History:</label>
@@ -173,14 +173,14 @@
                 <div id="followup-fields" class="hidden space-y-4">
                     <div class="bg-indigo-900/20 border border-indigo-700/50 p-4 rounded-md">
                         <label class="block text-sm font-bold text-indigo-300 mb-2">
-                            <i class="fa-solid fa-paste mr-2"></i>Paste Yesterday's Note / Current Meds
+                            <i aria-hidden="true" class="fa-solid fa-paste mr-2"></i>Paste Yesterday's Note / Current Meds
                         </label>
                         <textarea id="prior-note-input" rows="6" class="w-full p-3 border border-slate-700 rounded-md focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-slate-900 text-slate-300 text-xs font-mono placeholder-slate-600" placeholder="Paste the full text of the previous progress note or H&P here..."></textarea>
                     </div>
                     
                     <div class="bg-rose-900/20 border border-rose-700/50 p-4 rounded-md">
                         <label class="block text-sm font-bold text-rose-300 mb-2">
-                            <i class="fa-solid fa-clock-rotate-left mr-2"></i>24-Hour / Overnight Events
+                            <i aria-hidden="true" class="fa-solid fa-clock-rotate-left mr-2"></i>24-Hour / Overnight Events
                         </label>
                         <textarea id="events-input" rows="4" class="w-full p-3 border border-slate-700 rounded-md focus:ring-2 focus:ring-rose-500 focus:outline-none bg-slate-900 text-white placeholder-slate-500" placeholder="e.g. Spiked fever to 39.4 at 0200, started Vanco. Extubated at 0800. Urine output decreased."></textarea>
                     </div>
@@ -211,7 +211,7 @@
 
                 <button type="submit" class="mt-8 w-full bg-gradient-to-r from-rose-700 to-red-600 text-white font-bold text-lg py-4 px-6 rounded-lg shadow-lg hover:from-rose-600 hover:to-red-500 transition-all transform hover:-translate-y-1 flex items-center justify-center border border-rose-800">
                     <span class="mr-3">Initiate ICU Systems Analysis</span>
-                    <i class="fa-solid fa-microscope"></i>
+                    <i aria-hidden="true" class="fa-solid fa-microscope"></i>
                 </button>
             </form>
         </div>
@@ -219,7 +219,7 @@
         <!-- SECTION 2: FOLLOW-UP QUESTIONS -->
         <div id="section-questions" class="hidden bg-slate-900 p-6 rounded-lg shadow-xl border border-slate-700">
             <h2 class="text-xl font-semibold mb-4 text-white border-b border-slate-800 pb-2 flex items-center">
-                <i class="fa-solid fa-user-doctor text-rose-500 mr-2"></i> Intensivist Clarification
+                <i aria-hidden="true" class="fa-solid fa-user-doctor text-rose-500 mr-2"></i> Intensivist Clarification
             </h2>
             <p class="text-sm text-slate-400 mb-6 bg-slate-950 p-3 rounded border-l-4 border-rose-600">
                 To complete the systems-based plan, I need a few specific data points based on the pathology.
@@ -251,7 +251,7 @@
                     <div class="bg-slate-800 rounded border border-slate-700 overflow-hidden">
                         <div class="bg-slate-950 px-4 py-2 border-b border-slate-700 flex justify-between items-center">
                             <h3 class="font-bold text-rose-400 uppercase text-xs">Neurology / Pain / Sedation</h3>
-                            <i class="fa-solid fa-brain text-slate-600"></i>
+                            <i aria-hidden="true" class="fa-solid fa-brain text-slate-600"></i>
                         </div>
                         <div class="p-4">
                             <textarea id="sys-neuro" class="w-full bg-slate-900 text-slate-300 text-sm border border-slate-700 rounded p-2 h-32 font-mono leading-tight"></textarea>
@@ -262,7 +262,7 @@
                     <div class="bg-slate-800 rounded border border-slate-700 overflow-hidden">
                         <div class="bg-slate-950 px-4 py-2 border-b border-slate-700 flex justify-between items-center">
                             <h3 class="font-bold text-rose-400 uppercase text-xs">Cardiovascular</h3>
-                            <i class="fa-solid fa-heart-pulse text-slate-600"></i>
+                            <i aria-hidden="true" class="fa-solid fa-heart-pulse text-slate-600"></i>
                         </div>
                         <div class="p-4">
                             <textarea id="sys-cv" class="w-full bg-slate-900 text-slate-300 text-sm border border-slate-700 rounded p-2 h-32 font-mono leading-tight"></textarea>
@@ -273,7 +273,7 @@
                     <div class="bg-slate-800 rounded border border-slate-700 overflow-hidden">
                         <div class="bg-slate-950 px-4 py-2 border-b border-slate-700 flex justify-between items-center">
                             <h3 class="font-bold text-rose-400 uppercase text-xs">Respiratory</h3>
-                            <i class="fa-solid fa-lungs text-slate-600"></i>
+                            <i aria-hidden="true" class="fa-solid fa-lungs text-slate-600"></i>
                         </div>
                         <div class="p-4">
                             <textarea id="sys-resp" class="w-full bg-slate-900 text-slate-300 text-sm border border-slate-700 rounded p-2 h-32 font-mono leading-tight"></textarea>
@@ -284,7 +284,7 @@
                     <div class="bg-slate-800 rounded border border-slate-700 overflow-hidden">
                         <div class="bg-slate-950 px-4 py-2 border-b border-slate-700 flex justify-between items-center">
                             <h3 class="font-bold text-rose-400 uppercase text-xs">Renal / Fluids / GI / Endo</h3>
-                            <i class="fa-solid fa-kidneys text-slate-600"></i>
+                            <i aria-hidden="true" class="fa-solid fa-kidneys text-slate-600"></i>
                         </div>
                         <div class="p-4">
                             <textarea id="sys-renal" class="w-full bg-slate-900 text-slate-300 text-sm border border-slate-700 rounded p-2 h-32 font-mono leading-tight"></textarea>
@@ -295,7 +295,7 @@
                     <div class="bg-slate-800 rounded border border-slate-700 overflow-hidden">
                         <div class="bg-slate-950 px-4 py-2 border-b border-slate-700 flex justify-between items-center">
                             <h3 class="font-bold text-rose-400 uppercase text-xs">ID / Heme / PPX</h3>
-                            <i class="fa-solid fa-bacterium text-slate-600"></i>
+                            <i aria-hidden="true" class="fa-solid fa-bacterium text-slate-600"></i>
                         </div>
                         <div class="p-4">
                             <textarea id="sys-heme" class="w-full bg-slate-900 text-slate-300 text-sm border border-slate-700 rounded p-2 h-32 font-mono leading-tight"></textarea>
@@ -306,7 +306,7 @@
                     <div class="bg-slate-800 rounded border border-rose-900/50 overflow-hidden">
                         <div class="bg-rose-950 px-4 py-2 border-b border-rose-900 flex justify-between items-center">
                             <h3 class="font-bold text-rose-300 uppercase text-xs">ABCDE Bundle</h3>
-                            <i class="fa-solid fa-list-check text-rose-500"></i>
+                            <i aria-hidden="true" class="fa-solid fa-list-check text-rose-500"></i>
                         </div>
                         <div class="p-4 space-y-2">
                              <div class="flex items-center">
@@ -360,14 +360,14 @@
             </div>
             
             <button type="button" id="copy-note-btn" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold text-lg py-4 px-6 rounded-lg shadow-lg border border-slate-600 flex items-center justify-center mb-6">
-                <i class="fa-regular fa-copy mr-2"></i> Copy to EMR
+                <i aria-hidden="true" class="fa-regular fa-copy mr-2"></i> Copy to EMR
             </button>
             <p id="copy-success" class="hidden mt-2 text-center text-green-400 font-semibold text-sm">Copied to clipboard!</p>
 
             <!-- References -->
             <div id="references-container" class="bg-slate-800 p-4 rounded border border-slate-700 mb-8 hidden">
                 <h3 class="text-rose-400 font-bold mb-2 text-xs uppercase flex items-center">
-                    <i class="fa-solid fa-book-medical mr-2"></i> Critical Care Guidelines & Evidence
+                    <i aria-hidden="true" class="fa-solid fa-book-medical mr-2"></i> Critical Care Guidelines & Evidence
                 </h3>
                 <ul id="references-list" class="list-disc ml-5 text-sm space-y-2 text-slate-400"></ul>
             </div>
@@ -434,13 +434,13 @@
         function setMode(mode) {
             state.mode = mode;
             if (mode === 'Initial') {
-                btnInitial.className = "px-6 py-2 rounded-md text-sm font-bold transition-all bg-rose-600 text-white shadow";
-                btnFollowup.className = "px-6 py-2 rounded-md text-sm font-bold transition-all text-slate-400 hover:text-white";
+                btnInitial.className = "px-6 py-2 rounded-md text-sm font-bold transition-all bg-rose-600 text-white shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800 focus-visible:ring-rose-500";
+                btnFollowup.className = "px-6 py-2 rounded-md text-sm font-bold transition-all text-slate-400 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800 focus-visible:ring-rose-500";
                 initialFields.classList.remove('hidden');
                 followupFields.classList.add('hidden');
             } else {
-                btnInitial.className = "px-6 py-2 rounded-md text-sm font-bold transition-all text-slate-400 hover:text-white";
-                btnFollowup.className = "px-6 py-2 rounded-md text-sm font-bold transition-all bg-rose-600 text-white shadow";
+                btnInitial.className = "px-6 py-2 rounded-md text-sm font-bold transition-all text-slate-400 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800 focus-visible:ring-rose-500";
+                btnFollowup.className = "px-6 py-2 rounded-md text-sm font-bold transition-all bg-rose-600 text-white shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800 focus-visible:ring-rose-500";
                 initialFields.classList.add('hidden');
                 followupFields.classList.remove('hidden');
             }
