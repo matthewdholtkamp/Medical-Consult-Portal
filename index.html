@@ -364,8 +364,8 @@
                         id="top-search-input"
                         aria-label="Search protocols"
                         oninput="handleGlobalSearch(this.value)"
-                        class="glass-search border border-slate-700 text-slate-200 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 pr-10 p-2 placeholder-slate-500 transition-all focus:bg-slate-800"
-                        placeholder="Search protocols...">
+                        class="glass-search border border-slate-700 text-slate-200 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 block w-full pl-10 pr-10 p-2 placeholder-slate-500 transition-all focus:bg-slate-800"
+                        placeholder="Search ( Press / to focus )">
                  <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                     <kbd class="hidden sm:inline-block border border-slate-600 rounded px-1.5 text-[10px] font-medium text-slate-400 bg-slate-800/50">/</kbd>
                  </div>
@@ -439,7 +439,7 @@
                                         <label for="deepThinkToggle" class="toggle-switch-container flex items-center gap-2 cursor-pointer group">
                                             <div class="relative">
                                                 <input type="checkbox" id="deepThinkToggle" class="sr-only peer" aria-label="Toggle Thinking Mode">
-                                                <div class="w-9 h-5 bg-slate-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500/30 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                                                <div class="w-9 h-5 bg-slate-700 peer-focus-visible:outline-none peer-focus-visible:ring-2 peer-focus-visible:ring-blue-500/30 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
                                             </div>
                                             <span class="text-xs font-medium text-slate-400 group-hover:text-slate-200 transition-colors">Thinking Mode</span>
                                         </label>
