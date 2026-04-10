@@ -1,0 +1,3 @@
+## 2024-05-18 - Search shortcut discoverability
+**Learning:** Adding a shortcut hint to a placeholder text might overlap with existing shortcut design patterns. In this app, the search input already uses an absolute positioned `<kbd>` tag to indicate the `/` shortcut. Appending "( Press / to focus )" to the `placeholder` itself is redundant and obscures the original intent of the placeholder.
+**Action:** When adding discoverability to shortcuts, check for existing UI patterns (like absolute positioned kbd tags) before modifying placeholder text. If modifying placeholders, try to retain the original context (e.g. "Search protocols...").
