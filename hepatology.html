@@ -50,6 +50,35 @@
             <p class="text-lg text-slate-400">Small Military Community Hospital (Liver Disease, Cirrhosis, Hepatitis)</p>
         </header>
 
+
+        <!-- PROGRESS STEPPER -->
+        <div class="mb-8 w-full max-w-3xl mx-auto px-2">
+            <div class="flex items-center justify-between relative">
+                <div class="absolute left-0 top-1/2 transform -translate-y-1/2 w-full h-2 rounded-full bg-slate-700 z-0"></div>
+                <div id="progress-bar" class="absolute left-0 top-1/2 transform -translate-y-1/2 h-2 rounded-full bg-indigo-600 z-0 transition-all duration-500 w-0"></div>
+
+                <div class="relative z-10 flex flex-col items-center step-indicator" id="step-1-ind">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold border-4 border-slate-900 shadow-[0_0_10px_rgba(79,70,229,0.5)] transition-colors duration-300">1</div>
+                    <div class="text-[10px] sm:text-xs font-semibold text-slate-200 mt-2 uppercase tracking-wider text-center">Intake</div>
+                </div>
+
+                <div class="relative z-10 flex flex-col items-center step-indicator" id="step-2-ind">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-slate-700 text-slate-300 flex items-center justify-center font-bold border-4 border-slate-900 transition-colors duration-300">2</div>
+                    <div class="text-[10px] sm:text-xs font-semibold text-slate-400 mt-2 uppercase tracking-wider transition-colors duration-300 text-center">Q&A</div>
+                </div>
+
+                <div class="relative z-10 flex flex-col items-center step-indicator" id="step-3-ind">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-slate-700 text-slate-300 flex items-center justify-center font-bold border-4 border-slate-900 transition-colors duration-300">3</div>
+                    <div class="text-[10px] sm:text-xs font-semibold text-slate-400 mt-2 uppercase tracking-wider transition-colors duration-300 text-center">Review</div>
+                </div>
+
+                <div class="relative z-10 flex flex-col items-center step-indicator" id="step-4-ind">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-slate-700 text-slate-300 flex items-center justify-center font-bold border-4 border-slate-900 transition-colors duration-300">4</div>
+                    <div class="text-[10px] sm:text-xs font-semibold text-slate-400 mt-2 uppercase tracking-wider transition-colors duration-300 text-center">Final Note</div>
+                </div>
+            </div>
+        </div>
+
         <!-- HIPAA WARNING -->
         <details class="bg-slate-800 border border-slate-600 rounded-md mb-8 shadow-lg">
             <summary class="font-semibold text-slate-300 p-4 cursor-pointer text-lg flex justify-between items-center hover:bg-slate-750 transition">
@@ -320,9 +349,41 @@
             if (isLoading) Object.values(sections).forEach(s => s.classList.add('hidden'));
         }
 
+
+        function updateStepper(activeSection) {
+            const steps = ['intake', 'questions', 'review', 'final'];
+            const activeIndex = steps.indexOf(activeSection);
+
+            // Update progress bar width
+            const progressBar = document.getElementById('progress-bar');
+            if(progressBar) {
+                progressBar.style.width = activeIndex === 0 ? '0%' :
+                                        activeIndex === 1 ? '33%' :
+                                        activeIndex === 2 ? '66%' : '100%';
+            }
+
+            // Update step indicators
+            steps.forEach((step, index) => {
+                const ind = document.getElementById(`step-${index + 1}-ind`);
+                if (!ind) return;
+
+                const circle = ind.querySelector('div:first-child');
+                const text = ind.querySelector('div:last-child');
+
+                if (index <= activeIndex) {
+                    circle.className = "w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold border-4 border-slate-900 shadow-[0_0_10px_rgba(79,70,229,0.5)] transition-colors duration-300";
+                    text.className = "text-[10px] sm:text-xs font-semibold text-slate-200 mt-2 uppercase tracking-wider text-center transition-colors duration-300";
+                } else {
+                    circle.className = "w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-slate-700 text-slate-300 flex items-center justify-center font-bold border-4 border-slate-900 transition-colors duration-300";
+                    text.className = "text-[10px] sm:text-xs font-semibold text-slate-400 mt-2 uppercase tracking-wider text-center transition-colors duration-300";
+                }
+            });
+        }
+
         function showSection(name) {
             showLoading(false);
             Object.keys(sections).forEach(key => sections[key].classList.toggle('hidden', key !== name));
+            updateStepper(name);
             window.scrollTo(0, 0);
         }
 
@@ -431,7 +492,10 @@
                 FOCUS ON:
                 1. Liver Function (Synthetic function: INR, Albumin, Bili). 2. Complications (Ascites, Encephalopathy, Varices). 3. Etiology (Alcohol, Viral, Autoimmune).
 
-                Return strictly JSON: { "questions": ["Question 1", "Question 2"...] }
+
+                DO NOT ask educational, theoretical, or quiz-like questions (e.g., "What is the most common cause of..."). The goal is strictly to gather missing clinical data from the provider to determine risk stratification and "sick vs not sick" status for this specific patient.
+                Provide 3-4 highly probable multiple-choice options for each question to make it easy for the referring provider to answer.
+                Return strictly JSON: { "questions": [ { "question": "Question text?", "options": ["Option A", "Option B", "Option C"] } ] }
             `;
 
             const context = `
@@ -448,12 +512,56 @@
                 const result = await callGeminiApi(prompt, context);
                 const container = document.getElementById('questions-container');
                 container.innerHTML = '';
-                result.questions.forEach(q => {
-                    container.innerHTML += `
-                        <div class="bg-slate-900 p-3 rounded border border-slate-700">
-                            <label class="block text-sm text-indigo-300 mb-1 font-medium">${q}</label>
-                            <input type="text" data-q="${q}" class="w-full p-2 border-b border-slate-600 bg-transparent text-white focus:border-indigo-500 outline-none transition-colors" placeholder="Answer...">
-                        </div>`;
+                result.questions.forEach((qObj, index) => {
+                    const questionText = typeof qObj === 'string' ? qObj : qObj.question;
+                    const options = typeof qObj === 'string' ? [] : (qObj.options || []);
+                    const qId = `question-input-${index}`;
+
+                    let html = `<div class="bg-slate-900 p-4 rounded border border-slate-700 mb-4" data-q-index="${index}">
+                        <label class="block text-sm text-indigo-300 mb-3 font-medium">${questionText}</label>
+                        <div class="space-y-2 mb-3">`;
+
+                    if (options.length > 0) {
+                        options.forEach((opt, optIndex) => {
+                            const optId = `q-${index}-opt-${optIndex}`;
+                            html += `
+                            <label for="${optId}" class="flex items-start space-x-3 p-2 hover:bg-slate-800 rounded cursor-pointer group border border-transparent hover:border-slate-600 transition-all">
+                                <input type="checkbox" name="q-${index}-checkbox" id="${optId}" value="${opt}" class="mt-1 form-checkbox text-indigo-600 bg-slate-700 border-slate-500 focus:ring-indigo-500 q-checkbox">
+                                <span class="text-sm text-slate-300 group-hover:text-white transition-colors leading-tight">${opt}</span>
+                            </label>`;
+                        });
+
+                        const otherId = `q-${index}-opt-other`;
+                        html += `
+                            <label for="${otherId}" class="flex items-start space-x-3 p-2 hover:bg-slate-800 rounded cursor-pointer group border border-transparent hover:border-slate-600 transition-all">
+                                <input type="checkbox" name="q-${index}-checkbox" id="${otherId}" value="other" class="mt-1 form-checkbox text-indigo-600 bg-slate-700 border-slate-500 focus:ring-indigo-500 q-checkbox-other">
+                                <span class="text-sm text-slate-300 group-hover:text-white transition-colors leading-tight">Other (Type below)</span>
+                            </label>`;
+                    }
+
+                    html += `</div>
+                        <input type="text" id="${qId}" data-q="${questionText}" class="w-full p-2 border-b border-slate-600 bg-slate-800 text-white focus:border-indigo-500 outline-none transition-colors rounded ${options.length > 0 ? 'opacity-50 cursor-not-allowed' : ''}" placeholder="${options.length > 0 ? 'Check an option above, or check Other to type...' : 'Type answer...'}" ${options.length > 0 ? 'disabled' : ''}>
+                    </div>`;
+
+                    container.innerHTML += html;
+                });
+
+                document.querySelectorAll('.q-checkbox-other').forEach(checkbox => {
+                    checkbox.addEventListener('change', (e) => {
+                        const index = e.target.closest('[data-q-index]').dataset.qIndex;
+                        const textInput = document.getElementById(`question-input-${index}`);
+
+                        if (e.target.checked) {
+                            textInput.disabled = false;
+                            textInput.classList.remove('opacity-50', 'cursor-not-allowed');
+                            textInput.placeholder = "Type your answer here...";
+                            textInput.focus();
+                        } else {
+                            textInput.disabled = true;
+                            textInput.classList.add('opacity-50', 'cursor-not-allowed');
+                            textInput.placeholder = "Check an option above, or check Other to type...";
+                        }
+                    });
                 });
                 showSection('questions');
             } catch (err) {
@@ -469,9 +577,39 @@
             clearErrors();
 
             state.answers = [];
-            document.querySelectorAll('#questions-container input').forEach(inp => {
-                state.answers.push({ q: inp.dataset.q, a: inp.value });
-            });
+            const questionInputs = document.querySelectorAll('#questions-container input[type="text"]');
+                if (questionInputs.length > 0) {
+                    state.answers = [];
+                    questionInputs.forEach(inp => {
+                        const index = inp.id.split('-').pop();
+                        const checkedBoxes = document.querySelectorAll(`input[name="q-${index}-checkbox"]:checked`);
+
+                        let selectedValues = [];
+                        let hasOther = false;
+
+                        checkedBoxes.forEach(box => {
+                            if (box.value !== 'other') {
+                                selectedValues.push(box.value);
+                            } else {
+                                hasOther = true;
+                            }
+                        });
+
+                        let answerText = selectedValues.join(', ');
+
+                        if (hasOther && inp.value.trim() !== '') {
+                            if (answerText.length > 0) {
+                                answerText += ', ' + inp.value.trim();
+                            } else {
+                                answerText = inp.value.trim();
+                            }
+                        } else if (checkedBoxes.length === 0 && !inp.disabled && inp.value.trim() !== '') {
+                            answerText = inp.value.trim();
+                        }
+
+                        state.answers.push({ q: inp.dataset.q, a: answerText });
+                    });
+                }
 
             showLoading(true, "Developing Plan...");
 
@@ -713,11 +851,37 @@
                 state.labs = document.getElementById('prior-labs-input').value;
                 state.pmh = document.getElementById('pmh-input').value;
 
-                const qInputs = document.querySelectorAll('#questions-container input');
-                if (qInputs.length > 0) {
+                const questionInputs = document.querySelectorAll('#questions-container input[type="text"]');
+                if (questionInputs.length > 0) {
                     state.answers = [];
-                    qInputs.forEach(inp => {
-                        state.answers.push({ q: inp.dataset.q, a: inp.value });
+                    questionInputs.forEach(inp => {
+                        const index = inp.id.split('-').pop();
+                        const checkedBoxes = document.querySelectorAll(`input[name="q-${index}-checkbox"]:checked`);
+
+                        let selectedValues = [];
+                        let hasOther = false;
+
+                        checkedBoxes.forEach(box => {
+                            if (box.value !== 'other') {
+                                selectedValues.push(box.value);
+                            } else {
+                                hasOther = true;
+                            }
+                        });
+
+                        let answerText = selectedValues.join(', ');
+
+                        if (hasOther && inp.value.trim() !== '') {
+                            if (answerText.length > 0) {
+                                answerText += ', ' + inp.value.trim();
+                            } else {
+                                answerText = inp.value.trim();
+                            }
+                        } else if (checkedBoxes.length === 0 && !inp.disabled && inp.value.trim() !== '') {
+                            answerText = inp.value.trim();
+                        }
+
+                        state.answers.push({ q: inp.dataset.q, a: answerText });
                     });
                 }
 
@@ -745,15 +909,75 @@
                 if (state.questions && state.questions.length > 0) {
                     const container = document.getElementById('questions-container');
                     container.innerHTML = '';
-                    state.questions.forEach(q => {
-                        const ans = state.answers ? state.answers.find(a => a.q === q) : null;
-                        const val = ans ? ans.a : "";
-                        container.innerHTML += `
-                            <div class="bg-slate-900 p-3 rounded border border-slate-700">
-                                <label class="block text-sm text-indigo-300 mb-1 font-medium">${q}</label>
-                                <input type="text" data-q="${q}" value="${val}" class="w-full p-2 border-b border-slate-600 bg-transparent text-white focus:border-indigo-500 outline-none transition-colors" placeholder="Answer...">
-                            </div>`;
+                    state.questions.forEach((qObj, index) => {
+                    const questionText = typeof qObj === 'string' ? qObj : qObj.question;
+                    const options = typeof qObj === 'string' ? [] : (qObj.options || []);
+                    const ansObj = state.answers ? state.answers.find(a => a.q === questionText) : null;
+                    const val = ansObj ? ansObj.a : "";
+                    const qId = `question-input-${index}`;
+
+                    const valArr = val ? val.split(',').map(s => s.trim()) : [];
+
+                    let html = `<div class="bg-slate-900 p-4 rounded border border-slate-700 mb-4" data-q-index="${index}">
+                        <label class="block text-sm text-indigo-300 mb-3 font-medium">${questionText}</label>
+                        <div class="space-y-2 mb-3">`;
+
+                    let isOtherSelected = false;
+                    let otherText = val;
+
+                    if (options.length > 0) {
+                        options.forEach((opt, optIndex) => {
+                            const optId = `q-${index}-opt-${optIndex}`;
+                            const isChecked = valArr.includes(opt);
+                            if (isChecked) {
+                                otherText = otherText.replace(opt, '').replace(/^,|,$/g, '').trim();
+                                otherText = otherText.replace(/, ,/g, ',').replace(/^, */, '').replace(/, *$/, '').trim();
+                            }
+
+                            html += `
+                            <label for="${optId}" class="flex items-start space-x-3 p-2 hover:bg-slate-800 rounded cursor-pointer group border border-slate-600 transition-all">
+                                <input type="checkbox" name="q-${index}-checkbox" id="${optId}" value="${opt}" ${isChecked ? 'checked' : ''} class="mt-1 form-checkbox text-indigo-600 bg-slate-700 border-slate-500 focus:ring-indigo-500 q-checkbox">
+                                <span class="text-sm text-slate-300 group-hover:text-white transition-colors leading-tight">${opt}</span>
+                            </label>`;
+                        });
+
+                        const otherId = `q-${index}-opt-other`;
+                        if (otherText && otherText.length > 0) isOtherSelected = true;
+
+                        html += `
+                            <label for="${otherId}" class="flex items-start space-x-3 p-2 hover:bg-slate-800 rounded cursor-pointer group border border-slate-600 transition-all">
+                                <input type="checkbox" name="q-${index}-checkbox" id="${otherId}" value="other" ${isOtherSelected ? 'checked' : ''} class="mt-1 form-checkbox text-indigo-600 bg-slate-700 border-slate-500 focus:ring-indigo-500 q-checkbox-other">
+                                <span class="text-sm text-slate-300 group-hover:text-white transition-colors leading-tight">Other (Type below)</span>
+                            </label>`;
+                    }
+
+                    const shouldDisableText = options.length > 0 && !isOtherSelected;
+                    const textValue = isOtherSelected ? otherText : (options.length === 0 ? val : "");
+
+                    html += `</div>
+                        <input type="text" id="${qId}" data-q="${questionText}" value="${textValue}" class="w-full p-2 border-b border-slate-600 bg-slate-800 text-white focus:border-indigo-500 outline-none transition-colors rounded ${shouldDisableText ? 'opacity-50 cursor-not-allowed' : ''}" placeholder="${options.length > 0 ? 'Check an option above, or check Other to type...' : 'Type answer...'}" ${shouldDisableText ? 'disabled' : ''}>
+                    </div>`;
+
+                    container.innerHTML += html;
+                });
+
+                document.querySelectorAll('.q-checkbox-other').forEach(checkbox => {
+                    checkbox.addEventListener('change', (e) => {
+                        const index = e.target.closest('[data-q-index]').dataset.qIndex;
+                        const textInput = document.getElementById(`question-input-${index}`);
+
+                        if (e.target.checked) {
+                            textInput.disabled = false;
+                            textInput.classList.remove('opacity-50', 'cursor-not-allowed');
+                            textInput.placeholder = "Type your answer here...";
+                            textInput.focus();
+                        } else {
+                            textInput.disabled = true;
+                            textInput.classList.add('opacity-50', 'cursor-not-allowed');
+                            textInput.placeholder = "Check an option above, or check Other to type...";
+                        }
                     });
+                });
                 }
 
                 if (state.generatedPlan) {
