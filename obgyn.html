@@ -44,7 +44,7 @@
         
         <header class="text-center mb-8 border-b border-slate-700 pb-6">
             <div class="flex justify-center items-center mb-2">
-                <i class="fa-solid fa-person-pregnant text-indigo-500 text-4xl mr-3"></i>
+                <i aria-hidden="true" class="fa-solid fa-person-pregnant text-indigo-500 text-4xl mr-3"></i>
                 <h1 class="text-4xl font-bold text-white tracking-wider">AI OB/GYN CONSULTANT</h1>
             </div>
             <p class="text-lg text-slate-400">Small Military Community Hospital (Women's Health, Pregnancy, GYN)</p>
@@ -81,8 +81,8 @@
 
         <!-- HIPAA WARNING -->
         <details class="bg-slate-800 border border-slate-600 rounded-md mb-8 shadow-lg">
-            <summary class="font-semibold text-slate-300 p-4 cursor-pointer text-lg flex justify-between items-center hover:bg-slate-750 transition">
-                <span class="flex items-center"><i class="fa-solid fa-shield-halved mr-2 text-blue-400"></i> NON-HIPAA Compliance</span>
+            <summary class="font-semibold text-slate-300 p-4 cursor-pointer text-lg flex justify-between items-center hover:bg-slate-750 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 rounded-md">
+                <span class="flex items-center"><i aria-hidden="true" class="fa-solid fa-shield-halved mr-2 text-blue-400"></i> NON-HIPAA Compliance</span>
                 <span class="text-xs bg-red-900/80 text-red-100 px-2 py-1 rounded border border-red-500">Required Check</span>
             </summary>
             <div class="p-4 border-t border-slate-600 text-sm bg-slate-900/50">
@@ -129,7 +129,7 @@
                 <!-- Location Selection -->
                 <div class="mb-8 bg-slate-900 p-4 rounded-lg border border-slate-700 shadow-inner">
                       <label for="location-input" class="block text-sm font-bold text-indigo-400 mb-2 uppercase tracking-wide">
-                        <i class="fa-solid fa-hospital-user mr-1"></i> Patient Location
+                        <i aria-hidden="true" class="fa-solid fa-hospital-user mr-1"></i> Patient Location
                       </label>
                       <p class="text-xs text-slate-500 mb-2">Determines urgency and transfer necessity.</p>
                       <select id="location-input" class="w-full p-3 border border-slate-600 rounded bg-slate-800 text-white focus:ring-2 focus:ring-indigo-500 outline-none text-lg">
@@ -143,10 +143,10 @@
                 <!-- Chief Complaint Area -->
                 <div class="mb-6">
                     <label for="initial-symptoms" class="block text-sm font-bold text-white mb-1">History of Present Illness (HPI):</label>
-                    <textarea id="initial-symptoms" rows="3" class="w-full p-3 border border-slate-600 rounded-md focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-slate-700 text-white placeholder-slate-400" placeholder="e.g., 45M Active Duty. 3 days of worsening symptoms..."></textarea>
+                    <textarea id="initial-symptoms" rows="3" class="w-full p-3 border border-slate-600 rounded-md focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-slate-700 text-white placeholder-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900" placeholder="e.g., 45M Active Duty. 3 days of worsening symptoms..."></textarea>
                     <div class="flex justify-end space-x-3">
-                         <button type="button" id="example-1-btn" class="mt-1 text-xs text-indigo-400 hover:text-indigo-300 underline">Load Ectopic</button>
-                        <button type="button" id="example-2-btn" class="mt-1 text-xs text-indigo-400 hover:text-indigo-300 underline">Load PID</button>
+                         <button type="button" id="example-1-btn" class="mt-1 text-xs text-indigo-400 hover:text-indigo-300 underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800">Load Ectopic</button>
+                        <button type="button" id="example-2-btn" class="mt-1 text-xs text-indigo-400 hover:text-indigo-300 underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800">Load PID</button>
                     </div>
                 </div>
 
@@ -154,31 +154,31 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     <div>
                         <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Vitals</label>
-                        <textarea id="vitals-input" rows="2" class="w-full p-2 border border-slate-600 rounded-md bg-slate-900 text-white text-sm focus:border-indigo-500 outline-none" placeholder="BP 120/80, HR 80, Temp 98.6"></textarea>
+                        <textarea id="vitals-input" rows="2" class="w-full p-2 border border-slate-600 rounded-md bg-slate-900 text-white text-sm focus:border-indigo-500 outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900" placeholder="BP 120/80, HR 80, Temp 98.6"></textarea>
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Physical Exam</label>
-                        <textarea id="pe-input" rows="2" class="w-full p-2 border border-slate-600 rounded-md bg-slate-900 text-white text-sm focus:border-indigo-500 outline-none" placeholder="Pertinent exam findings..."></textarea>
+                        <textarea id="pe-input" rows="2" class="w-full p-2 border border-slate-600 rounded-md bg-slate-900 text-white text-sm focus:border-indigo-500 outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900" placeholder="Pertinent exam findings..."></textarea>
                     </div>
                     <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
                          <div>
                             <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Current Meds / Allergies</label>
-                            <input type="text" id="meds-input" class="w-full p-2 border border-slate-600 rounded-md bg-slate-900 text-white text-sm focus:border-indigo-500 outline-none" placeholder="Meds list and NKDA.">
+                            <input type="text" id="meds-input" class="w-full p-2 border border-slate-600 rounded-md bg-slate-900 text-white text-sm focus:border-indigo-500 outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900" placeholder="Meds list and NKDA.">
                          </div>
                          <div>
                              <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Labs / Imaging</label>
-                             <input type="text" id="prior-labs-input" class="w-full p-2 border border-slate-600 rounded-md bg-slate-900 text-white text-sm focus:border-indigo-500 outline-none" placeholder="Relevant labs or imaging results...">
+                             <input type="text" id="prior-labs-input" class="w-full p-2 border border-slate-600 rounded-md bg-slate-900 text-white text-sm focus:border-indigo-500 outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900" placeholder="Relevant labs or imaging results...">
                          </div>
                     </div>
                     <div class="md:col-span-2">
                          <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Pertinent History / ROS</label>
-                         <textarea id="pmh-input" rows="2" class="w-full p-2 border border-slate-600 rounded-md bg-slate-900 text-white text-sm focus:border-indigo-500 outline-none" placeholder="Vaginal bleeding, Discharge, Pelvic pain, LMP, Pregnancy..."></textarea>
+                         <textarea id="pmh-input" rows="2" class="w-full p-2 border border-slate-600 rounded-md bg-slate-900 text-white text-sm focus:border-indigo-500 outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900" placeholder="Vaginal bleeding, Discharge, Pelvic pain, LMP, Pregnancy..."></textarea>
                     </div>
                 </div>
 
-                <button type="submit" class="w-full bg-gradient-to-r from-indigo-700 to-indigo-600 text-white font-bold text-lg py-4 px-6 rounded-lg shadow-lg hover:from-indigo-600 hover:to-indigo-500 transition-all transform hover:-translate-y-1 flex items-center justify-center">
+                <button type="submit" class="w-full bg-gradient-to-r from-indigo-700 to-indigo-600 text-white font-bold text-lg py-4 px-6 rounded-lg shadow-lg hover:from-indigo-600 hover:to-indigo-500 transition-all transform hover:-translate-y-1 flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800">
                     <span class="mr-3">Start Assessment</span>
-                    <i class="fa-solid fa-arrow-right"></i>
+                    <i aria-hidden="true" class="fa-solid fa-arrow-right"></i>
                 </button>
             </form>
         </div>
@@ -186,7 +186,7 @@
         <!-- SECTION 2: FOLLOW-UP QUESTIONS -->
         <div id="section-questions" class="hidden bg-slate-800 p-6 rounded-lg shadow-xl border border-slate-700">
             <h2 class="text-xl font-semibold mb-4 text-white border-b border-slate-700 pb-2 flex items-center">
-                <i class="fa-solid fa-user-doctor text-indigo-500 mr-2"></i> Refining the Differential
+                <i aria-hidden="true" class="fa-solid fa-user-doctor text-indigo-500 mr-2"></i> Refining the Differential
             </h2>
             <p class="text-sm text-slate-400 mb-6 bg-slate-900 p-3 rounded border-l-4 border-indigo-500">
                 To distinguish between possible causes, I need to clarify a few clinical details.
@@ -195,8 +195,8 @@
             <form id="questions-form">
                 <div id="questions-container" class="space-y-5 mb-8"></div>
                 <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
-                    <button type="button" id="questions-back-btn" class="flex-1 bg-slate-700 text-slate-300 font-bold py-3 rounded-lg hover:bg-slate-600 transition">Back</button>
-                    <button type="submit" class="flex-[2] bg-indigo-600 text-white font-bold py-3 rounded-lg hover:bg-indigo-500 transition shadow-lg">Generate Plan & Orders</button>
+                    <button type="button" id="questions-back-btn" class="flex-1 bg-slate-700 text-slate-300 font-bold py-3 rounded-lg hover:bg-slate-600 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800">Back</button>
+                    <button type="submit" class="flex-[2] bg-indigo-600 text-white font-bold py-3 rounded-lg hover:bg-indigo-500 transition shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800">Generate Plan & Orders</button>
                 </div>
             </form>
         </div>
@@ -250,15 +250,15 @@
                          <div id="review-profile-container" class="space-y-2"></div>
                          <div class="mt-3 flex items-center bg-slate-800 p-2 rounded">
                              <label class="text-xs text-slate-400 mr-2 font-bold uppercase">Profile Duration (Days)</label>
-                             <input type="number" id="profile-days" class="w-20 bg-slate-700 border border-slate-600 text-white text-center text-sm p-1 rounded focus:border-indigo-500 outline-none">
+                             <input type="number" id="profile-days" class="w-20 bg-slate-700 border border-slate-600 text-white text-center text-sm p-1 rounded focus:border-indigo-500 outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900">
                          </div>
                     </div>
                 </div>
             </div>
 
             <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
-                <button type="button" id="review-back-btn" class="flex-1 bg-slate-700 text-slate-300 font-bold py-3 rounded-lg hover:bg-slate-600">Back</button>
-                <button type="button" id="review-continue-btn" class="flex-1 bg-green-700 text-white font-bold py-3 rounded-lg hover:bg-green-600 shadow-lg">Finalize Note</button>
+                <button type="button" id="review-back-btn" class="flex-1 bg-slate-700 text-slate-300 font-bold py-3 rounded-lg hover:bg-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800">Back</button>
+                <button type="button" id="review-continue-btn" class="flex-1 bg-green-700 text-white font-bold py-3 rounded-lg hover:bg-green-600 shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800">Finalize Note</button>
             </div>
         </div>
 
@@ -270,8 +270,8 @@
             <div class="bg-slate-700 p-4 rounded-md mb-6 border border-slate-600">
                 <label for="refine-input" class="block text-xs font-bold text-indigo-300 mb-2 uppercase">Consultant Q&A (Refine the plan)</label>
                 <div class="flex space-x-2">
-                    <input type="text" id="refine-input" class="flex-1 p-2 bg-slate-900 border border-slate-600 rounded text-white text-sm focus:border-indigo-500 outline-none" placeholder="e.g., 'Dosing for medication?' or 'Criteria for diagnosis?'">
-                    <button type="button" id="refine-btn" class="bg-indigo-700 hover:bg-indigo-600 text-white px-4 rounded font-medium text-sm">Ask</button>
+                    <input type="text" id="refine-input" class="flex-1 p-2 bg-slate-900 border border-slate-600 rounded text-white text-sm focus:border-indigo-500 outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900" placeholder="e.g., 'Dosing for medication?' or 'Criteria for diagnosis?'">
+                    <button type="button" id="refine-btn" class="bg-indigo-700 hover:bg-indigo-600 text-white px-4 rounded font-medium text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800">Ask</button>
                 </div>
                 <div id="refine-response" class="hidden mt-3 p-3 bg-slate-800 rounded text-sm text-slate-300 border border-slate-600 italic"></div>
             </div>
@@ -282,24 +282,24 @@
                 <pre id="final-note-content" class="whitespace-pre-wrap"></pre>
             </div>
 
-            <button type="button" id="copy-note-btn" class="w-full bg-slate-700 hover:bg-slate-600 text-white font-bold text-lg py-4 px-6 rounded-lg shadow-lg border border-slate-500 flex items-center justify-center mb-6">
-                <i class="fa-regular fa-copy mr-2"></i> Copy to Clipboard
+            <button type="button" id="copy-note-btn" class="w-full bg-slate-700 hover:bg-slate-600 text-white font-bold text-lg py-4 px-6 rounded-lg shadow-lg border border-slate-500 flex items-center justify-center mb-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800">
+                <i aria-hidden="true" class="fa-regular fa-copy mr-2"></i> Copy to Clipboard
             </button>
             <p id="copy-success" class="hidden mt-2 text-center text-green-400 font-semibold text-sm">Copied to clipboard!</p>
 
             <!-- References -->
             <div id="references-container" class="bg-slate-900 p-4 rounded border border-slate-600 mb-8">
                 <h3 class="text-indigo-400 font-bold mb-2 text-xs uppercase flex items-center">
-                    <i class="fa-solid fa-book-medical mr-2"></i> Clinical Guidelines & Evidence
+                    <i aria-hidden="true" class="fa-solid fa-book-medical mr-2"></i> Clinical Guidelines & Evidence
                 </h3>
                 <ul id="references-list" class="list-disc ml-5 text-sm space-y-2 text-slate-400"></ul>
             </div>
 
             <div class="mt-6 flex justify-center space-x-6">
-                <button type="button" id="final-back-btn" class="text-slate-500 hover:text-white underline text-sm">
+                <button type="button" id="final-back-btn" class="text-slate-500 hover:text-white underline text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800">
                     Back to Review
                 </button>
-                <button type="button" id="start-over-btn" class="text-slate-500 hover:text-white underline text-sm">
+                <button type="button" id="start-over-btn" class="text-slate-500 hover:text-white underline text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800">
                     Start New Consult
                 </button>
             </div>
@@ -540,7 +540,7 @@
                     }
 
                     html += `</div>
-                        <input type="text" id="${qId}" data-q="${questionText}" class="w-full p-2 border-b border-slate-600 bg-slate-800 text-white focus:border-indigo-500 outline-none transition-colors rounded ${options.length > 0 ? 'opacity-50 cursor-not-allowed' : ''}" placeholder="${options.length > 0 ? 'Check an option above, or check Other to type...' : 'Type answer...'}" ${options.length > 0 ? 'disabled' : ''}>
+                        <input class="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900" type="text" id="${qId}" data-q="${questionText}" class="w-full p-2 border-b border-slate-600 bg-slate-800 text-white focus:border-indigo-500 outline-none transition-colors rounded ${options.length > 0 ? 'opacity-50 cursor-not-allowed' : ''}" placeholder="${options.length > 0 ? 'Check an option above, or check Other to type...' : 'Type answer...'}" ${options.length > 0 ? 'disabled' : ''}>
                     </div>`;
 
                     container.innerHTML += html;
@@ -678,12 +678,12 @@
 
             if(isCritical) {
                  alertBanner.className = "mb-6 p-4 rounded-md flex items-start bg-red-900/40 border border-red-600 text-red-200";
-                 alertBanner.innerHTML = `<i class="fa-solid fa-biohazard mt-1 mr-3 text-2xl animate-pulse"></i><div><strong>CRITICAL CONDITION / ADMISSION</strong><br><span class="text-sm">High acuity detected. Review disposition carefully.</span></div>`;
+                 alertBanner.innerHTML = `<i aria-hidden="true" class="fa-solid fa-biohazard mt-1 mr-3 text-2xl animate-pulse"></i><div><strong>CRITICAL CONDITION / ADMISSION</strong><br><span class="text-sm">High acuity detected. Review disposition carefully.</span></div>`;
                  workupTag.textContent = "Urgent";
                  medsTag.textContent = "Acute";
             } else {
                 alertBanner.className = "mb-6 p-4 rounded-md flex items-start bg-indigo-900/40 border border-indigo-600 text-indigo-200";
-                alertBanner.innerHTML = `<i class="fa-solid fa-notes-medical mt-1 mr-3"></i><div><strong>Routine / Outpatient Management</strong><br><span class="text-sm">Standard protocol.</span></div>`;
+                alertBanner.innerHTML = `<i aria-hidden="true" class="fa-solid fa-notes-medical mt-1 mr-3"></i><div><strong>Routine / Outpatient Management</strong><br><span class="text-sm">Standard protocol.</span></div>`;
                 workupTag.textContent = "Routine";
                 medsTag.textContent = "Maintenance/Flare";
             }
@@ -955,7 +955,7 @@
                     const textValue = isOtherSelected ? otherText : (options.length === 0 ? val : "");
 
                     html += `</div>
-                        <input type="text" id="${qId}" data-q="${questionText}" value="${textValue}" class="w-full p-2 border-b border-slate-600 bg-slate-800 text-white focus:border-indigo-500 outline-none transition-colors rounded ${shouldDisableText ? 'opacity-50 cursor-not-allowed' : ''}" placeholder="${options.length > 0 ? 'Check an option above, or check Other to type...' : 'Type answer...'}" ${shouldDisableText ? 'disabled' : ''}>
+                        <input type="text" id="${qId}" data-q="${questionText}" value="${textValue}" class="w-full p-2 border-b border-slate-600 bg-slate-800 text-white focus:border-indigo-500 outline-none transition-colors rounded ${shouldDisableText ? 'opacity-50 cursor-not-allowed' : ''} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900" placeholder="${options.length > 0 ? 'Check an option above, or check Other to type...' : 'Type answer...'}" ${shouldDisableText ? 'disabled' : ''}>
                     </div>`;
 
                     container.innerHTML += html;
