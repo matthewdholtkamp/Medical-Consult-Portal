@@ -288,7 +288,7 @@
             }
             emptyState.style.display = 'none';
             gallery.innerHTML = mediaStack.map(m => `
-                <div class="relative bg-slate-900 p-1 rounded-xl shadow-inner border border-slate-700 aspect-square group overflow-hidden cursor-pointer" onclick="openLightboxId(${m.id})">
+                <div role="button" tabindex="0" onkeydown="if(event.key === \'Enter\' || event.key === \' \') { event.preventDefault(); openLightboxId(${m.id}); }" class="relative bg-slate-900 p-1 rounded-xl shadow-inner border border-slate-700 aspect-square group overflow-hidden cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900" onclick="openLightboxId(${m.id})">
                     ${m.type === 'video'
                         ? `<div class="w-full h-full flex items-center justify-center bg-black rounded-lg"><span class="material-symbols-outlined text-indigo-500 text-4xl">play_circle</span></div>`
                         : `<img src="${m.b64}" class="w-full h-full object-cover rounded-lg opacity-80 group-hover:opacity-100 transition-opacity" alt="Uploaded image preview">`
