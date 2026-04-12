@@ -50,7 +50,7 @@
         
         <header class="text-center mb-8 border-b border-slate-700 pb-6">
             <div class="flex justify-center items-center mb-2">
-                <i class="fa-solid fa-child-reaching text-cyan-400 text-4xl mr-3"></i>
+                <i aria-hidden="true" class="fa-solid fa-child-reaching text-cyan-400 text-4xl mr-3"></i>
                 <h1 class="text-4xl font-bold text-white tracking-wider">AI PEDIATRIC <span class="text-gradient-peds">CONSULTANT</span></h1>
             </div>
             <p class="text-lg text-slate-400">Decision Support for Pediatric Hospital Medicine & Acute Care</p>
@@ -87,8 +87,8 @@
 
         <!-- HIPAA WARNING -->
         <details class="bg-slate-800 border border-slate-600 rounded-md mb-8 shadow-lg">
-            <summary class="font-semibold text-slate-300 p-4 cursor-pointer text-lg flex justify-between items-center hover:bg-slate-750 transition">
-                <span class="flex items-center"><i class="fa-solid fa-shield-halved mr-2 text-cyan-400"></i> NON-HIPAA Compliance</span>
+            <summary class="font-semibold text-slate-300 p-4 cursor-pointer text-lg flex justify-between items-center hover:bg-slate-750 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 rounded-md">
+                <span class="flex items-center"><i aria-hidden="true" class="fa-solid fa-shield-halved mr-2 text-cyan-400"></i> NON-HIPAA Compliance</span>
                 <span class="text-xs bg-red-900/80 text-red-100 px-2 py-1 rounded border border-red-500">Required Check</span>
             </summary>
             <div class="p-4 border-t border-slate-600 text-sm bg-slate-900/50">
@@ -136,19 +136,19 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 bg-slate-900 p-4 rounded-lg border border-slate-700">
                      <div class="md:col-span-1">
                         <label class="block text-sm font-bold text-cyan-400 mb-2 uppercase tracking-wide">
-                             <i class="fa-solid fa-cake-candles mr-1"></i> Age
+                             <i aria-hidden="true" class="fa-solid fa-cake-candles mr-1"></i> Age
                         </label>
-                        <input type="text" id="age-input" class="w-full p-3 border border-slate-600 rounded bg-slate-800 text-white focus:ring-2 focus:ring-cyan-500 outline-none" placeholder="e.g. 3 mos, 4yo">
+                        <input type="text" id="age-input" class="w-full p-3 border border-slate-600 rounded bg-slate-800 text-white focus:ring-2 focus:ring-cyan-500 outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900" placeholder="e.g. 3 mos, 4yo">
                      </div>
                      <div class="md:col-span-1">
                         <label class="block text-sm font-bold text-cyan-400 mb-2 uppercase tracking-wide">
-                             <i class="fa-solid fa-weight-scale mr-1"></i> Weight (kg)
+                             <i aria-hidden="true" class="fa-solid fa-weight-scale mr-1"></i> Weight (kg)
                         </label>
-                        <input type="number" step="0.1" id="weight-input" class="w-full p-3 border border-slate-600 rounded bg-slate-800 text-white focus:ring-2 focus:ring-cyan-500 outline-none" placeholder="Required for dosing">
+                        <input type="number" step="0.1" id="weight-input" class="w-full p-3 border border-slate-600 rounded bg-slate-800 text-white focus:ring-2 focus:ring-cyan-500 outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900" placeholder="Required for dosing">
                      </div>
                      <div class="md:col-span-1">
                         <label class="block text-sm font-bold text-cyan-400 mb-2 uppercase tracking-wide">
-                            <i class="fa-solid fa-hospital mr-1"></i> Location
+                            <i aria-hidden="true" class="fa-solid fa-hospital mr-1"></i> Location
                          </label>
                          <select id="location-input" class="w-full p-3 border border-slate-600 rounded bg-slate-800 text-white focus:ring-2 focus:ring-cyan-500 outline-none">
                              <option value="Inpatient">Peds Ward / PICU</option>
@@ -162,9 +162,9 @@
                 <!-- Chief Complaint Area -->
                 <div class="mb-6">
                     <label for="initial-symptoms" class="block text-sm font-bold text-white mb-1">Consult Reason / HPI (De-identified):</label>
-                    <textarea id="initial-symptoms" rows="3" class="w-full p-3 border border-slate-600 rounded-md focus:ring-2 focus:ring-cyan-500 focus:outline-none bg-slate-700 text-white placeholder-slate-400" placeholder="e.g., 2yo male presenting with 2 days of barky cough, stridor, and fever."></textarea>
+                    <textarea id="initial-symptoms" rows="3" class="w-full p-3 border border-slate-600 rounded-md focus:ring-2 focus:ring-cyan-500 focus:outline-none bg-slate-700 text-white placeholder-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900" placeholder="e.g., 2yo male presenting with 2 days of barky cough, stridor, and fever."></textarea>
                     <div class="flex justify-end">
-                        <button type="button" id="example-complaint-btn" class="mt-1 text-xs text-cyan-400 hover:text-cyan-300 underline">Load Bronchiolitis Case</button>
+                        <button type="button" id="example-complaint-btn" class="mt-1 text-xs text-cyan-400 hover:text-cyan-300 underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800">Load Bronchiolitis Case</button>
                     </div>
                 </div>
 
@@ -172,31 +172,31 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     <div>
                         <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Vitals</label>
-                        <textarea id="vitals-input" rows="2" class="w-full p-2 border border-slate-600 rounded-md bg-slate-900 text-white text-sm focus:border-cyan-500 outline-none" placeholder="T, HR, BP (if applicable), RR, O2 Sat"></textarea>
+                        <textarea id="vitals-input" rows="2" class="w-full p-2 border border-slate-600 rounded-md bg-slate-900 text-white text-sm focus:border-cyan-500 outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900" placeholder="T, HR, BP (if applicable), RR, O2 Sat"></textarea>
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Physical Exam / Appearance</label>
-                        <textarea id="pe-input" rows="2" class="w-full p-2 border border-slate-600 rounded-md bg-slate-900 text-white text-sm focus:border-cyan-500 outline-none" placeholder="Gen appearance (TICLS), Work of breathing, Hydration status"></textarea>
+                        <textarea id="pe-input" rows="2" class="w-full p-2 border border-slate-600 rounded-md bg-slate-900 text-white text-sm focus:border-cyan-500 outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900" placeholder="Gen appearance (TICLS), Work of breathing, Hydration status"></textarea>
                     </div>
                     <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
                          <div>
                             <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Immunizations & Meds</label>
-                            <input type="text" id="meds-input" class="w-full p-2 border border-slate-600 rounded-md bg-slate-900 text-white text-sm focus:border-cyan-500 outline-none" placeholder="UTD on shots? Current meds? Allergies?">
+                            <input type="text" id="meds-input" class="w-full p-2 border border-slate-600 rounded-md bg-slate-900 text-white text-sm focus:border-cyan-500 outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900" placeholder="UTD on shots? Current meds? Allergies?">
                          </div>
                          <div>
                              <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Labs / Imaging</label>
-                             <input type="text" id="prior-labs-input" class="w-full p-2 border border-slate-600 rounded-md bg-slate-900 text-white text-sm focus:border-cyan-500 outline-none" placeholder="WBC, RSV/Flu/Covid, CXR, Urine">
+                             <input type="text" id="prior-labs-input" class="w-full p-2 border border-slate-600 rounded-md bg-slate-900 text-white text-sm focus:border-cyan-500 outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900" placeholder="WBC, RSV/Flu/Covid, CXR, Urine">
                          </div>
                     </div>
                     <div class="md:col-span-2">
                          <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Birth Hx / PMH / Social</label>
-                         <input type="text" id="pmh-input" class="w-full p-2 border border-slate-600 rounded-md bg-slate-900 text-white text-sm focus:border-cyan-500 outline-none" placeholder="Full term? NICU stay? Asthma? Sick contacts at daycare?">
+                         <input type="text" id="pmh-input" class="w-full p-2 border border-slate-600 rounded-md bg-slate-900 text-white text-sm focus:border-cyan-500 outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900" placeholder="Full term? NICU stay? Asthma? Sick contacts at daycare?">
                     </div>
                 </div>
 
-                <button type="submit" class="w-full bg-gradient-to-r from-teal-600 to-cyan-600 text-white font-bold text-lg py-4 px-6 rounded-lg shadow-lg hover:from-teal-500 hover:to-cyan-500 transition-all transform hover:-translate-y-1 flex items-center justify-center">
+                <button type="submit" class="w-full bg-gradient-to-r from-teal-600 to-cyan-600 text-white font-bold text-lg py-4 px-6 rounded-lg shadow-lg hover:from-teal-500 hover:to-cyan-500 transition-all transform hover:-translate-y-1 flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800">
                     <span class="mr-3">Start Pediatric Assessment</span>
-                    <i class="fa-solid fa-stethoscope"></i>
+                    <i aria-hidden="true" class="fa-solid fa-stethoscope"></i>
                 </button>
             </form>
         </div>
@@ -204,7 +204,7 @@
         <!-- SECTION 2: FOLLOW-UP QUESTIONS -->
         <div id="section-questions" class="hidden bg-slate-800 p-6 rounded-lg shadow-xl border border-slate-700">
             <h2 class="text-xl font-semibold mb-4 text-white border-b border-slate-700 pb-2 flex items-center">
-                <i class="fa-solid fa-clipboard-question text-cyan-500 mr-2"></i> Clinical Clarification
+                <i aria-hidden="true" class="fa-solid fa-clipboard-question text-cyan-500 mr-2"></i> Clinical Clarification
             </h2>
             <p class="text-sm text-slate-400 mb-6 bg-slate-900 p-3 rounded border-l-4 border-cyan-500">
                 Based on the age and presentation, I need to narrow the differential (e.g., Congenital vs Infectious vs Surgical).
@@ -213,8 +213,8 @@
             <form id="questions-form">
                 <div id="questions-container" class="space-y-5 mb-8"></div>
                 <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
-                    <button type="button" id="questions-back-btn" class="flex-1 bg-slate-700 text-slate-300 font-bold py-3 rounded-lg hover:bg-slate-600 transition">Back</button>
-                    <button type="submit" class="flex-[2] bg-cyan-600 text-white font-bold py-3 rounded-lg hover:bg-cyan-500 transition shadow-lg">Generate Assessment & Plan</button>
+                    <button type="button" id="questions-back-btn" class="flex-1 bg-slate-700 text-slate-300 font-bold py-3 rounded-lg hover:bg-slate-600 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800">Back</button>
+                    <button type="submit" class="flex-[2] bg-cyan-600 text-white font-bold py-3 rounded-lg hover:bg-cyan-500 transition shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800">Generate Assessment & Plan</button>
                 </div>
             </form>
         </div>
@@ -256,7 +256,7 @@
                             <span id="meds-tag" class="text-[10px] px-2 rounded bg-slate-800 border border-slate-600"></span>
                         </h3>
                         <div class="text-xs text-yellow-500 mb-2 bg-yellow-900/20 p-1 rounded border border-yellow-800">
-                            <i class="fa-solid fa-triangle-exclamation mr-1"></i> Verify all mg/kg calculations manually.
+                            <i aria-hidden="true" class="fa-solid fa-triangle-exclamation mr-1"></i> Verify all mg/kg calculations manually.
                         </div>
                         <div id="review-treatment-container" class="space-y-2"></div>
                     </div>
@@ -270,15 +270,15 @@
                          <div id="review-profile-container" class="space-y-2"></div>
                          <div class="mt-3 flex items-center bg-slate-800 p-2 rounded">
                              <label class="text-xs text-slate-400 mr-2 font-bold uppercase">School/Daycare Excuse (Days)</label>
-                             <input type="number" id="profile-days" class="w-20 bg-slate-700 border border-slate-600 text-white text-center text-sm p-1 rounded focus:border-cyan-500 outline-none">
+                             <input type="number" id="profile-days" class="w-20 bg-slate-700 border border-slate-600 text-white text-center text-sm p-1 rounded focus:border-cyan-500 outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900">
                          </div>
                     </div>
                 </div>
             </div>
 
             <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
-                <button type="button" id="review-back-btn" class="flex-1 bg-slate-700 text-slate-300 font-bold py-3 rounded-lg hover:bg-slate-600">Back</button>
-                <button type="button" id="review-continue-btn" class="flex-1 bg-green-700 text-white font-bold py-3 rounded-lg hover:bg-green-600 shadow-lg">Finalize Peds Note</button>
+                <button type="button" id="review-back-btn" class="flex-1 bg-slate-700 text-slate-300 font-bold py-3 rounded-lg hover:bg-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800">Back</button>
+                <button type="button" id="review-continue-btn" class="flex-1 bg-green-700 text-white font-bold py-3 rounded-lg hover:bg-green-600 shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800">Finalize Peds Note</button>
             </div>
         </div>
 
@@ -290,8 +290,8 @@
             <div class="bg-slate-700 p-4 rounded-md mb-6 border border-slate-600">
                 <label for="refine-input" class="block text-xs font-bold text-cyan-300 mb-2 uppercase">Consultant Q&A (Refine the plan)</label>
                 <div class="flex space-x-2">
-                    <input type="text" id="refine-input" class="flex-1 p-2 bg-slate-900 border border-slate-600 rounded text-white text-sm focus:border-cyan-500 outline-none" placeholder="e.g., 'What is the Amox dose for otitis media?' or 'Maintenance fluid rate?'">
-                    <button type="button" id="refine-btn" class="bg-cyan-700 hover:bg-cyan-600 text-white px-4 rounded font-medium text-sm">Ask</button>
+                    <input type="text" id="refine-input" class="flex-1 p-2 bg-slate-900 border border-slate-600 rounded text-white text-sm focus:border-cyan-500 outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900" placeholder="e.g., 'What is the Amox dose for otitis media?' or 'Maintenance fluid rate?'">
+                    <button type="button" id="refine-btn" class="bg-cyan-700 hover:bg-cyan-600 text-white px-4 rounded font-medium text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800">Ask</button>
                 </div>
                 <div id="refine-response" class="hidden mt-3 p-3 bg-slate-800 rounded text-sm text-slate-300 border border-slate-600 italic"></div>
             </div>
@@ -302,24 +302,24 @@
                 <pre id="final-note-content" class="whitespace-pre-wrap"></pre>
             </div>
             
-            <button type="button" id="copy-note-btn" class="w-full bg-slate-700 hover:bg-slate-600 text-white font-bold text-lg py-4 px-6 rounded-lg shadow-lg border border-slate-500 flex items-center justify-center mb-6">
-                <i class="fa-regular fa-copy mr-2"></i> Copy to Clipboard
+            <button type="button" id="copy-note-btn" class="w-full bg-slate-700 hover:bg-slate-600 text-white font-bold text-lg py-4 px-6 rounded-lg shadow-lg border border-slate-500 flex items-center justify-center mb-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800">
+                <i aria-hidden="true" class="fa-regular fa-copy mr-2"></i> Copy to Clipboard
             </button>
             <p id="copy-success" class="hidden mt-2 text-center text-green-400 font-semibold text-sm">Copied to clipboard!</p>
 
             <!-- References -->
             <div id="references-container" class="bg-slate-900 p-4 rounded border border-slate-600 mb-8">
                 <h3 class="text-cyan-400 font-bold mb-2 text-xs uppercase flex items-center">
-                    <i class="fa-solid fa-book-medical mr-2"></i> AAP Guidelines & Evidence
+                    <i aria-hidden="true" class="fa-solid fa-book-medical mr-2"></i> AAP Guidelines & Evidence
                 </h3>
                 <ul id="references-list" class="list-disc ml-5 text-sm space-y-2 text-slate-400"></ul>
             </div>
 
             <div class="mt-6 flex justify-center space-x-6">
-                <button type="button" id="final-back-btn" class="text-slate-500 hover:text-white underline text-sm">
+                <button type="button" id="final-back-btn" class="text-slate-500 hover:text-white underline text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800">
                     Back to Review
                 </button>
-                <button type="button" id="start-over-btn" class="text-slate-500 hover:text-white underline text-sm">
+                <button type="button" id="start-over-btn" class="text-slate-500 hover:text-white underline text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800">
                     Start New Consult
                 </button>
             </div>
@@ -509,7 +509,7 @@
                     }
 
                     html += `</div>
-                        <input type="text" id="${qId}" data-q="${questionText}" class="w-full p-2 border-b border-slate-600 bg-slate-800 text-white focus:border-indigo-500 outline-none transition-colors rounded ${options.length > 0 ? 'opacity-50 cursor-not-allowed' : ''}" placeholder="${options.length > 0 ? 'Check an option above, or check Other to type...' : 'Type answer...'}" ${options.length > 0 ? 'disabled' : ''}>
+                        <input class="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900" type="text" id="${qId}" data-q="${questionText}" class="w-full p-2 border-b border-slate-600 bg-slate-800 text-white focus:border-indigo-500 outline-none transition-colors rounded ${options.length > 0 ? 'opacity-50 cursor-not-allowed' : ''}" placeholder="${options.length > 0 ? 'Check an option above, or check Other to type...' : 'Type answer...'}" ${options.length > 0 ? 'disabled' : ''}>
                     </div>`;
 
                     container.innerHTML += html;
@@ -653,12 +653,12 @@
 
             if(state.location === 'Inpatient' || state.location === 'ER' || state.location === 'NICU') {
                 alertBanner.className = "mb-6 p-4 rounded-md flex items-start bg-blue-900/40 border border-blue-600 text-blue-200";
-                alertBanner.innerHTML = `<i class="fa-solid fa-hospital mt-1 mr-3"></i><div><strong>Acute Care Mode Active</strong><br><span class="text-sm">Showing IV formularies, fluid boluses (mL/kg), and admission orders.</span></div>`;
+                alertBanner.innerHTML = `<i aria-hidden="true" class="fa-solid fa-hospital mt-1 mr-3"></i><div><strong>Acute Care Mode Active</strong><br><span class="text-sm">Showing IV formularies, fluid boluses (mL/kg), and admission orders.</span></div>`;
                 workupTag.textContent = "Stat / Inpatient";
                 medsTag.textContent = "IV / Acute / Wt-Based";
             } else {
                 alertBanner.className = "mb-6 p-4 rounded-md flex items-start bg-green-900/40 border border-green-600 text-green-200";
-                alertBanner.innerHTML = `<i class="fa-solid fa-house-chimney-medical mt-1 mr-3"></i><div><strong>Ambulatory Mode Active</strong><br><span class="text-sm">Restricted to oral medications and outpatient follow-up.</span></div>`;
+                alertBanner.innerHTML = `<i aria-hidden="true" class="fa-solid fa-house-chimney-medical mt-1 mr-3"></i><div><strong>Ambulatory Mode Active</strong><br><span class="text-sm">Restricted to oral medications and outpatient follow-up.</span></div>`;
                 workupTag.textContent = "Routine / Referral";
                 medsTag.textContent = "Oral Only";
             }
@@ -932,7 +932,7 @@
                     const textValue = isOtherSelected ? otherText : (options.length === 0 ? val : "");
 
                     html += `</div>
-                        <input type="text" id="${qId}" data-q="${questionText}" value="${textValue}" class="w-full p-2 border-b border-slate-600 bg-slate-800 text-white focus:border-indigo-500 outline-none transition-colors rounded ${shouldDisableText ? 'opacity-50 cursor-not-allowed' : ''}" placeholder="${options.length > 0 ? 'Check an option above, or check Other to type...' : 'Type answer...'}" ${shouldDisableText ? 'disabled' : ''}>
+                        <input type="text" id="${qId}" data-q="${questionText}" value="${textValue}" class="w-full p-2 border-b border-slate-600 bg-slate-800 text-white focus:border-indigo-500 outline-none transition-colors rounded ${shouldDisableText ? 'opacity-50 cursor-not-allowed' : ''} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900" placeholder="${options.length > 0 ? 'Check an option above, or check Other to type...' : 'Type answer...'}" ${shouldDisableText ? 'disabled' : ''}>
                     </div>`;
 
                     container.innerHTML += html;

@@ -178,7 +178,7 @@
                 <span class="text-sm text-slate-300 group-hover:text-white transition-colors">Don't show this again on this device</span>
             </label>
           </div>
-          <button id="ackBtn" onclick="acceptDisclaimer()" disabled class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-2.5 rounded-xl bg-amber-600 text-white font-semibold shadow-lg shadow-amber-900/20 hover:bg-amber-500 disabled:opacity-50 disabled:cursor-not-allowed">
+          <button id="ackBtn" onclick="acceptDisclaimer()" disabled class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-2.5 rounded-xl bg-amber-600 text-white font-semibold shadow-lg shadow-amber-900/20 hover:bg-amber-500 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800">
             I Understand — Continue
           </button>
       </div>
@@ -333,7 +333,7 @@
 </aside>
 
 <!-- Overlay for mobile sidebar -->
-<div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/50 z-30 hidden md:hidden glass-search"></div>
+<div role="button" tabindex="0" onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); toggleSidebar(); }" id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/50 z-30 hidden md:hidden glass-search focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 cursor-pointer"></div>
 
 <!-- =================================================================== -->
 <!-- MAIN CONTENT AREA -->
@@ -416,7 +416,7 @@
                                     id="chatInput"
                                     aria-label="Clinical query"
                                     placeholder="Clinical query (e.g., 'Latest STEMI guidelines')..." 
-                                    class="w-full bg-transparent text-slate-200 placeholder-slate-500 p-4 pl-5 min-h-[60px] max-h-48 resize-none focus:outline-none rounded-2xl"
+                                    class="w-full bg-transparent text-slate-200 placeholder-slate-500 p-4 pl-5 min-h-[60px] max-h-48 resize-none focus:outline-none rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
                                     rows="1"
                                     onkeydown="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); if(this.value.trim()) askDrHoltkamp(); }"
                                     oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px'; document.getElementById('askBtn').disabled = !this.value.trim();"></textarea>
@@ -526,15 +526,15 @@
                                 <textarea
                                     id="routerInput"
                                     placeholder="e.g., '65M with history of Afib presenting with shortness of breath and leg swelling...'"
-                                    class="w-full bg-transparent text-slate-200 placeholder-slate-500 p-4 min-h-[80px] max-h-48 resize-y focus:outline-none rounded-2xl"
+                                    class="w-full bg-transparent text-slate-200 placeholder-slate-500 p-4 min-h-[80px] max-h-48 resize-y focus:outline-none rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
                                     onkeydown="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); if(this.value.trim()) askRouter(); }"
                                     oninput="document.getElementById('routerBtn').disabled = !this.value.trim();"></textarea>
 
                                 <div class="flex items-center justify-between px-3 pb-3">
-                                    <button id="routerNewBtn" onclick="resetRouter()" class="hidden text-slate-400 hover:text-white text-xs font-medium px-2 py-1 transition-colors">
+                                    <button id="routerNewBtn" onclick="resetRouter()" class="hidden text-slate-400 hover:text-white text-xs font-medium px-2 py-1 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800">
                                         Clear
                                     </button>
-                                    <button id="routerBtn" onclick="askRouter()" disabled class="ml-auto px-5 py-2 bg-teal-600 text-white text-sm font-bold rounded-xl hover:bg-teal-500 transition-all shadow-lg shadow-teal-900/30 disabled:opacity-50 disabled:cursor-not-allowed">
+                                    <button id="routerBtn" onclick="askRouter()" disabled class="ml-auto px-5 py-2 bg-teal-600 text-white text-sm font-bold rounded-xl hover:bg-teal-500 transition-all shadow-lg shadow-teal-900/30 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800">
                                         Find Consultant
                                     </button>
                                 </div>
@@ -911,7 +911,7 @@ ADTMC, ADTMC+, Internal Medicine, ICU, Cardiology, Neurology, Pediatrics, Psychi
                         ${thoughts ? `
                             <div class="mt-4 pt-4 border-t border-slate-800">
                                 <details class="group bg-slate-900/40 rounded-xl border border-slate-700/30 overflow-hidden">
-                                    <summary class="list-none p-3 cursor-pointer flex items-center justify-between text-[10px] text-slate-500 font-bold uppercase tracking-widest hover:bg-slate-800/50 transition-colors">
+                                    <summary class="list-none p-3 cursor-pointer flex items-center justify-between text-[10px] text-slate-500 font-bold uppercase tracking-widest hover:bg-slate-800/50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 rounded-md">
                                         <div class="flex items-center gap-2">
                                             <span class="material-symbols-outlined text-sm text-blue-500/50" aria-hidden="true">neurology</span>
                                             <span>View Internal Reasoning Process</span>
@@ -975,7 +975,7 @@ ADTMC, ADTMC+, Internal Medicine, ICU, Cardiology, Neurology, Pediatrics, Psychi
 
                                     <h3 class="text-xl font-bold text-white mb-2 relative z-10">${item.title}</h3>
                                     <p class="text-slate-400 mb-6 flex-grow text-sm relative z-10">\${item.desc}<br><strong class="\${c.text} text-xs">Note Generation</strong></p>
-                                    <button tabindex="-1" class="mt-auto w-full bg-slate-700 text-white font-medium py-2.5 px-4 rounded-xl text-center transition-all relative z-10 \${c.btnHover}">Start Consult</button>
+                                    <button tabindex="-1" class="mt-auto w-full bg-slate-700 text-white font-medium py-2.5 px-4 rounded-xl text-center transition-all relative z-10 \${c.btnHover} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800">Start Consult</button>
                             </div>
                         </div>
                     `;
@@ -1135,7 +1135,7 @@ ADTMC, ADTMC+, Internal Medicine, ICU, Cardiology, Neurology, Pediatrics, Psychi
                                     <h3 class="text-lg font-bold text-white">${item.title}</h3>
                                 </div>
                                 <p class="text-slate-400 text-xs mb-3 flex-grow relative z-10">${item.desc}</p>
-                                <button tabindex="-1" class="w-full bg-slate-700 text-white font-medium py-2 px-3 rounded-lg text-sm text-center transition-all relative z-10 \${c.btnHover}">Go to Consult</button>
+                                <button tabindex="-1" class="w-full bg-slate-700 text-white font-medium py-2 px-3 rounded-lg text-sm text-center transition-all relative z-10 \${c.btnHover} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800">Go to Consult</button>
                             </div>
                         `;
                     } else {
@@ -1482,7 +1482,7 @@ ADTMC, ADTMC+, Internal Medicine, ICU, Cardiology, Neurology, Pediatrics, Psychi
                         <div class="absolute top-0 right-0 w-24 h-24 rounded-bl-full -mr-4 -mt-4 transition-all bg-${item.color}-500/5 group-hover:bg-${item.color}-500/10"></div>
                         <h3 class="text-xl font-bold text-white mb-2 relative z-10">${item.title}</h3>
                         <p class="text-slate-400 mb-6 flex-grow text-sm relative z-10">${item.desc}<br><strong class="${textColor} text-xs">Note Generation</strong></p>
-                        <button tabindex="-1" class="mt-auto w-full bg-slate-700 text-white font-medium py-2.5 px-4 rounded-xl text-center transition-all relative z-10 ${btnHover}">Start Consult</button>
+                        <button tabindex="-1" class="mt-auto w-full bg-slate-700 text-white font-medium py-2.5 px-4 rounded-xl text-center transition-all relative z-10 ${btnHover} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800">Start Consult</button>
                 </div>
              `;
         }).join('');

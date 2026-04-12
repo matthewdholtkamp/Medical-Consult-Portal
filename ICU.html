@@ -95,7 +95,7 @@
 
         <!-- HIPAA WARNING -->
         <details class="bg-slate-900 border border-slate-700 rounded-md mb-8 shadow-lg">
-            <summary class="font-semibold text-slate-300 p-4 cursor-pointer text-lg flex justify-between items-center hover:bg-slate-800 transition">
+            <summary class="font-semibold text-slate-300 p-4 cursor-pointer text-lg flex justify-between items-center hover:bg-slate-800 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 rounded-md">
                 <span class="flex items-center"><i aria-hidden="true" class="fa-solid fa-user-shield mr-2 text-rose-500"></i> SECURITY & COMPLIANCE</span>
                 <span class="text-xs bg-rose-900/80 text-rose-100 px-2 py-1 rounded border border-rose-500">HIPAA Safe Harbor Required</span>
             </summary>
@@ -157,7 +157,7 @@
                          <label class="block text-xs font-bold text-rose-400 mb-2 uppercase tracking-wide">
                              <i aria-hidden="true" class="fa-solid fa-hashtag mr-1"></i> Age / Sex
                          </label>
-                         <input type="text" id="age-input" class="w-full p-3 border border-slate-700 rounded bg-slate-900 text-white focus:ring-2 focus:ring-rose-500 outline-none" placeholder="e.g. 65yo M">
+                         <input type="text" id="age-input" class="w-full p-3 border border-slate-700 rounded bg-slate-900 text-white focus:ring-2 focus:ring-rose-500 outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900" placeholder="e.g. 65yo M">
                       </div>
                       <div class="md:col-span-1">
                          <label class="block text-xs font-bold text-rose-400 mb-2 uppercase tracking-wide">
@@ -187,14 +187,14 @@
                 <div id="initial-fields" class="block space-y-4">
                     <div>
                         <label class="block text-sm font-bold text-white mb-1">Reason for Consult / HPI:</label>
-                        <textarea id="hpi-input" rows="3" class="w-full p-3 border border-slate-700 rounded-md focus:ring-2 focus:ring-rose-500 focus:outline-none bg-slate-800 text-white placeholder-slate-500" placeholder="e.g., Acute respiratory failure, septic shock etiology unclear..."></textarea>
+                        <textarea id="hpi-input" rows="3" class="w-full p-3 border border-slate-700 rounded-md focus:ring-2 focus:ring-rose-500 focus:outline-none bg-slate-800 text-white placeholder-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900" placeholder="e.g., Acute respiratory failure, septic shock etiology unclear..."></textarea>
                     </div>
                     <div class="flex justify-end">
                         <button type="button" id="load-example-btn" class="text-xs text-rose-400 hover:text-rose-300 underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800 focus-visible:ring-rose-500">Load Sepsis Case</button>
                     </div>
                     <div>
                         <label class="block text-sm font-bold text-white mb-1">Past Medical History:</label>
-                        <textarea id="pmh-input" rows="2" class="w-full p-3 border border-slate-700 rounded-md focus:ring-2 focus:ring-rose-500 focus:outline-none bg-slate-800 text-white placeholder-slate-500" placeholder="e.g. COPD, CHF (EF 30%), DM2"></textarea>
+                        <textarea id="pmh-input" rows="2" class="w-full p-3 border border-slate-700 rounded-md focus:ring-2 focus:ring-rose-500 focus:outline-none bg-slate-800 text-white placeholder-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900" placeholder="e.g. COPD, CHF (EF 30%), DM2"></textarea>
                     </div>
                 </div>
 
@@ -204,14 +204,14 @@
                         <label class="block text-sm font-bold text-indigo-300 mb-2">
                             <i aria-hidden="true" class="fa-solid fa-paste mr-2"></i>Paste Yesterday's Note / Current Meds
                         </label>
-                        <textarea id="prior-note-input" rows="6" class="w-full p-3 border border-slate-700 rounded-md focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-slate-900 text-slate-300 text-xs font-mono placeholder-slate-600" placeholder="Paste the full text of the previous progress note or H&P here..."></textarea>
+                        <textarea id="prior-note-input" rows="6" class="w-full p-3 border border-slate-700 rounded-md focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-slate-900 text-slate-300 text-xs font-mono placeholder-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900" placeholder="Paste the full text of the previous progress note or H&P here..."></textarea>
                     </div>
                     
                     <div class="bg-rose-900/20 border border-rose-700/50 p-4 rounded-md">
                         <label class="block text-sm font-bold text-rose-300 mb-2">
                             <i aria-hidden="true" class="fa-solid fa-clock-rotate-left mr-2"></i>24-Hour / Overnight Events
                         </label>
-                        <textarea id="events-input" rows="4" class="w-full p-3 border border-slate-700 rounded-md focus:ring-2 focus:ring-rose-500 focus:outline-none bg-slate-900 text-white placeholder-slate-500" placeholder="e.g. Spiked fever to 39.4 at 0200, started Vanco. Extubated at 0800. Urine output decreased."></textarea>
+                        <textarea id="events-input" rows="4" class="w-full p-3 border border-slate-700 rounded-md focus:ring-2 focus:ring-rose-500 focus:outline-none bg-slate-900 text-white placeholder-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900" placeholder="e.g. Spiked fever to 39.4 at 0200, started Vanco. Extubated at 0800. Urine output decreased."></textarea>
                     </div>
                 </div>
 
@@ -221,24 +221,24 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs text-slate-500 mb-1">Vitals (Current/Range)</label>
-                            <input type="text" id="vitals-input" class="w-full p-2 border border-slate-700 rounded bg-slate-900 text-white text-sm" placeholder="BP 110/60 (on levo), HR 110, RR 24">
+                            <input type="text" id="vitals-input" class="w-full p-2 border border-slate-700 rounded bg-slate-900 text-white text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900" placeholder="BP 110/60 (on levo), HR 110, RR 24">
                         </div>
                         <div>
                             <label class="block text-xs text-slate-500 mb-1">Vent/O2 Settings</label>
-                            <input type="text" id="vent-input" class="w-full p-2 border border-slate-700 rounded bg-slate-900 text-white text-sm" placeholder="AC/VC 450/5/12 40% or 4L NC">
+                            <input type="text" id="vent-input" class="w-full p-2 border border-slate-700 rounded bg-slate-900 text-white text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900" placeholder="AC/VC 450/5/12 40% or 4L NC">
                         </div>
                         <div>
                             <label class="block text-xs text-slate-500 mb-1">Relevant Labs</label>
-                            <input type="text" id="labs-input" class="w-full p-2 border border-slate-700 rounded bg-slate-900 text-white text-sm" placeholder="WBC 18, Cr 2.1, Lactate 4.0">
+                            <input type="text" id="labs-input" class="w-full p-2 border border-slate-700 rounded bg-slate-900 text-white text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900" placeholder="WBC 18, Cr 2.1, Lactate 4.0">
                         </div>
                         <div>
                             <label class="block text-xs text-slate-500 mb-1">Lines / Drains / Access</label>
-                            <input type="text" id="lines-input" class="w-full p-2 border border-slate-700 rounded bg-slate-900 text-white text-sm" placeholder="R IJ TLC, Foley, Dobhoff">
+                            <input type="text" id="lines-input" class="w-full p-2 border border-slate-700 rounded bg-slate-900 text-white text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900" placeholder="R IJ TLC, Foley, Dobhoff">
                         </div>
                     </div>
                 </div>
 
-                <button type="submit" class="mt-8 w-full bg-gradient-to-r from-rose-700 to-red-600 text-white font-bold text-lg py-4 px-6 rounded-lg shadow-lg hover:from-rose-600 hover:to-red-500 transition-all transform hover:-translate-y-1 flex items-center justify-center border border-rose-800">
+                <button type="submit" class="mt-8 w-full bg-gradient-to-r from-rose-700 to-red-600 text-white font-bold text-lg py-4 px-6 rounded-lg shadow-lg hover:from-rose-600 hover:to-red-500 transition-all transform hover:-translate-y-1 flex items-center justify-center border border-rose-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800">
                     <span class="mr-3">Initiate ICU Systems Analysis</span>
                     <i aria-hidden="true" class="fa-solid fa-microscope"></i>
                 </button>
@@ -257,8 +257,8 @@
             <form id="questions-form">
                 <div id="questions-container" class="space-y-5 mb-8"></div>
                 <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
-                    <button type="button" id="questions-back-btn" class="flex-1 bg-slate-800 text-slate-300 font-bold py-3 rounded-lg hover:bg-slate-700 transition">Back</button>
-                    <button type="submit" class="flex-[2] bg-rose-700 text-white font-bold py-3 rounded-lg hover:bg-rose-600 transition shadow-lg">Generate Systems Note</button>
+                    <button type="button" id="questions-back-btn" class="flex-1 bg-slate-800 text-slate-300 font-bold py-3 rounded-lg hover:bg-slate-700 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800">Back</button>
+                    <button type="submit" class="flex-[2] bg-rose-700 text-white font-bold py-3 rounded-lg hover:bg-rose-600 transition shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800">Generate Systems Note</button>
                 </div>
             </form>
         </div>
@@ -283,7 +283,7 @@
                             <i aria-hidden="true" class="fa-solid fa-brain text-slate-600"></i>
                         </div>
                         <div class="p-4">
-                            <textarea id="sys-neuro" class="w-full bg-slate-900 text-slate-300 text-sm border border-slate-700 rounded p-2 h-32 font-mono leading-tight"></textarea>
+                            <textarea id="sys-neuro" class="w-full bg-slate-900 text-slate-300 text-sm border border-slate-700 rounded p-2 h-32 font-mono leading-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"></textarea>
                         </div>
                     </div>
 
@@ -294,7 +294,7 @@
                             <i aria-hidden="true" class="fa-solid fa-heart-pulse text-slate-600"></i>
                         </div>
                         <div class="p-4">
-                            <textarea id="sys-cv" class="w-full bg-slate-900 text-slate-300 text-sm border border-slate-700 rounded p-2 h-32 font-mono leading-tight"></textarea>
+                            <textarea id="sys-cv" class="w-full bg-slate-900 text-slate-300 text-sm border border-slate-700 rounded p-2 h-32 font-mono leading-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"></textarea>
                         </div>
                     </div>
 
@@ -305,7 +305,7 @@
                             <i aria-hidden="true" class="fa-solid fa-lungs text-slate-600"></i>
                         </div>
                         <div class="p-4">
-                            <textarea id="sys-resp" class="w-full bg-slate-900 text-slate-300 text-sm border border-slate-700 rounded p-2 h-32 font-mono leading-tight"></textarea>
+                            <textarea id="sys-resp" class="w-full bg-slate-900 text-slate-300 text-sm border border-slate-700 rounded p-2 h-32 font-mono leading-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"></textarea>
                         </div>
                     </div>
 
@@ -316,7 +316,7 @@
                             <i aria-hidden="true" class="fa-solid fa-kidneys text-slate-600"></i>
                         </div>
                         <div class="p-4">
-                            <textarea id="sys-renal" class="w-full bg-slate-900 text-slate-300 text-sm border border-slate-700 rounded p-2 h-32 font-mono leading-tight"></textarea>
+                            <textarea id="sys-renal" class="w-full bg-slate-900 text-slate-300 text-sm border border-slate-700 rounded p-2 h-32 font-mono leading-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"></textarea>
                         </div>
                     </div>
 
@@ -327,7 +327,7 @@
                             <i aria-hidden="true" class="fa-solid fa-bacterium text-slate-600"></i>
                         </div>
                         <div class="p-4">
-                            <textarea id="sys-heme" class="w-full bg-slate-900 text-slate-300 text-sm border border-slate-700 rounded p-2 h-32 font-mono leading-tight"></textarea>
+                            <textarea id="sys-heme" class="w-full bg-slate-900 text-slate-300 text-sm border border-slate-700 rounded p-2 h-32 font-mono leading-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"></textarea>
                         </div>
                     </div>
 
@@ -364,8 +364,8 @@
             </div>
 
             <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
-                <button type="button" id="review-back-btn" class="flex-1 bg-slate-700 text-slate-300 font-bold py-3 rounded-lg hover:bg-slate-600">Back</button>
-                <button type="button" id="review-finalize-btn" class="flex-1 bg-green-700 text-white font-bold py-3 rounded-lg hover:bg-green-600 shadow-lg">Finalize Note</button>
+                <button type="button" id="review-back-btn" class="flex-1 bg-slate-700 text-slate-300 font-bold py-3 rounded-lg hover:bg-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800">Back</button>
+                <button type="button" id="review-finalize-btn" class="flex-1 bg-green-700 text-white font-bold py-3 rounded-lg hover:bg-green-600 shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800">Finalize Note</button>
             </div>
         </div>
 
@@ -377,8 +377,8 @@
             <div class="bg-slate-800 p-4 rounded-md mb-6 border border-slate-700">
                 <label for="refine-input" class="block text-xs font-bold text-rose-300 mb-2 uppercase">Consultant Q&A (Refine the plan)</label>
                 <div class="flex space-x-2">
-                    <input type="text" id="refine-input" class="flex-1 p-2 bg-slate-950 border border-slate-700 rounded text-white text-sm focus:border-rose-500 outline-none" placeholder="e.g., 'What is the target MAP?' or 'Sedation holiday protocol?'">
-                    <button type="button" id="refine-btn" class="bg-rose-700 hover:bg-rose-600 text-white px-4 rounded font-medium text-sm">Ask</button>
+                    <input type="text" id="refine-input" class="flex-1 p-2 bg-slate-950 border border-slate-700 rounded text-white text-sm focus:border-rose-500 outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900" placeholder="e.g., 'What is the target MAP?' or 'Sedation holiday protocol?'">
+                    <button type="button" id="refine-btn" class="bg-rose-700 hover:bg-rose-600 text-white px-4 rounded font-medium text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800">Ask</button>
                 </div>
                 <div id="refine-response" class="hidden mt-3 p-3 bg-slate-900 rounded text-sm text-slate-300 border border-slate-700 italic"></div>
             </div>
@@ -388,7 +388,7 @@
                 <pre id="final-note-content" class="whitespace-pre-wrap"></pre>
             </div>
             
-            <button type="button" id="copy-note-btn" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold text-lg py-4 px-6 rounded-lg shadow-lg border border-slate-600 flex items-center justify-center mb-6">
+            <button type="button" id="copy-note-btn" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold text-lg py-4 px-6 rounded-lg shadow-lg border border-slate-600 flex items-center justify-center mb-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800">
                 <i aria-hidden="true" class="fa-regular fa-copy mr-2"></i> Copy to EMR
             </button>
             <p id="copy-success" class="hidden mt-2 text-center text-green-400 font-semibold text-sm">Copied to clipboard!</p>
@@ -402,10 +402,10 @@
             </div>
 
             <div class="mt-6 flex justify-center space-x-6">
-                <button type="button" id="final-back-btn" class="text-slate-500 hover:text-white underline text-sm">
+                <button type="button" id="final-back-btn" class="text-slate-500 hover:text-white underline text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800">
                     Back to Review
                 </button>
-                <button type="button" id="start-over-btn" class="text-slate-500 hover:text-white underline text-sm">
+                <button type="button" id="start-over-btn" class="text-slate-500 hover:text-white underline text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800">
                     Start New Patient
                 </button>
             </div>
@@ -626,7 +626,7 @@
                     }
 
                     html += `</div>
-                        <input type="text" id="${qId}" data-q="${questionText}" class="w-full p-2 border-b border-slate-600 bg-slate-800 text-white focus:border-indigo-500 outline-none transition-colors rounded ${options.length > 0 ? 'opacity-50 cursor-not-allowed' : ''}" placeholder="${options.length > 0 ? 'Check an option above, or check Other to type...' : 'Type answer...'}" ${options.length > 0 ? 'disabled' : ''}>
+                        <input class="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900" type="text" id="${qId}" data-q="${questionText}" class="w-full p-2 border-b border-slate-600 bg-slate-800 text-white focus:border-indigo-500 outline-none transition-colors rounded ${options.length > 0 ? 'opacity-50 cursor-not-allowed' : ''}" placeholder="${options.length > 0 ? 'Check an option above, or check Other to type...' : 'Type answer...'}" ${options.length > 0 ? 'disabled' : ''}>
                     </div>`;
 
                     container.innerHTML += html;
@@ -1031,7 +1031,7 @@
                     const textValue = isOtherSelected ? otherText : (options.length === 0 ? val : "");
 
                     html += `</div>
-                        <input type="text" id="${qId}" data-q="${questionText}" value="${textValue}" class="w-full p-2 border-b border-slate-600 bg-slate-800 text-white focus:border-indigo-500 outline-none transition-colors rounded ${shouldDisableText ? 'opacity-50 cursor-not-allowed' : ''}" placeholder="${options.length > 0 ? 'Check an option above, or check Other to type...' : 'Type answer...'}" ${shouldDisableText ? 'disabled' : ''}>
+                        <input type="text" id="${qId}" data-q="${questionText}" value="${textValue}" class="w-full p-2 border-b border-slate-600 bg-slate-800 text-white focus:border-indigo-500 outline-none transition-colors rounded ${shouldDisableText ? 'opacity-50 cursor-not-allowed' : ''} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900" placeholder="${options.length > 0 ? 'Check an option above, or check Other to type...' : 'Type answer...'}" ${shouldDisableText ? 'disabled' : ''}>
                     </div>`;
 
                     container.innerHTML += html;

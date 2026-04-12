@@ -24,11 +24,11 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         /* Report Styles */
-        .prose-content h1 { font-size: 1.5rem; font-weight: 800; color: #f8fafc; margin-top: 1rem; border-bottom: 1px solid #334155; padding-bottom: 0.25rem; }
-        .prose-content h2 { font-size: 1.25rem; font-weight: 700; color: #e2e8f0; margin-top: 0.75rem; }
-        .prose-content h3 { font-size: 1.1rem; font-weight: 600; color: #cbd5e1; margin-top: 0.5rem; }
-        .prose-content p { color: #cbd5e1; line-height: 1.5; margin-bottom: 0.5rem; }
-        .prose-content ul { list-style-type: disc; padding-left: 1.5rem; color: #94a3b8; margin-bottom: 0.5rem; }
+        .prose-content h1 { font-size: 1.5rem; font-weight: 800; color: #f8fafc; margin-top: 1.5rem; border-bottom: 1px solid #334155; padding-bottom: 0.5rem; }
+        .prose-content h2 { font-size: 1.25rem; font-weight: 700; color: #e2e8f0; margin-top: 1.25rem; }
+        .prose-content h3 { font-size: 1.1rem; font-weight: 600; color: #cbd5e1; margin-top: 1rem; }
+        .prose-content p { color: #cbd5e1; line-height: 1.7; margin-bottom: 1rem; }
+        .prose-content ul { list-style-type: disc; padding-left: 1.5rem; color: #94a3b8; margin-bottom: 1rem; }
         .prose-content li { margin-bottom: 0.25rem; }
         .prose-content strong { color: #60a5fa; }
     </style>
@@ -40,23 +40,23 @@
         <div class="max-w-md w-full bg-gemini-800 border border-slate-700 rounded-3xl p-8 shadow-2xl animate-fade-in">
             <div class="text-center mb-8">
                 <div class="inline-block p-4 bg-indigo-500/10 rounded-2xl mb-4 border border-indigo-500/20">
-                    <span class="material-symbols-outlined text-indigo-400 text-5xl" aria-hidden="true">psychology</span>
+                    <span class="material-symbols-outlined text-indigo-400 text-5xl">psychology</span>
                 </div>
                 <h1 class="text-2xl font-black text-slate-100">Neuro Navigator</h1>
                 <p class="text-slate-500 mt-2 font-medium italic">Behavioral Neurology Suite</p>
             </div>
             <div class="space-y-4">
-                <button onclick="setExamMode('screening')" class="w-full p-6 bg-slate-800 border-2 border-slate-700 rounded-2xl text-left hover:border-indigo-500 hover:bg-indigo-500/5 transition-all group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500">
+                <button onclick="setExamMode('screening')" class="w-full p-6 bg-slate-800 border-2 border-slate-700 rounded-2xl text-left hover:border-indigo-500 hover:bg-indigo-500/5 transition-all group">
                     <div class="flex justify-between items-center mb-1">
                         <span class="font-black text-slate-200 uppercase tracking-tight group-hover:text-indigo-400">MoCA Screening</span>
-                        <span class="material-symbols-outlined text-slate-500 group-hover:text-indigo-500" aria-hidden="true">check_box</span>
+                        <span class="material-symbols-outlined text-slate-500 group-hover:text-indigo-500">check_box</span>
                     </div>
                     <p class="text-xs text-slate-500 font-bold uppercase">Rapid Assessment</p>
                 </button>
-                <button onclick="setExamMode('full')" class="w-full p-6 bg-gemini-900 border-2 border-slate-800 rounded-2xl text-left hover:border-slate-600 hover:bg-slate-800 transition-all group shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500">
+                <button onclick="setExamMode('full')" class="w-full p-6 bg-gemini-900 border-2 border-slate-800 rounded-2xl text-left hover:border-slate-600 hover:bg-slate-800 transition-all group shadow-lg">
                     <div class="flex justify-between items-center mb-1">
                         <span class="font-black text-white uppercase tracking-tight">Full Comprehensive Exam</span>
-                        <span class="material-symbols-outlined text-indigo-400" aria-hidden="true">cardiology</span>
+                        <span class="material-symbols-outlined text-indigo-400">cardiology</span>
                     </div>
                     <p class="text-xs text-slate-500 font-bold uppercase">General Neuro + Localization + Report</p>
                 </button>
@@ -70,13 +70,13 @@
         <!-- Header -->
         <header class="bg-gemini-800 text-white p-4 md:p-6 flex justify-between items-center border-b border-slate-700 shrink-0">
             <div class="flex items-center gap-4">
-                <div role="button" tabindex="0" onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); resetApp(); }" aria-label="Reset Application" class="p-2 bg-indigo-600 rounded-xl cursor-pointer hover:bg-indigo-500 transition-colors shadow-lg shadow-indigo-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-gemini-800" onclick="resetApp()">
-                    <span class="material-symbols-outlined text-white" aria-hidden="true">psychology</span>
+                <div class="p-2 bg-indigo-600 rounded-xl cursor-pointer hover:bg-indigo-500 transition-colors shadow-lg shadow-indigo-500/20" onclick="resetApp()">
+                    <span class="material-symbols-outlined text-white">psychology</span>
                 </div>
                 <div>
                     <h1 class="text-lg md:text-xl font-black uppercase tracking-tight text-slate-100">Behavioral Neurology Clinical Navigator</h1>
                     <p class="text-slate-400 text-[10px] font-bold flex items-center gap-2 uppercase tracking-wider">
-                        <span class="material-symbols-outlined text-indigo-400 text-[14px]" aria-hidden="true">stethoscope</span>
+                        <span class="material-symbols-outlined text-indigo-400 text-[14px]">stethoscope</span>
                         <span id="modeLabel">--</span>
                     </p>
                 </div>
@@ -96,8 +96,8 @@
                     <!-- Dynamic Tabs -->
                 </div>
                 <div class="pt-6 px-1">
-                    <button onclick="showAnalysisView()" class="w-full p-3 rounded-xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition-all bg-indigo-600 text-white shadow-lg shadow-indigo-900/40 hover:bg-indigo-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">
-                        <span class="material-symbols-outlined text-[18px]" aria-hidden="true">auto_awesome</span> Generate AI Report
+                    <button onclick="showAnalysisView()" class="w-full p-3 rounded-xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition-all bg-indigo-600 text-white shadow-lg shadow-indigo-900/40 hover:bg-indigo-500">
+                        <span class="material-symbols-outlined text-[18px]">auto_awesome</span> Generate AI Report
                     </button>
                 </div>
             </nav>
@@ -119,11 +119,11 @@
 
                     <!-- Navigation Footer -->
                     <div class="mt-10 pt-6 border-t border-slate-800 flex justify-between items-center">
-                        <button onclick="prevTab()" class="flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-slate-400 hover:bg-slate-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400">
-                            <span class="material-symbols-outlined" aria-hidden="true">chevron_left</span> Previous
+                        <button onclick="prevTab()" class="flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-slate-400 hover:bg-slate-800 transition-colors">
+                            <span class="material-symbols-outlined">chevron_left</span> Previous
                         </button>
-                        <button onclick="nextTab()" class="flex items-center gap-2 px-6 py-3 bg-slate-100 text-gemini-900 rounded-xl font-bold hover:bg-white transition-all shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500">
-                            Next Section <span class="material-symbols-outlined" aria-hidden="true">chevron_right</span>
+                        <button onclick="nextTab()" class="flex items-center gap-2 px-6 py-3 bg-slate-100 text-gemini-900 rounded-xl font-bold hover:bg-white transition-all shadow-lg">
+                            Next Section <span class="material-symbols-outlined">chevron_right</span>
                         </button>
                     </div>
                 </div>
@@ -133,14 +133,14 @@
                     <div class="flex justify-between items-center mb-6 border-b border-slate-700 pb-4 shrink-0">
                         <h2 class="text-2xl font-black text-white">Final Clinical Report</h2>
                         <div class="flex gap-2">
-                            <button onclick="generateReport()" class="flex items-center gap-2 px-4 py-2 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-xl font-bold text-xs hover:bg-indigo-500/20 transition-all uppercase tracking-wider focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400">
-                                <span class="material-symbols-outlined text-sm" aria-hidden="true">refresh</span> Regenerate
+                            <button onclick="generateReport()" class="flex items-center gap-2 px-4 py-2 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-xl font-bold text-xs hover:bg-indigo-500/20 transition-all uppercase tracking-wider">
+                                <span class="material-symbols-outlined text-sm">refresh</span> Regenerate
                             </button>
-                            <button onclick="copyReport()" id="copyBtn" class="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-xl font-bold text-xs hover:bg-emerald-500/20 transition-all uppercase tracking-wider focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400">
-                                <span class="material-symbols-outlined text-sm" aria-hidden="true">content_copy</span> Copy
+                            <button onclick="copyReport()" id="copyBtn" class="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-xl font-bold text-xs hover:bg-emerald-500/20 transition-all uppercase tracking-wider">
+                                <span class="material-symbols-outlined text-sm">content_copy</span> Copy
                             </button>
-                            <button onclick="hideAnalysisView()" class="flex items-center gap-2 px-4 py-2 text-slate-400 hover:text-white font-bold hover:bg-slate-800 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400">
-                                <span class="material-symbols-outlined" aria-hidden="true">close</span> Close
+                            <button onclick="hideAnalysisView()" class="flex items-center gap-2 px-4 py-2 text-slate-400 hover:text-white font-bold hover:bg-slate-800 rounded-lg transition-colors">
+                                <span class="material-symbols-outlined">close</span> Close
                             </button>
                         </div>
                     </div>
@@ -210,79 +210,79 @@ No tremor, bradykinesia, dystonic posturing, dyskinesias, chorea, myoclonus.`;
 
         const MOCA_SECTIONS = [
             { id: 'moca-visuo', title: "Visuospatial / Executive", tests: [
-                { id: 'moca_trails', label: 'Alt. Trail Making', max: 1, instructions: "Instruction: Please draw a line, going from a number to a letter in ascending order. Begin here [point to (1)] and draw a line from 1 then to A then to 2 and so on. End here [point to (E)]." },
-                { id: 'moca_cube', label: 'Cube Copy', max: 1, instructions: "Instruction: Copy this drawing as accurately as you can, in the space below." },
-                { id: 'moca_clock', label: 'Clock Drawing', max: 3, instructions: "Instruction: Draw a clock. Put in all the numbers and set the time to 10 past 11." }
+                { id: 'moca_trails', label: 'Alt. Trail Making', max: 1, instructions: "1 -> A -> 2 -> B -> 3 -> C..." },
+                { id: 'moca_cube', label: 'Cube Copy', max: 1, instructions: "Copy the cube exactly." },
+                { id: 'moca_clock', label: 'Clock Drawing', max: 3, instructions: "Draw clock, put in numbers, set time to 10 past 11." }
             ]},
             { id: 'moca-naming', title: "Naming", tests: [
-                { id: 'moca_naming', label: 'Animal Naming', max: 3, instructions: "Instruction: Tell me the name of this animal. (Lion, Rhinoceros, Camel)" }
+                { id: 'moca_naming', label: 'Animal Naming', max: 3, instructions: "Lion, Rhinoceros, Camel." }
             ]},
             { id: 'moca-attention', title: "Attention", tests: [
-                { id: 'moca_digits_f', label: 'Digits Forward', max: 1, instructions: "Instruction: I am going to say some numbers and when I am through, repeat them to me exactly as I said them. (2-1-8-5-4)" },
-                { id: 'moca_digits_b', label: 'Digits Backward', max: 1, instructions: "Instruction: Now I am going to say some more numbers, but when I am through you must repeat them to me in the backwards order. (7-4-2)" },
-                { id: 'moca_tapping', label: 'Vigilance (Tap A)', max: 1, instructions: "Instruction: I am going to read a sequence of letters. Every time I say the letter A, tap your hand once. If I say a different letter, do not tap. (F-B-A-C-M-N-A-A-J-K-L-B-A-F-A-K-D-E-A-A-A-J-A-M-O-F-A-A-B)" },
-                { id: 'moca_serial7', label: 'Serial 7s', max: 3, instructions: "Instruction: Now, I will ask you to count by subtracting seven from 100, and then, keep subtracting seven from your answer until I tell you to stop. (93, 86, 79, 72, 65...)" }
+                { id: 'moca_digits_f', label: 'Digits Forward', max: 1, instructions: "2-1-8-5-4" },
+                { id: 'moca_digits_b', label: 'Digits Backward', max: 1, instructions: "7-4-2" },
+                { id: 'moca_tapping', label: 'Vigilance (Tap A)', max: 1, instructions: "Tap on letter A." },
+                { id: 'moca_serial7', label: 'Serial 7s', max: 3, instructions: "100 - 7..." }
             ]},
             { id: 'moca-language', title: "Language", tests: [
-                { id: 'moca_repeat', label: 'Sentence Repetition', max: 2, instructions: "Instruction: Repeat exactly: 'I only know that John is the one to help today.' / 'The cat always hid under the couch when dogs were in the room.'" },
-                { id: 'moca_fluency', label: 'Verbal Fluency (F)', max: 1, instructions: "Instruction: Tell me as many words as you can think of that begin with the letter F. You have one minute. (>11 words)" }
+                { id: 'moca_repeat', label: 'Sentence Repetition', max: 2, instructions: "Repeat exact sentences." },
+                { id: 'moca_fluency', label: 'Verbal Fluency (F)', max: 1, instructions: "Words starting with F (>11 in 60s)." }
             ]},
             { id: 'moca-abstract', title: "Abstraction", tests: [
-                { id: 'moca_abstract', label: 'Similarities', max: 2, instructions: "Instruction: Tell me how an orange and a banana are alike. (Fruit). How are a train and a bicycle alike? (Transport). How are a watch and a ruler alike? (Measurement)." }
+                { id: 'moca_abstract', label: 'Similarities', max: 2, instructions: "Train/Bicycle, Watch/Ruler." }
             ]},
             { id: 'moca-memory', title: "Delayed Recall", tests: [
-                { id: 'moca_recall', label: 'Delayed Recall', max: 5, instructions: "Instruction: I read some words to you earlier. Tell me as many of those words as you can remember. (Face, Velvet, Church, Daisy, Red)." }
+                { id: 'moca_recall', label: 'Delayed Recall', max: 5, instructions: "Recall words from earlier (Face, Velvet, Church, Daisy, Red)." }
             ]},
             { id: 'moca-orient', title: "Orientation", tests: [
-                { id: 'moca_orient', label: 'Orientation', max: 6, instructions: "Instruction: Tell me the date, month, year, and day of the week. Then, tell me the name of this place, and which city it is in." }
+                { id: 'moca_orient', label: 'Orientation', max: 6, instructions: "Date, Month, Year, Day, Place, City." }
             ]}
         ];
 
         const EXAM_SECTIONS = [
             { id: 'right-frontal', lobe: "Right Dorsolateral Frontal", icon: "neurology", tests: [
-                { id: 'figural_fluency', label: 'Figural Fluency', note: "Tests non-verbal divergent thinking.", instructions: "Instruction: Connect the dots in this box using four straight lines to make a unique design. Make as many different designs as you can in 1 minute. (>8 unique designs)" },
-                { id: 'novel_design', label: 'Novel Design Fluency', note: "Inhibition of familiar patterns.", instructions: "Instruction: Draw a shape that does not exist in reality. Do not draw real objects like a house or a square." },
-                { id: 'affective_prosody', label: 'Affective Motor Prosody', note: "RH emotional expression.", instructions: "Instruction: I want you to say this sentence 'I am going to the store' first in an Angry tone, then in a Happy tone, then in a Sad tone." },
-                { id: 'picture_sequencing', label: 'Picture Sequencing', note: "Social/Contextual integration.", instructions: "Instruction: Place these mixed-up cartoon cards in the correct order to tell a logical story." }
+                { id: 'figural_fluency', label: 'Figural Fluency', note: "Tests non-verbal divergent thinking.", instructions: "Draw unique designs with 4 lines in 1 min (>8)." },
+                { id: 'novel_design', label: 'Novel Design Fluency', note: "Inhibition of familiar patterns.", instructions: "Draw non-real shapes." },
+                { id: 'affective_prosody', label: 'Affective Motor Prosody', note: "RH emotional expression.", instructions: "Repeat sentence with Angry, Happy, Sad tone." },
+                { id: 'picture_sequencing', label: 'Picture Sequencing', note: "Social/Contextual integration.", instructions: "Order mixed-up cartoon cards." }
             ]},
             { id: 'left-frontal', lobe: "Left Dorsolateral Frontal", icon: "translate", tests: [
-                { id: 'digit_reverse', label: 'Digit Span Reverse', note: "Working memory.", instructions: "Instruction: I will say some numbers. When I am done, repeat them backwards. (e.g., 7-4-2 -> 2-4-7)." },
-                { id: 'wisconsin_bedside', label: 'Bedside Wisconsin (Coin)', note: "Set-shifting.", instructions: "Instruction: Guess which hand holds the coin. (Examiner switches pattern—e.g., from 'Same Hand' to 'Alternating Hand'—after 3 consecutive correct guesses)." },
-                { id: 'animal_fluency', label: 'Verbal Fluency (Animals)', note: "Semantic retrieval.", instructions: "Instruction: Name as many animals as you can in 1 minute. (>12 animals)" },
-                { id: 'fas_fluency', label: 'Phonemic Fluency (F-A-S)', note: "Executive search.", instructions: "Instruction: Name words starting with F, then A, then S. One minute for each letter. (>10 words per letter)." },
-                { id: 'little_big', label: '“Little-Big” Stroop', note: "Response inhibition.", instructions: "Instruction: When I show you the word 'LITTLE' printed in large letters, say 'Small'. When I show you the word 'BIG' printed in small letters, say 'Large'." },
-                { id: 'trails_b', label: 'Trails B (Oral)', note: "Cognitive flexibility.", instructions: "Instruction: Connect numbers and letters in alternating order: 1-A, 2-B, 3-C, 4-D, etc., as fast as you can." },
-                { id: 'luria_seq', label: 'Luria Motor Seq', note: "Premotor/SMA.", instructions: "Instruction: Watch me: Fist (on table), Edge (of hand), Palm (flat). Now do it with me. Now keep doing it on your own." },
-                { id: 'gonogo', label: 'Go / No-Go', note: "Inhibition.", instructions: "Instruction: When I tap once, you tap once. When I tap twice, do not tap." }
+                { id: 'digit_reverse', label: 'Digit Span Reverse', note: "Working memory.", instructions: "Repeat numbers backwards." },
+                { id: 'wisconsin_bedside', label: 'Bedside Wisconsin (Coin)', note: "Set-shifting.", instructions: "Guess hand with coin. Switch pattern after 3 correct." },
+                { id: 'animal_fluency', label: 'Verbal Fluency (Animals)', note: "Semantic retrieval.", instructions: "Name animals in 1 min (>12)." },
+                { id: 'fas_fluency', label: 'Phonemic Fluency (F-A-S)', note: "Executive search.", instructions: "Words starting with F/A/S in 1 min (>10)." },
+                { id: 'little_big', label: '“Little-Big” Stroop', note: "Response inhibition.", instructions: "Read word vs say size (Big/Little)." },
+                { id: 'trails_b', label: 'Trails B (Oral)', note: "Cognitive flexibility.", instructions: "1-A, 2-B, 3-C..." },
+                { id: 'luria_seq', label: 'Luria Motor Seq', note: "Premotor/SMA.", instructions: "Fist-Edge-Palm." },
+                { id: 'gonogo', label: 'Go / No-Go', note: "Inhibition.", instructions: "Tap once when I tap once. Do not tap when I tap twice." }
             ]},
             { id: 'right-parietal', lobe: "Right Parietal (Spatial)", icon: "visibility", tests: [
-                { id: 'cube_strategy', label: 'Cube/Complex Drawing', note: "Spatial construction.", instructions: "Instruction: Copy this 3D cube exactly as you see it. (Watch for approach: global shape vs. piecemeal lines)." },
-                { id: 'neglect_battery', label: 'Neglect Battery', note: "Hemispatial Neglect.", instructions: "Instruction: Mark the center of this horizontal line. (Line Bisection). Now tell me which hand I am touching (Touch Left, Right, or Both simultaneously)." },
-                { id: 'line_orientation', label: 'Line Orientation', note: "Visuospatial perception.", instructions: "Instruction: Look at these two angled lines. Match them to the lines on this reference card." },
-                { id: 'dressing_praxis', label: 'Dressing Apraxia', note: "Body-in-space.", instructions: "Instruction: Put on this jacket. (Provide jacket with one sleeve pulled inside out)." }
+                { id: 'cube_strategy', label: 'Cube/Complex Drawing', note: "Spatial construction.", instructions: "Copy cube." },
+                { id: 'neglect_battery', label: 'Neglect Battery', note: "Hemispatial Neglect.", instructions: "Line bisection, double simultaneous stimulation." },
+                { id: 'line_orientation', label: 'Line Orientation', note: "Visuospatial perception.", instructions: "Match angled lines." },
+                { id: 'dressing_praxis', label: 'Dressing Apraxia', note: "Body-in-space.", instructions: "Put on jacket with sleeve inside out." }
             ]},
             { id: 'left-parietal', lobe: "Left Parietal (Gerstmann's)", icon: "fingerprint", tests: [
-                { id: 'finger_agnosia', label: 'Finger Agnosia', note: "Gerstmann's.", instructions: "Instruction: (Patient eyes closed). I am touching one of your fingers. Tell me which one it is (Thumb, Index, Middle, etc.)." },
-                { id: 'calculation', label: 'Calculation', note: "Acalculia.", instructions: "Instruction: What is 100 minus 7? What is 14 plus 9? (Or write down: 25 x 3)." },
-                { id: 'rl_orientation', label: 'Right-Left Orientation', note: "Spatial-symbolic.", instructions: "Instruction: Touch your right ear with your left hand. Touch your left knee with your right hand." },
-                { id: 'drawing_details', label: 'Drawing Details', note: "Object details.", instructions: "Instruction: Draw a picture of a house. (Check for essential details: windows, door, roof, chimney)." }
+                { id: 'finger_agnosia', label: 'Finger Agnosia', note: "Gerstmann's.", instructions: "Identify fingers by touch." },
+                { id: 'calculation', label: 'Calculation', note: "Acalculia.", instructions: "100-7, or written math." },
+                { id: 'rl_orientation', label: 'Right-Left Orientation', note: "Spatial-symbolic.", instructions: "Touch right ear with left hand." },
+                { id: 'drawing_details', label: 'Drawing Details', note: "Object details.", instructions: "Draw a house (look for windows, door)." }
             ]},
             { id: 'right-temporal', lobe: "Right Temporal (Visual Memory)", icon: "music_note", tests: [
-                { id: 'visual_recall', label: 'Visual Memory', note: "RH Hippocampal.", instructions: "Instruction: Look at this shape. (Show shape for 10s, then hide it). Draw it from memory." },
-                { id: 'object_location', label: 'Object Location', note: "Contextual memory.", instructions: "Instruction: I am placing these 3 objects in specific spots in the room. Remember where they are. (Ask to locate them after 5 mins)." },
-                { id: 'melody_rec', label: 'Melody Recognition', note: "Amusia.", instructions: "Instruction: I am going to hum a song (e.g., Happy Birthday). Tell me the name of the song." }
+                { id: 'visual_recall', label: 'Visual Memory', note: "RH Hippocampal.", instructions: "Recall hidden shape after 5 mins." },
+                { id: 'object_location', label: 'Object Location', note: "Contextual memory.", instructions: "Recall location of 3 hidden objects." },
+                { id: 'melody_rec', label: 'Melody Recognition', note: "Amusia.", instructions: "Identify hummed songs." }
             ]},
             { id: 'left-temporal', lobe: "Left Temporal (Verbal/Semantic)", icon: "translate", tests: [
-                { id: 'verbal_memory', label: '8-Word List Recall', note: "Hippocampal.", instructions: "Instruction: I will read 8 words. Remember them. (Read list). (After 5-10 mins delay): Tell me the words." },
-                { id: 'semantic_knowledge', label: 'Semantic/Category', note: "Semantic Dementia.", instructions: "Instruction: What is a stethoscope? What do you use it for? What implies 'medical'?" },
-                { id: 'aphasia_screen', label: 'Comprehension/Repetition', note: "Wernicke's/Conduction.", instructions: "Instruction: Point to the ceiling, then the floor. Repeat: 'No ifs, ands, or buts'." }
+                { id: 'verbal_memory', label: '8-Word List Recall', note: "Hippocampal.", instructions: "Recall 8 words after 5 mins." },
+                { id: 'semantic_knowledge', label: 'Semantic/Category', note: "Semantic Dementia.", instructions: "Define low frequency items (e.g. Stethoscope)." },
+                { id: 'aphasia_screen', label: 'Comprehension/Repetition', note: "Wernicke's/Conduction.", instructions: "Complex commands, Repetition." }
             ]},
             { id: 'occipital', lobe: "Occipital (Visual Agnosias)", icon: "visibility", tests: [
-                { id: 'prosopagnosia', label: 'Prosopagnosia', note: "Face blindness.", instructions: "Instruction: (Show photos of famous people). Who is this person?" },
-                { id: 'simultanagnosia', label: 'Simultanagnosia', note: "Balint's.", instructions: "Instruction: Look at this picture (Cookie Theft). Describe everything you see happening in the scene." },
-                { id: 'optic_ataxia', label: 'Optic Ataxia', note: "Visuomotor.", instructions: "Instruction: Reach out and touch my finger. (Move finger to different peripheral locations)." },
-                { id: 'visual_agnosia', label: 'Visual Agnosia', note: "Ventral stream.", instructions: "Instruction: What is this object? (Show pen/watch). (Patient must name it by sight, not touch)." },
-                { id: 'color_agnosia', label: 'Color Imagery', note: "Color knowledge.", instructions: "Instruction: What color is a strawberry? What color is the sky?" }
+                { id: 'prosopagnosia', label: 'Prosopagnosia', note: "Face blindness.", instructions: "Identify famous faces." },
+                { id: 'simultanagnosia', label: 'Simultanagnosia', note: "Balint's.", instructions: "Cookie Theft picture (whole scene)." },
+                { id: 'optic_ataxia', label: 'Optic Ataxia', note: "Visuomotor.", instructions: "Reach for object in periphery." },
+                { id: 'visual_agnosia', label: 'Visual Agnosia', note: "Ventral stream.", instructions: "Name object by sight vs touch." },
+                { id: 'color_agnosia', label: 'Color Imagery', note: "Color knowledge.", instructions: "What color is a strawberry?" }
             ]}
         ];
 
@@ -407,8 +407,8 @@ No tremor, bradykinesia, dystonic posturing, dyskinesias, chorea, myoclonus.`;
                     ? 'bg-slate-700 text-white shadow-md border-l-4 border-indigo-500'
                     : 'text-slate-400 hover:bg-slate-700/50 hover:text-white';
 
-                html += `<button onclick="setActiveTab(${logicalIdx})" class="w-full flex items-center gap-3 p-3 rounded-r-xl transition-all text-xs font-bold text-left mb-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${classes}">
-                    <span class="material-symbols-outlined text-[18px]" aria-hidden="true">${tab.icon}</span>
+                html += `<button onclick="setActiveTab(${logicalIdx})" class="w-full flex items-center gap-3 p-3 rounded-r-xl transition-all text-xs font-bold text-left mb-1 ${classes}">
+                    <span class="material-symbols-outlined text-[18px]">${tab.icon}</span>
                     <span class="truncate">${tab.label}</span>
                 </button>`;
             });
@@ -505,10 +505,10 @@ No tremor, bradykinesia, dystonic posturing, dyskinesias, chorea, myoclonus.`;
                         </div>
                         <div>
                              <label class="text-xs font-black uppercase text-slate-500 mb-2 block">Upload Exam Sheet</label>
-                             <div role="button" tabindex="0" onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); handleImageUpload(); }" aria-label="Upload MoCA Exam Sheet" onclick="handleImageUpload()" class="border-2 border-dashed border-slate-700 rounded-xl h-32 flex flex-col items-center justify-center text-slate-500 hover:bg-slate-800 hover:border-indigo-500 transition-all cursor-pointer relative overflow-hidden group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900">
+                             <div onclick="handleImageUpload()" class="border-2 border-dashed border-slate-700 rounded-xl h-32 flex flex-col items-center justify-center text-slate-500 hover:bg-slate-800 hover:border-indigo-500 transition-all cursor-pointer relative overflow-hidden group">
                                 ${appState.mocaImage
-                                    ? `<img src="${appState.mocaImage}" class="w-full h-full object-contain absolute inset-0 z-10" alt="MoCA test image"><div class="absolute inset-0 bg-black/50 z-20 opacity-0 group-hover:opacity-100 flex items-center justify-center text-xs font-bold text-white">Change Image</div>`
-                                    : `<span class="material-symbols-outlined mb-2 text-3xl" aria-hidden="true">cloud_upload</span><span class="text-xs font-bold">Click to Upload</span>`
+                                    ? `<img src="${appState.mocaImage}" class="w-full h-full object-contain absolute inset-0 z-10"><div class="absolute inset-0 bg-black/50 z-20 opacity-0 group-hover:opacity-100 flex items-center justify-center text-xs font-bold text-white">Change Image</div>`
+                                    : `<span class="material-symbols-outlined mb-2 text-3xl">cloud_upload</span><span class="text-xs font-bold">Click to Upload</span>`
                                 }
                              </div>
                         </div>
@@ -593,7 +593,7 @@ No tremor, bradykinesia, dystonic posturing, dyskinesias, chorea, myoclonus.`;
         });
 
         // --- AI REPORT GENERATION ---
-        
+
         window.showAnalysisView = () => {
             document.getElementById('inputView').classList.add('hidden');
             document.getElementById('reportView').classList.remove('hidden');
@@ -699,11 +699,7 @@ Format with clear Markdown headings. Professional medical terminology.
         };
 
         window.copyReport = () => {
-             let text = document.getElementById('reportOutput').innerText;
-             // Ensure "Option A": Single newline between sections.
-             // Collapse any sequence of CR, LF, or CRLF to a single newline
-             text = text.replace(/(\r\n|\n|\r)+/g, '\n');
-
+             const text = document.getElementById('reportOutput').innerText;
              navigator.clipboard.writeText(text);
              const btn = document.getElementById('copyBtn');
              const original = btn.innerHTML;
