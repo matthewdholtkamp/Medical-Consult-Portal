@@ -811,7 +811,7 @@
             refList.innerHTML = '';
             if(soap.references && soap.references.length) {
                 soap.references.forEach(r => {
-                    refList.innerHTML += `<li><a href="${r.url}" target="_blank" class="text-sky-400 hover:underline">${r.title}</a></li>`;
+                    refList.innerHTML += `<li><a href="${r.url}" target="_blank" class="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 text-sky-400 hover:underline">${r.title}</a></li>`;
                 });
                 document.getElementById('references-container').classList.remove('hidden');
             } else {

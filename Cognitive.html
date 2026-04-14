@@ -40,23 +40,23 @@
         <div class="max-w-md w-full bg-gemini-800 border border-slate-700 rounded-3xl p-8 shadow-2xl animate-fade-in">
             <div class="text-center mb-8">
                 <div class="inline-block p-4 bg-indigo-500/10 rounded-2xl mb-4 border border-indigo-500/20">
-                    <span class="material-symbols-outlined text-indigo-400 text-5xl">psychology</span>
+                    <span class="material-symbols-outlined text-indigo-400 text-5xl" aria-hidden="true">psychology</span>
                 </div>
                 <h1 class="text-2xl font-black text-slate-100">Neuro Navigator</h1>
                 <p class="text-slate-500 mt-2 font-medium italic">Behavioral Neurology Suite</p>
             </div>
             <div class="space-y-4">
-                <button onclick="setExamMode('screening')" class="w-full p-6 bg-slate-800 border-2 border-slate-700 rounded-2xl text-left hover:border-indigo-500 hover:bg-indigo-500/5 transition-all group">
+                <button onclick="setExamMode('screening')" class="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 w-full p-6 bg-slate-800 border-2 border-slate-700 rounded-2xl text-left hover:border-indigo-500 hover:bg-indigo-500/5 transition-all group">
                     <div class="flex justify-between items-center mb-1">
                         <span class="font-black text-slate-200 uppercase tracking-tight group-hover:text-indigo-400">MoCA Screening</span>
-                        <span class="material-symbols-outlined text-slate-500 group-hover:text-indigo-500">check_box</span>
+                        <span class="material-symbols-outlined text-slate-500 group-hover:text-indigo-500" aria-hidden="true">check_box</span>
                     </div>
                     <p class="text-xs text-slate-500 font-bold uppercase">Rapid Assessment</p>
                 </button>
-                <button onclick="setExamMode('full')" class="w-full p-6 bg-gemini-900 border-2 border-slate-800 rounded-2xl text-left hover:border-slate-600 hover:bg-slate-800 transition-all group shadow-lg">
+                <button onclick="setExamMode('full')" class="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 w-full p-6 bg-gemini-900 border-2 border-slate-800 rounded-2xl text-left hover:border-slate-600 hover:bg-slate-800 transition-all group shadow-lg">
                     <div class="flex justify-between items-center mb-1">
                         <span class="font-black text-white uppercase tracking-tight">Full Comprehensive Exam</span>
-                        <span class="material-symbols-outlined text-indigo-400">cardiology</span>
+                        <span class="material-symbols-outlined text-indigo-400" aria-hidden="true">cardiology</span>
                     </div>
                     <p class="text-xs text-slate-500 font-bold uppercase">General Neuro + Localization + Report</p>
                 </button>
@@ -70,13 +70,13 @@
         <!-- Header -->
         <header class="bg-gemini-800 text-white p-4 md:p-6 flex justify-between items-center border-b border-slate-700 shrink-0">
             <div class="flex items-center gap-4">
-                <div class="p-2 bg-indigo-600 rounded-xl cursor-pointer hover:bg-indigo-500 transition-colors shadow-lg shadow-indigo-500/20" onclick="resetApp()">
-                    <span class="material-symbols-outlined text-white">psychology</span>
+                <div role="button" tabindex="0" onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); resetApp(); }" class="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 p-2 bg-indigo-600 rounded-xl cursor-pointer hover:bg-indigo-500 transition-colors shadow-lg shadow-indigo-500/20" onclick="resetApp()">
+                    <span class="material-symbols-outlined text-white" aria-hidden="true">psychology</span>
                 </div>
                 <div>
                     <h1 class="text-lg md:text-xl font-black uppercase tracking-tight text-slate-100">Behavioral Neurology Clinical Navigator</h1>
                     <p class="text-slate-400 text-[10px] font-bold flex items-center gap-2 uppercase tracking-wider">
-                        <span class="material-symbols-outlined text-indigo-400 text-[14px]">stethoscope</span>
+                        <span class="material-symbols-outlined text-indigo-400 text-[14px]" aria-hidden="true">stethoscope</span>
                         <span id="modeLabel">--</span>
                     </p>
                 </div>
@@ -96,8 +96,8 @@
                     <!-- Dynamic Tabs -->
                 </div>
                 <div class="pt-6 px-1">
-                    <button onclick="showAnalysisView()" class="w-full p-3 rounded-xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition-all bg-indigo-600 text-white shadow-lg shadow-indigo-900/40 hover:bg-indigo-500">
-                        <span class="material-symbols-outlined text-[18px]">auto_awesome</span> Generate AI Report
+                    <button onclick="showAnalysisView()" class="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 w-full p-3 rounded-xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition-all bg-indigo-600 text-white shadow-lg shadow-indigo-900/40 hover:bg-indigo-500">
+                        <span class="material-symbols-outlined text-[18px]" aria-hidden="true">auto_awesome</span> Generate AI Report
                     </button>
                 </div>
             </nav>
@@ -119,11 +119,11 @@
 
                     <!-- Navigation Footer -->
                     <div class="mt-10 pt-6 border-t border-slate-800 flex justify-between items-center">
-                        <button onclick="prevTab()" class="flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-slate-400 hover:bg-slate-800 transition-colors">
-                            <span class="material-symbols-outlined">chevron_left</span> Previous
+                        <button onclick="prevTab()" class="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-slate-400 hover:bg-slate-800 transition-colors">
+                            <span class="material-symbols-outlined" aria-hidden="true">chevron_left</span> Previous
                         </button>
-                        <button onclick="nextTab()" class="flex items-center gap-2 px-6 py-3 bg-slate-100 text-gemini-900 rounded-xl font-bold hover:bg-white transition-all shadow-lg">
-                            Next Section <span class="material-symbols-outlined">chevron_right</span>
+                        <button onclick="nextTab()" class="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 flex items-center gap-2 px-6 py-3 bg-slate-100 text-gemini-900 rounded-xl font-bold hover:bg-white transition-all shadow-lg">
+                            Next Section <span class="material-symbols-outlined" aria-hidden="true">chevron_right</span>
                         </button>
                     </div>
                 </div>
@@ -133,14 +133,14 @@
                     <div class="flex justify-between items-center mb-6 border-b border-slate-700 pb-4 shrink-0">
                         <h2 class="text-2xl font-black text-white">Final Clinical Report</h2>
                         <div class="flex gap-2">
-                            <button onclick="generateReport()" class="flex items-center gap-2 px-4 py-2 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-xl font-bold text-xs hover:bg-indigo-500/20 transition-all uppercase tracking-wider">
-                                <span class="material-symbols-outlined text-sm">refresh</span> Regenerate
+                            <button onclick="generateReport()" class="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 flex items-center gap-2 px-4 py-2 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-xl font-bold text-xs hover:bg-indigo-500/20 transition-all uppercase tracking-wider">
+                                <span class="material-symbols-outlined text-sm" aria-hidden="true">refresh</span> Regenerate
                             </button>
-                            <button onclick="copyReport()" id="copyBtn" class="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-xl font-bold text-xs hover:bg-emerald-500/20 transition-all uppercase tracking-wider">
-                                <span class="material-symbols-outlined text-sm">content_copy</span> Copy
+                            <button onclick="copyReport()" id="copyBtn" class="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 flex items-center gap-2 px-4 py-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-xl font-bold text-xs hover:bg-emerald-500/20 transition-all uppercase tracking-wider">
+                                <span class="material-symbols-outlined text-sm" aria-hidden="true">content_copy</span> Copy
                             </button>
-                            <button onclick="hideAnalysisView()" class="flex items-center gap-2 px-4 py-2 text-slate-400 hover:text-white font-bold hover:bg-slate-800 rounded-lg transition-colors">
-                                <span class="material-symbols-outlined">close</span> Close
+                            <button onclick="hideAnalysisView()" class="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 flex items-center gap-2 px-4 py-2 text-slate-400 hover:text-white font-bold hover:bg-slate-800 rounded-lg transition-colors">
+                                <span class="material-symbols-outlined" aria-hidden="true">close</span> Close
                             </button>
                         </div>
                     </div>
@@ -407,8 +407,8 @@ No tremor, bradykinesia, dystonic posturing, dyskinesias, chorea, myoclonus.`;
                     ? 'bg-slate-700 text-white shadow-md border-l-4 border-indigo-500'
                     : 'text-slate-400 hover:bg-slate-700/50 hover:text-white';
 
-                html += `<button onclick="setActiveTab(${logicalIdx})" class="w-full flex items-center gap-3 p-3 rounded-r-xl transition-all text-xs font-bold text-left mb-1 ${classes}">
-                    <span class="material-symbols-outlined text-[18px]">${tab.icon}</span>
+                html += `<button onclick="setActiveTab(${logicalIdx})" class="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 w-full flex items-center gap-3 p-3 rounded-r-xl transition-all text-xs font-bold text-left mb-1 ${classes}">
+                    <span class="material-symbols-outlined text-[18px]" aria-hidden="true">${tab.icon}</span>
                     <span class="truncate">${tab.label}</span>
                 </button>`;
             });
@@ -425,7 +425,7 @@ No tremor, bradykinesia, dystonic posturing, dyskinesias, chorea, myoclonus.`;
                 title.textContent = "General Neuro Exam";
                 container.innerHTML = `
                     <div class="bg-indigo-500/10 p-4 rounded-xl border border-indigo-500/20 mb-6 flex gap-3">
-                        <span class="material-symbols-outlined text-indigo-400">info</span>
+                        <span class="material-symbols-outlined text-indigo-400" aria-hidden="true">info</span>
                         <p class="text-xs text-indigo-200 leading-relaxed">Complete patient history. Physical exam fields are pre-populated with "Normal" findings.</p>
                     </div>
                     <div class="space-y-6">
@@ -505,10 +505,10 @@ No tremor, bradykinesia, dystonic posturing, dyskinesias, chorea, myoclonus.`;
                         </div>
                         <div>
                              <label class="text-xs font-black uppercase text-slate-500 mb-2 block">Upload Exam Sheet</label>
-                             <div onclick="handleImageUpload()" class="border-2 border-dashed border-slate-700 rounded-xl h-32 flex flex-col items-center justify-center text-slate-500 hover:bg-slate-800 hover:border-indigo-500 transition-all cursor-pointer relative overflow-hidden group">
+                             <div role="button" tabindex="0" onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); handleImageUpload(); }" onclick="handleImageUpload()" class="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 border-2 border-dashed border-slate-700 rounded-xl h-32 flex flex-col items-center justify-center text-slate-500 hover:bg-slate-800 hover:border-indigo-500 transition-all cursor-pointer relative overflow-hidden group">
                                 ${appState.mocaImage
-                                    ? `<img src="${appState.mocaImage}" class="w-full h-full object-contain absolute inset-0 z-10"><div class="absolute inset-0 bg-black/50 z-20 opacity-0 group-hover:opacity-100 flex items-center justify-center text-xs font-bold text-white">Change Image</div>`
-                                    : `<span class="material-symbols-outlined mb-2 text-3xl">cloud_upload</span><span class="text-xs font-bold">Click to Upload</span>`
+                                    ? `<img src="${appState.mocaImage}" class="w-full h-full object-contain absolute inset-0 z-10" alt="MoCA test drawing" ><div class="absolute inset-0 bg-black/50 z-20 opacity-0 group-hover:opacity-100 flex items-center justify-center text-xs font-bold text-white">Change Image</div>`
+                                    : `<span class="material-symbols-outlined mb-2 text-3xl" aria-hidden="true">cloud_upload</span><span class="text-xs font-bold">Click to Upload</span>`
                                 }
                              </div>
                         </div>
@@ -703,7 +703,7 @@ Format with clear Markdown headings. Professional medical terminology.
              navigator.clipboard.writeText(text);
              const btn = document.getElementById('copyBtn');
              const original = btn.innerHTML;
-             btn.innerHTML = '<span class="material-symbols-outlined text-sm">check</span> COPIED';
+             btn.innerHTML = '<span class="material-symbols-outlined text-sm" aria-hidden="true">check</span> COPIED';
              setTimeout(() => btn.innerHTML = original, 2000);
         };
 

@@ -832,7 +832,7 @@
             refList.innerHTML = '';
             if(state.generatedPlan.references && state.generatedPlan.references.length) {
                 state.generatedPlan.references.forEach(r => {
-                    refList.innerHTML += `<li><a href="${r.url}" target="_blank" class="text-rose-400 hover:underline">${r.title}</a></li>`;
+                    refList.innerHTML += `<li><a href="${r.url}" target="_blank" class="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 text-rose-400 hover:underline">${r.title}</a></li>`;
                 });
                 document.getElementById('references-container').classList.remove('hidden');
             } else {
