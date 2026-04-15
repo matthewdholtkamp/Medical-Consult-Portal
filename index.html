@@ -416,7 +416,7 @@
                                     id="chatInput"
                                     aria-label="Clinical query"
                                     placeholder="Clinical query (e.g., 'Latest STEMI guidelines')..." 
-                                    class="w-full bg-transparent text-slate-200 placeholder-slate-500 p-4 pl-5 min-h-[60px] max-h-48 resize-none focus:outline-none rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
+                                    class="w-full bg-transparent text-slate-200 placeholder-slate-500 p-4 pl-5 min-h-[60px] max-h-48 resize-none focus:outline-none rounded-2xl focus-visible:outline-none"
                                     rows="1"
                                     onkeydown="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); if(this.value.trim()) askDrHoltkamp(); }"
                                     oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px'; document.getElementById('askBtn').disabled = !this.value.trim();"></textarea>
