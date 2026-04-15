@@ -59,7 +59,7 @@
         <header class="flex flex-col md:flex-row justify-between items-center gap-6 bg-gemini-800 p-6 rounded-[2rem] border border-slate-700/60 shadow-xl sticky top-4 z-50 backdrop-blur-xl bg-gemini-800/90">
             <div class="flex items-center gap-4">
                 <div class="bg-indigo-600/20 p-3 rounded-xl shadow-lg border border-indigo-500/30">
-                    <span class="material-symbols-outlined text-indigo-400 text-3xl">imagesmode</span>
+                    <span class="material-symbols-outlined text-indigo-400 text-3xl" aria-hidden="true">imagesmode</span>
                 </div>
                 <div>
                     <h1 class="text-2xl font-[900] text-slate-100 italic tracking-tighter uppercase leading-none">AI Imaging <span class="text-indigo-500">Vision</span></h1>
@@ -83,7 +83,7 @@
                 <div id="dropZone" class="group relative bg-gemini-800 border-2 border-dashed border-slate-700 rounded-[2rem] p-10 text-center transition-all cursor-pointer hover:border-indigo-500 hover:bg-indigo-500/5">
                     <input type="file" id="fileInput" class="hidden" accept="image/*,video/*" multiple>
                     <div class="bg-slate-900 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 transition-transform duration-300 group-hover:scale-110 group-hover:bg-indigo-500/20 border border-slate-700 group-hover:border-indigo-500/50">
-                        <span class="material-symbols-outlined text-indigo-400 text-4xl">cloud_upload</span>
+                        <span class="material-symbols-outlined text-indigo-400 text-4xl" aria-hidden="true">cloud_upload</span>
                     </div>
                     <h3 class="text-slate-200 font-extrabold text-lg mb-2">Upload Imaging Data</h3>
                     <p class="text-xs text-slate-500 font-medium mb-8 max-w-[200px] mx-auto">Drag & Drop X-Rays, CT Slices, MRI, or Videos (MP4/MOV)</p>
@@ -115,7 +115,7 @@
                     
                     <button id="runBtn" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 rounded-xl shadow-xl shadow-indigo-900/30 transition-all active:scale-[0.98] uppercase tracking-[0.2em] text-xs w-full flex items-center justify-center gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800">
                         <span>Initiate Radiological Review</span>
-                        <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                        <span class="material-symbols-outlined text-sm" aria-hidden="true">arrow_forward</span>
                     </button>
 
                     <div id="statusConsole" class="hidden mt-6 border-t border-slate-700/50 pt-6">
@@ -140,7 +140,7 @@
                     <div class="flex justify-between items-start mb-6 border-b border-slate-700 pb-4">
                         <div class="flex items-center gap-3">
                             <div class="w-8 h-8 rounded-lg bg-indigo-500/20 flex items-center justify-center">
-                                <span class="material-symbols-outlined text-indigo-400 text-sm">radiology</span>
+                                <span class="material-symbols-outlined text-indigo-400 text-sm" aria-hidden="true">radiology</span>
                             </div>
                             <div>
                                 <h4 class="text-indigo-100 text-xs font-bold uppercase tracking-widest">Preliminary Report</h4>
@@ -148,7 +148,7 @@
                             </div>
                         </div>
                         <button onclick="copyReport()" class="group flex items-center gap-2 text-indigo-400 hover:text-white transition-colors bg-indigo-500/10 hover:bg-indigo-500 py-1.5 px-3 rounded-lg border border-indigo-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800">
-                            <span class="material-symbols-outlined text-sm">content_copy</span>
+                            <span class="material-symbols-outlined text-sm" aria-hidden="true">content_copy</span>
                             <span class="text-[10px] font-bold uppercase">Copy</span>
                         </button>
                     </div>
@@ -239,7 +239,7 @@
             } catch (e) {
                 alert("Error: " + e.message);
             } finally {
-                runBtn.innerHTML = `<span>Initiate Radiological Review</span><span class="material-symbols-outlined text-sm">arrow_forward</span>`;
+                runBtn.innerHTML = `<span>Initiate Radiological Review</span><span class="material-symbols-outlined text-sm" aria-hidden="true">arrow_forward</span>`;
                 runBtn.disabled = false;
                 fileInput.value = '';
             }
@@ -290,7 +290,7 @@
             gallery.innerHTML = mediaStack.map(m => `
                 <div role="button" tabindex="0" onkeydown="if(event.key === \'Enter\' || event.key === \' \') { event.preventDefault(); openLightboxId(${m.id}); }" class="relative bg-slate-900 p-1 rounded-xl shadow-inner border border-slate-700 aspect-square group overflow-hidden cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900" onclick="openLightboxId(${m.id})">
                     ${m.type === 'video'
-                        ? `<div class="w-full h-full flex items-center justify-center bg-black rounded-lg"><span class="material-symbols-outlined text-indigo-500 text-4xl">play_circle</span></div>`
+                        ? `<div class="w-full h-full flex items-center justify-center bg-black rounded-lg"><span class="material-symbols-outlined text-indigo-500 text-4xl" aria-hidden="true">play_circle</span></div>`
                         : `<img src="${m.b64}" class="w-full h-full object-cover rounded-lg opacity-80 group-hover:opacity-100 transition-opacity" alt="Uploaded image preview">`
                     }
                     <button onclick="event.stopPropagation(); removeItem(${m.id})" class="absolute top-1 right-1 bg-red-500/90 hover:bg-red-600 text-white rounded-full h-5 w-5 flex items-center justify-center text-[10px] font-bold shadow-sm transition-colors z-10 focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none" aria-label="Remove uploaded image">×</button>
@@ -505,7 +505,7 @@
                 errorText.innerText = err.message || "Unknown Error Occurred";
             } finally {
                 runBtn.disabled = false;
-                runBtn.innerHTML = `<span>Initiate Radiological Review</span><span class="material-symbols-outlined text-sm">arrow_forward</span>`;
+                runBtn.innerHTML = `<span>Initiate Radiological Review</span><span class="material-symbols-outlined text-sm" aria-hidden="true">arrow_forward</span>`;
             }
         };
     </script>
