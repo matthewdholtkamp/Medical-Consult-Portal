@@ -121,7 +121,7 @@ export function setupSharing({ apiKey, getState, restoreState }) {
                             Copy
                         </button>
                     </div>
-                    <p id="share-copy-msg" class="text-green-400 text-xs text-center hidden mb-2">Link copied to clipboard!</p>
+                    <p id="share-copy-msg" class="text-green-400 text-xs text-center hidden mb-2" role="status" aria-live="polite">Link copied to clipboard!</p>
                 </div>
 
                 <div id="share-error" class="hidden bg-red-900/30 border border-red-800 text-red-200 p-3 rounded text-sm mb-4"></div>
