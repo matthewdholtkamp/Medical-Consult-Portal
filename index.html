@@ -1014,7 +1014,7 @@ ADTMC, ADTMC+, Internal Medicine, ICU, Cardiology, Neurology, Pediatrics, Psychi
                 removeLoadingIndicator(loadingId);
                 const conversationHistory = document.getElementById('conversationHistory');
                 conversationHistory.insertAdjacentHTML('beforeend', `
-                    <div class="p-4 bg-red-900/20 text-red-200 text-xs rounded-xl border border-red-500/30 animate-fade-in">
+                    <div class="p-4 bg-red-900/20 text-red-200 text-xs rounded-xl border border-red-500/30 animate-fade-in" role="alert" aria-live="assertive">
                         <strong>Error:</strong> ${error.message}
                     </div>
                 `);
@@ -1149,7 +1149,7 @@ ADTMC, ADTMC+, Internal Medicine, ICU, Cardiology, Neurology, Pediatrics, Psychi
                 loading.classList.add('hidden');
                 loading.classList.remove('flex');
                 content.classList.remove('hidden');
-                content.innerHTML = `<div class="text-red-400 text-sm bg-red-900/20 p-3 rounded-lg border border-red-500/30">Failed to analyze scenario. Please try again.</div>`;
+                content.innerHTML = `<div class="text-red-400 text-sm bg-red-900/20 p-3 rounded-lg border border-red-500/30" role="alert" aria-live="assertive">Failed to analyze scenario. Please try again.</div>`;
             } finally {
                 btn.disabled = false;
                 btn.textContent = "Find Consultant";
