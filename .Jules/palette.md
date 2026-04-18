@@ -8,3 +8,7 @@
 ## 2024-05-18 - ARIA Live Regions for Dynamic Feedback
 **Learning:** This static, vanilla JS application generates dynamic notifications (e.g., "Copied to clipboard!" via `copy-success` elements or error boxes upon API failures) that become visible without a page reload. Initially, these messages were missing ARIA live regions, making them invisible to screen readers when they appeared.
 **Action:** Always ensure that transient, dynamically appearing success messages include `role="status"` and `aria-live="polite"`. High-priority dynamic error messages should include `role="alert"` and `aria-live="assertive"`. This pattern has been applied to `#copy-success` elements, share link messages, and dynamically injected error notifications in `index.html`.
+
+## 2024-05-22 - Icon-only Buttons and Tooltips
+**Learning:** Icon-only buttons (like `#micBtn`) often receive an `aria-label` for screen reader accessibility, but can lack a visual tooltip for mouse users who may not immediately recognize the icon's function.
+**Action:** When working on icon-only buttons, ensure both an `aria-label` (for screen readers) and a `title` attribute (for visual tooltips on hover) are provided to maximize usability across different interaction methods.

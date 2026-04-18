@@ -431,7 +431,7 @@
                                     <div class="flex items-center gap-4 ml-auto">
 
                                         <!-- Mic Button -->
-                                        <button id="micBtn" class="p-2 rounded-full text-slate-400 hover:text-white hover:bg-slate-700 transition-all flex items-center justify-center border border-slate-600/50 hover:border-slate-500 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none" aria-label="Voice Input">
+                                        <button id="micBtn" class="p-2 rounded-full text-slate-400 hover:text-white hover:bg-slate-700 transition-all flex items-center justify-center border border-slate-600/50 hover:border-slate-500 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none" aria-label="Voice Input" title="Voice Input">
                                             <span class="material-symbols-outlined text-[20px]" aria-hidden="true">mic</span>
                                         </button>
 
@@ -525,6 +525,7 @@
                             <div class="bg-slate-900/80 border border-slate-700/50 rounded-2xl shadow-inner flex flex-col relative focus-within:ring-2 focus-within:ring-teal-500/30 transition-all">
                                 <textarea
                                     id="routerInput"
+                                    aria-label="Clinical scenario for routing"
                                     placeholder="e.g., '65M with history of Afib presenting with shortness of breath and leg swelling...'"
                                     class="w-full bg-transparent text-slate-200 placeholder-slate-500 p-4 min-h-[80px] max-h-48 resize-y focus:outline-none rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
                                     onkeydown="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); if(this.value.trim()) askRouter(); }"
