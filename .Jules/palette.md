@@ -12,3 +12,11 @@
 ## 2024-05-22 - Icon-only Buttons and Tooltips
 **Learning:** Icon-only buttons (like `#micBtn`) often receive an `aria-label` for screen reader accessibility, but can lack a visual tooltip for mouse users who may not immediately recognize the icon's function.
 **Action:** When working on icon-only buttons, ensure both an `aria-label` (for screen readers) and a `title` attribute (for visual tooltips on hover) are provided to maximize usability across different interaction methods.
+
+## 2024-05-22 - Focus Styles on Details/Summary Elements
+**Learning:** The `<summary>` elements in the application (like the 'View Research Logic' dropdowns in the journal club pages) act as interactive buttons but were lacking the proper offset classes (`focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900`) for their focus rings. Without the offset, the `ring-orange-500` outline blends directly into the dark `bg-slate-900` container, making keyboard focus nearly invisible.
+**Action:** When working on interactive `<summary>` elements or expandable sections, always append the offset utility classes alongside the main ring class to ensure the focus state is clearly legible for keyboard navigators.
+
+## 2024-05-22 - ARIA Live Regions on Dynamically Injected Errors
+**Learning:** In the text-to-speech audio generation flow (e.g., `journalclub.html`), rate limit errors were being handled by dynamically injecting a `<div>` containing an error message directly into the DOM via `.innerHTML +=`. Because this injected element lacked `role="alert"` and `aria-live="assertive"`, screen readers would not proactively announce the failure to visually impaired users, leaving them unaware that the generation stopped.
+**Action:** Always scrutinize error handling blocks (especially `catch` statements or non-200 HTTP responses) that dynamically construct and inject UI elements. Ensure that critical error injections include `role="alert"` and `aria-live="assertive"` within the template string itself.
