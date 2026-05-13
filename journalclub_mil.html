@@ -427,7 +427,7 @@
             <!-- Thinking Process (New) -->
             <div id="thinkingContainer" class="hidden mb-6">
                 <details class="group bg-slate-900/40 rounded-xl border border-slate-700/30 overflow-hidden">
-                    <summary class="list-none p-3 cursor-pointer flex items-center justify-between text-[10px] text-slate-500 font-bold uppercase tracking-widest hover:bg-slate-800/50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500">
+                    <summary class="list-none p-3 cursor-pointer flex items-center justify-between text-[10px] text-slate-500 font-bold uppercase tracking-widest hover:bg-slate-800/50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900">
                         <div class="flex items-center gap-2">
                             <span class="text-sm text-blue-500/50" aria-hidden="true">🧠</span>
                             <span>View Tactical Reasoning</span>
@@ -1154,7 +1154,7 @@ ${script}
                      if (res.status === 429) {
                          // Specific UI for Rate Limit
                          progressContainer.classList.add('hidden');
-                         el('audioContainer').innerHTML += `<div class="p-4 bg-red-900/50 border border-red-700 text-red-200 rounded mt-2">Rate limit hit (free tier is 3 RPM). Wait ~60s or enable billing.</div>`;
+                         el('audioContainer').innerHTML += `<div class="p-4 bg-red-900/50 border border-red-700 text-red-200 rounded mt-2" role="alert" aria-live="assertive">Rate limit hit (free tier is 3 RPM). Wait ~60s or enable billing.</div>`;
                          throw new Error("TTS Rate Limit Exceeded (429).");
                      }
 
