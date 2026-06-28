@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Medical Specialist Consult Portal</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+
+        /* Subtle scrollbar for the modal content */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e293b; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #475569; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b; 
+        }
+
+        .hero-bg {
+            background: radial-gradient(circle at top right, #1d4ed855, #0f172a);
+        }
+
+        .card {
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+        .card:hover {
+            transform: translateY(-6px) scale(1.015);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28);
+        }
+
+        /* Styling for blocked/coming soon cards */
+        .card-blocked {
+            opacity: 0.5;
+            filter: grayscale(0.8);
+            pointer-events: none;
+            user-select: none;
+            background: #0f172a; /* Darker background */
+            border: 1px solid #1e293b;
+        }
+
+        .search-box {
+            border: 1px solid #334155;
+            background: #1e293b;
+            transition: 0.2s ease;
+        }
+        .search-box:focus {
+            border-color: #0ea5e9;
+            box-shadow: 0 0 0 2px #0ea5e980;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 dark:bg-gray-900 dark:text-gray-300 selection:bg-sky-500 selection:text-white">
+
+<!-- =================================================================== -->
+<!-- DISCLAIMER MODAL -->
+<!-- =================================================================== -->
+<div id="disclaimerModal"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="disclaimerTitle"
+     aria-describedby="disclaimerDesc"
+     class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 transition-opacity duration-300">
+  
+  <!-- Dialog container -->
+  <div id="disclaimerDialog"
+       class="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl bg-slate-800 border border-slate-700 p-6 text-left text-slate-100 shadow-2xl ring-1 ring-white/10"
+       tabindex="-1">
+       
+    <!-- Header -->
+    <div class="flex items-start justify-between gap-4">
+      <div>
+        <h2 id="disclaimerTitle" class="text-2xl font-bold mb-1 text-white">Quick challenge — one small step</h2>
+        <p class="text-sm text-slate-400">Use only de-identified examples. You'll be prompted if something looks like PHI.</p>
+      </div>
+      <div class="hidden sm:inline-flex items-center gap-2 text-sm">
+        <span class="inline-block px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/20 font-medium text-xs uppercase tracking-wider">Safety First</span>
+      </div>
+    </div>
+
+    <hr class="my-4 border-slate-700/60"/>
+
+    <!-- Main message -->
+    <p id="disclaimerDesc" class="text-sm text-slate-300 mb-3 leading-relaxed">
+      This site generates consult drafts and provides clinical decision support. It does <strong>not</strong> replace your clinical judgment,
+      licensure, or medical decision-making. Enter only de-identified information here.
+    </p>
+
+    <div class="bg-amber-950/30 border-l-4 border-amber-500 p-3 mb-4 rounded-r">
+        <p class="text-sm font-semibold text-amber-200">
+        This platform is <u>NOT HIPAA compliant</u>. Do <strong>NOT</strong> enter Protected Health Information (PHI).
+        </p>
+    </div>
+
+    <p class="text-sm mb-2 font-medium text-slate-200">Do not enter any of the following 18 direct identifiers (HIPAA Safe Harbor):</p>
+
+    <div class="bg-slate-900/50 rounded-lg p-4 mb-4 border border-slate-700/50">
+        <ol class="list-decimal list-inside text-xs sm:text-sm space-y-1 text-slate-400 grid grid-cols-1 sm:grid-cols-2 gap-x-4">
+        <li>Names (Full or initials)</li>
+        <li>Geographic subdivisions &lt; State</li>
+        <li>Dates (except year) & Ages &gt; 89</li>
+        <li>Telephone numbers</li>
+        <li>Fax numbers</li>
+        <li>Email addresses</li>
+        <li>Social Security numbers</li>
+        <li>Medical record numbers</li>
+        <li>Health plan beneficiary #s</li>
+        <li>Account numbers</li>
+        <li>Certificate/license numbers</li>
+        <li>Vehicle identifiers/plates</li>
+        <li>Device identifiers/serials</li>
+        <li>Web URLs</li>
+        <li>IP addresses</li>
+        <li>Biometric identifiers</li>
+        <li>Full-face photos/images</li>
+        <li>Any other unique numbers/codes</li>
+        </ol>
+    </div>
+
+    <p class="text-sm font-semibold text-slate-200 mb-2">Additional — other details that can identify a person:</p>
+    <ul class="list-disc list-inside text-sm mb-4 text-slate-400 space-y-1">
+      <li>Unique combinations of demographics or clinical details (rare diagnosis + exact timestamp/location).</li>
+      <li>Occupation with a unique role/location (e.g., "the hospital CEO" at a small facility).</li>
+      <li>Free-text notes with household details, quoted speech, or local references that link to an individual.</li>
+    </ul>
+
+    <!-- Acknowledgement controls -->
+    <div class="flex flex-col gap-4 mt-6 pt-4 border-t border-slate-700/60">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div class="space-y-2">
+            <label class="flex items-center gap-3 cursor-pointer group">
+                <div class="relative flex items-center">
+                    <input id="ackCheckbox" type="checkbox" class="peer h-5 w-5 rounded border-slate-600 bg-slate-700 text-amber-500 focus:ring-amber-500/50 focus:ring-offset-0 transition-all" />
+                </div>
+                <span class="text-sm text-slate-300 group-hover:text-white transition-colors">I confirm I will not enter PHI or identifiable information.</span>
+            </label>
+
+            <label class="flex items-center gap-3 cursor-pointer group">
+                <div class="relative flex items-center">
+                    <input id="dontShowAgain" type="checkbox" class="peer h-5 w-5 rounded border-slate-600 bg-slate-700 text-sky-500 focus:ring-sky-500/50 focus:ring-offset-0 transition-all" />
+                </div>
+                <span class="text-sm text-slate-300 group-hover:text-white transition-colors">Don't show this again on this device</span>
+            </label>
+          </div>
+
+          <button id="ackBtn"
+                  onclick="acceptDisclaimer()"
+                  disabled
+                  class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-2.5 rounded-xl bg-amber-600 text-white font-semibold shadow-lg shadow-amber-900/20 hover:bg-amber-500 hover:scale-[1.02] focus:ring-4 focus:ring-amber-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800">
+            I Understand — Continue
+          </button>
+      </div>
+       
+      <p class="text-xs text-center sm:text-right text-slate-500">By continuing you acknowledge this tool is for support only.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ====== DISCLAIMER MODAL BEHAVIOR ====== */
+(function() {
+  const MODAL_KEY = 'consultDisclaimerAck_v1';
+  const AUDIT_KEY = 'consultDisclaimerAudit_v1';
+  const modal = document.getElementById('disclaimerModal');
+  const dialog = document.getElementById('disclaimerDialog');
+  const ackCheckbox = document.getElementById('ackCheckbox');
+  const ackBtn = document.getElementById('ackBtn');
+  const dontShowAgain = document.getElementById('dontShowAgain');
+
+  // Check persistence
+  try {
+    const prev = localStorage.getItem(MODAL_KEY);
+    if (prev) {
+      if (modal) modal.style.display = 'none';
+      document.body.style.overflow = '';
+      return;
+    }
+  } catch (e) {
+    console.warn('localStorage not available for disclaimer persistence.');
+  }
+
+  // Lock background scroll
+  document.body.style.overflow = 'hidden';
+   
+  // Focus management
+  if(dialog) dialog.focus();
+  if(ackCheckbox) ackCheckbox.focus();
+
+  // Button state
+  ackCheckbox?.addEventListener('change', () => {
+    if (ackCheckbox.checked) {
+      ackBtn.disabled = false;
+      ackBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+    } else {
+      ackBtn.disabled = true;
+      ackBtn.classList.add('opacity-50', 'cursor-not-allowed');
+    }
+  });
+
+  // Modal trap
+  modal?.addEventListener('click', (e) => {
+    if (e.target === modal) e.stopPropagation();
+  });
+
+  // Focus Trap Logic
+  const FOCUSABLE_SELECTORS = 'a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), [tabindex]:not([tabindex="-1"])';
+  function trapFocus(e) {
+    const focusable = Array.from(dialog.querySelectorAll(FOCUSABLE_SELECTORS)).filter(el => el.offsetParent !== null);
+    if (focusable.length === 0) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (e.key === 'Tab') {
+      if (e.shiftKey) { 
+        if (document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else { 
+        if (document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    }
+  }
+  window.addEventListener('keydown', trapFocus);
+
+  // Prevent Escape
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') e.preventDefault();
+  });
+
+  // Accept function
+  window.acceptDisclaimer = function() {
+    try {
+      const now = new Date().toISOString();
+      const auditRaw = localStorage.getItem(AUDIT_KEY);
+      const audits = auditRaw ? JSON.parse(auditRaw) : [];
+      audits.push({ ts: now });
+      localStorage.setItem(AUDIT_KEY, JSON.stringify(audits));
+
+      if (dontShowAgain && dontShowAgain.checked) {
+        localStorage.setItem(MODAL_KEY, now);
+      }
+    } catch (err) {
+      console.warn('localStorage unavailable; audit/persistence may not be recorded.');
+    }
+
+    if (modal) {
+        modal.style.opacity = '0';
+        setTimeout(() => {
+            modal.style.display = 'none';
+        }, 300);
+    }
+    document.body.style.overflow = '';
+    window.removeEventListener('keydown', trapFocus);
+  };
+})();
+</script>
+
+<!-- =================================================================== -->
+<!-- HERO SECTION -->
+<!-- =================================================================== -->
+<header class="relative overflow-hidden rounded-b-3xl mb-12 shadow-2xl border-b border-white/5">
+
+  <div class="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-gray-900 -z-10"></div>
+   
+  <!-- Decorative background elements -->
+  <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none overflow-hidden">
+      <div class="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-blue-600/10 blur-[100px]"></div>
+      <div class="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-indigo-600/10 blur-[80px]"></div>
+  </div>
+
+  <div class="relative max-w-4xl mx-auto px-6 py-16 sm:py-20 text-center">
+      
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 backdrop-blur-md mb-6">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span class="text-xs font-medium text-slate-300 uppercase tracking-wide">System Operational</span>
+      </div>
+
+      <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-200 to-slate-400 leading-tight tracking-tight mb-6 drop-shadow-lg">
+          AI Medical Consult<br class="hidden sm:block" /> & Decision-Support
+      </h1>
+
+      <p class="max-w-2xl mx-auto text-lg sm:text-xl text-slate-300/90 font-medium leading-relaxed">
+          Full consult notes and clinical recommendations — fast.<br>
+          <span class="text-white/60">You make the decisions. We handle the draft.</span>
+      </p>
+
+      <div class="mt-10 max-w-md mx-auto relative group">
+          <div class="absolute -inset-0.5 bg-gradient-to-r from-sky-500 to-indigo-500 rounded-2xl opacity-50 group-hover:opacity-75 transition duration-200 blur"></div>
+          <div class="relative flex items-center bg-slate-900 rounded-xl overflow-hidden">
+             <div class="pl-4 text-slate-400">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+             </div>
+             <input id="search"
+               type="text"
+               placeholder="Search specialty (e.g. Cardio, GI)..."
+               class="w-full p-4 bg-transparent text-white placeholder-slate-400 focus:outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
+               onkeyup="filterCards()"
+               autocomplete="off">
+          </div>
+      </div>
+
+      <p class="mt-8 text-xs sm:text-sm text-slate-500">
+          Developed by Dr. Matthew Holtkamp • For educational and workflow support only
+      </p>
+  </div>
+</header>
+
+<!-- =================================================================== -->
+<!-- SPECIALTY GRID -->
+<!-- =================================================================== -->
+<div class="container mx-auto px-4 pb-24 max-w-7xl">
+
+    <!-- NEW: Journal Club / Education Section (Distinct from Consults) -->
+    <div class="mb-12">
+        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-800 to-slate-900 border border-slate-700/60 p-6 sm:p-8 shadow-2xl transition-all hover:border-red-500/30">
+            <!-- Red Glow Effect -->
+            <div class="absolute top-0 right-0 w-64 h-64 bg-red-600/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+            
+            <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+                <div class="flex-1 text-center md:text-left">
+                    <div class="flex items-center justify-center md:justify-start gap-3 mb-2">
+                        <span class="bg-red-500/20 p-2 rounded-lg text-red-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                            </svg>
+                        </span>
+                        <h2 class="text-2xl font-bold text-white">Medical Journal Club</h2>
+                    </div>
+                    <p class="text-slate-400 text-lg">
+                        Evidence summaries, audio breakdowns, and landmark trials. 
+                        <span class="text-red-400 font-medium block sm:inline sm:ml-2">Learning starts here</span>
+                    </p>
+                </div>
+                <div class="flex-shrink-0 w-full md:w-auto">
+                    <a href="journalclub.html" class="inline-flex items-center justify-center w-full md:w-auto px-6 py-3 text-base font-bold text-white transition-all duration-200 bg-red-600 rounded-xl hover:bg-red-500 hover:scale-105 shadow-lg shadow-red-900/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900">
+                        Start Learning
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section Title for Consults -->
+    <div class="flex items-center gap-4 mb-6">
+        <h3 class="text-xl font-semibold text-slate-300">Consult Services</h3>
+        <div class="h-px bg-slate-700 flex-grow"></div>
+    </div>
+
+    <main id="cardContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+
+        <!-- ==================== ALLOWED CARDS ==================== -->
+
+        <!-- ADTMC (Special Color: Green) -->
+        <div class="card group bg-white dark:bg-slate-800/50 dark:border dark:border-slate-700/50 rounded-2xl p-6 flex flex-col relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-24 h-24 bg-green-500/5 rounded-bl-full -mr-4 -mt-4 transition-all group-hover:bg-green-500/10"></div>
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">ADTMC</h2>
+            <p class="text-slate-500 dark:text-slate-400 mb-6 flex-grow">Medic sick call services.<br><strong class="text-sky-500 text-sm">Note Generation</strong></p>
+            <a href="ADTMC.html" class="mt-auto w-full bg-slate-100 dark:bg-slate-700 hover:bg-green-600 dark:hover:bg-green-600 hover:text-white text-slate-900 dark:text-white font-medium py-3 px-4 rounded-xl text-center transition-all duration-300 shadow-sm hover:shadow-lg hover:shadow-green-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900">
+                Start Consult
+            </a>
+        </div>
+
+        <!-- ADTMC+ (Special Color: Indigo) -->
+        <div class="card group bg-white dark:bg-slate-800/50 dark:border dark:border-slate-700/50 rounded-2xl p-6 flex flex-col relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-24 h-24 bg-indigo-500/5 rounded-bl-full -mr-4 -mt-4 transition-all group-hover:bg-indigo-500/10"></div>
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">ADTMC+</h2>
+            <p class="text-slate-500 dark:text-slate-400 mb-6 flex-grow">Sick call for providers.<br><strong class="text-sky-500 text-sm">Note Generation</strong></p>
+            <a href="ADTMCplus.html" class="mt-auto w-full bg-slate-100 dark:bg-slate-700 hover:bg-indigo-600 dark:hover:bg-indigo-600 hover:text-white text-slate-900 dark:text-white font-medium py-3 px-4 rounded-xl text-center transition-all duration-300 shadow-sm hover:shadow-lg hover:shadow-indigo-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900">
+                Start Consult
+            </a>
+        </div>
+
+        <!-- NEW: Internal Medicine -->
+        <div class="card group bg-white dark:bg-slate-800/50 dark:border dark:border-slate-700/50 rounded-2xl p-6 flex flex-col">
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">Internal Medicine</h2>
+            <p class="text-slate-500 dark:text-slate-400 mb-6 flex-grow">Adult hospital medicine.<br><strong class="text-sky-500 text-sm">Note Generation</strong></p>
+            <a href="IM.html" class="mt-auto w-full bg-slate-100 dark:bg-slate-700 hover:bg-white hover:text-sky-500 font-medium py-3 px-4 rounded-xl text-center transition-colors duration-300 shadow-sm hover:shadow-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900">Go to Consult</a>
+        </div>
+
+        <!-- NEW: ICU (Moved from blocked) -->
+        <div class="card group bg-white dark:bg-slate-800/50 dark:border dark:border-slate-700/50 rounded-2xl p-6 flex flex-col">
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">ICU</h2>
+            <p class="text-slate-500 dark:text-slate-400 mb-6 flex-grow">Critical Care consults.<br><strong class="text-sky-500 text-sm">Note Generation</strong></p>
+            <a href="ICU.html" class="mt-auto w-full bg-slate-100 dark:bg-slate-700 hover:bg-white hover:text-sky-500 font-medium py-3 px-4 rounded-xl text-center transition-colors duration-300 shadow-sm hover:shadow-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900">Go to Consult</a>
+        </div>
+
+        <!-- Cardiology -->
+        <div class="card group bg-white dark:bg-slate-800/50 dark:border dark:border-slate-700/50 rounded-2xl p-6 flex flex-col">
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">Cardiology</h2>
+            <p class="text-slate-500 dark:text-slate-400 mb-6 flex-grow">Consults for cardiovascular issues.<br><strong class="text-sky-500 text-sm">Note Generation</strong></p>
+            <a href="cardiology.html" class="mt-auto w-full bg-slate-100 dark:bg-slate-700 hover:bg-white hover:text-sky-500 font-medium py-3 px-4 rounded-xl text-center transition-colors duration-300 shadow-sm hover:shadow-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900">Go to Consult</a>
+        </div>
+
+        <!-- Neurology -->
+        <div class="card group bg-white dark:bg-slate-800/50 dark:border dark:border-slate-700/50 rounded-2xl p-6 flex flex-col">
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">Neurology</h2>
+            <p class="text-slate-500 dark:text-slate-400 mb-6 flex-grow">Brain + CNS consults.<br><strong class="text-sky-500 text-sm">Note Generation</strong></p>
+            <a href="neurology.html" class="mt-auto w-full bg-slate-100 dark:bg-slate-700 hover:bg-white hover:text-sky-500 font-medium py-3 px-4 rounded-xl text-center transition-colors duration-300 shadow-sm hover:shadow-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900">Go to Consult</a>
+        </div>
+
+        <!-- NEW: Pediatrics (Moved from blocked) -->
+        <div class="card group bg-white dark:bg-slate-800/50 dark:border dark:border-slate-700/50 rounded-2xl p-6 flex flex-col">
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">Pediatrics</h2>
+            <p class="text-slate-500 dark:text-slate-400 mb-6 flex-grow">Infants + children.<br><strong class="text-sky-500 text-sm">Note Generation</strong></p>
+            <a href="pediatrics.html" class="mt-auto w-full bg-slate-100 dark:bg-slate-700 hover:bg-white hover:text-sky-500 font-medium py-3 px-4 rounded-xl text-center transition-colors duration-300 shadow-sm hover:shadow-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900">Go to Consult</a>
+        </div>
+
+        <!-- Psychiatry -->
+        <div class="card group bg-white dark:bg-slate-800/50 dark:border dark:border-slate-700/50 rounded-2xl p-6 flex flex-col">
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">Psychiatry</h2>
+            <p class="text-slate-500 dark:text-slate-400 mb-6 flex-grow">Mental health consults.<br><strong class="text-sky-500 text-sm">Note Generation</strong></p>
+            <a href="psychiatry.html" class="mt-auto w-full bg-slate-100 dark:bg-slate-700 hover:bg-white hover:text-sky-500 font-medium py-3 px-4 rounded-xl text-center transition-colors duration-300 shadow-sm hover:shadow-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900">Go to Consult</a>
+        </div>
+
+        <!-- Orthopedic Surgery -->
+        <div class="card group bg-white dark:bg-slate-800/50 dark:border dark:border-slate-700/50 rounded-2xl p-6 flex flex-col">
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">Orthopedic Surgery</h2>
+            <p class="text-slate-500 dark:text-slate-400 mb-6 flex-grow">Bone + joint consults.<br><strong class="text-sky-500 text-sm">Note Generation</strong></p>
+            <a href="orthopedic_surgery.html" class="mt-auto w-full bg-slate-100 dark:bg-slate-700 hover:bg-white hover:text-sky-500 font-medium py-3 px-4 rounded-xl text-center transition-colors duration-300 shadow-sm hover:shadow-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900">Go to Consult</a>
+        </div>
+
+        <!-- Rheumatology -->
+        <div class="card group bg-white dark:bg-slate-800/50 dark:border dark:border-slate-700/50 rounded-2xl p-6 flex flex-col">
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">Rheumatology</h2>
+            <p class="text-slate-500 dark:text-slate-400 mb-6 flex-grow">Autoimmune consults.<br><strong class="text-sky-500 text-sm">Note Generation</strong></p>
+            <a href="rheumatology.html" class="mt-auto w-full bg-slate-100 dark:bg-slate-700 hover:bg-white hover:text-sky-500 font-medium py-3 px-4 rounded-xl text-center transition-colors duration-300 shadow-sm hover:shadow-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900">Go to Consult</a>
+        </div>
+
+        <!-- ==================== BLOCKED CARDS ==================== -->
+
+        <!-- Endocrinology -->
+        <div class="card-blocked rounded-2xl p-6 flex flex-col">
+            <h2 class="text-2xl font-bold text-slate-500 dark:text-slate-600 mb-2">Endocrinology</h2>
+            <p class="text-slate-600 dark:text-slate-700 mb-6 flex-grow">Hormone/metabolism disorders.</p>
+            <span class="mt-auto w-full bg-slate-200 dark:bg-slate-800 text-slate-500 font-medium py-3 px-4 rounded-xl text-center">Coming Soon</span>
+        </div>
+
+        <!-- ENT -->
+        <div class="card-blocked rounded-2xl p-6 flex flex-col">
+            <h2 class="text-2xl font-bold text-slate-500 dark:text-slate-600 mb-2">ENT</h2>
+            <p class="text-slate-600 dark:text-slate-700 mb-6 flex-grow">Ear, nose, throat consults.</p>
+            <span class="mt-auto w-full bg-slate-200 dark:bg-slate-800 text-slate-500 font-medium py-3 px-4 rounded-xl text-center">Coming Soon</span>
+        </div>
+
+        <!-- Gastroenterology -->
+        <div class="card-blocked rounded-2xl p-6 flex flex-col">
+            <h2 class="text-2xl font-bold text-slate-500 dark:text-slate-600 mb-2">Gastroenterology</h2>
+            <p class="text-slate-600 dark:text-slate-700 mb-6 flex-grow">GI and digestive consults.</p>
+            <span class="mt-auto w-full bg-slate-200 dark:bg-slate-800 text-slate-500 font-medium py-3 px-4 rounded-xl text-center">Coming Soon</span>
+        </div>
+
+        <!-- General Surgery -->
+        <div class="card-blocked rounded-2xl p-6 flex flex-col">
+            <h2 class="text-2xl font-bold text-slate-500 dark:text-slate-600 mb-2">General Surgery</h2>
+            <p class="text-slate-600 dark:text-slate-700 mb-6 flex-grow">Surgical evaluation consults.</p>
+            <span class="mt-auto w-full bg-slate-200 dark:bg-slate-800 text-slate-500 font-medium py-3 px-4 rounded-xl text-center">Coming Soon</span>
+        </div>
+
+        <!-- Hepatology -->
+        <div class="card-blocked rounded-2xl p-6 flex flex-col">
+            <h2 class="text-2xl font-bold text-slate-500 dark:text-slate-600 mb-2">Hepatology</h2>
+            <p class="text-slate-600 dark:text-slate-700 mb-6 flex-grow">Liver and biliary system.</p>
+            <span class="mt-auto w-full bg-slate-200 dark:bg-slate-800 text-slate-500 font-medium py-3 px-4 rounded-xl text-center">Coming Soon</span>
+        </div>
+
+        <!-- Infectious Disease -->
+        <div class="card-blocked rounded-2xl p-6 flex flex-col">
+            <h2 class="text-2xl font-bold text-slate-500 dark:text-slate-600 mb-2">Infectious Disease</h2>
+            <p class="text-slate-600 dark:text-slate-700 mb-6 flex-grow">Infections and antibiotics consults.</p>
+            <span class="mt-auto w-full bg-slate-200 dark:bg-slate-800 text-slate-500 font-medium py-3 px-4 rounded-xl text-center">Coming Soon</span>
+        </div>
+
+        <!-- Nephrology -->
+        <div class="card-blocked rounded-2xl p-6 flex flex-col">
+            <h2 class="text-2xl font-bold text-slate-500 dark:text-slate-600 mb-2">Nephrology</h2>
+            <p class="text-slate-600 dark:text-slate-700 mb-6 flex-grow">Kidney disease consults.</p>
+            <span class="mt-auto w-full bg-slate-200 dark:bg-slate-800 text-slate-500 font-medium py-3 px-4 rounded-xl text-center">Coming Soon</span>
+        </div>
+
+        <!-- Neurosurgery -->
+        <div class="card-blocked rounded-2xl p-6 flex flex-col">
+            <h2 class="text-2xl font-bold text-slate-500 dark:text-slate-600 mb-2">Neurosurgery</h2>
+            <p class="text-slate-600 dark:text-slate-700 mb-6 flex-grow">Surgical neuro consults.</p>
+            <span class="mt-auto w-full bg-slate-200 dark:bg-slate-800 text-slate-500 font-medium py-3 px-4 rounded-xl text-center">Coming Soon</span>
+        </div>
+
+        <!-- OB/GYN -->
+        <div class="card-blocked rounded-2xl p-6 flex flex-col">
+            <h2 class="text-2xl font-bold text-slate-500 dark:text-slate-600 mb-2">Ob/Gyn</h2>
+            <p class="text-slate-600 dark:text-slate-700 mb-6 flex-grow">Women's health consults.</p>
+            <span class="mt-auto w-full bg-slate-200 dark:bg-slate-800 text-slate-500 font-medium py-3 px-4 rounded-xl text-center">Coming Soon</span>
+        </div>
+
+        <!-- Occupational Therapy -->
+        <div class="card-blocked rounded-2xl p-6 flex flex-col">
+            <h2 class="text-2xl font-bold text-slate-500 dark:text-slate-600 mb-2">Occupational Therapy</h2>
+            <p class="text-slate-600 dark:text-slate-700 mb-6 flex-grow">ADLs + rehab consults.</p>
+            <span class="mt-auto w-full bg-slate-200 dark:bg-slate-800 text-slate-500 font-medium py-3 px-4 rounded-xl text-center">Coming Soon</span>
+        </div>
+
+        <!-- Clinical Pharmacology -->
+        <div class="card-blocked rounded-2xl p-6 flex flex-col">
+            <h2 class="text-2xl font-bold text-slate-500 dark:text-slate-600 mb-2">Clinical Pharmacology</h2>
+            <p class="text-slate-600 dark:text-slate-700 mb-6 flex-grow">Medication + dosing consults.</p>
+            <span class="mt-auto w-full bg-slate-200 dark:bg-slate-800 text-slate-500 font-medium py-3 px-4 rounded-xl text-center">Coming Soon</span>
+        </div>
+
+        <!-- PM&R / Pain -->
+        <div class="card-blocked rounded-2xl p-6 flex flex-col">
+            <h2 class="text-2xl font-bold text-slate-500 dark:text-slate-600 mb-2">PM&R + Pain</h2>
+            <p class="text-slate-600 dark:text-slate-700 mb-6 flex-grow">Rehab + pain consults.</p>
+            <span class="mt-auto w-full bg-slate-200 dark:bg-slate-800 text-slate-500 font-medium py-3 px-4 rounded-xl text-center">Coming Soon</span>
+        </div>
+
+        <!-- Physical Therapy -->
+        <div class="card-blocked rounded-2xl p-6 flex flex-col">
+            <h2 class="text-2xl font-bold text-slate-500 dark:text-slate-600 mb-2">Physical Therapy</h2>
+            <p class="text-slate-600 dark:text-slate-700 mb-6 flex-grow">Functional mobility consults.</p>
+            <span class="mt-auto w-full bg-slate-200 dark:bg-slate-800 text-slate-500 font-medium py-3 px-4 rounded-xl text-center">Coming Soon</span>
+        </div>
+
+        <!-- Pulmonary -->
+        <div class="card-blocked rounded-2xl p-6 flex flex-col">
+            <h2 class="text-2xl font-bold text-slate-500 dark:text-slate-600 mb-2">Pulmonary</h2>
+            <p class="text-slate-600 dark:text-slate-700 mb-6 flex-grow">Respiratory consults.</p>
+            <span class="mt-auto w-full bg-slate-200 dark:bg-slate-800 text-slate-500 font-medium py-3 px-4 rounded-xl text-center">Coming Soon</span>
+        </div>
+
+        <!-- Hematology / Oncology -->
+        <div class="card-blocked rounded-2xl p-6 flex flex-col">
+            <h2 class="text-2xl font-bold text-slate-500 dark:text-slate-600 mb-2">Hematology & Oncology</h2>
+            <p class="text-slate-600 dark:text-slate-700 mb-6 flex-grow">Cancer + blood consults.</p>
+            <span class="mt-auto w-full bg-slate-200 dark:bg-slate-800 text-slate-500 font-medium py-3 px-4 rounded-xl text-center">Coming Soon</span>
+        </div>
+
+        <!-- Radiology -->
+        <div class="card-blocked rounded-2xl p-6 flex flex-col">
+            <h2 class="text-2xl font-bold text-slate-500 dark:text-slate-600 mb-2">Radiology</h2>
+            <p class="text-slate-600 dark:text-slate-700 mb-6 flex-grow">Imaging consults.</p>
+            <span class="mt-auto w-full bg-slate-200 dark:bg-slate-800 text-slate-500 font-medium py-3 px-4 rounded-xl text-center">Coming Soon</span>
+        </div>
+
+        <!-- Urology -->
+        <div class="card-blocked rounded-2xl p-6 flex flex-col">
+            <h2 class="text-2xl font-bold text-slate-500 dark:text-slate-600 mb-2">Urology</h2>
+            <p class="text-slate-600 dark:text-slate-700 mb-6 flex-grow">Urinary tract consults.</p>
+            <span class="mt-auto w-full bg-slate-200 dark:bg-slate-800 text-slate-500 font-medium py-3 px-4 rounded-xl text-center">Coming Soon</span>
+        </div>
+     
+    </main>
+
+    <footer class="text-center mt-16 py-8 border-t border-slate-800">
+        <p class="text-slate-500 font-medium">© Powered by AI + Evidence-Based Medicine</p>
+    </footer>
+</div>
+
+<!-- FILTER SEARCH -->
+<script>
+function filterCards() {
+    const term = document.getElementById("search").value.toLowerCase();
+    const cards = document.querySelectorAll("#cardContainer > div"); // Select all direct children (active and blocked)
+    
+    cards.forEach(card => {
+        const text = card.textContent.toLowerCase();
+        if (text.includes(term)) {
+            card.style.display = "";
+            card.style.opacity = card.classList.contains('card-blocked') ? "0.5" : "1"; // Keep blocked transparency
+            card.style.transform = "scale(1)";
+        } else {
+            card.style.display = "none";
+            card.style.opacity = "0";
+            card.style.transform = "scale(0.95)";
+        }
+    });
+}
+</script>
+
+</body>
+</html>

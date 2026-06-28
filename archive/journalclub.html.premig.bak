@@ -1,0 +1,1407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medical Journal Club - Dr. Holtkamp Edition</title>
+    <!-- Tailwind CSS for rapid, responsive styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter for high legibility -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- MathJax for rendering medical formulas -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Marked.js for Markdown rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <style>
+        /* Custom Theme Overrides */
+        :root {
+            --bg-primary: #1a1a2e;
+            --bg-secondary: #16213e;
+            --accent: #e94560;
+            --text-main: #e0e0e0;
+            --text-muted: #a0a0a0;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        /* Tabular Numbers for Data Tables */
+        .tabular-nums {
+            font-variant-numeric: tabular-nums;
+        }
+
+        .glass-panel {
+            background: rgba(22, 33, 62, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Markdown Styles within the content area - Modernized Typography 2025 */
+        .prose-invert h1, .prose-invert h2, .prose-invert h3 {
+            color: #F39C12;
+            margin-top: 2em;
+            margin-bottom: 0.75em;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+        }
+        .prose-invert h2 {
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 1.5em;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 8px;
+            margin-top: 2.5em;
+            font-size: 1.5rem;
+        }
+        .prose-invert h3 {
+            font-size: 1.25rem;
+            margin-top: 1.5em;
+            color: #ffb74d; /* Softer orange for subheads */
+        }
+        .prose-invert strong {
+            color: #f1f5f9; /* Slate-100: Much brighter to pop against dark background */
+            font-weight: 700;
+        }
+        .prose-invert ul {
+            list-style-type: none;
+            padding-left: 0;
+            margin: 20px 0;
+        }
+        .prose-invert li {
+            margin-bottom: 12px;
+            padding-left: 24px;
+            position: relative;
+            line-height: 1.8;
+        }
+        .prose-invert li::before {
+            content: "•";
+            color: var(--accent);
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+        .prose-invert p {
+            margin-bottom: 1.75em; /* Increased breathing room */
+            line-height: 1.9; /* Enhanced readability */
+            color: #d1d5db;
+            font-size: 1.1rem; /* Slightly larger base text */
+        }
+        .prose-invert a {
+            color: #38bdf8;
+            text-decoration: none;
+            border-bottom: 1px dotted #38bdf8;
+            transition: all 0.2s;
+        }
+        .prose-invert a:hover {
+            color: #7dd3fc;
+            border-bottom-style: solid;
+        }
+
+        /* Enhanced Blockquote for Clinical Pearls */
+        .prose-invert blockquote {
+            border-left: 4px solid var(--accent);
+            background: rgba(233, 69, 96, 0.1);
+            padding: 1em;
+            margin: 1.5em 0;
+            border-radius: 0 8px 8px 0;
+            font-style: italic;
+            color: #ffdadf;
+        }
+
+        /* Medical Data Grid Table - Modernized 2025 */
+        .prose-invert table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            border-radius: 12px;
+            overflow: hidden;
+            background: rgba(30, 41, 59, 0.7); /* Slate-800 with opacity */
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin: 2em 0;
+            font-size: 0.90rem;
+        }
+
+        .prose-invert thead {
+            background: rgba(233, 69, 96, 0.15); /* Accent tint */
+            color: #ffdadf;
+        }
+
+        .prose-invert th {
+            padding: 14px 16px;
+            text-align: left;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .prose-invert td {
+            padding: 14px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            vertical-align: top;
+            color: #cbd5e1;
+            line-height: 1.6;
+        }
+
+        .prose-invert tr:last-child td {
+            border-bottom: none;
+        }
+
+        .prose-invert tr:hover td {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        /* Tiered Alert System */
+        .prose-invert blockquote.quote-red {
+            border-left-color: #ef4444;
+            background: rgba(239, 68, 68, 0.15);
+            color: #fca5a5;
+        }
+        .prose-invert blockquote.quote-amber {
+            border-left-color: #f59e0b;
+            background: rgba(245, 158, 11, 0.15);
+            color: #fcd34d;
+        }
+        .prose-invert blockquote.quote-blue {
+            border-left-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.15);
+            color: #93c5fd;
+        }
+
+        /* Medical Data Tables - Modernized for 2025 */
+        .prose-invert table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 2em 0;
+            background: rgba(30, 41, 59, 0.5); /* Slate-800/50 */
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .prose-invert th {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fbbf24; /* Amber-400 */
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .prose-invert td {
+            padding: 14px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: #e2e8f0; /* Slate-200 */
+            font-size: 0.95rem;
+            vertical-align: middle;
+        }
+        .prose-invert tr:last-child td {
+            border-bottom: none;
+        }
+        .prose-invert tr:nth-child(even) {
+            background: rgba(255, 255, 255, 0.02);
+        }
+        .prose-invert tr:hover td {
+            background: rgba(255, 255, 255, 0.05);
+            transition: background 0.15s ease;
+        }
+
+        /* Evidence Level Badges - Medical Dashboard Style */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.125rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.70rem;
+            font-weight: 700;
+            line-height: 1;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            white-space: nowrap;
+            border: 1px solid transparent;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+        .badge-rct { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border-color: rgba(16, 185, 129, 0.4); } /* Green */
+        .badge-meta { background: rgba(139, 92, 246, 0.2); color: #c4b5fd; border-color: rgba(139, 92, 246, 0.4); } /* Purple */
+        .badge-guide { background: rgba(59, 130, 246, 0.2); color: #93c5fd; border-color: rgba(59, 130, 246, 0.4); } /* Blue */
+        .badge-cohort { background: rgba(245, 158, 11, 0.2); color: #fcd34d; border-color: rgba(245, 158, 11, 0.4); } /* Amber */
+        .badge-case { background: rgba(107, 114, 128, 0.2); color: #d1d5db; border-color: rgba(107, 114, 128, 0.4); } /* Gray */
+        
+        /* Strength of Recommendation Badges */
+        .badge-strong { background: rgba(16, 185, 129, 0.4); color: #ffffff; border: 1px solid rgba(16, 185, 129, 0.6); box-shadow: 0 0 8px rgba(16, 185, 129, 0.2); }
+        .badge-conditional { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px dashed rgba(245, 158, 11, 0.5); }
+        .badge-weak { background: rgba(100, 116, 139, 0.2); color: #cbd5e1; border: 1px dotted rgba(100, 116, 139, 0.4); }
+
+        /* Consensus Status Badges (New 2025) */
+        .badge-consensus { font-size: 0.85rem; padding: 0.25rem 0.75rem; margin-right: 0.75rem; border-width: 1px; vertical-align: middle; }
+        .badge-consensus-strong { background: rgba(16, 185, 129, 0.15); color: #34d399; border-color: #059669; }
+        .badge-consensus-conditional { background: rgba(251, 191, 36, 0.15); color: #fbbf24; border-color: #d97706; border-style: dashed; }
+        .badge-consensus-controversial { background: rgba(239, 68, 68, 0.15); color: #f87171; border-color: #dc2626; }
+        .badge-consensus-evolving { background: rgba(147, 51, 234, 0.15); color: #c084fc; border-color: #9333ea; border-style: dotted; }
+
+        /* Loading Animation */
+        .pulse-ring {
+            display: inline-block;
+            width: 64px;
+            height: 64px;
+        }
+        .pulse-ring:after {
+            content: " ";
+            display: block;
+            width: 46px;
+            height: 46px;
+            margin: 1px;
+            border-radius: 50%;
+            border: 5px solid var(--accent);
+            border-color: var(--accent) transparent var(--accent) transparent;
+            animation: ring 1.2s linear infinite;
+        }
+        @keyframes ring {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Toast Notification */
+        #toast {
+            visibility: hidden;
+            min-width: 250px;
+            margin-left: -125px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 8px;
+            padding: 16px;
+            position: fixed;
+            z-index: 50;
+            left: 50%;
+            bottom: 30px;
+            font-size: 17px;
+            border: 1px solid var(--accent);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        #toast.show {
+            visibility: visible;
+            -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+
+        @-webkit-keyframes fadein {
+            from {bottom: 0; opacity: 0;}
+            to {bottom: 30px; opacity: 1;}
+        }
+
+        @keyframes fadein {
+            from {bottom: 0; opacity: 0;}
+            to {bottom: 30px; opacity: 1;}
+        }
+
+        @-webkit-keyframes fadeout {
+            from {bottom: 30px; opacity: 1;}
+            to {bottom: 0; opacity: 0;}
+        }
+
+        @keyframes fadeout {
+            from {bottom: 30px; opacity: 1;}
+            to {bottom: 0; opacity: 0;}
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center p-4 md:p-8">
+
+    <!-- Toast Notification -->
+    <div id="toast">Notification Message</div>
+
+    <!-- Header -->
+    <header class="w-full max-w-4xl text-center mb-10">
+        <h1 class="text-4xl md:text-5xl font-extrabold text-orange-500 tracking-tight mb-3">Medical Journal Club</h1>
+        <!-- Prominent Subtitle -->
+        <p class="text-blue-50 mt-2 text-2xl font-semibold leading-relaxed">Evidence summaries, audio breakdowns, and landmark trials</p>
+        <!-- Subdued Sub-subtitle -->
+        <p class="text-gray-500 text-sm mt-3 italic">Learning Starts Now - Brought to you by Dr. Matthew Holtkamp</p>
+    </header>
+
+    <main class="w-full max-w-4xl">
+        
+        <!-- Disclaimer -->
+        <div class="bg-blue-900/30 border border-blue-800 rounded-lg p-4 mb-8 text-center text-xs text-blue-200">
+            <strong>Educational Use Only.</strong> Not medical advice. Verify all citations and guidelines clinically.
+        </div>
+
+        <!-- STEP 1: Initial Topic -->
+        <div id="step1" class="glass-panel rounded-xl p-6 shadow-2xl mb-6">
+            <form id="queryForm" class="space-y-4">
+                <div>
+                    <label class="block text-lg font-semibold mb-2" for="initialQuestion">Topic or Clinical Question</label>
+                    <input type="text" id="initialQuestion" 
+                           class="w-full bg-slate-800 border border-slate-600 rounded-lg p-4 text-white focus:outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 transition"
+                           placeholder="e.g., Dual antiplatelet therapy after minor stroke" required>
+                </div>
+                <button type="submit" id="btnRefine"
+                        class="w-full bg-indigo-700 hover:bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg transition duration-200 flex justify-center items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800">
+                    <span>Initialize Refinement</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                </button>
+            </form>
+        </div>
+
+        <!-- STEP 2: Refinement (Dynamic) -->
+        <div id="step2" class="glass-panel rounded-xl p-6 shadow-2xl mb-6 hidden">
+            <!-- UPDATED HEADER -->
+            <h3 class="text-xl font-bold text-orange-400 mb-4 border-b border-gray-700 pb-2">Refining Questions</h3>
+            <form id="refinementForm" class="space-y-4">
+                <div id="dynamicInputs" class="space-y-4"></div>
+                
+                <div class="flex gap-4 pt-2">
+                    <button type="button" id="btnBackToStep1" class="w-1/3 bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 px-4 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800">
+                        Back
+                    </button>
+                    <button type="submit" id="btnGenerate"
+                            class="w-2/3 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform transition hover:scale-[1.01] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800">
+                        Generate Analysis
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Loader -->
+        <div id="loader" class="hidden text-center py-12">
+            <div class="pulse-ring"></div>
+            <p id="loaderText" class="mt-4 text-orange-400 font-mono text-sm animate-pulse">Analyzing Clinical Trials...</p>
+        </div>
+
+        <!-- STEP 3: Results -->
+        <div id="results" class="hidden">
+            
+            <!-- UPDATED TOOLBAR (GRID LAYOUT) -->
+            <!-- 8 columns total. Listen takes 4 (50%). The other 4 take 1 each. -->
+            <div class="grid grid-cols-2 md:grid-cols-8 gap-2 mb-6 bg-slate-800/50 p-3 rounded-lg border border-slate-700 items-stretch">
+                
+                <!-- Listen Button: Biggest, First, Half Width -->
+                <button id="btnAudio" class="col-span-2 md:col-span-4 bg-teal-700 hover:bg-teal-600 text-white px-4 py-3 rounded-lg font-bold text-lg flex items-center justify-center gap-2 shadow-lg transition-all h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" /></svg>
+                    Listen
+                </button>
+
+                <!-- New Topic -->
+                <button id="btnNewTopic" class="md:col-span-1 bg-red-900/40 hover:bg-red-900/60 text-red-200 px-2 py-3 rounded-lg font-semibold text-xs md:text-sm border border-red-900/50 flex items-center justify-center h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800">
+                    New Topic
+                </button>
+
+                <!-- Back -->
+                <button id="btnBackToRefine" class="md:col-span-1 bg-slate-700 hover:bg-slate-600 text-gray-200 px-2 py-3 rounded-lg font-medium text-xs md:text-sm flex items-center justify-center h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800">
+                    Back
+                </button>
+                
+                <!-- Copy Text -->
+                <button id="btnCopy" class="md:col-span-1 bg-slate-700 hover:bg-slate-600 text-gray-200 px-2 py-3 rounded-lg font-medium text-xs md:text-sm flex items-center justify-center h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800">
+                    Copy Text
+                </button>
+
+                <!-- Copy Plan -->
+                <button id="btnPlan" class="md:col-span-1 bg-slate-700 hover:bg-slate-600 text-gray-200 px-2 py-3 rounded-lg font-medium text-xs md:text-sm flex items-center justify-center h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800">
+                    Copy Plan
+                </button>
+            </div>
+            
+            <!-- Audio Player Container -->
+            <div id="audioContainer" class="hidden mb-6 p-4 bg-teal-900/30 border border-teal-800 rounded-lg transition-all duration-300">
+                <p class="text-teal-200 text-sm mb-2 font-semibold">🎙️ Dr. Holtkamp's Analysis</p>
+                
+                <!-- Progress Bar -->
+                <div id="audioProgressContainer" class="w-full bg-gray-700 rounded-full h-2.5 mb-3 hidden">
+                    <div id="audioProgressBar" class="bg-teal-500 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+                    <p id="audioProgressText" class="text-xs text-teal-400 text-center mt-1">Generating Script...</p>
+                </div>
+
+                <audio id="audioPlayer" controls class="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 w-full hidden"></audio>
+            </div>
+
+            <!-- Thinking Process (New) -->
+            <div id="thinkingContainer" class="hidden mb-6">
+                <details class="group bg-slate-900/40 rounded-xl border border-slate-700/30 overflow-hidden">
+                    <summary class="list-none p-3 cursor-pointer flex items-center justify-between text-[10px] text-slate-500 font-bold uppercase tracking-widest hover:bg-slate-800/50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900">
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm text-blue-500/50" aria-hidden="true">🧠</span>
+                            <span>View Research Logic</span>
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 group-open:rotate-180 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                    </summary>
+                    <div class="px-4 pb-4 text-xs text-slate-500 italic font-mono leading-relaxed bg-black/10">
+                        <div id="thinkingContent" class="pt-2 whitespace-pre-line"></div>
+                    </div>
+                </details>
+            </div>
+
+            <!-- Follow Up (MOVED TO TOP) -->
+            <div class="mb-8 p-6 bg-slate-800/30 rounded-lg border border-slate-700">
+                <h3 class="text-lg font-bold text-white mb-2">Interactive Discussion</h3>
+                <form id="followUpForm" class="flex gap-2">
+                    <input type="text" id="followUpInput" aria-label="Follow-up question" class="flex-1 bg-slate-800 border border-slate-600 rounded-lg p-3 text-white focus:border-orange-500 outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900" placeholder="Ask Dr. Holtkamp a follow-up...">
+                    <button type="submit" class="bg-orange-600 hover:bg-orange-500 text-white px-6 rounded-lg font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800">Ask</button>
+                </form>
+                <div id="followUpResult" class="mt-4 p-4 bg-slate-800/50 rounded-lg border-l-4 border-orange-500 hidden prose prose-invert max-w-none"></div>
+            </div>
+
+            <!-- Clinical Bottom Line (Dynamic) -->
+            <div id="clinicalBottomLine" class="hidden mb-8 p-6 bg-gradient-to-r from-orange-900/40 to-slate-900/40 border-l-4 border-orange-500 rounded-r-lg shadow-lg">
+                <h3 class="text-sm font-bold text-orange-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" /></svg>
+                    Clinical Bottom Line
+                </h3>
+                <div id="clinicalBottomLineContent" class="prose prose-invert max-w-none text-lg text-slate-200 font-medium leading-relaxed"></div>
+            </div>
+
+            <!-- Content Tabs -->
+            <div class="mb-4 border-b border-gray-700 flex gap-6 overflow-x-auto">
+                <button class="tab-btn active text-orange-500 border-b-2 border-orange-500 pb-2 px-1 font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800" data-target="summary">Journal Club</button>
+                <button class="tab-btn text-gray-400 hover:text-white pb-2 px-1 font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800" data-target="plan">Treatment & Plan</button>
+                <button class="tab-btn text-gray-400 hover:text-white pb-2 px-1 font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800" data-target="refs">References</button>
+            </div>
+
+            <!-- Content Areas -->
+            <div id="summaryContent" class="tab-content prose prose-invert max-w-none text-gray-300 overflow-x-auto"></div>
+            <div id="planContent" class="tab-content hidden prose prose-invert max-w-none text-gray-300 overflow-x-auto"></div>
+            <div id="refsContent" class="tab-content hidden font-mono text-sm bg-black/30 p-4 rounded text-gray-400 whitespace-pre-wrap overflow-x-auto"></div>
+
+            <div class="mt-8 flex justify-center">
+                <button id="btnBackToRefineBottom" class="text-slate-500 hover:text-white underline text-sm flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+                    Back to Refinement
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- PCM to WAV Library (Inlined for single file portability) -->
+    <script>
+    !function(e,t){"object"==typeof exports&&"object"==typeof module?module.exports=t():"function"==typeof define&&define.amd?define([],t):"object"==typeof exports?exports.pcmToWav=t():e.pcmToWav=t()}(window,function(){return function(e){var t={};function r(n){if(t[n])return t[n].exports;var o=t[n]={i:n,l:!1,exports:{}};return e[n].call(o.exports,o,o.exports,r),o.l=!0,o.exports}return r.m=e,r.c=t,r.d=function(e,t,n){r.o(e,t)||Object.defineProperty(e,t,{enumerable:!0,get:n})},r.r=function(e){"undefined"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(e,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(e,"__esModule",{value:!0})},r.t=function(e,t){if(1&t&&(e=r(e)),8&t)return e;if(4&t&&"object"==typeof e&&e&&e.__esModule)return e;var n=Object.create(null);if(r.r(n),Object.defineProperty(n,"default",{enumerable:!0,value:e}),2&t&&"string"!=typeof e)for(var o in e)r.d(n,o,function(t){return e[t]}.bind(null,o));return n},r.n=function(e){var t=e&&e.__esModule?function(){return e.default}:function(){return e};return r.d(t,"a",t),t},r.o=function(e,t){return Object.prototype.hasOwnProperty.call(e,t)},r.p="",r(r.s=0)}([function(e,t,r){"use strict";Object.defineProperty(t,"__esModule",{value:!0}),t.default=function(e,t,r){var n,o,a,i,f,c,u,d=new DataView(new ArrayBuffer(44+e.length*t*2));return d.setUint32(0,1380533830,!1),d.setUint32(4,36+e.length*t*2,!0),d.setUint32(8,1463899717,!1),d.setUint32(12,1718449184,!1),d.setUint32(16,16,!0),d.setUint16(20,1,!0),n=t,d.setUint16(22,n,!0),o=r,d.setUint32(24,o,!0),a=r*t*2,d.setUint32(28,a,!0),i=2*t,d.setUint16(32,i,!0),f=16,d.setUint16(34,f,!0),d.setUint32(36,1684108385,!1),c=e.length*t*2,d.setUint32(40,c,!0),u=new Uint8Array(d.buffer,44),e.forEach(function(e,t){var r=44+2*t;d.setInt16(r,e,!0)}),new Blob([d.buffer],{type:"audio/wav"})},e.exports=t.default}])});
+    </script>
+
+    <!-- Main Logic -->
+    <script type="module">
+        import { setupSharing } from './js/sharing.js';
+        import { API_KEYS } from './js/config.js';
+
+        // API Configuration
+        const apiKey = API_KEYS.JOURNAL_CLUB;
+        const jsonBinKey = "$2a$10$J/Gr0x7KT4o8YHMdHtRgV.MokfRSRnPPdXBI5jJidEiqrvJfbH5Py";
+        // Use Gemini 2.5 Flash for grounded Journal Club generation.
+        // These requests ask the model to search for citations and build a long final report,
+        // which is more reliable on the stable grounded model path.
+        const FAST_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+        const GENERATE_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+
+        // DOM Elements
+        const el = id => document.getElementById(id);
+        const queryForm = el('queryForm');
+        const refineForm = el('refinementForm');
+        const loader = el('loader');
+        const results = el('results');
+        const dynamicInputs = el('dynamicInputs');
+        const followUpForm = el('followUpForm');
+        const progressBar = el('audioProgressBar');
+        const progressContainer = el('audioProgressContainer');
+        const progressText = el('audioProgressText');
+        const toast = el('toast');
+        
+        let storedSummary = "";
+        let storedContext = "";
+
+        // Toast Notification Function
+        function showToast(message) {
+            toast.innerText = message;
+            toast.className = "show";
+            setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 3000);
+        }
+
+        function b64ToBytes(b64) {
+          const fixed = b64.replace(/-/g, "+").replace(/_/g, "/");
+          const pad = fixed.length % 4 ? "=".repeat(4 - (fixed.length % 4)) : "";
+          const bin = atob(fixed + pad);
+          const bytes = new Uint8Array(bin.length);
+          for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+          return bytes;
+        }
+
+        // Tiered Alert Logic
+        function colorCodeBlockquotes() {
+            // Target all blockquotes in the results area
+            const blockquotes = document.querySelectorAll('#results blockquote');
+            blockquotes.forEach(bq => {
+                const text = bq.textContent;
+                if (text.includes('🚨')) {
+                    bq.classList.add('quote-red');
+                } else if (text.includes('⚖️')) {
+                    bq.classList.add('quote-amber');
+                } else if (text.includes('💡')) {
+                    bq.classList.add('quote-blue');
+                }
+            });
+        }
+
+        // Improved Retry Logic with Error Parsing
+        async function fetchWithRetry(url, payload, maxRetries = 5) {
+            for (let i = 0; i < maxRetries; i++) {
+                try {
+                    const res = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    // Handle Service Unavailable / Rate Limits by throwing to catch block
+                    if (res.status === 429 || res.status === 503) {
+                         throw new Error(`Transient Error: ${res.status}`);
+                    }
+
+                    if (!res.ok) {
+                        let errorMsg = res.statusText || `Error ${res.status}`;
+                        // Try to parse detailed JSON error from API safely
+                        try {
+                            const text = await res.text();
+                            // Attempt to parse JSON
+                            try {
+                                const errorBody = JSON.parse(text);
+                                if (errorBody.error && errorBody.error.message) {
+                                    errorMsg = `${res.status} - ${errorBody.error.message}`;
+                                } else {
+                                    errorMsg = `${res.status} - ${JSON.stringify(errorBody)}`;
+                                }
+                            } catch (jsonErr) {
+                                // If not JSON, use truncated text if short, or just status
+                                if (text.length < 500) {
+                                    errorMsg = `${res.status} - ${text}`;
+                                }
+                            }
+                        } catch (readError) {
+                            // Failed to read response body, keep default statusText
+                        }
+
+                        // Stop retrying on 4xx errors (Client Error) except 429 (Too Many Requests)
+                        const isFatal = res.status >= 400 && res.status < 500 && res.status !== 429;
+                        const err = new Error(errorMsg);
+                        if (isFatal) err.isFatal = true;
+                        throw err;
+                    }
+                    return await res.json();
+
+                } catch (e) {
+                    // Stop retrying if fatal (4xx) or max retries reached
+                    if (e.isFatal || i === maxRetries - 1) throw e;
+                    
+                    // Exponential backoff: 1s, 2s, 4s, 8s, 16s
+                    await new Promise(r => setTimeout(r, 1000 * Math.pow(2, i)));
+                }
+            }
+        }
+        
+        // --- Robust Cleaner for LaTeX Artifacts ---
+        function stripLatex(text) {
+            if (!text) return "";
+            return text
+                // 1. Remove wrapping $ delimiters for inline math
+                .replace(/\$([^$]+)\$/g, '$1')
+                // 2. Remove \text{content} wrappers
+                .replace(/\\text\s*\{([^}]+)\}/g, '$1')
+                // 3. Replace common math symbols
+                .replace(/\\geq/g, '≥')
+                .replace(/\\leq/g, '≤')
+                .replace(/\\approx/g, '≈')
+                .replace(/\\pm/g, '±')
+                .replace(/\\rightarrow/g, '→')
+                .replace(/\\times/g, 'x')
+                .replace(/\\cdot/g, '·')
+                .replace(/\\%/g, '%')
+                // 4. Remove generic backslashes before words
+                .replace(/\\([a-zA-Z]+)/g, ' $1 ')
+                .trim();
+        }
+
+        // --- Navigation Logic ---
+        
+        // Back to Step 1 (From Refinement)
+        el('btnBackToStep1').addEventListener('click', () => {
+            el('step2').classList.add('hidden');
+            el('step1').classList.remove('hidden');
+        });
+
+        // Back to Step 2 (From Results)
+        const goBackToRefine = () => {
+            el('results').classList.add('hidden');
+            el('step2').classList.remove('hidden');
+        };
+        el('btnBackToRefine').addEventListener('click', goBackToRefine);
+        el('btnBackToRefineBottom').addEventListener('click', goBackToRefine);
+
+        // New Topic (Reset)
+        el('btnNewTopic').addEventListener('click', () => {
+             if(confirm("Start a new topic? This will clear current results.")) {
+                 location.reload();
+             }
+        });
+
+
+        // STEP 1: Handle Initial Query (Get Refinement Questions)
+        queryForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const topic = el('initialQuestion').value;
+            
+            showLoader("Consulting Research Database...");
+            el('step1').classList.add('hidden');
+
+            const prompt = `
+                Topic: "${topic}"
+                Role: Medical Research Librarian.
+                Task: Generate 5 specific *clarifying* questions to help the user narrow their search scope (PICO elements).
+                
+                CRITICAL INSTRUCTION: Do NOT ask knowledge questions (e.g., "What is the pathophysiology?"). 
+                Instead, ask questions that force the user to choose a direction (e.g., "Are you interested in pediatric or adult populations?", "Do you want to focus on diagnosis or treatment?", "Which specific drug class is the intervention?").
+                
+                Output: A simple list of questions, one per line. No bullets, no numbering, just the text.
+            `;
+
+            try {
+                // Use FAST_URL (Flash) for simple question generation
+                const data = await fetchWithRetry(FAST_URL, {
+                    contents: [{ parts: [{ text: prompt }] }],
+                    safetySettings: [
+                        { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
+                    ]
+                });
+                
+                const text = data.candidates[0].content.parts[0].text;
+                const questions = text.split('\n').filter(line => line.trim().length > 5).slice(0, 5);
+                
+                dynamicInputs.innerHTML = '';
+                questions.forEach((q, idx) => {
+                    dynamicInputs.innerHTML += `
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-1" for="q${idx}">${q.replace(/^[Q\-*0-9: ]+/, '')}</label>
+                            <input type="text" id="q${idx}" name="q${idx}" class="w-full bg-slate-800 border border-slate-600 rounded p-3 text-white focus:outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900" placeholder="Enter details...">
+                        </div>
+                    `;
+                });
+
+                hideLoader();
+                el('step2').classList.remove('hidden');
+            } catch (err) {
+                showToast("Error generating questions. Please try again. " + err.message);
+                el('step1').classList.remove('hidden');
+                hideLoader();
+            }
+        });
+
+        // STEP 2: Generate Journal Club Content
+        refineForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const topic = el('initialQuestion').value;
+            const details = Array.from(dynamicInputs.querySelectorAll('input')).map(i => `${i.previousElementSibling.innerText}: ${i.value}`).join('\n');
+
+            showLoader("Synthesizing Journal Club: Finding 2 Landmark & 2 Recent Trials...");
+            el('step2').classList.add('hidden');
+
+            const mainPrompt = `
+                Role: Dr. Matthew Holtkamp (Senior Attending Physician & Medical Educator).
+                Task: Create a Journal Club analysis for: "${topic}".
+                Target Audience: Senior Attending Physicians and Medical Directors (High Authority).
+                Context: ${details}
+
+                STRATEGY: Chain of Verification (CoV) for Evidence-Based Medicine.
+                1. **Draft & Retrieve:** Internally identify key clinical guidelines (e.g., AHA, ACC, IDSA) and define the "Landmark Trials".
+                2. **Negative Verification (Self-Correction):** Before finalizing, explicitly check if any selected trial has been RETRACTED or significantly contradicted by newer 2024/2025 meta-analyses. If so, discard it.
+                3. **Verify Dates:** Explicitly check that "Recent Trials" are from the last 5 years (2020-2025).
+                4. **Synthesize:** Construct the final report using the verified evidence.
+                
+                MANDATORY STRUCTURE:
+                1. Identify EXACTLY 4 Key Trials:
+                   - Trial 1 & 2: The Two Historical Landmark Trials (The foundation of current practice).
+                   - Trial 3 & 4: The Two Most Important Recent/Emerging Trials (Strictly 2020-2025).
+                
+                2. Use Google Search to find real citations and DATES.
+                
+                OUTPUT FORMAT (Use Markdown). You MUST use the separators |||SECTION_THOUGHTS|||, |||SECTION_SUMMARY|||, |||SECTION_PLAN|||, and |||SECTION_REFS||| exactly as written below.
+
+                |||SECTION_THOUGHTS|||
+                1. **Search Strategy:** [Queries used]
+                2. **Exclusion Criteria:** [Trials rejected for date/retraction]
+                3. **Guideline Check:** [Guidelines verified]
+                
+                |||SECTION_SUMMARY|||
+                # Journal Club Summary
+
+                ## Executive Summary
+                [CONSENSUS: TAG] [Provide a 2-sentence bottom-line answer to the clinical question.]
+
+                **INSTRUCTION FOR [CONSENSUS: TAG]:** Start the Executive Summary with exactly one of:
+                - \`[CONSENSUS: STRONG]\` (High certainty, broad agreement)
+                - \`[CONSENSUS: CONDITIONAL]\` (Moderate certainty, depends on patient factors)
+                - \`[CONSENSUS: CONTROVERSIAL]\` (Conflicting data, no agreement)
+                - \`[CONSENSUS: EVOLVING]\` (New emerging data, not yet standard)
+
+                ## Evidence Matrix
+                | Trial | Year | Evidence Level | Strength of Rec (SOR) | Key Findings | NNT/NNH | Risk of Bias | Clinical Impact |
+                |---|---|---|---|---|---|---|---|
+                | **Landmark:** [Name] | [YYYY] | [TAG] (N=[N]) | [SOR] | [Result] | [NNT/H] | [Low/High/Unclear] | [Impact] |
+                | **Landmark:** [Name] | [YYYY] | [TAG] (N=[N]) | [SOR] | [Result] | [NNT/H] | [Low/High/Unclear] | [Impact] |
+                | **Recent:** [Name] | [YYYY] | [TAG] (N=[N]) | [SOR] | [Result] | [NNT/H] | [Low/High/Unclear] | [Impact] |
+                | **Recent:** [Name] | [YYYY] | [TAG] (N=[N]) | [SOR] | [Result] | [NNT/H] | [Low/High/Unclear] | [Impact] |
+
+                **INSTRUCTION FOR [TAG]:** You MUST use one of these exact tags for the Evidence Level column:
+                - \`[RCT]\` for Randomized Controlled Trials (Green).
+                - \`[MA]\` for Meta-Analyses (Purple).
+                - \`[Guide]\` for Clinical Guidelines (Blue).
+                - \`[Cohort]\` for Observational/Retrospective (Amber).
+                - \`[Case]\` for Case Series/Reports (Gray).
+
+                **INSTRUCTION FOR [SOR]:** You MUST use one of these tags based on GRADE:
+                - \`[Strong]\` for high-certainty evidence where benefits clearly outweigh risks.
+                - \`[Conditional]\` for lower certainty or when patient values/preferences vary significantly.
+                
+                ## Introduction
+                Brief clinical context.
+                
+                ## Landmark Trial 1: [Trial Name/Acronym]
+                * **Year:** [YYYY]
+                * **Design/PICO:**
+                * **Evidence Level:** [e.g. High (RCT), Moderate (Observational)]
+                * **Results:**
+                * **Limitations:**
+                * **Link:** [Click to Search](https://www.google.com/search?q=[Trial Name]+[Year])
+                
+                ## Landmark Trial 2: [Trial Name/Acronym]
+                * **Year:** [YYYY]
+                * **Design/PICO:**
+                * **Evidence Level:** [e.g. High (RCT), Moderate (Observational)]
+                * **Results:**
+                * **Limitations:**
+                * **Link:** [Click to Search](https://www.google.com/search?q=[Trial Name]+[Year])
+                
+                ## Recent Major Trial 1: [Trial Name]
+                * **Year:** [YYYY]
+                * **Evidence Level:** [e.g. High (RCT), Moderate (Observational), Low (Case Series)]
+                * **Clinical Impact:** [Specific practice change or confirmation]
+                * **Key Findings:**
+                * **Link:** [Click to Search](https://www.google.com/search?q=[Trial Name]+[Year])
+                
+                ## Recent Major Trial 2: [Trial Name]
+                * **Year:** [YYYY]
+                * **Evidence Level:** [e.g. High (RCT), Moderate (Observational), Low (Case Series)]
+                * **Clinical Impact:** [Specific practice change or confirmation]
+                * **Key Findings:**
+                * **Link:** [Click to Search](https://www.google.com/search?q=[Trial Name]+[Year])
+                
+                ## Dr. Holtkamp's Clinical Pearls
+                > 🚨 **CRITICAL ALERT:** [Severe Safety Risk or Contraindication]
+
+                > ⚖️ **EVIDENCE:** [Nuanced/Conflicting Data]
+
+                > 💡 **CLINICAL PEARL:** [Key Takeaway]
+
+                |||SECTION_PLAN|||
+                
+                # Treatment & Plan
+                Based on the evidence above, provide a stepwise clinical plan.
+                1. **Initial Workup:**
+                2. **First-Line Therapy:**
+                3. **Escalation/Refractory Management:**
+                
+                |||SECTION_REFS|||
+                
+                [Full APA Citations List]
+                
+                CLEANLINESS INSTRUCTION: DO NOT use LaTeX syntax (like \\geq, \\text{}, or $...$). Use simple UTF-8 symbols (e.g., ≥, mg/kg) or plain text. Use separate paragraphs for clarity.
+            `;
+
+            try {
+                const data = await fetchWithRetry(GENERATE_URL, {
+                    contents: [{ parts: [{ text: mainPrompt }] }],
+                    tools: [{ google_search: {} }],
+                    safetySettings: [
+                        { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
+                    ]
+                });
+
+                const candidate = data.candidates[0];
+                const parts = candidate.content.parts;
+
+                // Extract the text response from the text-generation step.
+                const rawText = parts.map(p => p.text).join("");
+
+                // Hide thinking container
+                el('thinkingContainer').classList.add('hidden');
+
+                storedContext = rawText; // Save for follow up
+
+                // ROBUST PARSING LOGIC
+                const sections = { thoughts: "", summary: "", plan: "", refs: "" };
+                const markers = {
+                    thoughts: '|||SECTION_THOUGHTS|||',
+                    summary: '|||SECTION_SUMMARY|||',
+                    plan: '|||SECTION_PLAN|||',
+                    refs: '|||SECTION_REFS|||'
+                };
+
+                function parseSections(text) {
+                     const res = { thoughts: "", summary: "", plan: "", refs: "" };
+                     let temp = text;
+
+                     // Thoughts
+                     if (temp.includes(markers.thoughts)) {
+                         const parts = temp.split(markers.thoughts);
+                         temp = parts[1];
+                         let end = temp.length;
+                         [markers.summary, markers.plan, markers.refs].forEach(t => {
+                             const i = temp.indexOf(t);
+                             if(i !== -1 && i < end) end = i;
+                         });
+                         res.thoughts = temp.substring(0, end).trim();
+                         temp = temp.substring(end);
+                     }
+
+                     // Summary
+                     if (temp.includes(markers.summary)) {
+                         temp = temp.split(markers.summary)[1];
+                     }
+
+                     let sumEnd = temp.length;
+                     [markers.plan, markers.refs].forEach(t => {
+                         const i = temp.indexOf(t);
+                         if(i !== -1 && i < sumEnd) sumEnd = i;
+                     });
+
+                     if (!temp.startsWith(markers.plan) && !temp.startsWith(markers.refs)) {
+                        res.summary = temp.substring(0, sumEnd).trim();
+                     }
+                     temp = temp.substring(sumEnd);
+
+                     // Plan
+                     if (temp.includes(markers.plan)) {
+                         temp = temp.split(markers.plan)[1];
+                         let planEnd = temp.length;
+                         if (temp.indexOf(markers.refs) !== -1) planEnd = temp.indexOf(markers.refs);
+                         res.plan = temp.substring(0, planEnd).trim();
+                         temp = temp.substring(planEnd);
+                     }
+
+                     // Refs
+                     if (temp.includes(markers.refs)) {
+                         res.refs = temp.split(markers.refs)[1].trim();
+                     }
+
+                     return res;
+                }
+                
+                let parsed = parseSections(rawText);
+
+                // Fallback for Summary if empty (Old format or missed tags)
+                if (!parsed.summary && !parsed.thoughts && !parsed.plan) {
+                    parsed.summary = rawText;
+                    const planMatch = rawText.match(/\n#\s*(Treatment & Plan|Plan|Management)/i);
+                    if (planMatch) {
+                        parsed.summary = rawText.substring(0, planMatch.index);
+                        parsed.plan = rawText.substring(planMatch.index + planMatch[0].length);
+                        const refMatch = parsed.plan.match(/\n(?:\|\|\|SECTION_REFS\|\|\||#\s*References)/i);
+                        if (refMatch) {
+                            parsed.refs = parsed.plan.substring(refMatch.index + refMatch[0].length);
+                            parsed.plan = parsed.plan.substring(0, refMatch.index);
+                        }
+                    }
+                }
+
+                // Heuristic: If thoughts contain "# Journal Club Summary", split it.
+                if (parsed.thoughts.match(/\n#\s+Journal Club Summary/i)) {
+                    const match = parsed.thoughts.match(/\n#\s+Journal Club Summary/i);
+                    parsed.summary = parsed.thoughts.substring(match.index).trim() + "\n" + parsed.summary;
+                    parsed.thoughts = parsed.thoughts.substring(0, match.index).trim();
+                }
+
+                storedSummary = parsed.summary;
+                storedContext = rawText;
+
+                // Thoughts UI
+                if (parsed.thoughts) {
+                    el('thinkingContent').innerText = parsed.thoughts;
+                    el('thinkingContainer').classList.remove('hidden');
+                } else {
+                    el('thinkingContainer').classList.add('hidden');
+                }
+
+                // APPLY CLEANER
+                const cleanSummary = stripLatex(storedSummary);
+                const cleanPlan = stripLatex(parsed.plan || "No plan section generated.");
+                const cleanRefs = stripLatex(parsed.refs || "No references section generated.");
+
+                // PARSE MARKDOWN
+                let htmlSummary = marked.parse(cleanSummary);
+
+                // ENHANCE BADGES (Post-Process HTML)
+                // Replaces [RCT] with <span class="badge badge-rct">RCT</span> etc.
+                const badgeMap = {
+                    '\\[RCT\\]': '<span class="badge badge-rct">RCT</span>',
+                    '\\[MA\\]': '<span class="badge badge-meta">Meta-Analysis</span>',
+                    '\\[Guide\\]': '<span class="badge badge-guide">Guideline</span>',
+                    '\\[Cohort\\]': '<span class="badge badge-cohort">Cohort</span>',
+                    '\\[Case\\]': '<span class="badge badge-case">Case Series</span>',
+                    // Strength of Recommendation
+                    '\\[Strong\\]': '<span class="badge badge-strong">Strong Rec</span>',
+                    '\\[Conditional\\]': '<span class="badge badge-conditional">Conditional</span>',
+                    '\\[Weak\\]': '<span class="badge badge-weak">Weak Rec</span>',
+                    // Consensus Status
+                    '\\[CONSENSUS: STRONG\\]': '<span class="badge badge-consensus badge-consensus-strong"><i aria-hidden="true" class="fas fa-check-circle mr-1"></i> Strong Consensus</span>',
+                    '\\[CONSENSUS: CONDITIONAL\\]': '<span class="badge badge-consensus badge-consensus-conditional"><i aria-hidden="true" class="fas fa-exclamation-circle mr-1"></i> Conditional</span>',
+                    '\\[CONSENSUS: CONTROVERSIAL\\]': '<span class="badge badge-consensus badge-consensus-controversial"><i aria-hidden="true" class="fas fa-times-circle mr-1"></i> Controversial</span>',
+                    '\\[CONSENSUS: EVOLVING\\]': '<span class="badge badge-consensus badge-consensus-evolving"><i aria-hidden="true" class="fas fa-flask mr-1"></i> Evolving Data</span>'
+                };
+
+                // Apply badges helper function
+                const applyBadges = (htmlString) => {
+                    let result = htmlString;
+                    Object.keys(badgeMap).forEach(key => {
+                        const regex = new RegExp(key, 'g');
+                        result = result.replace(regex, badgeMap[key]);
+                    });
+                    return result;
+                };
+
+                htmlSummary = applyBadges(htmlSummary);
+
+                el('summaryContent').innerHTML = htmlSummary;
+                el('planContent').innerHTML = marked.parse(cleanPlan);
+                el('refsContent').innerText = cleanRefs.trim();
+
+                // Extract Executive Summary for Bottom Line Display
+                const execSummaryMatch = cleanSummary.match(/##\s*Executive Summary\s*\n([\s\S]*?)(?=\n##\s|$)/i);
+                if (execSummaryMatch && execSummaryMatch[1].trim()) {
+                    let execHtml = marked.parse(execSummaryMatch[1].trim());
+                    execHtml = applyBadges(execHtml);
+                    el('clinicalBottomLineContent').innerHTML = execHtml;
+                    el('clinicalBottomLine').classList.remove('hidden');
+                } else {
+                    el('clinicalBottomLine').classList.add('hidden');
+                }
+
+                // Typeset Math
+                MathJax.typesetPromise();
+
+                // Color Code Alerts
+                colorCodeBlockquotes();
+
+                hideLoader();
+                el('results').classList.remove('hidden');
+
+            } catch (err) {
+                console.error(err);
+                const message = /429|quota|rate limit/i.test(err.message)
+                    ? "Rate limit hit while building the final grounded Journal Club report. This step searches for citations and writes the full page. Wait a minute and try again."
+                    : "Error building the final Journal Club report. " + err.message;
+                showToast(message);
+                el('step2').classList.remove('hidden');
+                hideLoader();
+            }
+        });
+
+        // TABS Logic
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => {
+                    b.classList.remove('text-orange-500', 'border-b-2', 'border-orange-500', 'active');
+                    b.classList.add('text-gray-400');
+                });
+                btn.classList.add('text-orange-500', 'border-b-2', 'border-orange-500', 'active');
+                btn.classList.remove('text-gray-400');
+
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+                const target = btn.dataset.target;
+                if(target === 'summary') el('summaryContent').classList.remove('hidden');
+                if(target === 'plan') el('planContent').classList.remove('hidden');
+                if(target === 'refs') el('refsContent').classList.remove('hidden');
+            });
+        });
+
+        // AUDIO GENERATION (The Holtkamp Persona)
+        el('btnAudio').addEventListener('click', async () => {
+            const btn = el('btnAudio');
+            btn.disabled = true;
+            
+            // Declare intervals outside try block so they can be cleared in catch
+            let scriptInterval, audioInterval;
+
+            // Show Container & Progress
+            el('audioContainer').classList.remove('hidden');
+            progressContainer.classList.remove('hidden');
+            progressBar.style.width = '2%';
+            progressText.innerText = "Step 1: Scripting Lecture (Dr. Holtkamp Style)...";
+
+            // Simulated Progress: Step 1 (Scripting) - Fast
+            let progress = 2;
+            scriptInterval = setInterval(() => {
+                if (progress < 20) {
+                    progress += 2;
+                    progressBar.style.width = `${progress}%`;
+                }
+            }, 300);
+
+            try {
+                // Step 1: Generate the Persona Script (Requested shorter length)
+                const scriptPrompt = `
+                    You are Dr. Matthew Holtkamp. Convert the following medical summary into a high-energy, podcast-style audio transcript.
+                    
+                    Tone: **Fun, Witty, Fast-Paced, and Conversational.**
+                    Style:
+                    - Use short, punchy sentences to keep the tempo up.
+                    - Be charismatic and less formal. Use humor where appropriate.
+                    - Say things like "Here's the kicker," "Let's cut through the noise," "Boom, there it is," or "Welcome back to Journal Club."
+                    - Avoid long, dragging explanations. Keep it moving.
+                    
+                    Structure:
+                    1. Intro (High energy, hook the listener immediately).
+                    2. Discuss the 2 Landmark trials (The history - keep it snappy).
+                    3. Discuss the 2 Recent trials (The update - what's new and exciting).
+                    4. The "Bottom Line" advice (Clear, actionable, confident).
+                    
+                    Length: Detailed but efficient. Aim for roughly 4000 words to ensure a brisk pace without dragging.
+                    
+                    TEXT TO ADAPT:
+                    ${storedSummary.substring(0, 6000)}
+                `;
+
+                const scriptRes = await fetchWithRetry(GENERATE_URL, {
+                    contents: [{ parts: [{ text: scriptPrompt }] }],
+                    safetySettings: [
+                        { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
+                    ]
+                });
+                let script = scriptRes.candidates[0].content.parts[0].text;
+                
+                // Stop script interval
+                clearInterval(scriptInterval);
+                progress = 25;
+                progressBar.style.width = '25%';
+
+                // --- TRUNCATE FOR SAFETY ---
+                // Limit to 10000 chars for safe TTS generation (approx 7 mins)
+                if (script.length > 7000) {
+                    script = script.substring(0, 7000);
+                    const lastPeriod = script.lastIndexOf('.');
+                    if (lastPeriod > 0) script = script.substring(0, lastPeriod + 1);
+                }
+
+                // Step 2: TTS - Robust Implementation
+                progressText.innerText = "Step 2: Synthesizing Audio (Est. wait: ~5-7 mins)...";
+                
+                // Use specific TTS model and endpoint as requested
+                const TTS_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
+                
+                const ttsPrompt = `
+Style: You are a senior medical officer delivering a briefing. Use a professional, steady pace with clear pronunciation of medical terminology. Sound authoritative yet accessible.
+
+TEXT TO SPEAK:
+${script}
+                `;
+
+                const ttsPayload = {
+                    contents: [{ parts: [{ text: ttsPrompt }] }],
+                    generationConfig: {
+                        responseModalities: ["AUDIO"],
+                        speechConfig: {
+                            voiceConfig: {
+                                prebuiltVoiceConfig: {
+                                    voiceName: "Aoede"
+                                }
+                            }
+                        }
+                    }
+                };
+
+                // Custom Fetch with Backoff for 503 and explicit 429 handling
+                let res;
+                let attempt = 0;
+                const delays = [500, 1000, 2000]; // 3 retries (0.5s, 1s, 2s)
+
+                while (true) {
+                    try {
+                        res = await fetch(TTS_ENDPOINT, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(ttsPayload)
+                        });
+
+                        if (res.status === 503 && attempt < delays.length) {
+                             await new Promise(r => setTimeout(r, delays[attempt]));
+                             attempt++;
+                             continue;
+                        }
+
+                        break; // Exit loop if not 503 or retries exhausted
+
+                    } catch (netErr) {
+                         // Network error (offline?), distinct from HTTP error
+                         throw new Error("Network error during TTS fetch: " + netErr.message);
+                    }
+                }
+
+                // Handle HTTP Errors
+                if (!res.ok) {
+                     if (res.status === 429) {
+                         // Specific UI for Rate Limit
+                         progressContainer.classList.add('hidden');
+                         el('audioContainer').innerHTML += `<div class="p-4 bg-red-900/50 border border-red-700 text-red-200 rounded mt-2" role="alert" aria-live="assertive">Rate limit hit (free tier is 3 RPM). Wait ~60s or enable billing.</div>`;
+                         throw new Error("TTS Rate Limit Exceeded (429).");
+                     }
+
+                     const txt = await res.text().catch(()=> "");
+                     throw new Error(`TTS HTTP ${res.status} ${res.statusText} :: ${txt}`);
+                }
+
+                const ttsRes = await res.json();
+                
+                // Find Audio Part
+                const cand = ttsRes?.candidates?.[0];
+                const part = cand?.content?.parts?.find(p => p?.inlineData?.data);
+                if (!part) throw new Error("No AUDIO inlineData returned (no audio part in response).");
+
+                const b64  = part.inlineData.data;
+                const mime = part.inlineData.mimeType || "audio/pcm";
+                console.log("TTS mime:", mime);
+
+                // Decode Safe Base64
+                const bytes = b64ToBytes(b64);
+
+                // Convert/Blob
+                let blob;
+                if (mime.includes("pcm") || mime.includes("L16")) {
+                  if (typeof window.pcmToWav !== "function") throw new Error("pcmToWav missing on globalThis");
+                  // Int16Array view of the bytes
+                  const pcm16 = new Int16Array(bytes.buffer);
+                  blob = window.pcmToWav(pcm16, 1, 24000);
+                } else {
+                  blob = new Blob([bytes], { type: mime });
+                }
+
+                const audioUrl = URL.createObjectURL(blob);
+                const player = el('audioPlayer');
+                player.src = audioUrl;
+                player.playbackRate = 1.25;
+
+                // Clear progress UI
+                if (scriptInterval) clearInterval(scriptInterval);
+                
+                progressBar.style.width = '100%';
+                progressText.innerText = "Audio Ready!";
+                
+                setTimeout(async () => {
+                    progressContainer.classList.add('hidden');
+                    player.classList.remove('hidden');
+                    try {
+                        await player.play();
+                    } catch (e) {
+                        console.warn("Playback blocked:", e);
+                        showToast("Click play to start audio");
+                    }
+                }, 500);
+
+            } catch (err) {
+                // Clear intervals on error
+                if (scriptInterval) clearInterval(scriptInterval);
+                if (audioInterval) clearInterval(audioInterval);
+                
+                // Don't hide progress container if we showed the 429 error inside audioContainer,
+                // but usually we want to reset or show error.
+                // The 429 block above already appended error UI.
+                if (!err.message.includes("429")) {
+                     progressContainer.classList.add('hidden');
+                     alert("Audio generation failed: " + err.message);
+                }
+                console.error(err);
+            } finally {
+                btn.disabled = false;
+            }
+        });
+
+        // FOLLOW UP
+        followUpForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const q = el('followUpInput').value;
+            const container = el('followUpResult');
+            
+            container.innerHTML = '<span class="animate-pulse">Dr. Holtkamp is thinking...</span>';
+            container.classList.remove('hidden');
+
+            const prompt = `
+                Context: ${storedContext}
+                User Question: "${q}"
+                Role: Dr. Holtkamp.
+                Task: Answer the question comparing the trials mentioned above if relevant. Be concise.
+            `;
+
+            try {
+                const data = await fetchWithRetry(GENERATE_URL, {
+                    contents: [{ parts: [{ text: prompt }] }],
+                    tools: [{ google_search: {} }],
+                    safetySettings: [
+                        { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
+                    ]
+                });
+                const rawFollowUp = data.candidates[0].content.parts[0].text;
+                container.innerHTML = marked.parse(stripLatex(rawFollowUp)); // Apply cleaner here too
+            } catch (err) {
+                container.innerText = "Error getting response.";
+            }
+        });
+
+        // Utilities
+        let loaderInterval;
+        const LOADING_TIPS = [
+            "Checking for retracted papers...",
+            "Cross-referencing 2024/2025 Guidelines...",
+            "Verifying P-values and Confidence Intervals...",
+            "Synthesizing Clinical Pearls...",
+            "Consulting the Evidence Matrix...",
+            "Reviewing Exclusion Criteria..."
+        ];
+
+        function showLoader(text) {
+            el('loaderText').innerText = text;
+            el('loader').classList.remove('hidden');
+
+            // Cycle tips every 2.5 seconds to reduce perceived latency
+            let i = 0;
+            if (loaderInterval) clearInterval(loaderInterval);
+            loaderInterval = setInterval(() => {
+                const tip = LOADING_TIPS[i % LOADING_TIPS.length];
+                el('loaderText').innerText = `${text}\n\n(Step: ${tip})`;
+                i++;
+            }, 2500);
+        }
+
+        function hideLoader() {
+            if (loaderInterval) clearInterval(loaderInterval);
+            el('loader').classList.add('hidden');
+        }
+        
+        el('btnCopy').onclick = () => {
+            navigator.clipboard.writeText(storedSummary);
+            showToast("Summary copied!");
+        };
+        el('btnPlan').onclick = () => {
+            navigator.clipboard.writeText(el('planContent').innerText);
+            showToast("Plan copied!");
+        };
+
+        // --- Sharing Logic ---
+        // Need to be careful about inputs since they are dynamic
+        function getDynamicInputValues() {
+            const inputs = [];
+            if(dynamicInputs.innerHTML.trim() !== "") {
+                const labels = dynamicInputs.querySelectorAll('label');
+                const textInputs = dynamicInputs.querySelectorAll('input');
+                labels.forEach((label, i) => {
+                     inputs.push({
+                         label: label.innerText,
+                         value: textInputs[i] ? textInputs[i].value : ""
+                     });
+                });
+            }
+            return inputs;
+        }
+
+        function restoreDynamicInputs(savedInputs) {
+            dynamicInputs.innerHTML = '';
+            if(savedInputs && savedInputs.length) {
+                savedInputs.forEach((item, idx) => {
+                    dynamicInputs.innerHTML += `
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-1" for="q${idx}">${item.label}</label>
+                            <input type="text" id="q${idx}" name="q${idx}" value="${item.value}" class="w-full bg-slate-800 border border-slate-600 rounded p-3 text-white focus:outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900" placeholder="Enter details...">
+                        </div>
+                    `;
+                });
+            }
+        }
+
+        try {
+            setupSharing({
+                apiKey: jsonBinKey,
+                getState: () => {
+                    return {
+                        initialQuestion: el('initialQuestion').value,
+                        dynamicInputs: getDynamicInputValues(),
+                        summaryContent: storedSummary,
+                        planContent: el('planContent').innerHTML,
+                        refsContent: el('refsContent').innerText,
+                        context: storedContext,
+                        currentStep: !el('results').classList.contains('hidden') ? 3
+                                   : !el('step2').classList.contains('hidden') ? 2 : 1
+                    };
+                },
+                restoreState: (state) => {
+                    el('initialQuestion').value = state.initialQuestion || "";
+
+                    if (state.dynamicInputs) {
+                        restoreDynamicInputs(state.dynamicInputs);
+                    }
+
+                    if (state.summaryContent) {
+                        storedSummary = state.summaryContent;
+                        storedContext = state.context || "";
+                        el('summaryContent').innerHTML = marked.parse(stripLatex(state.summaryContent));
+                        el('planContent').innerHTML = state.planContent || ""; // planContent is likely already HTML if saved via innerHTML? No, wait.
+                        // Actually, in getState above: planContent: el('planContent').innerHTML
+                        // So we can assign it back directly.
+                        // But in original logic, we parse markdown.
+                        // If we saved innerHTML, we restore innerHTML.
+                        el('planContent').innerHTML = state.planContent || "";
+                        el('refsContent').innerText = state.refsContent || "";
+
+                        // MathJax
+                        if(window.MathJax) MathJax.typesetPromise();
+                    }
+
+                    // Show correct step
+                    el('step1').classList.add('hidden');
+                    el('step2').classList.add('hidden');
+                    el('results').classList.add('hidden');
+
+                    if (state.currentStep === 3) {
+                        el('results').classList.remove('hidden');
+                    } else if (state.currentStep === 2) {
+                        el('step2').classList.remove('hidden');
+                    } else {
+                        el('step1').classList.remove('hidden');
+                    }
+                }
+            });
+        } catch (e) {
+            console.warn("Sharing disabled due to error:", e);
+        }
+
+    </script>
+</body>
+</html>
