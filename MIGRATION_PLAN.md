@@ -33,7 +33,7 @@
 - [x] **Phase 4:** Bucket C migration — `index.html` (stateful chat)
 - [x] **Phase 5:** `.gitignore` + folder cleanup
 - [ ] **Phase 6:** Smoke testing (local + production)
-- [ ] **Phase 7 (optional):** Extract `ADTMC.html` embedded JSON
+- [x] **Phase 7 (optional):** Extract `ADTMC.html` embedded JSON
 - [ ] **Phase 8:** Confirm key rotation (Gemini + JSONBin)
 
 ---
@@ -425,12 +425,12 @@ Send the user a short message:
 
 ## 11. Definition of Done (whole effort)
 
-- [ ] Zero inline `fetch` calls to `generativelanguage.googleapis.com` outside `js/api.js` and the one TTS endpoint in `journalclub.html` / `journalclub_mil.html`.
-- [ ] Zero references to `gemini-3.1-flash-lite-preview` anywhere.
-- [ ] Zero hardcoded API keys (Gemini or JSONBin) in committed files.
-- [ ] `.gitignore` covers `js/config.js`, logs, screenshots, scratch scripts.
+- [x] Zero inline `fetch` calls to `generativelanguage.googleapis.com` outside `js/api.js` and the one TTS endpoint in `journalclub.html` / `journalclub_mil.html`.
+- [x] Zero references to `gemini-3.1-flash-lite-preview` anywhere.
+- [x] Zero hardcoded API keys (Gemini or JSONBin) in committed files.
+- [x] `.gitignore` covers `js/config.js`, logs, screenshots, scratch scripts.
 - [ ] All HTML entry points smoke-tested locally and on production.
-- [ ] PR `chore/revive-secure-modernize` → `main` opened with full changelog.
+- [x] PR `chore/revive-secure-modernize` → `main` opened with full changelog.
 
 ---
 
