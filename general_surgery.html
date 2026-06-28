@@ -310,10 +310,11 @@
     <script type="module">
         import { setupSharing } from './js/sharing.js';
         import { API_KEYS } from './js/config.js?v=secure';
+        import { callGeminiApi, callGeminiText } from './js/api.js';
 
         // --- Gemini API Configuration ---
         const apiKey = API_KEYS.RHEUMATOLOGY;
-        const jsonBinKey = "$2a$10$J/Gr0x7KT4o8YHMdHtRgV.MokfRSRnPPdXBI5jJidEiqrvJfbH5Py";
+        const jsonBinKey = API_KEYS.JSONBIN;
         
         let state = {
             location: "",
@@ -402,51 +403,7 @@
             });
         }
 
-        // --- API Logic ---
-        async function callGeminiApi(systemPrompt, userQuery, retries = 3) {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent?key=${apiKey}`;
-            const payload = {
-                contents: [{ parts: [{ text: userQuery }] }],
-                systemInstruction: { parts: [{ text: systemPrompt }] },
-                generationConfig: { responseMimeType: "application/json", temperature: 1.0 }
-            };
-
-            try {
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                if (!response.ok) throw new Error(`API Error: ${response.status}`);
-                const data = await response.json();
-                
-                // ROBUST PARSING LOGIC:
-                let textResponse = data.candidates[0].content.parts[0].text;
-                // Remove markdown code blocks if the AI adds them
-                textResponse = textResponse.replace(/^```json\s*/, '').replace(/^```\s*/, '').replace(/```$/, '').trim();
-                
-                return JSON.parse(textResponse);
-
-            } catch (error) {
-                console.error("Gemini API Failure:", error);
-                if (retries > 0) {
-                    await new Promise(r => setTimeout(r, 2000));
-                    return callGeminiApi(systemPrompt, userQuery, retries - 1);
-                }
-                throw error;
-            }
-        }
-
-        async function callGeminiText(systemPrompt, userQuery) {
-             const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent?key=${apiKey}`;
-             const payload = {
-                contents: [{ parts: [{ text: userQuery }] }],
-                systemInstruction: { parts: [{ text: systemPrompt }] }
-            };
-            const response = await fetch(url, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload)});
-            const data = await response.json();
-            return data.candidates[0].content.parts[0].text;
-        }
+        // --- API Logic (migrated to js/api.js) ---
 
 
         // --- Step 1: Intake Logic ---
@@ -509,7 +466,7 @@
             `;
 
             try {
-                const result = await callGeminiApi(prompt, context);
+                const result = await callGeminiApi(apiKey, prompt, context);
                 const container = document.getElementById('questions-container');
                 container.innerHTML = '';
                 result.questions.forEach((qObj, index) => {
@@ -658,7 +615,7 @@
             `;
 
             try {
-                const result = await callGeminiApi(systemPrompt, contextData);
+                const result = await callGeminiApi(apiKey, systemPrompt, contextData);
                 state.generatedPlan = result;
                 renderReview(result);
                 showSection('review');
@@ -808,7 +765,7 @@
             const ctx = `Patient Context: ${state.chiefComplaint}. Plan: ${JSON.stringify(state.generatedPlan.plan)}. Question: ${q}`;
             
             try {
-                const ans = await callGeminiText(sys, ctx);
+                const ans = await callGeminiText(apiKey, sys, ctx);
                 box.textContent = `Consultant: ${ans}`;
             } catch(e) {
                 box.textContent = "Connection error.";

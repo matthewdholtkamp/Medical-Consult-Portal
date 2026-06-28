@@ -731,74 +731,46 @@ ADTMC, ADTMC+, Internal Medicine, ICU, Cardiology, Neurology, Pediatrics, Psychi
     <!-- Import Shared API Logic -->
     <script type="module">
         import { API_KEYS } from './js/config.js?v=secure';
+        import { callGeminiText } from './js/api.js';
         const apiKey = API_KEYS.START_PAGE;
 
         // Chat History for Stateful Reasoning
         let chatHistory = [];
 
         async function callGeminiDrHoltkamp(apiKey, systemPrompt, userQuery) {
-            const cleanKey = apiKey ? apiKey.trim() : "";
-
-            const modelId = "gemini-3.1-flash-lite-preview";
-
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${cleanKey}`;
-
             const userContent = { role: "user", parts: [{ text: userQuery }] };
             const currentContents = [...chatHistory, userContent];
 
-            const payload = {
-                contents: currentContents,
-                systemInstruction: { parts: [{ text: systemPrompt }] },
-                generationConfig: {
-                    temperature: 1.0
-                }
-            };
-
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+            const result = await callGeminiText(apiKey, systemPrompt, "", 3, false, {
+                chatHistory: currentContents,
+                temperature: 1.0,
+                returnRaw: true
             });
 
-            if (!response.ok) {
-                const errData = await response.json().catch(() => ({}));
-                // Fallback to standard if error occurs (optional, keeping logic similar to before but generalized)
-                if (response.status === 400) return await callStandardGemini(apiKey, systemPrompt, userQuery);
-                throw new Error(`API Error: ${response.status} - ${errData.error?.message || response.statusText}`);
-            }
-
-            const data = await response.json();
-
-            // Crash Prevention
-            if (!data.candidates) throw new Error(data.error?.message || "No response");
-
-            const candidate = data.candidates?.[0];
-
-            if (!candidate || !candidate.content) throw new Error("No clinical content generated");
-
             chatHistory.push(userContent);
-            chatHistory.push(candidate.content);
+            
+            let parts = [];
+            if (result.thoughts) {
+                parts.push({ text: result.thoughts, thought: true });
+            }
+            parts.push({ text: result.text });
+            
+            chatHistory.push({
+                role: "model",
+                parts: parts
+            });
 
-            // Extract internal thoughts and the clean response text separately
-            const thoughts = candidate.content.parts.find(p => p.thought)?.text || "";
-            const responseText = candidate.content.parts
-                .filter(p => p.text && !p.thought)
-                .map(p => p.text)
-                .join("");
-
-            return { text: responseText, thoughts: thoughts };
+            return result;
         }
 
         async function callStandardGemini(apiKey, systemPrompt, userQuery) {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent?key=${apiKey}`;
-            const payload = {
-                contents: [...chatHistory, { role: "user", parts: [{ text: userQuery }] }],
-                systemInstruction: { parts: [{ text: systemPrompt }] },
-                generationConfig: { temperature: 0.7 }
-            };
-            const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-            const data = await response.json();
-            return { text: data.candidates[0].content.parts[0].text, thoughts: "" };
+            const currentContents = [...chatHistory, { role: "user", parts: [{ text: userQuery }] }];
+            const result = await callGeminiText(apiKey, systemPrompt, "", 3, false, {
+                chatHistory: currentContents,
+                temperature: 0.7,
+                returnRaw: true
+            });
+            return { text: result.text, thoughts: "" };
         }
 
         window.resetConsult = function() {
@@ -1071,17 +1043,9 @@ ADTMC, ADTMC+, Internal Medicine, ICU, Cardiology, Neurology, Pediatrics, Psychi
 
             try {
                 // We can reuse callStandardGemini for a simple one-off request
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent?key=${apiKey}`;
-                const payload = {
-                    contents: [{ role: "user", parts: [{ text: query }] }],
-                    systemInstruction: { parts: [{ text: routerPrompt }] },
-                    generationConfig: { temperature: 0.2 }
-                };
-
-                const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                if(!response.ok) throw new Error("API Error");
-                const data = await response.json();
-                let text = data.candidates[0].content.parts[0].text;
+                const text = await callGeminiText(apiKey, routerPrompt, query, 3, false, {
+                    temperature: 0.2
+                });
 
                 // Parse tag
                 let recommendedTitle = null;

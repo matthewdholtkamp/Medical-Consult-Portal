@@ -252,10 +252,10 @@
     <script type="module">
         import { API_KEYS } from './js/config.js?v=secure';
         import { COV_INSTRUCTIONS } from './js/prompts.js';
+        import { callGeminiText } from './js/api.js';
 
         // --- Configuration ---
         let API_KEY = API_KEYS.PSYCHIATRY;
-        const MODEL_ID = "gemini-3.1-flash-lite-preview"; // Main chat model
         const TTS_MODEL_ID = "gemini-2.5-flash-preview-tts"; // Model for Audio Generation (Aoede)
         
         // --- State Machine ---
@@ -537,8 +537,6 @@
         }
 
         async function callGeminiAPI(input) {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_ID}:generateContent?key=${API_KEY}`;
-            
             let userPart = { text: input.text };
 
             // Add user turn to history
@@ -547,55 +545,36 @@
                 parts: [userPart]
             });
 
-            // Using unified prompt from js/prompts.js (Chain of Verification)
-            const payload = {
-                contents: conversationHistory,
-                systemInstruction: {
-                    parts: [{ text: COV_INSTRUCTIONS }]
+            try {
+                const text = await callGeminiText(
+                    API_KEY,
+                    COV_INSTRUCTIONS,
+                    "",
+                    3,
+                    false,
+                    { chatHistory: conversationHistory }
+                );
+                
+                if (!text) {
+                    throw new Error("No response text found.");
                 }
-            };
-
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-
-            if (!response.ok) {
-                let details = "";
-                try {
-                    const j = await response.json();
-                    details = j?.error?.message || JSON.stringify(j);
-                } catch {
-                    details = await response.text();
+                
+                // Add model response to history
+                conversationHistory.push({
+                    role: "model",
+                    parts: [{ text: text }]
+                });
+                
+                if (conversationHistory.length > 20) {
+                    conversationHistory = conversationHistory.slice(conversationHistory.length - 20);
                 }
+                
+                return text;
+            } catch (error) {
                 // Remove failed turn so retry works
                 conversationHistory.pop();
-                throw new Error(`API Error ${response.status}: ${details}`);
+                throw error;
             }
-
-            const data = await response.json();
-            const text = data?.candidates?.[0]?.content?.parts
-                ?.map(p => p.text)
-                ?.filter(Boolean)
-                ?.join("") || "";
-            
-            if (!text) {
-                conversationHistory.pop();
-                throw new Error("No response text found.");
-            }
-            
-            // Add model response to history
-            conversationHistory.push({
-                role: "model",
-                parts: [{ text: text }]
-            });
-            
-            if (conversationHistory.length > 20) {
-                conversationHistory = conversationHistory.slice(conversationHistory.length - 20);
-            }
-            
-            return text;
         }
 
         // Generate Audio using Gemini's Aoede Voice
