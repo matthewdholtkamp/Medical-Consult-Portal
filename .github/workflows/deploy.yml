@@ -27,6 +27,7 @@ jobs:
       - name: Generate shared Gemini config
         env:
           KEY_ADTMC: ${{ secrets.KEY_ADTMC }}
+          KEY_JSONBIN: ${{ secrets.KEY_JSONBIN }}
         run: |
           if [ -z "${KEY_ADTMC}" ]; then
             echo "Missing required GitHub secret: KEY_ADTMC" >&2
