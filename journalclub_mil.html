@@ -489,17 +489,17 @@
     <!-- Main Logic -->
     <script type="module">
         import { setupSharing } from './js/sharing.js';
-        import { API_KEYS } from './js/config.js';
+        import { API_KEYS } from './js/config.js?v=secure';
+        import { callGeminiText } from './js/api.js';
 
         // API Configuration
         const apiKey = API_KEYS.JOURNAL_CLUB;
-        const jsonBinKey = "$2a$10$J/Gr0x7KT4o8YHMdHtRgV.MokfRSRnPPdXBI5jJidEiqrvJfbH5Py";
-        
-        // Use Gemini 2.5 Flash for grounded Journal Club generation.
-        // These requests ask the model to search for doctrine/citations and build a long final report,
-        // which is more reliable on the stable grounded model path.
-        const FAST_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-        const GENERATE_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+        // TODO(rotation): jsonBinKey below was committed in plain text. Rotate the
+        // JSONBin master key in the JSONBin dashboard, then move this value into
+        // js/config.js (injected via generate_config.sh from a new GitHub Secret).
+        const jsonBinKey = API_KEYS.JSONBIN;
+        // Gemini routing is centralized in js/api.js (primary: gemini-3.1-flash-lite,
+        // fallback: gemini-3.5-flash). Inline FAST_URL / GENERATE_URL removed.
 
         // DOM Elements
         const el = id => document.getElementById(id);
@@ -671,17 +671,23 @@
             `;
 
             try {
-                const data = await fetchWithRetry(FAST_URL, {
-                    contents: [{ parts: [{ text: prompt }] }],
-                    safetySettings: [
-                        { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
-                        { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
-                        { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
-                        { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
-                    ]
-                });
-
-                const text = data.candidates[0].content.parts[0].text;
+                // STEP 1: Question generation via centralized API
+                const { text } = await callGeminiText(
+                    apiKey,
+                    "",
+                    prompt,
+                    3,
+                    false,
+                    {
+                        safetySettings: [
+                            { category: "HARM_CATEGORY_HARASSMENT",        threshold: "BLOCK_NONE" },
+                            { category: "HARM_CATEGORY_HATE_SPEECH",       threshold: "BLOCK_NONE" },
+                            { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+                            { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
+                        ],
+                        returnRaw: true,
+                    }
+                );
                 const questions = text.split('\n').filter(line => line.trim().length > 5).slice(0, 5);
 
                 dynamicInputs.innerHTML = '';
@@ -820,22 +826,24 @@
             `;
 
             try {
-                const data = await fetchWithRetry(GENERATE_URL, {
-                    contents: [{ parts: [{ text: mainPrompt }] }],
-                    tools: [{ google_search: {} }],
-                    safetySettings: [
-                        { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
-                        { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
-                        { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
-                        { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
-                    ]
-                });
-
-                const candidate = data.candidates[0];
-                const parts = candidate.content.parts;
-
-                // Extract the text response from the text-generation step.
-                const rawText = parts.map(p => p.text).join("");
+                // STEP 2: Grounded report via centralized API
+                const { text: rawText } = await callGeminiText(
+                    apiKey,
+                    "",
+                    mainPrompt,
+                    3,
+                    false,
+                    {
+                        safetySettings: [
+                            { category: "HARM_CATEGORY_HARASSMENT",        threshold: "BLOCK_NONE" },
+                            { category: "HARM_CATEGORY_HATE_SPEECH",       threshold: "BLOCK_NONE" },
+                            { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+                            { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
+                        ],
+                        tools: [{ google_search: {} }],
+                        returnRaw: true,
+                    }
+                );
 
                 // Hide thinking container
                 el('thinkingContainer').classList.add('hidden');
@@ -1072,16 +1080,24 @@
                     ${storedSummary.substring(0, 6000)}
                 `;
 
-                const scriptRes = await fetchWithRetry(GENERATE_URL, {
-                    contents: [{ parts: [{ text: scriptPrompt }] }],
-                    safetySettings: [
-                        { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
-                        { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
-                        { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
-                        { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
-                    ]
-                });
-                let script = scriptRes.candidates[0].content.parts[0].text;
+                // STEP 3: Audio script generation via centralized API
+                const { text: scriptText } = await callGeminiText(
+                    apiKey,
+                    "",
+                    scriptPrompt,
+                    3,
+                    false,
+                    {
+                        safetySettings: [
+                            { category: "HARM_CATEGORY_HARASSMENT",        threshold: "BLOCK_NONE" },
+                            { category: "HARM_CATEGORY_HATE_SPEECH",       threshold: "BLOCK_NONE" },
+                            { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+                            { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
+                        ],
+                        returnRaw: true,
+                    }
+                );
+                let script = scriptText;
 
                 // Stop script interval
                 clearInterval(scriptInterval);
@@ -1241,17 +1257,24 @@ ${script}
             `;
 
             try {
-                const data = await fetchWithRetry(GENERATE_URL, {
-                    contents: [{ parts: [{ text: prompt }] }],
-                    tools: [{ google_search: {} }],
-                    safetySettings: [
-                        { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
-                        { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
-                        { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
-                        { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
-                    ]
-                });
-                const rawFollowUp = data.candidates[0].content.parts[0].text;
+                // Follow-up Q&A via centralized API
+                const { text: rawFollowUp } = await callGeminiText(
+                    apiKey,
+                    "",
+                    prompt,
+                    3,
+                    false,
+                    {
+                        safetySettings: [
+                            { category: "HARM_CATEGORY_HARASSMENT",        threshold: "BLOCK_NONE" },
+                            { category: "HARM_CATEGORY_HATE_SPEECH",       threshold: "BLOCK_NONE" },
+                            { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+                            { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
+                        ],
+                        tools: [{ google_search: {} }],
+                        returnRaw: true,
+                    }
+                );
                 container.innerHTML = marked.parse(stripLatex(rawFollowUp)); // Apply cleaner here too
             } catch (err) {
                 container.innerText = "Error getting response.";

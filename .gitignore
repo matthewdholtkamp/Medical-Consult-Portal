@@ -1,1 +1,21 @@
 .env
+
+# Deploy-time generated config (contains injected API key)
+js/config.js
+
+# Server logs
+server.log
+*.log
+
+# Screenshots
+*.png
+!docs/**/*.png
+
+# Local patch/verify scripts
+patch_*.py
+verify_*.py
+migrate_*.py
+write_*.py
+
+# Old Jules tooling
+.Jules/

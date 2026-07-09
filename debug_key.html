@@ -24,8 +24,12 @@
         </div>
 
         <button id="test-btn" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 px-4 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-800">
-            Test Connection (gemini-3.1-flash-lite-preview)
+            Test Connection
         </button>
+
+        <div id="model-label" class="mt-2 text-xs text-slate-400 text-center">
+            Testing primary model: <span id="model-name" class="font-mono">(loading...)</span>
+        </div>
 
         <div id="result" class="mt-4 p-3 bg-slate-900 rounded border border-slate-700 hidden text-xs font-mono whitespace-pre-wrap"></div>
     </div>
@@ -40,6 +44,9 @@
         const snippetEl = document.getElementById('snippet');
         const resultEl = document.getElementById('result');
         const warningEl = document.getElementById('whitespace-warning');
+
+        // Populate model name label
+        document.getElementById('model-name').textContent = GEMINI_MODEL_ID;
 
         // Check for whitespace issues
         if (rawKey !== key) {
@@ -68,8 +75,8 @@
                 return;
             }
 
-            // Use the globally configured model ID or fallback
-            const modelId = (typeof GEMINI_MODEL_ID !== 'undefined' && GEMINI_MODEL_ID) ? GEMINI_MODEL_ID : "gemini-3.1-flash-lite-preview";
+            // Use the globally configured model ID.
+            const modelId = GEMINI_MODEL_ID;
             const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${key}`;
 
             const payload = {

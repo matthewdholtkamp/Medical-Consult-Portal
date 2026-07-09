@@ -4,7 +4,8 @@ set -euo pipefail
 
 CONFIG_FILE="js/config.js"
 ENV_FILE=".env"
-GEMINI_MODEL_ID="${GEMINI_MODEL_ID:-gemini-3.1-flash-lite-preview}"
+GEMINI_MODEL_ID="${GEMINI_MODEL_ID:-gemini-3.1-flash-lite}"
+FALLBACK_MODEL_ID="${FALLBACK_MODEL_ID:-gemini-3.5-flash}"
 
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -19,6 +20,8 @@ if [ -z "${KEY_ADTMC:-}" ] && [ -f "$ENV_FILE" ]; then
     set +a
 fi
 
+KEY_JSONBIN="${KEY_JSONBIN:-}"
+
 if [ -z "${KEY_ADTMC:-}" ]; then
     echo -e "${RED}Error: KEY_ADTMC is not set.${NC}"
     echo "Set KEY_ADTMC in the environment or in .env before running this script."
@@ -30,6 +33,7 @@ echo -e "${YELLOW}Generating $CONFIG_FILE from shared KEY_ADTMC...${NC}"
 cat <<EOF > "$CONFIG_FILE"
 // Generated file. Do not commit real secrets.
 export const GEMINI_MODEL_ID = "${GEMINI_MODEL_ID}";
+export const FALLBACK_MODEL_ID = "${FALLBACK_MODEL_ID}";
 
 const SHARED_GEMINI_API_KEY = "${KEY_ADTMC}";
 
@@ -47,7 +51,8 @@ export const API_KEYS = {
     get ORTHOPEDICS() { return getSharedGeminiApiKey(); },
     get PSYCHIATRY() { return getSharedGeminiApiKey(); },
     get RHEUMATOLOGY() { return getSharedGeminiApiKey(); },
-    get START_PAGE() { return getSharedGeminiApiKey(); }
+    get START_PAGE() { return getSharedGeminiApiKey(); },
+    get JSONBIN() { return "${KEY_JSONBIN}"; }
 };
 EOF
 
