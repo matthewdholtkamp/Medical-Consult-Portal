@@ -445,3 +445,7 @@ When you pick this up:
 5. **If you discover the plan is wrong**, fix the plan in the same commit as the code change and note it in the commit message.
 6. **Do not invoke the TTS endpoint or alter the PCM-to-WAV library.**
 7. **Do not ask the user permission for steps already authorized here.** Standing directive: continue without further questions.
+> **Current model routing (August 2026):** Active text requests use
+> `gemini-3.5-flash-lite` with `gemini-3.7-flash` as fallback. Active audio
+> requests use `gemini-3.1-flash-tts-preview`. Earlier model references below
+> are retained only as historical migration context.

@@ -4,8 +4,8 @@ set -euo pipefail
 
 CONFIG_FILE="js/config.js"
 ENV_FILE=".env"
-GEMINI_MODEL_ID="${GEMINI_MODEL_ID:-gemini-3.1-flash-lite}"
-FALLBACK_MODEL_ID="${FALLBACK_MODEL_ID:-gemini-3.5-flash}"
+GEMINI_MODEL_ID="${GEMINI_MODEL_ID:-gemini-3.5-flash-lite}"
+FALLBACK_MODEL_ID="${FALLBACK_MODEL_ID:-gemini-3.7-flash}"
 
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'

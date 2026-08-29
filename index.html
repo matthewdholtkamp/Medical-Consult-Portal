@@ -743,7 +743,6 @@ ADTMC, ADTMC+, Internal Medicine, ICU, Cardiology, Neurology, Pediatrics, Psychi
 
             const result = await callGeminiText(apiKey, systemPrompt, "", 3, false, {
                 chatHistory: currentContents,
-                temperature: 1.0,
                 returnRaw: true
             });
 
@@ -767,7 +766,6 @@ ADTMC, ADTMC+, Internal Medicine, ICU, Cardiology, Neurology, Pediatrics, Psychi
             const currentContents = [...chatHistory, { role: "user", parts: [{ text: userQuery }] }];
             const result = await callGeminiText(apiKey, systemPrompt, "", 3, false, {
                 chatHistory: currentContents,
-                temperature: 0.7,
                 returnRaw: true
             });
             return { text: result.text, thoughts: "" };
@@ -1044,7 +1042,7 @@ ADTMC, ADTMC+, Internal Medicine, ICU, Cardiology, Neurology, Pediatrics, Psychi
             try {
                 // We can reuse callStandardGemini for a simple one-off request
                 const text = await callGeminiText(apiKey, routerPrompt, query, 3, false, {
-                    temperature: 0.2
+                    thinkingLevel: "low"
                 });
 
                 // Parse tag

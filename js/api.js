@@ -33,8 +33,7 @@ function shouldFallback(error) {
  */
 function buildPayload(systemPrompt, userQuery, options, jsonMode) {
     const {
-        temperature,
-        thinkingBudget,
+        thinkingLevel,
         maxOutputTokens,
         chatHistory,
         responseMimeType,
@@ -58,11 +57,8 @@ function buildPayload(systemPrompt, userQuery, options, jsonMode) {
         generationConfig.responseMimeType = "application/json";
     }
 
-    if (temperature !== undefined && temperature !== null) {
-        generationConfig.temperature = temperature;
-    }
-    if (thinkingBudget !== undefined && thinkingBudget !== null) {
-        generationConfig.thinkingConfig = { thinkingBudget };
+    if (thinkingLevel !== undefined && thinkingLevel !== null) {
+        generationConfig.thinkingConfig = { thinkingLevel };
     }
     if (maxOutputTokens !== undefined && maxOutputTokens !== null) {
         generationConfig.maxOutputTokens = maxOutputTokens;
@@ -108,8 +104,8 @@ function extractCandidate(data) {
 /**
  * Shared function to call the Gemini API in JSON-response mode.
  *
- * Backward compatible: existing callers passing (apiKey, systemPrompt, userQuery)
- * continue to get the previous behavior (single-turn, temperature 1.0, JSON mode).
+ * Existing callers passing (apiKey, systemPrompt, userQuery) continue to get
+ * single-turn JSON mode with Gemini 3-compatible low thinking.
  *
  * @param {string} apiKey - The API Key (provided by the calling page).
  * @param {string} systemPrompt - The system instruction for the AI persona.
@@ -117,8 +113,7 @@ function extractCandidate(data) {
  * @param {number} retries - Number of times to retry on failure (default 3).
  * @param {boolean} useFallback - Whether to use the fallback model (default false).
  * @param {Object} [options] - Optional per-call overrides.
- * @param {number} [options.temperature] - Sampling temperature. If omitted in a fresh call, defaults to 1.0 for backward compatibility.
- * @param {number} [options.thinkingBudget] - Reasoning thinking budget (Gemini 3.x).
+ * @param {string} [options.thinkingLevel] - Gemini 3 thinking level (defaults to "low").
  * @param {number} [options.maxOutputTokens] - Maximum output tokens.
  * @param {Array}  [options.chatHistory] - Multi-turn `contents` array (overrides userQuery).
  * @param {string} [options.responseMimeType] - Override response MIME type. Pass null to omit.
@@ -132,8 +127,7 @@ export async function callGeminiApi(apiKey, systemPrompt, userQuery, retries = 3
     const modelId = useFallback ? FALLBACK_MODEL_ID : GEMINI_MODEL_ID;
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${cleanKey}`;
 
-    // Backward-compat default: temperature 1.0 when caller did not pass options at all.
-    const effectiveOptions = options ? { ...options } : { temperature: 1.0 };
+    const effectiveOptions = { thinkingLevel: "low", ...(options || {}) };
     const payload = buildPayload(systemPrompt, userQuery, effectiveOptions, true);
 
     try {
@@ -191,8 +185,8 @@ export async function callGeminiApi(apiKey, systemPrompt, userQuery, retries = 3
 /**
  * Shared function for simple text responses (chat/refinement).
  *
- * Backward compatible: existing callers passing (apiKey, systemPrompt, userQuery)
- * continue to get the previous behavior (single-turn, temperature 1.0, plain text).
+ * Existing callers passing (apiKey, systemPrompt, userQuery) continue to get
+ * single-turn plain text with Gemini 3-compatible low thinking.
  *
  * @param {string} apiKey - The API Key.
  * @param {string} systemPrompt - The system instruction.
@@ -209,8 +203,7 @@ export async function callGeminiText(apiKey, systemPrompt, userQuery, retries = 
     const modelId = useFallback ? FALLBACK_MODEL_ID : GEMINI_MODEL_ID;
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${cleanKey}`;
 
-    // Backward-compat default: temperature 1.0 when caller did not pass options at all.
-    const effectiveOptions = options ? { ...options } : { temperature: 1.0 };
+    const effectiveOptions = { thinkingLevel: "low", ...(options || {}) };
     const payload = buildPayload(systemPrompt, userQuery, effectiveOptions, false);
 
     try {

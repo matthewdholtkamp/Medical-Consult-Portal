@@ -375,7 +375,7 @@
             const payload = {
                 contents: [{ parts: parts }],
                 generationConfig: {
-                    temperature: 0.2, // Low temp for medical accuracy
+                    thinkingConfig: { thinkingLevel: "low" },
                     maxOutputTokens: 2048
                 }
             };
@@ -405,7 +405,7 @@
                 return alert("Please upload at least one image or video.");
             }
             
-            const selectedModel = "gemini-3.1-flash-lite";
+            const selectedModel = "gemini-3.5-flash-lite";
             const promptContext = document.getElementById('promptInput').value;
 
             // Reset UI
