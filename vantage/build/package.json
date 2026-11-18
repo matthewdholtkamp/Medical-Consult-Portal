@@ -1,0 +1,23 @@
+{
+  "name": "medcon-vantage-build",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "css": "tailwindcss -c tailwind.config.cjs -i portal.src.css -o ../widget/src/medcon/styles/portal.css --minify",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "dev": "vite --config vite.config.ts",
+    "build": "vite build --config vite.config.ts"
+  },
+  "devDependencies": {
+    "@osdk/widget.client": "^3.92.0",
+    "@osdk/widget.client-react": "^3.92.0",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.11"
+  }
+}
