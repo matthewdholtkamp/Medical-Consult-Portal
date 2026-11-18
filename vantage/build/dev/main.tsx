@@ -62,6 +62,57 @@ const DR_H = `### Guideline Framework
 
 [RECOMMENDED_CONSULT: Neurology]`;
 
+const JC_REPORT = `|||SECTION_THOUGHTS|||
+1. **Search Strategy:** TEST DATA (no live search).
+2. **Exclusion Criteria:** None.
+3. **Guideline Check:** AHA/ASA 2021 (test).
+
+|||SECTION_SUMMARY|||
+# Journal Club Summary
+
+## Executive Summary
+[CONSENSUS: STRONG] TEST DATA. Short-course DAPT after minor stroke reduces recurrence. Stop at 21 days.
+
+## Evidence Matrix
+| Trial | Year | Evidence Level | Strength of Rec (SOR) | Key Findings | NNT/NNH | Risk of Bias | Clinical Impact |
+|---|---|---|---|---|---|---|---|
+| **Landmark:** CHANCE (test) | 2013 | [RCT] (N=5170) | [Strong] | Fewer strokes | NNT 29 | Low | Practice changing |
+| **Recent:** TEST-TRIAL | 2023 | [MA] (N=999) | [Conditional] | Test result (verify) | n/a | Unclear | Confirms |
+
+## Introduction
+Brief clinical context. TEST DATA.
+
+## Landmark Trial 1: CHANCE (test)
+* **Year:** 2013
+* **Results:** Test results.
+* **Link:** [Click to Search](https://www.google.com/search?q=CHANCE+2013)
+
+## Dr. Holtkamp's Clinical Pearls
+> 🚨 **CRITICAL ALERT:** Test alert.
+
+> ⚖️ **EVIDENCE:** Test nuance.
+
+> 💡 **CLINICAL PEARL:** Test pearl.
+
+|||SECTION_PLAN|||
+
+# Treatment & Plan
+1. **Initial Workup:** Test.
+2. **First-Line Therapy:** Test.
+
+|||SECTION_REFS|||
+
+Test A. (2013). TEST reference. N Engl J Med.`;
+
+function journalAnswer(task: string): string {
+  if (task.endsWith(".questions"))
+    return "Are you interested in adult or pediatric populations?\nWhich antiplatelet combination?\nWhat duration of therapy?\nMinor stroke or TIA or both?\nDo you want outcomes or bleeding risk?";
+  if (task.endsWith(".report")) return JC_REPORT;
+  if (task.endsWith(".audioScript"))
+    return "Welcome back to Journal Club. This is test data. Here's the kicker: short-course dual antiplatelet therapy works. Boom, there it is. That's the bottom line.";
+  return "TEST DATA. **CHANCE** used clopidogrel plus aspirin for 21 days.";
+}
+
 aiBridge.setSender((json) => {
   const req = JSON.parse(json);
   const task: string = req.task;
@@ -71,7 +122,8 @@ aiBridge.setSender((json) => {
       return;
     }
     let text = "";
-    if (task.endsWith(".questions")) text = JSON.stringify(QUESTIONS);
+    if (task.startsWith("journal")) text = journalAnswer(task);
+    else if (task.endsWith(".questions")) text = JSON.stringify(QUESTIONS);
     else if (task.endsWith(".plan")) text = "```json\n" + JSON.stringify(PLAN) + "\n```";
     else if (task.endsWith(".refine")) text = "TEST DATA. Max prochlorperazine dose is 10 mg IV per dose.";
     else if (task === "home.router") text = "TEST DATA. Headache with photophobia fits neurology.\n[RECOMMENDED_CONSULT: Neurology]";

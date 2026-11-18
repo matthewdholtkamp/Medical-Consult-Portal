@@ -11,7 +11,7 @@ export interface SiteItem {
   tags: string;
   color?: string;
   icon?: string;
-  pageId?: "adtmcPlus" | "neurology";
+  pageId?: "adtmcPlus" | "neurology" | "journalGeneral" | "journalMilitary";
   webPath?: string;
   url?: string;
 }
@@ -46,8 +46,8 @@ export const SITE_CONTENT: SiteItem[] = [
   { title: "Pulmonary", type: "consult", category: "Medicine", desc: "Lungs, Breathing.", tags: "pulm, copd, asthma", color: "cyan", webPath: "pulmonary.html" },
   { title: "Radiology", type: "consult", category: "Support", desc: "Imaging Guidance.", tags: "rad, xray, ct", color: "gray", webPath: "radiology.html" },
   { title: "Urology", type: "consult", category: "Surgery", desc: "Stones, Retention.", tags: "uro, stones, bladder", color: "yellow", webPath: "urology.html" },
-  { title: "General Journal Club", type: "journal", category: "Journal", desc: "Evidence summaries and audio breakdowns.", tags: "research, papers, evidence", color: "red", webPath: "journalclub.html" },
-  { title: "Military Medicine", type: "journal", category: "Journal", desc: "Operational medicine updates, TCCC guidelines.", tags: "operational, deployment, tccc", color: "emerald", webPath: "journalclub_mil.html" },
+  { title: "General Journal Club", type: "journal", category: "Journal", desc: "Evidence summaries and audio breakdowns.", tags: "research, papers, evidence", color: "red", pageId: "journalGeneral" },
+  { title: "Military Medicine", type: "journal", category: "Journal", desc: "Operational medicine updates, TCCC guidelines.", tags: "operational, deployment, tccc", color: "emerald", pageId: "journalMilitary" },
   { title: "Live Ai Consults", type: "consult", category: "Medicine", desc: "Real-time audio consultation with Dr. Holtkamp.", tags: "audio, voice, mic, live", color: "rose", webPath: "Audioconsult.html" },
   { title: "AI Imaging Vision", type: "consult", category: "Support", desc: "Radiology decision support. X-Ray/CT/MRI Analysis.", tags: "rad, image, vision, xray, ct", color: "indigo", webPath: "Imaging.html" },
   { title: "Cognitive Assessment", type: "consult", category: "Medicine", desc: "Behavioral Neurology & MoCA Navigator.", tags: "neuro, cognitive, moca, memory", color: "indigo", webPath: "Cognitive.html" },

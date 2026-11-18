@@ -17,16 +17,23 @@ function cleanMedical(text: string): string {
 let keySeq = 0;
 const k = () => `md${keySeq++}`;
 
+/** Optional [TAG] -> badge map, e.g. { "RCT": { label: "RCT", className: "badge badge-rct" } }. */
+export type BadgeMap = Record<string, { label: string; className: string }>;
+let activeBadges: BadgeMap | undefined;
+
 function inline(text: string): React.ReactNode[] {
   const out: React.ReactNode[] = [];
-  // tokens: **bold**, *italic* / _italic_, `code`, [text](url), ^[n] superscript
-  const re = /(\*\*[^*]+\*\*|__[^_]+__|`[^`]+`|\[[^\]]+\]\([^)\s]+\)|\^\[\d+\]|\*[^*\s][^*]*\*|_[^_\s][^_]*_)/g;
+  // tokens: **bold**, *italic* / _italic_, `code`, [text](url), ^[n] superscript, [TAG] badge
+  const re = /(\*\*[^*]+\*\*|__[^_]+__|`[^`]+`|\[[^\]]+\]\([^)\s]+\)|\^\[\d+\]|\[[A-Za-z][A-Za-z: ]{0,30}\](?!\()|\*[^*\s][^*]*\*|_[^_\s][^_]*_)/g;
   let last = 0;
   let m: RegExpExecArray | null;
   while ((m = re.exec(text))) {
     if (m.index > last) out.push(text.slice(last, m.index));
     const t = m[0];
-    if (t.startsWith("**") || t.startsWith("__")) out.push(<strong key={k()}>{inline(t.slice(2, -2))}</strong>);
+    if (t.startsWith("[") && !t.includes("](")) {
+      const badge = activeBadges?.[t.slice(1, -1).trim().toUpperCase()];
+      out.push(badge ? <span key={k()} className={badge.className}>{badge.label}</span> : t);
+    } else if (t.startsWith("**") || t.startsWith("__")) out.push(<strong key={k()}>{inline(t.slice(2, -2))}</strong>);
     else if (t.startsWith("`")) out.push(<code key={k()}>{t.slice(1, -1)}</code>);
     else if (t.startsWith("[")) {
       const mm = /^\[([^\]]+)\]\(([^)\s]+)\)$/.exec(t)!;
@@ -57,7 +64,8 @@ const splitRow = (l: string) =>
     .split("|")
     .map((c) => c.trim());
 
-export function Markdown({ text, className = "" }: { text: string; className?: string }) {
+export function Markdown({ text, className = "", badges }: { text: string; className?: string; badges?: BadgeMap }) {
+  activeBadges = badges;
   const lines = cleanMedical(text || "").replace(/\r\n/g, "\n").split("\n");
   const blocks: React.ReactNode[] = [];
   let i = 0;
@@ -104,7 +112,14 @@ export function Markdown({ text, className = "" }: { text: string; className?: s
     if (/^\s*>/.test(line)) {
       const quote: string[] = [];
       while (i < lines.length && /^\s*>/.test(lines[i])) quote.push(lines[i++].replace(/^\s*>\s?/, ""));
-      blocks.push(<blockquote key={k()}>{inline(quote.join(" "))}</blockquote>);
+      const qt = quote.join(" ");
+      // Tiered alerts used by the Journal Club pearls: 🚨 red, ⚖️ amber, 💡 blue.
+      const tone = qt.includes("🚨") ? "quote-red" : qt.includes("⚖") ? "quote-amber" : qt.includes("💡") ? "quote-blue" : undefined;
+      blocks.push(
+        <blockquote key={k()} className={tone}>
+          {inline(qt)}
+        </blockquote>,
+      );
       continue;
     }
     if (/^\s*([-*+]|\d+[.)])\s+/.test(line)) {

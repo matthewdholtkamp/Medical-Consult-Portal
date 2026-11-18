@@ -3,6 +3,9 @@ import { useEffect, useRef, useState } from "react";
 import { ADTMC_PLUS } from "./consult/adtmcPlus";
 import { ConsultFlow } from "./consult/ConsultFlow";
 import { NEUROLOGY } from "./consult/neurology";
+import { JOURNAL_GENERAL } from "./journal/general";
+import { JournalClub } from "./journal/JournalClub";
+import { JOURNAL_MILITARY } from "./journal/military";
 import { SITE_CONTENT, SiteItem } from "./data/siteContent";
 import { ConsultGenerator } from "./pages/ConsultGenerator";
 import { Dashboard } from "./pages/Dashboard";
@@ -19,7 +22,8 @@ const TITLES: Record<MainView, string> = {
   search: "Search Results",
 };
 
-const PAGES = { adtmcPlus: ADTMC_PLUS, neurology: NEUROLOGY };
+const CONSULT_PAGES = { adtmcPlus: ADTMC_PLUS, neurology: NEUROLOGY };
+const JOURNAL_PAGES = { journalGeneral: JOURNAL_GENERAL, journalMilitary: JOURNAL_MILITARY };
 
 const byTitle = (t: string) => SITE_CONTENT.find((s) => s.title === t)!;
 const QUICK_REF = ["Tricare Formulary", "MedCalc", "OpenEvidence", "PubMed AI", "Ask Sage"].map(byTitle);
@@ -114,7 +118,9 @@ export function MedconApp() {
     </button>
   );
 
-  const pageConfig = page?.pageId ? PAGES[page.pageId] : null;
+  const pageId = page?.pageId;
+  const consultConfig = pageId && pageId in CONSULT_PAGES ? CONSULT_PAGES[pageId as keyof typeof CONSULT_PAGES] : null;
+  const journalConfig = pageId && pageId in JOURNAL_PAGES ? JOURNAL_PAGES[pageId as keyof typeof JOURNAL_PAGES] : null;
 
   return (
     <div className="medcon-root bg-gemini-900 text-gray-200 h-full min-h-0 overflow-hidden flex relative">
@@ -226,7 +232,13 @@ export function MedconApp() {
             <div className="absolute inset-0 flex flex-col bg-slate-900">
               <div className="w-full h-1 flex-shrink-0 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500" />
               <div className="flex-1 overflow-y-auto custom-scroll">
-                {pageConfig ? <ConsultFlow key={page.title} config={pageConfig} /> : <NotMovedYet item={page} onBack={() => switchView("dashboard")} />}
+                {consultConfig ? (
+                  <ConsultFlow key={page.title} config={consultConfig} />
+                ) : journalConfig ? (
+                  <JournalClub key={page.title} config={journalConfig} />
+                ) : (
+                  <NotMovedYet item={page} onBack={() => switchView("dashboard")} />
+                )}
               </div>
             </div>
           )}

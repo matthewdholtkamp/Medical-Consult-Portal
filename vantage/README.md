@@ -14,14 +14,18 @@ This folder is NOT used by the website. It only lives here so it can be copied i
 | Journal Clubs grid, Search Results | Done |
 | **ADTMC+** (intake → Q&A → review → final SOAP note → follow-up Q&A) | Done |
 | **Neurology** (intake → Q&A → review → final consult note → follow-up Q&A) | Done |
+| **General Journal Club** and **Military (Operational) Journal Club** (topic → refining questions → report with evidence badges, bottom line, tabs, follow-up discussion, copy, Listen) | Done (Build 2) |
 | Every other page | Shows "not in Vantage yet" with a button to the web version |
 
 Changes from the website (Vantage rules): no microphone button, no share links (JSONBin is blocked), the PHI check shows on every visit (widgets can't remember it), and a "Use the faster model instead" link appears if an answer takes over 30 seconds.
 
+Journal Club changes: Vantage AI can't search the web, so the prompt tells it to use only trials it is sure of and mark anything uncertain "(verify)", and there is an optional box to paste abstracts it should use first. **Listen** writes the same Dr. Holtkamp script, then reads it aloud with the computer's built-in voice at 1.25x (a British male voice such as George or Daniel when the computer has one), instead of Google's voice service. "New Topic" asks for a second click instead of a pop-up.
+
 ## How to move it into Vantage
 
 1. Open `Vantage AI Prompt - Build 1 MedCon Shell.md` (in this folder) and paste it into the Vantage AI. It works in phases and stops after each one.
-2. When it asks for the files, open each file below on GitHub, click **Copy raw file**, and paste it into the matching file in the Vantage code repository (or paste it to the Vantage AI if it asks for it in chat).
+2. For the Journal Club pages (after Build 1 works), paste `Vantage AI Prompt - Build 2 Journal Club.md`.
+3. When it asks for the files, open each file below on GitHub, click **Copy raw file**, and paste it into the matching file in the Vantage code repository (or paste it to the Vantage AI if it asks for it in chat).
 
 ### Functions repository (copy of DPMAP Writer's functions repo)
 
@@ -57,6 +61,17 @@ Keep DPMAP's `package.json`, `vite.config`, `index.html`, and `src/main.tsx`. De
 | `vantage/widget/src/medcon/ui/Markdown.tsx` | `src/medcon/ui/Markdown.tsx` |
 | `vantage/widget/src/medcon/ui/WaitHint.tsx` | `src/medcon/ui/WaitHint.tsx` |
 | `vantage/widget/src/medcon/ui/clipboard.ts` | `src/medcon/ui/clipboard.ts` |
+| **Build 2 – Journal Club (new files)** | |
+| `vantage/widget/src/medcon/journal/JournalClub.tsx` | `src/medcon/journal/JournalClub.tsx` |
+| `vantage/widget/src/medcon/journal/general.ts` | `src/medcon/journal/general.ts` |
+| `vantage/widget/src/medcon/journal/military.ts` | `src/medcon/journal/military.ts` |
+| `vantage/widget/src/medcon/journal/types.ts` | `src/medcon/journal/types.ts` |
+| `vantage/widget/src/medcon/ui/speech.ts` | `src/medcon/ui/speech.ts` |
+| **Build 2 – changed files (replace)** | |
+| `vantage/widget/src/medcon/App.tsx` | `src/medcon/App.tsx` |
+| `vantage/widget/src/medcon/data/siteContent.ts` | `src/medcon/data/siteContent.ts` |
+| `vantage/widget/src/medcon/ui/Markdown.tsx` | `src/medcon/ui/Markdown.tsx` |
+| `vantage/widget/src/medcon/styles/portal.css` | `src/medcon/styles/portal.css` |
 
 No new npm packages are needed: only React and the `@osdk/widget.client` packages DPMAP already has.
 
